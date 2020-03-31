@@ -1,0 +1,8 @@
+# To use import rather than require you need:
+npm install esm
+node -r esm index.js
+
+#need to setup Chrome path
+$env:CHROME_PATH="C:\Program Files (x86)\Google\Chrome\Application\chrome.exe"
+
+$env:CHROME_PATH="C:\github\MC_outreacher24\crawlers\node_modules\puppeteer\.local-chromium\win64-722234\chrome-win\chrome.exe"
