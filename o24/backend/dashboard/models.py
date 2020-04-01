@@ -8,6 +8,7 @@ import json
 import traceback
 from o24.backend.models.shared import Funnel
 from werkzeug.security import check_password_hash, generate_password_hash
+from o24.globals import *
 
 class User(db.Document, UserMixin):
     email = db.EmailField(unique=True)
@@ -129,6 +130,10 @@ class Campaign(db.Document):
     title = db.StringField()
     credentials = db.ListField(db.ReferenceField(Credentials))
 
+    # 0 - created
+    # 1 - in progress
+    # 2 - paused
+    # 11 - archived (deleted)
     status = db.IntField(default=0)
 
     funnel = db.ReferenceField(Funnel)
@@ -163,6 +168,12 @@ class Campaign(db.Document):
         new_campaign._commit()
         return new_campaign
     
+    def inprogress(self):
+        if self.status == 1:
+            return True
+        
+        return False
+
     def _commit(self):
         self.save()
 
@@ -173,7 +184,14 @@ class Prospects(db.Document):
     data = db.DictField()
 
     assign_to = db.ReferenceField(Campaign)
-    status = db.IntField()
+    
+    # 0 - just created
+    # 1 - in progress
+    # 2 - paused
+    # 3 - finished
+    status = db.IntField(default=0)
+    
+    tags = db.ListField(db.StringField())
 
     @classmethod
     def create_prospect(cls, owner_id, campaign_id, data={}):
@@ -186,6 +204,15 @@ class Prospects(db.Document):
         new_prospect._commit()
 
         return new_prospect
+
+    @classmethod
+    def get_prospects(cls, status, campaign_id):
+        return cls.objects(Q(status=status) & Q(assign_to=campaign_id)).all()
+
+    def update_status(self, status):
+        self.status = status
+
+        self._commit()
 
     def _commit(self):
         self.save()

@@ -1,5 +1,6 @@
 from celery import Celery
-import config
+from celery.schedules import crontab
+import o24.config as config
 
 #Init celery instance
 def make_celery():
@@ -16,3 +17,13 @@ celery.conf.beat_schedule = {
         "schedule": config.SCHEDULER_HANDLER_PERIOD
     }
 }
+
+
+#celery.conf.beat_schedule = {
+#    'scheduler': {
+#        'task': 'celery_uncovered.toyex.tasks.produce_hot_repo_report_task',
+#        'schedule': crontab(minute=0, hour=0)  # midnight,
+#        'args': ('today',)
+#    },
+#}
+
