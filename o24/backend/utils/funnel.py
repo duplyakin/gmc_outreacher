@@ -1,4 +1,4 @@
-from backend.models.shared import Action, Funnel
+from o24.backend.models.shared import Action, Funnel
 
 def create_funnel_node(current):
     #check if already create
@@ -28,7 +28,8 @@ def create_nodes(funnel_dict):
     while True:
         if current is not None:
             stack.append(current) 
-            current = current.get('if_true', None)
+            key = current.get('if_true', None)
+            current = funnel_dict.get(key, None)
 
         elif(stack):
             current = stack.pop()
@@ -36,12 +37,13 @@ def create_nodes(funnel_dict):
             if node:
                 current['node_id'] = node.id
 
-            current = current.get('if_false', None)
+            key = current.get('if_false', None)
+            current = funnel_dict.get(key, None)
         else:
             break
 
 
-def connect_funnel_node(current):
+def connect_funnel_node(current, funnel_dict):
     node = Funnel.get_node(current.get('node_id'))
     if not node:
         raise Exception("No such node id:{0}".format(current.get('node_id', None)))
@@ -49,11 +51,11 @@ def connect_funnel_node(current):
     data = {}
     true_key = current.get('if_true', None)
     if true_key:
-        data['if_true'] = current.get(true_key)['node_id']
+        data['if_true'] = funnel_dict.get(true_key)['node_id']
     
     false_key = current.get('if_false', None)
     if false_key:
-        data['if_false'] = current.get(false_key)['node_id']
+        data['if_false'] = funnel_dict.get(false_key)['node_id']
 
     node.update_data(data)
 
@@ -68,13 +70,15 @@ def connect_nodes(funnel_dict):
     while True:
         if current is not None:
             stack.append(current)  
-            current = current.get('if_true', None)
-  
+            key = current.get('if_true', None)
+            current = funnel_dict.get(key, None)
+
         elif(stack):
             current = stack.pop()
-            connect_funnel_node(current)
+            connect_funnel_node(current, funnel_dict)
 
-            current = current.get('if_false', None)
+            key = current.get('if_false', None)
+            current = funnel_dict.get(key, None)
         else:
             break
 

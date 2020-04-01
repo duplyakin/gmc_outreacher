@@ -1,6 +1,6 @@
-from backend import app
-from backend import db
-from backend.scheduler.scheduler import Scheduler
+from o24.backend import app
+from o24.backend import db
+from o24.backend.scheduler.scheduler import Scheduler
 
 from . import celery
 import traceback

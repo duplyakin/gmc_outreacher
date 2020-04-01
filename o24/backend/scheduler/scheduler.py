@@ -1,5 +1,5 @@
-from backend import db
-from backend import app
+from o24.backend import db
+from o24.backend import app
 
 class Scheduler():
     def __init__(self, db, app):

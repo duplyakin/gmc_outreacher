@@ -1,5 +1,5 @@
-from backend import db
-from backend import app
+from o24.backend import db
+from o24.backend import app
 
 from mongoengine.queryset.visitor import Q
 
@@ -21,6 +21,7 @@ class Action(db.Document):
 
 
         new_action._commit()
+        return new_action
     
     @classmethod
     def get_by_key(cls, key):
@@ -37,8 +38,8 @@ class Funnel(db.Document):
 
     root = db.BooleanField(default=False)
 
-    if_true = db.ReferenceField(Funnel, default=None)
-    if_false = db.ReferenceField(Funnel, default=None)
+    if_true = db.ObjectIdField(default=None)
+    if_false = db.ObjectIdField(default=None)
 
     template = db.DictField()
 
@@ -66,7 +67,7 @@ class Funnel(db.Document):
             self.root = data.get('root')
         
         if data.get('action', None):
-            self.action = data.get(action)
+            self.action = data.get('action')
 
         if data.get('if_true', None):
             self.if_true = data.get('if_true')
@@ -84,7 +85,7 @@ class ActionQueue(db.Document):
     current = db.ReferenceField(Funnel)
     
     #None - for root action
-    parent = db.ReferenceField(ActionQueue)
+    parent = db.ObjectIdField(default=None)
 
     status = db.IntField(default=0)
     data = db.DictField()

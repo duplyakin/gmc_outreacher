@@ -1,12 +1,12 @@
-from backend import db
-from backend import app
+from o24.backend import db
+from o24.backend import app
 import datetime
 from flask_user import UserManager, UserMixin
 import uuid
 from mongoengine.queryset.visitor import Q
 import json
 import traceback
-from backend.models.shared import Funnel
+from o24.backend.models.shared import Funnel
 from werkzeug.security import check_password_hash, generate_password_hash
 
 class User(db.Document, UserMixin):
@@ -73,8 +73,8 @@ class Credentials(db.Document):
 
     data = db.DictField()
     
-    last_action = db.DateTimeField(default=0)
-    next_action = db.DateTimeField(default=0)
+    last_action = db.DateTimeField(default=datetime.datetime(1970, 1, 1))
+    next_action = db.DateTimeField(default=datetime.datetime(1970, 1, 1))
 
     limits = db.DictField()
 
@@ -90,6 +90,8 @@ class Credentials(db.Document):
         new_credentials.limits = {}
         
         new_credentials._commit()
+
+        return new_credentials
     
     @classmethod
     def get_credentials(cls, user_id, medium):
@@ -125,7 +127,7 @@ class Team(db.Document):
 
 class Campaign(db.Document):
     title = db.StringField()
-    credentials = db.LsitField(db.ReferenceField(Credentials))
+    credentials = db.ListField(db.ReferenceField(Credentials))
 
     status = db.IntField(default=0)
 
@@ -152,7 +154,7 @@ class Campaign(db.Document):
     def create_campaign(cls, data):
         new_campaign = cls()
         
-        new_campaign.title = date.get('title', '')
+        new_campaign.title = data.get('title', '')
         new_campaign.credentials = data.get('credentials')
         new_campaign.funnel = data.get('funnel')
         

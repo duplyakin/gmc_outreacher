@@ -1,4 +1,4 @@
-users = [
+USERS = [
     {'email' : '1@email.com',
      'password' : 'password1',
      'active' : True,
@@ -155,7 +155,7 @@ users = [
     }
 ]
 
-teams = [
+TEAMS = [
     {
         'admin' : '3@email.com',
         'title' : 'team1-3@email.com',
@@ -174,7 +174,7 @@ teams = [
 # 3 - Async Events
 # 4 - FINISHED
 # 5 - SUCCESS
-actions = [
+ACTIONS = [
     {
         'action_type' : 0,
         'data' : {
@@ -242,7 +242,7 @@ actions = [
         'data' : {
             'what' : 'check-accept'
         },
-        'medium' : 'linkedin'
+        'medium' : 'linkedin',
         'key' : 'linkedin-check-accept'
     },
 
@@ -251,7 +251,7 @@ actions = [
         'data' : {
             'what' : 'check-reply'
         },
-        'medium' : 'linkedin'
+        'medium' : 'linkedin',
         'key' : 'linkedin-check-reply'
     },
 
@@ -260,18 +260,16 @@ actions = [
         'data' : {
             'what' : 'check-reply'
         },
-        'medium' : 'email'
+        'medium' : 'email',
         'key' : 'email-check-reply'
-    },
-
-
+    }
 ]
 
-funnels = [
+FUNNELS = [
     {
         'root' : {
             'key' : 'linkedin-connect',
-            'root' : True
+            'root' : True,
             'if_true' : 'wait-1',
         },
 
@@ -283,13 +281,13 @@ funnels = [
 
         'check-connect-1' : {
             'key' : 'linkedin-check-accept',
-            'if_true' : 'connect-approve-1'
+            'if_true' : 'connect-approve-1',
             'if_false' : 'connect-deny-1'
         },
 
                 'connect-approve-1' : {
                     'key' : 'linkedin-send-message',
-                    'data' : 'Hello on Linkedin' 
+                    'data' : 'Hello on Linkedin',
                     'if_true' : 'wait-2'
                 },
 
@@ -301,9 +299,9 @@ funnels = [
 
                 'check-reply-1' : {
                     'key' : 'linkedin-check-reply',
-                    'if_true' : 'success'
+                    'if_true' : 'success',
                     'if_false' : 'connect-deny-1'
-                }
+                },
 
         'connect-deny-1' : {
             'key' : 'email-send-message',
@@ -352,7 +350,7 @@ funnels = [
     }
 ]
 
-campaigns = [
+CAMPAIGNS = [
     {
         'title' : 'campaign-1',
         'owner' : '1@email.com',
@@ -366,7 +364,7 @@ campaigns = [
     }   
 ]
 
-prospects = [
+PROSPECTS = [
     {
         'owner' : '1@email.com',
         'amount' : 100,
@@ -380,39 +378,46 @@ prospects = [
 ]
 
 import unittest
-from backend.dashboard.models import User, Team, Credentials
-from backend import app
-from backend.models.shared import Action, Funnel
-from backend.utils.funnel import construct_funnel
+import os
+import o24.config as config
+from o24.backend.dashboard.models import User, Team, Credentials, Campaign, Prospects
+from o24.backend import app
+from o24.backend import db
+from o24.backend.models.shared import Action, Funnel
+from o24.backend.utils.funnel import construct_funnel
+
 
 class TestUsersCampaignsProspects(unittest.TestCase):
     def setUp(self):
-        app.app.testing = True
-        self.app = app.app.test_client()
+        pass
 
-    def test_create_users(self):
-        users = users
+    def test_1_create_users(self):
+        users = USERS
         for user in users:
             new_user = User.create_user(user)
             self.assertEqual(new_user.email, user.get('email'), "Can't create user")
 
-    def test_create_teams(self):
-        teams = teams
+    def test_2_create_teams(self):
+        teams = TEAMS
         for team in teams:
             members = []
+            data = {}
+            admin = User.get_user(team.get('admin'))
             for email in team.get('members'):
                 user = User.get_user(email)
                 self.assertEqual(user.email, email, "Wrong user's email")
                 members.append(user)
 
-            team['members'] = members
-            new_team = Team.create_team(team)
+            data['members'] = members
+            data['title'] = team.get('title', '')
+            data['admin'] = admin
+            new_team = Team.create_team(data)
             self.assertEqual(new_team.title, team.get('title'), "Wrong team title after team creation")
 
 
-    def test_create_credentials(self):
-        users = users
-        for user in users
+    def test_3_create_credentials(self):
+        users = USERS
+        for user in users:
             db_user = User.get_user(user.get('email'))
             self.assertEqual(db_user.email, user.get('email'), "Wrong user email")
             
@@ -423,20 +428,20 @@ class TestUsersCampaignsProspects(unittest.TestCase):
                 new_credentials = Credentials.create_credentials(owner=owner, data=next_cred)
                 self.assertTrue(new_credentials is not None, "new_credentials is None")
 
-    def test_create_actions(self):
-        actions = actions
+    def test_4_create_actions(self):
+        actions = ACTIONS
         for action in actions:
             new_action = Action.create_action(action)
             self.assertEqual(new_action.key, action.get('key'), "Can't create action")
 
-    def test_create_funnels(self):
-        funnels = funnels
+    def test_5_create_funnels(self):
+        funnels = FUNNELS
         for funnel in funnels:
             success = construct_funnel(funnel)
             self.assertTrue(success, "construct_funnel failed")
 
-    def test_create_campaigns(self):
-        campaigns = campaigns
+    def test_6_create_campaigns(self):
+        campaigns = CAMPAIGNS
         for campaign in campaigns:
             db_user = User.get_user(campaign.get('owner'))
             self.assertEqual(db_user.email, campaign.get('owner'), "Wrong user email")
@@ -460,8 +465,8 @@ class TestUsersCampaignsProspects(unittest.TestCase):
             new_campaign = Campaign.create_campaign(data)
             self.assertTrue(new_campaign is not None, "can't create campaign")
 
-    def test_create_prospects(self):
-        prospects = prospects
+    def test_7_create_prospects(self):
+        prospects = PROSPECTS
         for prospect in prospects:
             owner = User.get_user(prospect.get('owner'))
             self.assertTrue(owner is not None, "No such user")
@@ -475,8 +480,16 @@ class TestUsersCampaignsProspects(unittest.TestCase):
                                                         campaign_id=campaign.id)
                 self.assertTrue(new_prospect is not None, "Can't create prospect")
 
+def setUpModule():
+    env = os.environ.get('APP_ENV', None)
+    assert env == "Test", "ERROR: Must be Test environment. APP_ENV={0}".format(env)
 
+    settings = config.MONGODB_SETTINGS
+    db_name = settings.get('db', None)
+    assert db_name == "O24Mc-test", "ERROR: db_name. db_name={0}".format(db_name)
 
+    with app.app_context():
+        db.connection.drop_database(db_name)
 
 if __name__ == '__main__':
     unittest.main()
