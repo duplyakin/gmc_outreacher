@@ -77,7 +77,22 @@ class Credentials(db.Document):
     last_action = db.DateTimeField(default=datetime.datetime(1970, 1, 1))
     next_action = db.DateTimeField(default=datetime.datetime(1970, 1, 1))
 
-    limits = db.DictField()
+    #limits and schedule
+    limit_per_day = db.IntField()
+    limit_per_hour = db.IntField()
+    limit_interval = db.IntField()
+
+    current_daily_counter = db.IntField()
+    current_hourly_counter = db.IntField()
+
+    #current_day = db.DateTimeField(default=datetime.datetime(1970, 1, 1))
+    #current_hour = db.DateTimeField(default=datetime.datetime(1970, 1, 1))
+    #daily_counter = db.IntField(default=0)
+    #hourly_counter = db.IntField(default=0)
+
+    @classmethod
+    def ready_now(cls, utc_now):
+        return cls.objects(next_action__lte=utc_now).only('id').all()
 
     @classmethod
     def create_credentials(cls, owner, data):
@@ -168,11 +183,31 @@ class Campaign(db.Document):
         new_campaign._commit()
         return new_campaign
     
+    @classmethod
+    def get_credentials(cls, campaign_id, funnel_node):
+        campaign = cls.objects(id=campaign_id).get()
+
+        medium = funnel_node.action.medium
+
+        credentials_dict = {}
+        for c in campaign.credentials:
+            if c.medium == medium:
+                credentials_dict['id'] = c.id
+                credentials_dict['data'] = c.data
+                credentials_dict['medium'] = medium
+        
+        return credentials_dict
+                
+    
     def inprogress(self):
         if self.status == 1:
             return True
         
         return False
+
+    def update_status(self, status):
+        self.status = status
+        self._commit()
 
     def _commit(self):
         self.save()
@@ -209,6 +244,10 @@ class Prospects(db.Document):
     def get_prospects(cls, status, campaign_id):
         return cls.objects(Q(status=status) & Q(assign_to=campaign_id)).all()
 
+    @classmethod
+    def update_prospects(cls, ids, status):
+        return cls.objects(Q(id__in=ids)).update(status=status)
+
     def update_status(self, status):
         self.status = status
 
@@ -234,3 +273,4 @@ class Templates(db.Document):
 class MergeTags(db.Document):
     tag_name = db.StringField()
     tag_value = db.DictField()
+

@@ -33,7 +33,7 @@ let funnelSchema = new mongoose.Schema({
 
 })
 
-let actionQueueSchema = new mongoose.Schema({
+let TaskQueueSchema = new mongoose.Schema({
     current: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "Funnel"
@@ -53,5 +53,5 @@ let actionQueueSchema = new mongoose.Schema({
 module.exports = {
    Action : mongoose.model('Action', actionSchema),
    Funnel : mongoose.model('Funnel', funnelSchema),
-   ActionQueue : mongoose.model('ActionQueue', actionQueueSchema)
+   TaskQueue : mongoose.model('TaskQueue', TaskQueueSchema)
 }
