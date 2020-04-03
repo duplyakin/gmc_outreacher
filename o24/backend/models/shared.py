@@ -109,11 +109,14 @@ class Funnel(db.Document):
     def _commit(self):
         self.save()
 
+# How TaskQueue works
+# When the new task created status = NEW
+# When the task added to job queue status = IN_PROGRESS
 class TaskQueue(db.Document):
     current_node = db.ReferenceField(Funnel)
     action_key = db.StringField()
 
-    status = db.IntField(default=0)
+    status = db.IntField(default=NEW)
     ack = db.IntField(default=0)
 
     credentials_dict = db.DictField()
@@ -122,7 +125,7 @@ class TaskQueue(db.Document):
     result_data = db.DictField()
 
     prospect_id = db.ObjectIdField(unique=True)
-    campaing_id = db.ObjectIdField()
+    campaign_id = db.ObjectIdField()
     
     record_type = db.IntField(default=0)
     followup_level = db.IntField(default=0)
@@ -139,7 +142,7 @@ class TaskQueue(db.Document):
         self.record_type = 0
         self.followup_level = 0
 
-        self.credentials_dict = models.Campaign.get_credentials(self.campaing_id, next_node)
+        self.credentials_dict = models.Campaign.get_credentials(self.campaign_id, next_node)
         self.credentials_id = self.credentials_dict.get('id', None)
 
         self.action_key = self.current_node.get_action_key()
@@ -162,7 +165,7 @@ class TaskQueue(db.Document):
         #TODO: filter only campaigns with now in schedule_period
         #campaign_ids = Campaign.for_schedule(datetime.datetime.now())
 
-        credential_in_progress = TaskQueue.objects(status=IN_PROGRESS).only('credentials_id').all()
+        credential_in_progress = [c.get('credentials_id') for c in TaskQueue.objects(status=IN_PROGRESS).only('credentials_id').all().as_pymongo()]
         credential_ready = models.Credentials.ready_now(datetime.datetime.now())
 
         #We received tasks that we can put to the JOB queue:
@@ -171,18 +174,18 @@ class TaskQueue(db.Document):
         # credentials_id doesn't have another task with status = IN_PROGRESS (BECAUSE we can't execute more than 1 credential simulteniously)
         new_tasks = TaskQueue.objects(Q(status=NEW) & 
                                     Q(credentials_id__in=credential_ready) & 
-                                    Q(credentials_id__nin=credential_in_progress)).distinct('credentials_id').all()
+                                    Q(credentials_id__nin=credential_in_progress)).all().distinct('credentials_id')
 
         return new_tasks
 
 
     @classmethod
-    def pause_tasks(cls, campaing_id):
-        TaskQueue.objects(Q(campaing_id=campaing_id) & Q(status__in=TASKS_CAN_BE_PAUSED)).update(status=PAUSED)
+    def pause_tasks(cls, campaign_id):
+        TaskQueue.objects(Q(campaign_id=campaign_id) & Q(status__in=TASKS_CAN_BE_PAUSED)).update(status=PAUSED)
 
     @classmethod
-    def resume_tasks(cls, campaing_id):
-        TaskQueue.objects(Q(campaing_id=campaing_id) & Q(status__in=TASKS_CAN_BE_RESUMED)).update(status=IN_PROGRESS)
+    def resume_tasks(cls, campaign_id):
+        TaskQueue.objects(Q(campaign_id=campaign_id) & Q(status__in=TASKS_CAN_BE_RESUMED)).update(status=IN_PROGRESS)
 
     @classmethod
     def create_task(cls, campaign, prospect):
@@ -193,7 +196,7 @@ class TaskQueue(db.Document):
         new_task.credentials_id = new_task.credentials_dict.get('id', None)
 
         new_task.prospect_id = prospect.id
-        new_task.campaing_id = campaign.id
+        new_task.campaign_id = campaign.id
 
         new_task.action_key = new_task.current_node.get_action_key()
 
@@ -204,7 +207,10 @@ class TaskQueue(db.Document):
         if not tasks:
             return None
         
-        TaskQueue.objects.update(tasks)
+        for task in tasks:
+            task.save()
+
+        #TaskQueue.objects.update(tasks, multi=True)
 
     @classmethod
     def insert_tasks(cls, tasks):

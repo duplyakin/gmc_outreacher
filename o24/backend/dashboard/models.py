@@ -97,7 +97,8 @@ class Credentials(db.Document):
 
     @classmethod
     def ready_now(cls, utc_now):
-        return cls.objects(next_action__lte=utc_now).only('id').all()
+        ids = [p.get('_id') for p in cls.objects(next_action__lte=utc_now).only('id').all().as_pymongo()]
+        return ids
 
     @classmethod
     def create_credentials(cls, owner, data):
@@ -126,7 +127,11 @@ class Credentials(db.Document):
 
     @classmethod
     def update_credentials(cls, arr):
-        cls.objects.update(arr)
+        if not arr:
+            return None
+        for e in arr:
+            e.save()
+        #cls.objects.update(arr)
 
     def inc_limits(self, now):
         self.next_action = self.next_action + timedelta(seconds=60)        
@@ -197,7 +202,7 @@ class Campaign(db.Document):
         new_campaign.credentials = data.get('credentials')
         new_campaign.funnel = data.get('funnel')
         
-        new_campaign.status = 1
+        new_campaign.status = NEW
 
         new_campaign._commit()
         return new_campaign

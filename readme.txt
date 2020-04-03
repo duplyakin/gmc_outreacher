@@ -8,6 +8,9 @@ $env:APP_ENV="Test"
 #execute all tests in a folder:
 python -m unittest discover -s .\o24\tests\
 python -m unittest discover -s .\o24\tests\ -p "*db_entities.py"
+python -m unittest discover -s .\o24\tests\ -p "*mongo_updates.py"
+python -m unittest discover -s .\o24\tests\ -p "*test_scheduler.py"
+
 
 
 #which tasks use with celery:

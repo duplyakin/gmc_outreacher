@@ -61,5 +61,11 @@ class TaskLog(db.Document):
 
 
     @classmethod
-    def commit_log(cls, logs):
-        TaskLog.objects.update(logs)
+    def update_logs(cls, logs):
+        if not logs:
+            return None
+
+        for log in logs:
+            log.save()
+            
+        #TaskLog.objects.update(logs, multi=True)
