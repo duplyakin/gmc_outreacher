@@ -22,6 +22,7 @@ class BaseConfig():
     SCHEDULER_HANDLER_PERIOD = 10
     SCHEDULER_HANDLER = 'emit_scheduler'
     #WATCH_DOG_HANDLER = 'emit_test_watch_dog'
+    broker_transport_options = {"max_retries": 3, "interval_start": 0, "interval_step": 0.2, "interval_max": 0.5}
 
 
     # Application threads. A common general assumption is
@@ -53,7 +54,6 @@ class DevConfig(BaseConfig):
     DEBUG = True
     CELERY_TASK_ALWAYS_EAGER = True
     CELERY_BROKER = 'amqp://guest:guest@localhost:5672//'
-    BROKER_TRANSPORT_OPTIONS = {"max_retries": 3, "interval_start": 0, "interval_step": 0.2, "interval_max": 0.5}
     CELERY_BACKEND_RESULT_EXPIRES = 300
     os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
 
@@ -66,7 +66,6 @@ class DevConfig(BaseConfig):
 class ProductionConfig(BaseConfig):
     FLASK_ENV = 'production'
     CELERY_BROKER = 'amqp://guest:guest@localhost:5672//'
-    BROKER_TRANSPORT_OPTIONS = {"max_retries": 3, "interval_start": 0, "interval_step": 0.2, "interval_max": 0.5}
     CELERY_BACKEND_RESULT_EXPIRES = 300
     
     MONGODB_SETTINGS = {
@@ -80,7 +79,6 @@ class TestConfig(BaseConfig):
     DEBUG = True
     CELERY_TASK_ALWAYS_EAGER = True
     CELERY_BROKER = 'amqp://guest:guest@localhost:5672//'
-    BROKER_TRANSPORT_OPTIONS = {"max_retries": 3, "interval_start": 0, "interval_step": 0.2, "interval_max": 0.5}
     CELERY_BACKEND_RESULT_EXPIRES = 300
     os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
 

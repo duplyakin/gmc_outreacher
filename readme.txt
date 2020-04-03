@@ -22,3 +22,7 @@ task.s(arg1, arg2, kwarg1='x', kwargs2='y').apply_async()
 
 #no need to have app context, use @shared_task:
 http://docs.celeryproject.org/en/latest/django/first-steps-with-django.html#using-the-shared-task-decorator
+
+#start celery worker
+#logic explained here: https://blog.miguelgrinberg.com/post/celery-and-the-flask-application-factory-pattern
+celery -A o24.backend.handlers.worker_start.celery worker -E -l info -P gevent

@@ -4,11 +4,12 @@ from o24.backend.dashboard.models import Campaign, Prospects
 from o24.backend.models.shared import TaskQueue
 from o24.globals import *
 from .models import Priority, TaskLog
+import o24.backend.handlers.jobs_map as jobs_map
+import datetime
 
 class Scheduler():
-    def __init__(self, db, app):
-        self.db = db
-        self.app = app
+    def __init__(self):
+        pass
 
     ###################################### SCHEDULER CYCLE tasks  ##################################
     #################################################################################################
@@ -23,19 +24,51 @@ class Scheduler():
             log = self._switch(task)
             
             for_update.append(task)
-            logs.append(log)
+            if log:
+                logs.append(log)
 
         TaskLog.update_logs(logs)
         TaskQueue.update_tasks(for_update)
 
     def execute(self):
         tasks = TaskQueue.get_execute_tasks()
-        for_update = []
+        
+        task_update = []
+        credential_update = []
+        jobs = []
 
+        #TODO: for each task based on type create job and send it to the queue
+        for task in tasks:
+            handler = jobs_map.JOBS_MAP.get(job.action_key, None)
+            if not handler:
+                continue
+            
+            job = handler.s(str(task.id))
+            jobs.append(job)
+
+            task.status = IN_PROGRESS
+            task_update.append(task)
+
+            credential_update.append(task.credentials_id)
+        
+        TaskQueue.update_tasks(task_update)
+        
+        self.refresh_limits(credential_update)
+
+        return jobs
 
     
-    def refresh_limits(self):
-        pass
+    def refresh_limits(self, credential_ids):
+        credentials = Credentials.list_credentials(credential_ids)
+
+        updated = []
+        for c in credentials:
+            c.inc_limits(datetime.datetime.utcnow())
+            c.warmup(datetime.datetime.utcnow())
+            updated.append(c)
+
+        Credentials.update_credentials(updated)
+
 
     def _switch(self, task):
         if task.status != READY:
@@ -75,7 +108,7 @@ class Scheduler():
 
         self._update_prospects(ids, status=IN_PROGRESS)
 
-    def pause_campaign(self, campaign)
+    def pause_campaign(self, campaign):
         if not campaign.inprogress():
             raise Exception("Campaign already paused, title={0}".format(campaign.title))
 
@@ -83,7 +116,7 @@ class Scheduler():
 
         campaign.update_status(status=PAUSED)
 
-    def resume_campaign(self, campaign)
+    def resume_campaign(self, campaign):
         if campaign.inprogress():
             raise Exception("Campaign already resumed, title={0}".format(campaign.title))
 

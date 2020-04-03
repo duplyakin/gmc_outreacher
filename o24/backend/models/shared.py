@@ -1,7 +1,8 @@
 from o24.backend import db
 from o24.backend import app
 from o24.globals import *
-from o24.backend.dashboard.models import Credentials, Campaign
+
+import o24.backend.dashboard.models as models 
 from mongoengine.queryset.visitor import Q
 import datetime
 
@@ -85,6 +86,9 @@ class Funnel(db.Document):
 
         return new_funnel
 
+    def get_action_key(self):
+        return self.action.key
+
     def update_data(self, data):
 
         if data.get('root', None):
@@ -107,9 +111,11 @@ class Funnel(db.Document):
 
 class TaskQueue(db.Document):
     current_node = db.ReferenceField(Funnel)
-    
+    action_key = db.StringField()
+
     status = db.IntField(default=0)
-    
+    ack = db.IntField(default=0)
+
     credentials_dict = db.DictField()
     credentials_id = db.ObjectIdField()
 
@@ -126,13 +132,25 @@ class TaskQueue(db.Document):
         #init to 0
         self.current_node = next_node
         self.status = NEW
+        self.ack = 0
+
         self.result_data = {}
 
         self.record_type = 0
         self.followup_level = 0
 
-        self.credentials_dict = Campaign.get_credentials(self.campaing_id, next_node)
+        self.credentials_dict = models.Campaign.get_credentials(self.campaing_id, next_node)
         self.credentials_id = self.credentials_dict.get('id', None)
+
+        self.action_key = self.current_node.get_action_key()
+
+    def acknowledge(self):
+        self.ack = self.ack + 1
+        return self.ack
+
+    @classmethod
+    def get_task(cls, task_id):
+        return cls.objects(id=task_id).get()
 
     @classmethod
     def get_ready(cls):
@@ -144,9 +162,16 @@ class TaskQueue(db.Document):
         #TODO: filter only campaigns with now in schedule_period
         #campaign_ids = Campaign.for_schedule(datetime.datetime.now())
 
-        credential_ids = Credentials.ready_now(datetime.datetime.now())
+        credential_in_progress = TaskQueue.objects(status=IN_PROGRESS).only('credentials_id').all()
+        credential_ready = models.Credentials.ready_now(datetime.datetime.now())
 
-        new_tasks = TaskQueue.objects(Q(status=NEW) & Q(credentials_id__in=credential_ids)).distinct('credentials_id').all()
+        #We received tasks that we can put to the JOB queue:
+        # now() in campaigns_schedule_interval
+        # now() >= credentials.next_action
+        # credentials_id doesn't have another task with status = IN_PROGRESS (BECAUSE we can't execute more than 1 credential simulteniously)
+        new_tasks = TaskQueue.objects(Q(status=NEW) & 
+                                    Q(credentials_id__in=credential_ready) & 
+                                    Q(credentials_id__nin=credential_in_progress)).distinct('credentials_id').all()
 
         return new_tasks
 
@@ -164,11 +189,13 @@ class TaskQueue(db.Document):
         new_task = cls()
         new_task.current_node = campaign.funnel
         
-        new_task.credentials_dict = Campaign.get_credentials(campaign.id, new_task.current_node)
+        new_task.credentials_dict = models.Campaign.get_credentials(campaign.id, new_task.current_node)
         new_task.credentials_id = new_task.credentials_dict.get('id', None)
 
         new_task.prospect_id = prospect.id
         new_task.campaing_id = campaign.id
+
+        new_task.action_key = new_task.current_node.get_action_key()
 
         return new_task
 

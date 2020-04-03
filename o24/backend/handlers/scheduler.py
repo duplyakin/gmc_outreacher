@@ -1,23 +1,28 @@
 from o24.backend import app
 from o24.backend import db
-from o24.backend.scheduler.scheduler import Scheduler
 from celery import shared_task, group, chord
+from o24.backend import celery
+from o24.backend.scheduler.scheduler import Scheduler
+from flask import current_app
 
-from . import celery
 import traceback
 import time
 
+from o24.backend.models.shared import TaskQueue
 
-@shared_task
+
+@celery.task
 def emit_scheduler():
     try:
-        #get all campaigns that are ready
+        scheduler = Scheduler()
         
+        scheduler.plan()
 
-        scheduler = Scheduler(db=db, app=app)
+        jobs = scheduler.execute()
 
-        scheduler.planning()
-
+        group_jobs = group(jobs)
+        
+        return group_jobs.apply_async()
     except Exception as e:
         app.logger.error(".....emit_scheduler Exception:{0}".format(str(e)))
         traceback.print_exc()

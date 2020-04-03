@@ -1,14 +1,19 @@
 from o24.backend import db
 from o24.backend import app
-import datetime
+
+from datetime import datetime  
+from datetime import timedelta  
+
 from flask_user import UserManager, UserMixin
 import uuid
 from mongoengine.queryset.visitor import Q
 import json
 import traceback
-from o24.backend.models.shared import Funnel
+
 from werkzeug.security import check_password_hash, generate_password_hash
 from o24.globals import *
+
+import o24.backend.models.shared as shared
 
 class User(db.Document, UserMixin):
     email = db.EmailField(unique=True)
@@ -19,7 +24,7 @@ class User(db.Document, UserMixin):
     # Relationships
     roles = db.ListField(db.StringField(), default=[])
 
-    created = db.DateTimeField( default=datetime.datetime.utcnow )
+    created = db.DateTimeField( default=datetime.utcnow )
 
     @classmethod
     def create_user(cls, data):
@@ -74,16 +79,16 @@ class Credentials(db.Document):
 
     data = db.DictField()
     
-    last_action = db.DateTimeField(default=datetime.datetime(1970, 1, 1))
-    next_action = db.DateTimeField(default=datetime.datetime(1970, 1, 1))
+    last_action = db.DateTimeField(default=datetime(1970, 1, 1))
+    next_action = db.DateTimeField(default=datetime(1970, 1, 1))
 
     #limits and schedule
-    limit_per_day = db.IntField()
-    limit_per_hour = db.IntField()
-    limit_interval = db.IntField()
+    limit_per_day = db.IntField(default=0)
+    limit_per_hour = db.IntField(default=0)
+    limit_interval = db.IntField(default=0) #in seconds
 
-    current_daily_counter = db.IntField()
-    current_hourly_counter = db.IntField()
+    current_daily_counter = db.IntField(default=0)
+    current_hourly_counter = db.IntField(default=0)
 
     #current_day = db.DateTimeField(default=datetime.datetime(1970, 1, 1))
     #current_hour = db.DateTimeField(default=datetime.datetime(1970, 1, 1))
@@ -114,6 +119,20 @@ class Credentials(db.Document):
         credentials = cls.objects(Q(owner=user_id) & Q(medium=medium)).first()
 
         return credentials
+
+    @classmethod
+    def list_credentials(cls, credential_ids):
+        return cls.objects(Q(id__in=credential_ids)).all()
+
+    @classmethod
+    def update_credentials(cls, arr):
+        cls.objects.update(arr)
+
+    def inc_limits(self, now):
+        self.next_action = self.next_action + timedelta(seconds=60)        
+
+    def warmup(self, now):
+        pass
 
     def _commit(self):
         self.save()
@@ -151,7 +170,7 @@ class Campaign(db.Document):
     # 11 - archived (deleted)
     status = db.IntField(default=0)
 
-    funnel = db.ReferenceField(Funnel)
+    funnel = db.ReferenceField(shared.Funnel)
     
     sending_schedule = db.DictField()
     
@@ -273,4 +292,3 @@ class Templates(db.Document):
 class MergeTags(db.Document):
     tag_name = db.StringField()
     tag_value = db.DictField()
-
