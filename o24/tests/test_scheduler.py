@@ -12,6 +12,8 @@ from o24.globals import *
 from o24.exceptions.exception_with_code import ErrorCodeException
 from o24.exceptions.error_codes import *
 
+from celery import shared_task, group, chord
+
 
 CAMPAIGNS_TO_START = [
     {
@@ -77,8 +79,10 @@ class TestScheduler(unittest.TestCase):
             campaign.reload()
             self.assertTrue(campaign.status == IN_PROGRESS, "campaing status change error campaign_title:{0}".format(campaign.title))
 
-            ids_in_queue =[p.get('prospect_id') for p in TaskQueue.objects(Q(status=NEW) & 
-                                            Q(prospect_id__in=ids_after)).only('prospect_id').all().as_pymongo()]
+            #ids_in_queue =[p.get('prospect_id') for p in TaskQueue.objects(Q(status=NEW) & 
+            #                                Q(prospect_id__in=ids_after)).only('prospect_id').all().as_pymongo()]
+            
+            ids_in_queue = TaskQueue.objects(Q(status=NEW) & Q(prospect_id__in=ids_after)).distinct('prospect_id')
             count_queue = len(ids_in_queue)
             self.assertTrue(set(ids_in_queue) == set(ids_before), "not all prospects appeared in TaskQueue campaign_title:{0} count_before={1} count_queue={2}".format(campaign.title, count_before, count_queue))
 
@@ -111,8 +115,9 @@ class TestScheduler(unittest.TestCase):
             campaign.reload()
             self.assertTrue(campaign.status == PAUSED, "campaing status change error campaign_title:{0}".format(campaign.title))
 
-            ids_in_queue =[p.get('prospect_id') for p in TaskQueue.objects(Q(status=NEW) & 
-                                            Q(prospect_id__in=ids_before)).only('prospect_id').all().as_pymongo()]
+            #ids_in_queue =[p.get('prospect_id') for p in TaskQueue.objects(Q(status=NEW) & 
+            #                                Q(prospect_id__in=ids_before)).only('prospect_id').all().as_pymongo()]
+            ids_in_queue = TaskQueue.objects(Q(status=NEW) & Q(prospect_id__in=ids_before)).distinct('prospect_id')
             count_queue = len(ids_in_queue)
             self.assertTrue(set(ids_in_queue) == set(ids_before), "status changed in TaskQueue campaign_title:{0} count_before={1} count_queue={2}".format(campaign.title, count_before, count_queue))
 
@@ -156,8 +161,10 @@ class TestScheduler(unittest.TestCase):
         # All prospects in TaskQueue change status to IN_PROGRESS
         for campaign in campaigns:
             self.assertTrue(campaign.status == PAUSED, "campaing is not PAUSED campaign_title:{0} status:{1}".format(campaign.title, campaign.status))
-            ids_before = [p.get('prospect_id') for p in TaskQueue.objects(Q(status=NEW) & 
-                                            Q(campaign_id=campaign.id)).only('prospect_id').all().as_pymongo()]
+            #ids_before = [p.get('prospect_id') for p in TaskQueue.objects(Q(status=NEW) &  Q(campaign_id=campaign.id)).only('prospect_id').all().as_pymongo()]
+            
+            ids_before = TaskQueue.objects(Q(status=NEW) &  Q(campaign_id=campaign.id)).distinct('prospect_id')
+
             count_before = len(ids_before)
             self.assertTrue(count_before > 0, "There is no prospects in TaskQueue for campaign_title:{0} count_before={1}".format(campaign.title, count_before))
 
@@ -166,8 +173,10 @@ class TestScheduler(unittest.TestCase):
             campaign.reload()
             self.assertTrue(campaign.status == IN_PROGRESS, "campaing status change error campaign_title:{0}".format(campaign.title))
 
-            ids_in_queue =[p.get('prospect_id') for p in TaskQueue.objects(Q(status=NEW) & 
-                                            Q(prospect_id__in=ids_before)).only('prospect_id').all().as_pymongo()]
+            #ids_in_queue =[p.get('prospect_id') for p in TaskQueue.objects(Q(status=NEW) & Q(prospect_id__in=ids_before)).only('prospect_id').all().as_pymongo()]
+
+            ids_in_queue = TaskQueue.objects(Q(status=NEW) & Q(prospect_id__in=ids_before)).distinct('prospect_id')
+            
             count_queue = len(ids_in_queue)
             self.assertTrue(set(ids_in_queue) == set(ids_before), "status changed for prospects in TaskQueue campaign_title:{0} count_before={1} count_queue={2}".format(campaign.title, count_before, count_queue))
 
@@ -232,8 +241,10 @@ class TestScheduler(unittest.TestCase):
             all_ids = new_prospect_ids + old_prospects_ids
             all_count = len(all_ids)
            
-            ids_in_queue =[p.get('prospect_id') for p in TaskQueue.objects(Q(status=NEW) & 
-                                            Q(prospect_id__in=all_ids)).only('prospect_id').all().as_pymongo()]
+            #ids_in_queue =[p.get('prospect_id') for p in TaskQueue.objects(Q(status=NEW) &  Q(prospect_id__in=all_ids)).only('prospect_id').all().as_pymongo()]
+
+            ids_in_queue = TaskQueue.objects(Q(status=NEW) &  Q(prospect_id__in=all_ids)).distinct('prospect_id')
+
             count_queue = len(ids_in_queue)
             self.assertTrue(set(ids_in_queue) == set(all_ids), "not all prospects added to TaskQueue campaign_title:{0} all_count={1} count_queue={2}".format(campaign.title, all_count, count_queue))
 
@@ -292,42 +303,74 @@ class TestScheduler(unittest.TestCase):
             campaign.reload()
             self.assertTrue(campaign.status == IN_PROGRESS, "campaign resume error campaign_title:{0}".format(campaign.title))
 
-            status_changed_ids = [p.get('_id') for p in Prospects.objects(Q(status=IN_PROGRESS) & 
-                                            Q(id__in=new_prospect_ids)).only('id').all().as_pymongo()]
+            #status_changed_ids = [p.get('_id') for p in Prospects.objects(Q(status=IN_PROGRESS) & Q(id__in=new_prospect_ids)).only('id').all().as_pymongo()]
+
+            status_changed_ids = Prospects.objects(Q(status=IN_PROGRESS) & Q(id__in=new_prospect_ids)).distinct('id')
 
             self.assertTrue(set(new_prospect_ids) == set(status_changed_ids), "new prospects don't change status to IN_PROGRESS campaign_title:{0}".format(campaign.title))
            
-            ids_in_queue =[p.get('prospect_id') for p in TaskQueue.objects(Q(status=NEW) & 
-                                            Q(prospect_id__in=new_prospect_ids)).only('prospect_id').all().as_pymongo()]
+            #ids_in_queue =[p.get('prospect_id') for p in TaskQueue.objects(Q(status=NEW) & Q(prospect_id__in=new_prospect_ids)).only('prospect_id').all().as_pymongo()]
+            ids_in_queue = TaskQueue.objects(Q(status=NEW) & Q(prospect_id__in=new_prospect_ids)).distinct('prospect_id')
+
             count_queue = len(ids_in_queue)
             self.assertTrue(set(ids_in_queue) == set(new_prospect_ids), "new prospects don't added to TaskQueue campaign_title:{0} count_queue={1}".format(campaign.title, count_queue))
 
-    def test_7_scheduler_plan(self):
-        return 
+    def test_7_scheduler_loop(self): 
         scheduler = SCHEDULER.Scheduler()
         
-        tasks_ids = [t.id for t in TaskQueue.get_ready()]
+        #PLANNING PHASE
+
+        tasks_before_plan = TaskQueue.get_ready()
+        tasks_ids_before = [t.id for t in tasks_before_plan]
+        count_tasks_ids_before = len(tasks_ids_before)
+        
         scheduler.plan()
 
-        tasks = TaskQueue.objects(Q(id__in=tasks_ids)).all().as_pymongo()
-        print(tasks)
+        #check plan phase
+        if tasks_before_plan:
+            #check switch of the funnel phase
+            tasks_after_plan = TaskQueue.objects(Q(id__in=tasks_ids_before) & Q(status=NEW)).all()
+            tasks_ids_after = [t.id for t in tasks_after_plan]
+            count_tasks_ids_after = len(tasks_ids_after)
+            self.assertTrue(set(tasks_ids_before) == set(tasks_ids_after), "Plan error not all tasks switched")
 
+            #Check that all nodes are switched correctly
+            for task_after in tasks_after_plan:
+                found = False
+                for task_before in tasks_before_plan:
+                    if task_before.id == task_after.id:
+                        found = True
+                        node_before = task_before.current_node
+                        result_before = task_before.result_data
 
-    def test_8_scheduler_execute(self):
-        scheduler = SCHEDULER.Scheduler()
+                        node_after = task_after.current_node
 
-        tasks_ids = [t.id for t in TaskQueue.get_execute_tasks()]
-        
+                        if node_before.check_true(result_before):
+                            self.assertTrue(node_before.if_true == task_after.id, "if_true: Node switch error for task_before.id:{0}".format(task_before.id))
+                        else:
+                            self.assertTrue(node_before.if_false == task_after.id, "if_false: Node switch error for task_before.id:{0}".format(task_before.id))
+
+                        break
+                self.assertTrue(found, "Can't find task_before for task_after")
+       
+
+        #EXECUTING PHASE
+        tasks_before_execute = TaskQueue.get_execute_tasks()
+        tasks_before_execute_ids = [t.id for t in tasks_before_execute]
+        count_tasks_before_execute = len(tasks_before_execute_ids)
+
         jobs = scheduler.execute()
-        print(jobs)
 
-        tasks = TaskQueue.objects(Q(id__in=tasks_ids)).all().as_pymongo()
-        print(tasks)
+        if tasks_before_execute:
+            tasks_after_execute = TaskQueue.objects(Q(id__in=tasks_before_execute_ids) & Q(status=IN_PROGRESS)).all()
+            tasks_after_execute_ids = [t.id for t in tasks_after_execute]
+            count_tasks_after_execute = len(tasks_after_execute_ids)
+            self.assertTrue(set(tasks_before_execute_ids) == set(tasks_after_execute_ids), "Execute error not all tasks IN_PROGRESS count_before={0} count_after={1}".format(count_tasks_before_execute, count_tasks_after_execute))
 
+        group_jobs = group(jobs)
+        
+        return group_jobs.apply_async()
 
-
-    def test_9_scheduler_celery_handler(self):
-        pass
 
 def setUpModule():
     env = os.environ.get('APP_ENV', None)

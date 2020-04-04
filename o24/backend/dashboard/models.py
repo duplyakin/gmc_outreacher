@@ -96,8 +96,9 @@ class Credentials(db.Document):
     #hourly_counter = db.IntField(default=0)
 
     @classmethod
-    def ready_now(cls, utc_now):
-        ids = [p.get('_id') for p in cls.objects(next_action__lte=utc_now).only('id').all().as_pymongo()]
+    def ready_ids(cls, utc_now):
+        #ids = [p.get('_id') for p in cls.objects(next_action__lte=utc_now).only('id').all().as_pymongo()]
+        ids = cls.objects(next_action__lte=utc_now).distinct('id')
         return ids
 
     @classmethod

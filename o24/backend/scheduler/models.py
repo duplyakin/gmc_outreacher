@@ -12,7 +12,7 @@ from o24.backend.models.shared import TaskQueue
 
 
 class Priority(db.Document):
-    campaign = db.ReferenceField(Campaign, unique=True)
+    #campaign = db.ReferenceField(Campaign, unique=True)
 
     # 0 - Intro, 1 - Follow up
     do_next = db.IntField(default=0)
@@ -20,15 +20,21 @@ class Priority(db.Document):
     #0 - Init phase, 1 - While all 1 are empty
     followup_level = db.IntField(default=0)
 
-
     @classmethod
-    def create_priority(cls, campaign):
-        new_priority = cls()
+    def get_priority(cls):
+        exist = Priority.objects().first()
+        if exist:
+            return exist
 
-        new_priority.campaign = campaign.id
+        new_priority = cls()
 
         new_priority._commit()
         return new_priority
+
+    def update_priority(self, do_next, followup_level):
+        self.do_next = do_next
+        self.followup_level = followup_level
+        self._commit()
 
     def _commit(self):
         self.save()

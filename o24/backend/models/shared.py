@@ -89,6 +89,9 @@ class Funnel(db.Document):
     def get_action_key(self):
         return self.action.key
 
+    def chek_true(self, result):
+        return self.action.is_true(result)
+
     def update_data(self, data):
 
         if data.get('root', None):
@@ -162,19 +165,31 @@ class TaskQueue(db.Document):
     @classmethod
     def get_execute_tasks(cls):
         
+        # Which tasks are ready for execution:
+        # OUTPUT: list of UNIQUE(credentials_id)
+        # ADD:
+        # now >= crededentials.next_action
+        # tasks.record_type = 
+        # REMOVE:
+        # **** remove tasks.status = IN_PROGRESS
+        # **** remove tasks.id where campaign.status = PAUSE
+
         #TODO: filter only campaigns with now in schedule_period
         #campaign_ids = Campaign.for_schedule(datetime.datetime.now())
 
-        credential_in_progress = [c.get('credentials_id') for c in TaskQueue.objects(status=IN_PROGRESS).only('credentials_id').all().as_pymongo()]
-        credential_ready = models.Credentials.ready_now(datetime.datetime.now())
+        #credential_in_progress = [c.get('credentials_id') for c in TaskQueue.objects(status=IN_PROGRESS).only('credentials_id').all().as_pymongo()]
+        #credentials_in_progress = TaskQueue.objects(status=IN_PROGRESS).distinct('credentials_id')
+        #credentials_ready = models.Credentials.ready_ids(datetime.datetime.now())
+
+        credentials_ids_remove = TaskQueue.objects(Q(status=IN_PROGRESS)).distinct('credentials_id')
 
         #We received tasks that we can put to the JOB queue:
         # now() in campaigns_schedule_interval
         # now() >= credentials.next_action
         # credentials_id doesn't have another task with status = IN_PROGRESS (BECAUSE we can't execute more than 1 credential simulteniously)
         new_tasks = TaskQueue.objects(Q(status=NEW) & 
-                                    Q(credentials_id__in=credential_ready) & 
-                                    Q(credentials_id__nin=credential_in_progress)).all().distinct('credentials_id')
+                                    Q(credentials_id__in=credentials_ready) & 
+                                    Q(credentials_id__nin=credentials_in_progress)).all()
 
         return new_tasks
 

@@ -1,70 +1,111 @@
 from o24.backend import db
 from o24.backend import app
-from o24.backend.dashboard.models import Campaign, Prospects
+from o24.backend.dashboard.models import Campaign, Prospects, Credentials
 from o24.backend.models.shared import TaskQueue
 from o24.globals import *
 from .models import Priority, TaskLog
 import o24.backend.handlers.jobs_map as jobs_map
 import datetime
-
+    
 from o24.exceptions.exception_with_code import ErrorCodeException
 from o24.exceptions.error_codes import *
-
-
+    
+    
 class Scheduler():
     def __init__(self):
         pass
-
+    
     ###################################### SCHEDULER CYCLE tasks  ##################################
     #################################################################################################
+    
+    def switch_priority(self):
+        # We need to equally select tasks from TaskQueue
+        # do_next = intro(0) or follow up(1)
+        # follow up level = 0(update level=1)
+        # The algo:
+        # if do_next == intro(0):
+        # **** execute all intro tasks (record_type=0)
+        
+        current_priority = Priority.get_priority()
+        follow_ups = TaskQueue.objects(Q(record_type=FOLLOWUP))
+    
+        if follow_ups.count() <= 0:
+            current_priority.do_next = INTRO
+        else:
+            follow_level = follow_ups.filter(followup_level=FOLLOWUP)
+        current_priority.save()
+    
+        #Check if followup queue finished
+        if current_priority.do_next == FOLLOWUP:
+            if follow_ups.count() <=0:
+                current_priority.do_next = INTRO
+                
+    
+            left = TaskQueue.objects(Q(record_type=FOLLOWUP) and Q(followup_level=FOLLOWUP)).all()
+            if len(left) <= 0:
+                current_priority.do_next = INTRO
+            return
+         
+        
+        current_priority.save()
+    
+    
     def plan(self):
         #All tasks
-
+    
+        self.switch_priority()
+    
         tasks = TaskQueue.get_ready()
         for_update = []
         logs = []
-
+    
         for task in tasks:
             log = self._switch(task)
             
             for_update.append(task)
             if log:
                 logs.append(log)
-
-        TaskLog.update_logs(logs)
-        TaskQueue.update_tasks(for_update)
-
+    
+        if logs:
+            TaskLog.update_logs(logs)
+        
+        if for_update:
+            TaskQueue.update_tasks(for_update)
+    
+    
     def execute(self):
         tasks = TaskQueue.get_execute_tasks()
         
         task_update = []
         credential_update = []
         jobs = []
-
+    
         #TODO: for each task based on type create job and send it to the queue
         for task in tasks:
-            handler = jobs_map.JOBS_MAP.get(job.action_key, None)
+            handler = jobs_map.JOBS_MAP.get(task.action_key, None)
             if not handler:
                 continue
             
             job = handler.s(str(task.id))
             jobs.append(job)
-
+    
             task.status = IN_PROGRESS
             task_update.append(task)
 
             credential_update.append(task.credentials_id)
         
-        TaskQueue.update_tasks(task_update)
+        if task_update:
+            TaskQueue.update_tasks(task_update)
         
-        self.refresh_limits(credential_update)
-
+        if credential_update:
+            self.refresh_limits(credential_update)
+    
         return jobs
-
+    
     
     def refresh_limits(self, credential_ids):
         credentials = Credentials.list_credentials(credential_ids)
-
+    
         updated = []
         for c in credentials:
             c.inc_limits(datetime.datetime.utcnow())

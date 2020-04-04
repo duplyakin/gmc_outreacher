@@ -1,6 +1,9 @@
 import o24.backend.handlers.dummy as dummy
+import os
 
-JOBS_MAP = {
+JOBS_MAP = None
+
+JOBS_MAP_TEST = {
     'linkedin-check-reply' : dummy.dummy_linkedin_check_reply, 
     'linkedin-visit-profile' : dummy.dummy_linkedin_visit_profile,
     'linkedin-connect' : dummy.dummy_linkedin_connect,
@@ -12,3 +15,11 @@ JOBS_MAP = {
     'linkedin-check-accept' : dummy.dummy_linkedin_check_accept,
     'email-check-reply' : dummy.dummy_email_check_reply,
 }
+
+JOBS_MAP_PROD = {}
+
+env = os.environ.get('APP_ENV', None)
+if env == "Test":
+    JOBS_MAP = JOBS_MAP_TEST
+else:
+    JOBS_MAP = JOBS_MAP_PROD
