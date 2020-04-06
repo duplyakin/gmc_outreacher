@@ -21,34 +21,40 @@ class Scheduler():
     def switch_priority(self):
         # We need to equally select tasks from TaskQueue
         # do_next = intro(0) or follow up(1)
-        # follow up level = 0(update level=1)
-        # The algo:
-        # if do_next == intro(0):
-        # **** execute all intro tasks (record_type=0)
+        # follow up level = 0(reserve the current followups) 1(execute followup_level=1 until finished)
         
         current_priority = Priority.get_priority()
         follow_ups = TaskQueue.objects(Q(record_type=FOLLOWUP))
     
+        #if we don't have followups then we need to execute INTRO
         if follow_ups.count() <= 0:
             current_priority.do_next = INTRO
-        else:
-            follow_level = follow_ups.filter(followup_level=FOLLOWUP)
-        current_priority.save()
-    
-        #Check if followup queue finished
-        if current_priority.do_next == FOLLOWUP:
-            if follow_ups.count() <=0:
-                current_priority.do_next = INTRO
-                
-    
-            left = TaskQueue.objects(Q(record_type=FOLLOWUP) and Q(followup_level=FOLLOWUP)).all()
-            if len(left) <= 0:
-                current_priority.do_next = INTRO
+            current_priority.save()
             return
-         
-        
-        current_priority.save()
-    
+
+        #switch to INTRO if we did followups on the last round
+        if current_priority.do_next == FOLLOWUP:
+            current_priority.do_next = INTRO
+            current_priority.save()
+            return
+
+        #switch to followup if we did INTRO on the last round
+        if current_priority.do_next == INTRO:
+            current_priority.do_next = FOLLOWUP
+            
+            # we need to check followup_level
+            if current_priority.followup_level == 0:
+                follow_ups.update(followup_level=FOLLOWUP)
+                current_priority.followup_level = 1
+                current_priority.save()
+                return
+
+            if follow_ups.filter(followup_level=FOLLOWUP).count() <= 0:
+                current_priority.followup_level = 0
+                current_priority.save()
+                return
+
+            return    
     
     def plan(self):
         #All tasks
@@ -74,7 +80,13 @@ class Scheduler():
     
     
     def execute(self):
-        tasks = TaskQueue.get_execute_tasks()
+        current_priority = Priority.get_priority()
+
+        now = datetime.datetime.now()
+        do_next = current_priority.do_next
+        followup_level = current_priority.followup_level
+
+        tasks = TaskQueue.get_execute_tasks(do_next, followup_level, now)
         
         task_update = []
         credential_update = []
@@ -102,18 +114,26 @@ class Scheduler():
     
         return jobs
     
-    
+    #Inc counters for each credential (It will change next_action)
+    #Refresh next_action for campaigns
     def refresh_limits(self, credential_ids):
         credentials = Credentials.list_credentials(credential_ids)
-    
+        now = datetime.datetime.now()
+
         updated = []
         for c in credentials:
-            c.inc_limits(datetime.datetime.utcnow())
-            c.warmup(datetime.datetime.utcnow())
+            c.change_limits(now)
             updated.append(c)
 
         Credentials.update_credentials(updated)
 
+        campaigns = Campaign.objects(status=IN_PROGRESS).all()
+        campaigns_updated = []
+        for campaign in campaigns:
+            campaign.change_limits(now)
+            campaigns_updated.append(campaign)
+        
+        Campaign.update_campaigns(campaigns_updated)
 
     def _switch(self, task):
         if task.status != READY:
@@ -191,5 +211,5 @@ class Scheduler():
         Prospects.update_prospects(ids, status)
 
     def _setup_scheduler_data(self, campaign):
-        Priority.create_priority(campaign)
+        Priority.get_priority()
 

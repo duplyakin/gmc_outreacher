@@ -51,13 +51,24 @@ class TestBulkUpdates(unittest.TestCase):
         
         Campaign.objects(title="campaign-1").update(status=PAUSED)
 
-        #1. выбрать все tasks для которых есть кампании и показать campaign.title
-        #2. выбрать все tasks кампании которых активны и показать campaign.title
-        #3
-        tasks_q = TaskQueue.objects()
-        print(tasks_q.count())
-        print(tasks_q.filter(status=1).all())
-        return
+        # Which tasks are ready for execution:
+        # OUTPUT: list of UNIQUE(credentials_id)
+        # REMOVE:
+        # **** remove credentials_id tasks.status == IN_PROGRESS : DONE
+        # **** remove tasks.id where campaign.status == PAUSE  (DONE)
+        # ADD:
+        # now >= crededentials.next_action
+        # now >= campaign.next_action DONE
+        # tasks.record_type == Priority.do_next DONE
+        # if tasks.followup_level == 1 then check tasks.followup_level == Priority.followup_level DONE
+
+        do_next = 0
+        followup_level = 0
+
+        query = {"$match": {"record_type" : {"$eq" : INTRO} }}
+        if (do_next == 1):
+            query = {"$match" : {"record_type" : {"$eq" : FOLLOWUP}, "followup_level" : {"$eq" : followup_level}}}
+        
         pipeline = [
             {"$lookup" : {
                 "from" : "campaign",
@@ -65,7 +76,16 @@ class TestBulkUpdates(unittest.TestCase):
                 "foreignField" : "_id",
                 "as" : "campaign_docs"
             }},
-            {"$match": {"campaign_docs.status" : {"$ne" : PAUSED} }},
+            {"$lookup" : {
+                "from" : "credentials",
+                "localField" : "campaign_id",
+                "foreignField" : "_id",
+                "as" : "campaign_docs"
+            }},
+
+
+            *query,
+            {"$match" : {"campaign_docs.status" : {"$eq" : IN_PROGRESS}, "campaign_docs.next_action" : {"$le": now}}},
             {"$group" : {"_id": "$credentials_id", "task_id" : { "$first" : "$_id" }}},
         ]
         

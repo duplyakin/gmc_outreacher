@@ -84,11 +84,11 @@ class Credentials(db.Document):
 
     #limits and schedule
     limit_per_day = db.IntField(default=0)
-    limit_per_hour = db.IntField(default=0)
+    limit_per_hour = db.IntField(default=0) #NOT USED
     limit_interval = db.IntField(default=0) #in seconds
 
     current_daily_counter = db.IntField(default=0)
-    current_hourly_counter = db.IntField(default=0)
+    current_hourly_counter = db.IntField(default=0) #NOT USED
 
     #current_day = db.DateTimeField(default=datetime.datetime(1970, 1, 1))
     #current_hour = db.DateTimeField(default=datetime.datetime(1970, 1, 1))
@@ -130,15 +130,25 @@ class Credentials(db.Document):
     def update_credentials(cls, arr):
         if not arr:
             return None
+
         for e in arr:
             e.save()
         #cls.objects.update(arr)
 
-    def inc_limits(self, now):
-        self.next_action = self.next_action + timedelta(seconds=60)        
+    def change_limits(self, now):
+        self.current_daily_counter = self.current_daily_counter + 1
 
-    def warmup(self, now):
-        pass
+        self.last_action = self.next_action
+        if self.current_daily_counter >= self.limit_per_day:
+            #switch action to the next day
+            self.next_action = self.next_action + timedelta(seconds=NEXT_DAY_SECONDS)
+            self.current_daily_counter = 0
+            self.warmup()
+        else:
+            self.next_action = self.next_action + timedelta(seconds=self.limit_interval)        
+
+    def warmup(self):
+        self.limit_per_day = round(self.limit_per_day * 1.3)
 
     def _commit(self):
         self.save()
@@ -178,7 +188,21 @@ class Campaign(db.Document):
 
     funnel = db.ReferenceField(shared.Funnel)
     
-    sending_schedule = db.DictField()
+    sending_days = db.DictField(default={
+        '0' : True,
+        '1' : True,
+        '2' : True, 
+        '3' : True,
+        '4' : True,
+        '5' : False,
+        '6' : False
+    })
+    from_hour = db.IntField()
+    to_hour = db.IntField()
+
+    last_action = db.DateTimeField(default=datetime(1970, 1, 1))
+    next_action = db.DateTimeField(default=datetime(1970, 1, 1))
+
     
     #not used now
     priorities = db.IntField(default=0)
@@ -223,7 +247,45 @@ class Campaign(db.Document):
         
         return credentials_dict
                 
+    @classmethod
+    def update_campaigns(cls, campaigns):
+        if not campaigns:
+            return None
+
+        for c in campaigns:
+            c.save()
+   
+    def change_limits(self, now):
+        current_hour = now.hour
+        current_day = now.day
+
+        if current_hour >= to_hour:
+            self.last_action = self.next_action
+
+            days_delta = self.days_delta(current_day)
+
+            next_t = self.next_action + timedelta(days=days_delta)
+            self.next_action = next_t.replace(hour=self.from_hour, minutes=0)
     
+
+    def days_delta(self, current_day):
+        delta = 1
+        next_day = current_day + 1
+        a = self.sending_days
+
+        for i in range(6):
+            if next_day > 6:
+                next_day = 0
+
+            if a.get(str(next_day)):
+                break
+
+            delta = delta + 1
+            next_day = next_day + 1
+
+        return delta
+
+
     def inprogress(self):
         if self.status == 1:
             return True

@@ -43,9 +43,7 @@ class TestScheduler(unittest.TestCase):
     def setUp(self):
         pass
 
-    def test_1_start_campaign(self):
-        return
-        
+    def test_1_start_campaign(self):        
         campaigns_to_start = CAMPAIGNS_TO_START
 
         campaigns = []
@@ -89,7 +87,6 @@ class TestScheduler(unittest.TestCase):
 
 
     def test_2_pause_campaign(self):
-        return 
         campaigns_to_pause = CAMPAIGNS_TO_START
         
         campaigns = []
@@ -122,8 +119,7 @@ class TestScheduler(unittest.TestCase):
             self.assertTrue(set(ids_in_queue) == set(ids_before), "status changed in TaskQueue campaign_title:{0} count_before={1} count_queue={2}".format(campaign.title, count_before, count_queue))
 
 
-    def test_3_start_paused_campaign(self):
-        return 
+    def test_3_start_paused_campaign(self): 
         campaigns_to_start = CAMPAIGNS_TO_START
 
         campaigns = []
@@ -143,8 +139,7 @@ class TestScheduler(unittest.TestCase):
             the_exception = context.exception
             self.assertEqual(the_exception.error_code, START_CAMPAIGN_ERROR)
 
-    def test_4_resume_campaign(self):
-        return 
+    def test_4_resume_campaign(self): 
         campaigns_to_resume = CAMPAIGNS_TO_START
         
         campaigns = []
@@ -180,8 +175,7 @@ class TestScheduler(unittest.TestCase):
             count_queue = len(ids_in_queue)
             self.assertTrue(set(ids_in_queue) == set(ids_before), "status changed for prospects in TaskQueue campaign_title:{0} count_before={1} count_queue={2}".format(campaign.title, count_before, count_queue))
 
-    def test_5_resume_with_new_prospects(self):
-        return 
+    def test_5_resume_with_new_prospects(self): 
         campaigns_to_resume = CAMPAIGNS_TO_START
         
         scheduler = SCHEDULER.Scheduler()
@@ -249,8 +243,6 @@ class TestScheduler(unittest.TestCase):
             self.assertTrue(set(ids_in_queue) == set(all_ids), "not all prospects added to TaskQueue campaign_title:{0} all_count={1} count_queue={2}".format(campaign.title, all_count, count_queue))
 
     def test_6_add_new_prospects_to_active_campaign(self):
-        return 
-
         campaigns_active = CAMPAIGNS_TO_START
          
         campaigns = []
@@ -315,7 +307,9 @@ class TestScheduler(unittest.TestCase):
             count_queue = len(ids_in_queue)
             self.assertTrue(set(ids_in_queue) == set(new_prospect_ids), "new prospects don't added to TaskQueue campaign_title:{0} count_queue={1}".format(campaign.title, count_queue))
 
-    def test_7_scheduler_loop(self): 
+    def test_7_scheduler_loop(self):
+        return 
+        
         scheduler = SCHEDULER.Scheduler()
         
         #PLANNING PHASE

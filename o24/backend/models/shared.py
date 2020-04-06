@@ -142,7 +142,7 @@ class TaskQueue(db.Document):
 
         self.result_data = {}
 
-        self.record_type = 0
+        self.record_type = FOLLOWUP
         self.followup_level = 0
 
         self.credentials_dict = models.Campaign.get_credentials(self.campaign_id, next_node)
@@ -163,35 +163,55 @@ class TaskQueue(db.Document):
         return TaskQueue.objects(status=READY).all()
 
     @classmethod
-    def get_execute_tasks(cls):
+    def get_execute_tasks(cls, do_next, followup_level, now):
         
         # Which tasks are ready for execution:
         # OUTPUT: list of UNIQUE(credentials_id)
+        # REMOVE:
+        # **** remove credentials_id tasks.status == IN_PROGRESS
+        # **** remove tasks.id where campaign.status == PAUSE
         # ADD:
         # now >= crededentials.next_action
-        # tasks.record_type = 
-        # REMOVE:
-        # **** remove tasks.status = IN_PROGRESS
-        # **** remove tasks.id where campaign.status = PAUSE
+        # now >= campaign.next_action
+        # tasks.record_type == Priority.do_next
+        # if tasks.followup_level == 1 then check tasks.followup_level == Priority.followup_level
+        credentials_ids_in_progress = TaskQueue.objects(status=IN_PROGRESS).distinct('credentials_id')
+        
+        query = {"$match": {"record_type" : {"$eq" : INTRO} }}
+        if (do_next == 1):
+            query = {"$match" : {"record_type" : {"$eq" : FOLLOWUP}, "followup_level" : {"$eq" : followup_level}}}
+        
+        pipeline = [
+            {"$lookup" : {
+                "from" : "campaign",
+                "localField" : "campaign_id",
+                "foreignField" : "_id",
+                "as" : "campaign_docs"
+            }},
+            { "$unwind" : "$campaign_docs" },
+            {"$match" : { 
+                "campaign_docs.status" : {"$eq" : IN_PROGRESS}, 
+                'campaign_docs.next_action' : {'$lte' : now}
+            }},
+            {"$lookup" : {
+                "from" : "credentials",
+                "localField" : "credentials_id",
+                "foreignField" : "_id",
+                "as" : "cr_docs"
+            }},
+            { "$unwind" : "$cr_docs" },
+            {"$match" : { "cr_docs.next_action" : { "$lte" : now},
+                "cr_docs._id" : { "$nin" : credentials_ids_in_progress}
+             } },
+             query,
+            {"$group" : {"_id": "$credentials_id", "task_id" : { "$first" : "$_id" }}},
+        ]
 
-        #TODO: filter only campaigns with now in schedule_period
-        #campaign_ids = Campaign.for_schedule(datetime.datetime.now())
+        new_tasks = list(TaskQueue.objects(status=NEW).aggregate(*pipeline))
+        tasks_ids = [x.get('task_id') for x in new_tasks]
 
-        #credential_in_progress = [c.get('credentials_id') for c in TaskQueue.objects(status=IN_PROGRESS).only('credentials_id').all().as_pymongo()]
-        #credentials_in_progress = TaskQueue.objects(status=IN_PROGRESS).distinct('credentials_id')
-        #credentials_ready = models.Credentials.ready_ids(datetime.datetime.now())
-
-        credentials_ids_remove = TaskQueue.objects(Q(status=IN_PROGRESS)).distinct('credentials_id')
-
-        #We received tasks that we can put to the JOB queue:
-        # now() in campaigns_schedule_interval
-        # now() >= credentials.next_action
-        # credentials_id doesn't have another task with status = IN_PROGRESS (BECAUSE we can't execute more than 1 credential simulteniously)
-        new_tasks = TaskQueue.objects(Q(status=NEW) & 
-                                    Q(credentials_id__in=credentials_ready) & 
-                                    Q(credentials_id__nin=credentials_in_progress)).all()
-
-        return new_tasks
+        execute_tasks = TaskQueue.objects(Q(id__in=tasks_ids)).all()
+        return execute_tasks
 
 
     @classmethod
@@ -203,17 +223,22 @@ class TaskQueue(db.Document):
         TaskQueue.objects(Q(campaign_id=campaign_id) & Q(status__in=TASKS_CAN_BE_RESUMED)).update(status=IN_PROGRESS)
 
     @classmethod
-    def create_task(cls, campaign, prospect):
+    def create_task(cls, campaign, prospect, test_crededentials_dict=None):
         new_task = cls()
         new_task.current_node = campaign.funnel
         
         new_task.credentials_dict = models.Campaign.get_credentials(campaign.id, new_task.current_node)
         new_task.credentials_id = new_task.credentials_dict.get('id', None)
+        new_task.action_key = new_task.current_node.get_action_key()
+
+        if test_crededentials_dict:
+            new_task.credentials_dict = test_crededentials_dict.get('credentials_dict')
+            new_task.credentials_id = test_crededentials_dict.get('credentials_id')
+            new_task.action_key = test_crededentials_dict.get('action_key')
 
         new_task.prospect_id = prospect.id
         new_task.campaign_id = campaign.id
 
-        new_task.action_key = new_task.current_node.get_action_key()
 
         return new_task
 
