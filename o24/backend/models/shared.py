@@ -154,6 +154,25 @@ class TaskQueue(db.Document):
         self.ack = self.ack + 1
         return self.ack
 
+    def update_status(self, status):
+        self.status = status
+        self._commit()
+    
+    def set_result(self, result):
+        self.result_data = result
+        self._commit()
+
+    def last_action(self):
+        if self.current_node.action.key in FINISHED_KEYS:
+            return True
+        
+        return False
+
+    def finish_task(self):
+        self.status = FINISHED
+        self._commit()
+
+
     @classmethod
     def get_task(cls, task_id):
         return cls.objects(id=task_id).get()
@@ -216,11 +235,13 @@ class TaskQueue(db.Document):
 
     @classmethod
     def pause_tasks(cls, campaign_id):
-        TaskQueue.objects(Q(campaign_id=campaign_id) & Q(status__in=TASKS_CAN_BE_PAUSED)).update(status=PAUSED)
+        return
+        #TaskQueue.objects(Q(campaign_id=campaign_id) & Q(status__in=TASKS_CAN_BE_PAUSED)).update(status=PAUSED)
 
     @classmethod
     def resume_tasks(cls, campaign_id):
-        TaskQueue.objects(Q(campaign_id=campaign_id) & Q(status__in=TASKS_CAN_BE_RESUMED)).update(status=IN_PROGRESS)
+        return
+        #TaskQueue.objects(Q(campaign_id=campaign_id) & Q(status__in=TASKS_CAN_BE_RESUMED)).update(status=NEW)
 
     @classmethod
     def create_task(cls, campaign, prospect, test_crededentials_dict=None):
@@ -238,7 +259,7 @@ class TaskQueue(db.Document):
 
         new_task.prospect_id = prospect.id
         new_task.campaign_id = campaign.id
-
+        new_task.status = NEW
 
         return new_task
 
@@ -258,3 +279,6 @@ class TaskQueue(db.Document):
             return None
         
         return TaskQueue.objects.insert(tasks, load_bulk=True)
+
+    def _commit(self):
+        self.save()

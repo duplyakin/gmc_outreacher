@@ -24,7 +24,7 @@ class User(db.Document, UserMixin):
     # Relationships
     roles = db.ListField(db.StringField(), default=[])
 
-    created = db.DateTimeField( default=datetime.utcnow )
+    created = db.DateTimeField( default=datetime.now() )
 
     @classmethod
     def create_user(cls, data):
@@ -79,13 +79,14 @@ class Credentials(db.Document):
 
     data = db.DictField()
     
-    last_action = db.DateTimeField(default=datetime(1970, 1, 1))
-    next_action = db.DateTimeField(default=datetime(1970, 1, 1))
+    last_action = db.DateTimeField(default=datetime.now())
+    next_action = db.DateTimeField(default=datetime.now())
 
     #limits and schedule
-    limit_per_day = db.IntField(default=0)
+    limit_per_day = db.IntField(default=DEFAULT_PER_DAY_LIMIT)
+
     limit_per_hour = db.IntField(default=0) #NOT USED
-    limit_interval = db.IntField(default=0) #in seconds
+    limit_interval = db.IntField(default=DEFAULT_INTERVAL) #in seconds
 
     current_daily_counter = db.IntField(default=0)
     current_hourly_counter = db.IntField(default=0) #NOT USED
@@ -141,11 +142,11 @@ class Credentials(db.Document):
         self.last_action = self.next_action
         if self.current_daily_counter >= self.limit_per_day:
             #switch action to the next day
-            self.next_action = self.next_action + timedelta(seconds=NEXT_DAY_SECONDS)
+            self.next_action = now + timedelta(seconds=NEXT_DAY_SECONDS)
             self.current_daily_counter = 0
             self.warmup()
         else:
-            self.next_action = self.next_action + timedelta(seconds=self.limit_interval)        
+            self.next_action = now + timedelta(seconds=self.limit_interval)        
 
     def warmup(self):
         self.limit_per_day = round(self.limit_per_day * 1.3)
@@ -188,20 +189,12 @@ class Campaign(db.Document):
 
     funnel = db.ReferenceField(shared.Funnel)
     
-    sending_days = db.DictField(default={
-        '0' : True,
-        '1' : True,
-        '2' : True, 
-        '3' : True,
-        '4' : True,
-        '5' : False,
-        '6' : False
-    })
-    from_hour = db.IntField()
-    to_hour = db.IntField()
+    sending_days = db.DictField(default=DEFAULT_SENDING_DAYS)
+    from_hour = db.IntField(default=DEFAULT_FROM_HOUR)
+    to_hour = db.IntField(default=DEFAULT_TO_HOUR)
 
-    last_action = db.DateTimeField(default=datetime(1970, 1, 1))
-    next_action = db.DateTimeField(default=datetime(1970, 1, 1))
+    last_action = db.DateTimeField(default=datetime.now())
+    next_action = db.DateTimeField(default=datetime.now())
 
     
     #not used now
@@ -259,12 +252,12 @@ class Campaign(db.Document):
         current_hour = now.hour
         current_day = now.day
 
-        if current_hour >= to_hour:
+        if current_hour >= self.to_hour:
             self.last_action = self.next_action
 
             days_delta = self.days_delta(current_day)
 
-            next_t = self.next_action + timedelta(days=days_delta)
+            next_t = now + timedelta(days=days_delta)
             self.next_action = next_t.replace(hour=self.from_hour, minutes=0)
     
 

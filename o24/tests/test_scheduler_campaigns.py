@@ -307,63 +307,6 @@ class TestScheduler(unittest.TestCase):
             count_queue = len(ids_in_queue)
             self.assertTrue(set(ids_in_queue) == set(new_prospect_ids), "new prospects don't added to TaskQueue campaign_title:{0} count_queue={1}".format(campaign.title, count_queue))
 
-    def test_7_scheduler_loop(self):
-        return 
-        
-        scheduler = SCHEDULER.Scheduler()
-        
-        #PLANNING PHASE
-
-        tasks_before_plan = TaskQueue.get_ready()
-        tasks_ids_before = [t.id for t in tasks_before_plan]
-        count_tasks_ids_before = len(tasks_ids_before)
-        
-        scheduler.plan()
-
-        #check plan phase
-        if tasks_before_plan:
-            #check switch of the funnel phase
-            tasks_after_plan = TaskQueue.objects(Q(id__in=tasks_ids_before) & Q(status=NEW)).all()
-            tasks_ids_after = [t.id for t in tasks_after_plan]
-            count_tasks_ids_after = len(tasks_ids_after)
-            self.assertTrue(set(tasks_ids_before) == set(tasks_ids_after), "Plan error not all tasks switched")
-
-            #Check that all nodes are switched correctly
-            for task_after in tasks_after_plan:
-                found = False
-                for task_before in tasks_before_plan:
-                    if task_before.id == task_after.id:
-                        found = True
-                        node_before = task_before.current_node
-                        result_before = task_before.result_data
-
-                        node_after = task_after.current_node
-
-                        if node_before.check_true(result_before):
-                            self.assertTrue(node_before.if_true == task_after.id, "if_true: Node switch error for task_before.id:{0}".format(task_before.id))
-                        else:
-                            self.assertTrue(node_before.if_false == task_after.id, "if_false: Node switch error for task_before.id:{0}".format(task_before.id))
-
-                        break
-                self.assertTrue(found, "Can't find task_before for task_after")
-       
-
-        #EXECUTING PHASE
-        tasks_before_execute = TaskQueue.get_execute_tasks()
-        tasks_before_execute_ids = [t.id for t in tasks_before_execute]
-        count_tasks_before_execute = len(tasks_before_execute_ids)
-
-        jobs = scheduler.execute()
-
-        if tasks_before_execute:
-            tasks_after_execute = TaskQueue.objects(Q(id__in=tasks_before_execute_ids) & Q(status=IN_PROGRESS)).all()
-            tasks_after_execute_ids = [t.id for t in tasks_after_execute]
-            count_tasks_after_execute = len(tasks_after_execute_ids)
-            self.assertTrue(set(tasks_before_execute_ids) == set(tasks_after_execute_ids), "Execute error not all tasks IN_PROGRESS count_before={0} count_after={1}".format(count_tasks_before_execute, count_tasks_after_execute))
-
-        group_jobs = group(jobs)
-        
-        return group_jobs.apply_async()
 
 
 def setUpModule():

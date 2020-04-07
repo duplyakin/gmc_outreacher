@@ -43,7 +43,7 @@ class TaskLog(db.Document):
     prospect_id = db.ObjectIdField()
     campaign_id = db.ObjectIdField()
 
-    log = db.ListField(TaskQueue())
+    log = db.ListField(db.DictField())
 
     meta = {
         'indexes': [
@@ -62,7 +62,7 @@ class TaskLog(db.Document):
             exist.prospect_id = task.prospect_id
             exist.campaign_id = task.campaign_id
 
-        exist.log.append(task)
+        exist.log.append(task.to_mongo())
         return exist
 
 

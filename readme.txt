@@ -7,12 +7,19 @@ $env:APP_ENV="Test"
 
 #execute all tests in a folder:
 python -m unittest discover -s .\o24\tests\
+
 python -m unittest discover -s .\o24\tests\ -p "*db_entities.py"
+python -m unittest o24.tests.test_scheduler_campaigns.TestScheduler.test_1_start_campaign
+
+
+
 python -m unittest discover -s .\o24\tests\ -p "*mongo_test_lookup.py"
 
 
 python -m unittest discover -s .\o24\tests\ -p "*mongo_updates.py"
-python -m unittest discover -s .\o24\tests\ -p "*test_scheduler.py"
+python -m unittest discover -s .\o24\tests\ -p "*test_scheduler_campaigns.py"
+python -m unittest discover -s .\o24\tests\ -p "*test_scheduler_loop.py"
+
 
 python -m unittest o24.tests.test_scheduler.TestScheduler.test_7_scheduler_loop
 python -m unittest o24.tests.test_mongo_updates.TestBulkUpdates.test_5_taskqueue_methods

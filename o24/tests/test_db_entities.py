@@ -15,6 +15,10 @@ USERS = [
          'data' : { 'email' : 'linkedin1-email', 'password' : 'linkedin1-password'},
          'medium' : 'linkedin'
          },
+   {
+         'data' : { 'special-medium' : 'special-medium'},
+         'medium' : 'special-medium'
+         },
      ]
     },
     {'email' : '2@email.com',
@@ -33,6 +37,10 @@ USERS = [
          'data' : { 'email' : 'linkedin2-email', 'password' : 'linkedin2-password'},
          'medium' : 'linkedin'
          },
+   {
+         'data' : { 'special-medium' : 'special-medium'},
+         'medium' : 'special-medium'
+         },
      ]
     },
     {'email' : '3@email.com',
@@ -46,6 +54,10 @@ USERS = [
          {
          'data' : { 'email' : 'linkedin3-email', 'password' : 'linkedin3-password'},
          'medium' : 'linkedin'
+         },
+   {
+         'data' : { 'special-medium' : 'special-medium'},
+         'medium' : 'special-medium'
          },
      ]
 
@@ -62,6 +74,10 @@ USERS = [
          'data' : { 'email' : 'linkedin4-email', 'password' : 'linkedin4-password'},
          'medium' : 'linkedin'
          },
+   {
+         'data' : { 'special-medium' : 'special-medium'},
+         'medium' : 'special-medium'
+         },
       ]
     },
     
@@ -77,6 +93,10 @@ USERS = [
          'data' : { 'email' : 'linkedin5-email', 'password' : 'linkedin5-password'},
          'medium' : 'linkedin'
          },
+   {
+         'data' : { 'special-medium' : 'special-medium'},
+         'medium' : 'special-medium'
+         },
       ]
     },
     {'email' : '6@email.com',
@@ -90,6 +110,10 @@ USERS = [
          {
          'data' : { 'email' : 'linkedin6-email', 'password' : 'linkedin6-password'},
          'medium' : 'linkedin'
+         },
+   {
+         'data' : { 'special-medium' : 'special-medium'},
+         'medium' : 'special-medium'
          },
       ]
 
@@ -106,6 +130,10 @@ USERS = [
          'data' : { 'email' : 'linkedin7-email', 'password' : 'linkedin7-password'},
          'medium' : 'linkedin'
          },
+   {
+         'data' : { 'special-medium' : 'special-medium'},
+         'medium' : 'special-medium'
+         },
       ]
 
     },
@@ -121,6 +149,10 @@ USERS = [
          'data' : { 'email' : 'linkedin8-email', 'password' : 'linkedin8-password'},
          'medium' : 'linkedin'
          },
+   {
+         'data' : { 'special-medium' : 'special-medium'},
+         'medium' : 'special-medium'
+         },
       ]
     },
     {'email' : '9@email.com',
@@ -134,6 +166,10 @@ USERS = [
          {
          'data' : { 'email' : 'linkedin9-email', 'password' : 'linkedin9-password'},
          'medium' : 'linkedin'
+         },
+         {
+         'data' : { 'special-medium' : 'special-medium'},
+         'medium' : 'special-medium'
          },
       ]
 
@@ -150,6 +186,10 @@ USERS = [
          'data' : { 'email' : 'linkedin10-email', 'password' : 'linkedin10-password'},
          'medium' : 'linkedin'
          },
+         {
+         'data' : { 'special-medium' : 'special-medium'},
+         'medium' : 'special-medium'
+         },         
       ]
 
     }
@@ -216,15 +256,25 @@ ACTIONS = [
         'data' : {
             'what' : 'delay'
         },
-        'medium' : '',
-        'key' : 'delay'
+        'medium' : 'special-medium',
+        'key' : 'delay-linkedin'
     },
+
+     {
+        'action_type' : 1,
+        'data' : {
+            'what' : 'delay'
+        },
+        'medium' : 'special-medium',
+        'key' : 'delay-email'
+    },
+
     {
         'action_type' : 4,
         'data' : {
             'what' : 'FINISHED'
         },
-        'medium' : '',
+        'medium' : 'special-medium',
         'key' : 'finished'
     },
     
@@ -233,7 +283,7 @@ ACTIONS = [
         'data' : {
             'what' : 'SUCCESS'
         },
-        'medium' : '',
+        'medium' : 'special-medium',
         'key' : 'success'
     },
 
@@ -274,7 +324,7 @@ FUNNELS = [
         },
 
         'wait-1' : {
-            'key' : 'delay',
+            'key' : 'delay-linkedin',
             'data' : 10,
             'if_true' : 'check-connect-1'
         },
@@ -292,7 +342,7 @@ FUNNELS = [
                 },
 
                 'wait-2' : {
-                    'key' : 'delay',
+                    'key' : 'delay-linkedin',
                     'data' : 10,
                     'if_true': 'check-reply-1'
                 },
@@ -306,11 +356,11 @@ FUNNELS = [
         'connect-deny-1' : {
             'key' : 'email-send-message',
             'data' : 'hello on email',
-            'if_true' : 'wait-2'
+            'if_true' : 'wait-22'
         },
 
-                'wait-2' : {
-                    'key' : 'delay',
+                'wait-22' : {
+                    'key' : 'delay-email',
                     'data' : 10,
                     'if_true' : 'check-reply-intro'
                 },
@@ -328,7 +378,7 @@ FUNNELS = [
                 },
 
                 'wait-3' : {
-                    'key' : 'delay',
+                    'key' : 'delay-email',
                     'data' : 10,
                     'if_true' : 'check-reply-followup-1'
                 },
@@ -354,25 +404,25 @@ CAMPAIGNS = [
     {
         'title' : 'campaign-1',
         'owner' : '1@email.com',
-        'medium' : ['linkedin', 'email']
+        'medium' : ['linkedin', 'email', 'special-medium']
     },
 
     {
         'title' : 'campaign-2',
         'owner' : '3@email.com',
-        'medium' : ['linkedin', 'email']
+        'medium' : ['linkedin', 'email', 'special-medium']
     }   
 ]
 
 PROSPECTS = [
     {
         'owner' : '1@email.com',
-        'amount' : 100,
+        'amount' : 5,
         'assign_to' : 'campaign-1'
     },
     {
         'owner' : '3@email.com',
-        'amount' : 1000,
+        'amount' : 5,
         'assign_to' : 'campaign-2'
     },
 ]

@@ -1,12 +1,13 @@
 from o24.backend import db
 from o24.backend import app
 from o24.backend.dashboard.models import Campaign, Prospects, Credentials
-from o24.backend.models.shared import TaskQueue
+from o24.backend.models.shared import TaskQueue, Funnel, Action
 from o24.globals import *
 from .models import Priority, TaskLog
 import o24.backend.handlers.jobs_map as jobs_map
 import datetime
-    
+from mongoengine.queryset.visitor import Q
+
 from o24.exceptions.exception_with_code import ErrorCodeException
 from o24.exceptions.error_codes import *
     
@@ -24,16 +25,18 @@ class Scheduler():
         # follow up level = 0(reserve the current followups) 1(execute followup_level=1 until finished)
         
         current_priority = Priority.get_priority()
-        follow_ups = TaskQueue.objects(Q(record_type=FOLLOWUP))
+        follow_ups = TaskQueue.objects(Q(record_type=FOLLOWUP) and Q(status__ne=FINISHED))
     
         #if we don't have followups then we need to execute INTRO
         if follow_ups.count() <= 0:
+            print("follow_ups.count() <= 0")
             current_priority.do_next = INTRO
             current_priority.save()
             return
 
         #switch to INTRO if we did followups on the last round
         if current_priority.do_next == FOLLOWUP:
+            print("current_priority.do_next == FOLLOWUP")
             current_priority.do_next = INTRO
             current_priority.save()
             return
@@ -41,19 +44,22 @@ class Scheduler():
         #switch to followup if we did INTRO on the last round
         if current_priority.do_next == INTRO:
             current_priority.do_next = FOLLOWUP
-            
+            print("current_priority.do_next == INTRO")
+
             # we need to check followup_level
             if current_priority.followup_level == 0:
+                print("current_priority.followup_level == 0")
                 follow_ups.update(followup_level=FOLLOWUP)
                 current_priority.followup_level = 1
                 current_priority.save()
                 return
 
             if follow_ups.filter(followup_level=FOLLOWUP).count() <= 0:
+                print("follow_ups.filter(followup_level=FOLLOWUP).count() <= 0")
                 current_priority.followup_level = 0
                 current_priority.save()
                 return
-
+            current_priority.save()
             return    
     
     def plan(self):
@@ -79,14 +85,12 @@ class Scheduler():
             TaskQueue.update_tasks(for_update)
     
     
-    def execute(self):
+    def execute(self, now):
         current_priority = Priority.get_priority()
-
-        now = datetime.datetime.now()
         do_next = current_priority.do_next
         followup_level = current_priority.followup_level
 
-        tasks = TaskQueue.get_execute_tasks(do_next, followup_level, now)
+        tasks = TaskQueue.get_execute_tasks(do_next=do_next, followup_level=followup_level, now=now)
         
         task_update = []
         credential_update = []
@@ -96,7 +100,7 @@ class Scheduler():
         for task in tasks:
             handler = jobs_map.JOBS_MAP.get(task.action_key, None)
             if not handler:
-                continue
+                raise Exception("There is no handler for key:{0}".format(task.action_key))
             
             job = handler.s(str(task.id))
             jobs.append(job)
@@ -139,7 +143,8 @@ class Scheduler():
         if task.status != READY:
             return None
         
-        next_node = Funnel.next_node(task.current_node)
+        next_node = Funnel.next_node(task.current_node, 
+                                    task.result_data)
         log = TaskLog.create_log(task)
         if next_node:
             task.switch_task(next_node) 
