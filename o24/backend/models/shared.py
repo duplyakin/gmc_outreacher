@@ -89,7 +89,7 @@ class Funnel(db.Document):
     def get_action_key(self):
         return self.action.key
 
-    def chek_true(self, result):
+    def check_true(self, result):
         return self.action.is_true(result)
 
     def update_data(self, data):

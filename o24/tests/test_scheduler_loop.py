@@ -62,15 +62,18 @@ class TestSchedulerLoop(unittest.TestCase):
                             node_after = task_after.current_node
 
                             if node_before.check_true(result_before):
-                                self.assertTrue(node_before.if_true == task_after.id, "if_true: Node switch error for task_before.id:{0}".format(task_before.id))
+                                self.assertTrue(node_before.if_true == task_after.id, 
+                                        "if_true: Node switch error for task_before.id:{0}".format(task_before.id))
                             else:
-                                self.assertTrue(node_before.if_false == task_after.id, "if_false: Node switch error for task_before.id:{0}".format(task_before.id))
+                                self.assertTrue(node_before.if_false == task_after.id, 
+                                        "if_false: Node switch error for task_before.id:{0}".format(task_before.id))
 
                             break
                     self.assertTrue(found, "Can't find task_before for task_after")
 
                 #It means that funnel is broken - check that there is no duplicate keys
-                self.assertTrue(chain_checked, "Chain checked loop didn't start, It means that funnel is broken - check that there is no duplicate keys")
+                if (len(tasks_after_plan)):
+                    self.assertTrue(chain_checked, "Chain checked loop didn't start, It means that funnel is broken - check that there is no duplicate keys tasks_ids_before:{0} tasks_ids_after:{1}".format(tasks_ids_before, tasks_ids_after))
 
             else:
                 print("*** There are no tasks on planning phase")
@@ -103,7 +106,7 @@ class TestSchedulerLoop(unittest.TestCase):
             group_jobs = group(jobs)
             
             group_jobs.apply_async()
-            #time.sleep(0.3)
+            #time.sleep(0.5)
              
             tasks_finished = TaskQueue.objects(status=FINISHED).count()
             print("**** tasks_finished:{0}  tasks_total:{1}".format(tasks_finished, tasks_total))

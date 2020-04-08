@@ -321,12 +321,14 @@ FUNNELS = [
             'key' : 'linkedin-connect',
             'root' : True,
             'if_true' : 'wait-1',
+            'if_false' : 'wait-1',
         },
 
         'wait-1' : {
             'key' : 'delay-linkedin',
             'data' : 10,
-            'if_true' : 'check-connect-1'
+            'if_true' : 'check-connect-1',
+            'if_false' : 'check-connect-1'
         },
 
         'check-connect-1' : {
@@ -338,13 +340,15 @@ FUNNELS = [
                 'connect-approve-1' : {
                     'key' : 'linkedin-send-message',
                     'data' : 'Hello on Linkedin',
-                    'if_true' : 'wait-2'
+                    'if_true' : 'wait-2',
+                    'if_false' : 'wait-2'
                 },
 
                 'wait-2' : {
                     'key' : 'delay-linkedin',
                     'data' : 10,
-                    'if_true': 'check-reply-1'
+                    'if_true': 'check-reply-1',
+                    'if_false': 'check-reply-1'
                 },
 
                 'check-reply-1' : {
@@ -356,13 +360,15 @@ FUNNELS = [
         'connect-deny-1' : {
             'key' : 'email-send-message',
             'data' : 'hello on email',
-            'if_true' : 'wait-22'
+            'if_true' : 'wait-22',
+            'if_false' : 'wait-22'
         },
 
                 'wait-22' : {
                     'key' : 'delay-email',
                     'data' : 10,
-                    'if_true' : 'check-reply-intro'
+                    'if_true' : 'check-reply-intro',
+                    'if_false' : 'check-reply-intro'
                 },
 
                 'check-reply-intro' : {
@@ -374,13 +380,15 @@ FUNNELS = [
                 'email-followup-1' :  {
                     'key' : 'email-send-message',
                     'data' : 'hello on email - follow up 1',
-                    'if_true' : 'wait-3'
+                    'if_true' : 'wait-3',
+                    'if_false' : 'wait-3'
                 },
 
                 'wait-3' : {
                     'key' : 'delay-email',
                     'data' : 10,
-                    'if_true' : 'check-reply-followup-1'
+                    'if_true' : 'check-reply-followup-1',
+                    'if_false' : 'check-reply-followup-1'
                 },
 
                     'check-reply-followup-1' : {
