@@ -35,3 +35,6 @@ DEFAULT_SENDING_DAYS={
 }
 
 
+#MEDIUMS
+GMAIL_TYPE = 'gmail'
+

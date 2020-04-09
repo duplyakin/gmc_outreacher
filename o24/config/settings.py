@@ -43,10 +43,11 @@ class BaseConfig():
 
     #UI specific settings
     PER_PAGE = 10
+    USER_PASSLIB_CRYPTCONTEXT_SCHEMES = ["pbkdf2_sha256"]
 
     #Flask-User customization
-    USER_LOGIN_TEMPLATE = 'login/login.html'
-    USER_REGISTER_TEMPLATE = 'login/register.html'
+    #USER_LOGIN_TEMPLATE = 'login/login.html'
+    #USER_REGISTER_TEMPLATE = 'login/register.html'
 
 
 class DevConfig(BaseConfig):

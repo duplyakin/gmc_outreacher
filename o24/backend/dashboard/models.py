@@ -13,6 +13,8 @@ import traceback
 from werkzeug.security import check_password_hash, generate_password_hash
 from o24.globals import *
 
+from passlib.context import CryptContext
+
 import o24.backend.models.shared as shared
 
 class User(db.Document, UserMixin):
@@ -20,6 +22,7 @@ class User(db.Document, UserMixin):
     password = db.StringField()
 
     active = db.BooleanField(default=True)
+    current_oauth_state = db.StringField()
 
     # Relationships
     roles = db.ListField(db.StringField(), default=[])
@@ -30,8 +33,11 @@ class User(db.Document, UserMixin):
     def create_user(cls, data):
         new_user = cls()
 
+        password_crypt_context = CryptContext(
+            schemes=["pbkdf2_sha256"])
+
         new_user.email = data.get('email')
-        new_user.password = generate_password_hash(data.get('password'))
+        new_user.password = password_crypt_context.hash(data.get('password'))
         new_user.active = data.get('active')
 
         new_user._commit()
@@ -41,6 +47,20 @@ class User(db.Document, UserMixin):
     def get_user(cls, email):
         user = cls.objects(email=email).first()
         return user
+
+
+    def get_oauth_state(self):
+        if not self.current_oauth_state or self.current_oauth_state == '':
+            self.current_oauth_state = self._generate_ouath_state()
+            self._commit()
+        
+        return self.current_oauth_state
+
+    def _generate_ouath_state(self):
+        state = uuid.uuid4().hex
+
+        return state
+
 
     def _commit(self):
         self.save()
@@ -135,6 +155,10 @@ class Credentials(db.Document):
         for e in arr:
             e.save()
         #cls.objects.update(arr)
+
+    def get_data(self):
+        return self.data
+
 
     def change_limits(self, now):
         self.current_daily_counter = self.current_daily_counter + 1

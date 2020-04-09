@@ -192,6 +192,12 @@ USERS = [
          },         
       ]
 
+    },
+    {
+        'email' : '11@email.com',
+        'password' : 'password11',
+        'active' : True,
+        'credentials' : []
     }
 ]
 
@@ -435,6 +441,22 @@ PROSPECTS = [
     },
 ]
 
+
+GOOGLE_APP_SETTINGS = [{
+    'title': 'Outreacher24 - web app credentials - development local',
+    'credentials': {"web":{"client_id":"606646624276-qcedt5p3vdad7h6aie2l5s75mg59at7t.apps.googleusercontent.com","project_id":"outreacher24","auth_uri":"https://accounts.google.com/o/oauth2/auth","token_uri":"https://oauth2.googleapis.com/token","auth_provider_x509_cert_url":"https://www.googleapis.com/oauth2/v1/certs","client_secret":"Gn-M_96r8PTML9SQaLxAqqWD","redirect_uris":["http://127.0.0.1:5000/oauth/callback"],"javascript_origins":["http://127.0.0.1:5000"]}},
+    'redirect_uri': 'http://127.0.0.1:5000/oauth/callback',
+
+    'gmail_scopes': ['https://www.googleapis.com/auth/gmail.send'],
+    'gmail_access_type': 'offline',
+    'gmail_include_granted_scopes': 'true',
+
+    'gmail_api_name': 'gmail',
+    'gmail_api_version': 'v1',
+
+    'active' : True
+}]
+
 import unittest
 import os
 import o24.config as config
@@ -444,6 +466,7 @@ from o24.backend import db
 from o24.backend.models.shared import Action, Funnel
 from o24.backend.utils.funnel import construct_funnel
 
+from o24.backend.google.models import GoogleAppSetting
 
 class TestUsersCampaignsProspects(unittest.TestCase):
     def setUp(self):
@@ -537,6 +560,28 @@ class TestUsersCampaignsProspects(unittest.TestCase):
                 new_prospect = Prospects.create_prospect(owner_id=owner.id,
                                                         campaign_id=campaign.id)
                 self.assertTrue(new_prospect is not None, "Can't create prospect")
+
+    def test_8_create_google_app_settings(self):
+
+        for setting in GOOGLE_APP_SETTINGS:
+            s = GoogleAppSetting()
+
+            s.title = setting.get('title')
+            s.credentials = setting.get('credentials')
+            s.redirect_uri = setting.get('redirect_uri')
+
+            s.gmail_scopes = setting.get('gmail_scopes')
+            s.gmail_access_type = setting.get('gmail_access_type')
+            s.gmail_include_granted_scopes = setting.get('gmail_include_granted_scopes')
+
+            s.gmail_api_name = setting.get('gmail_api_name')
+            s.gmail_api_version = setting.get('gmail_api_version')
+
+            s.active = setting.get('active')
+
+            s.save()
+
+
 
 def setUpModule():
     env = os.environ.get('APP_ENV', None)
