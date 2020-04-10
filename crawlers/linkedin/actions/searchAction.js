@@ -6,17 +6,15 @@ export class SearchAction {
     this.searchUrl = searchUrl;
     this.pageNum = pageNum;
 
-    this._cookies = cookies;
+    this.cookies = JSON.parse(cookies);
   }
-
-  cookies() {
-      return this._cookies
-    }
 
   async function startBrowser() {
     //this.browser = await puppeteer.launch({ headless: false });
     this.browser = await puppeteer.launch();
     this.context = await this.browser.createIncognitoBrowserContext();
+    this.page = await this.context.newPage();
+    await page.setCookie(...this.cookies);
   }
 
   async function closeBrowser(browser) {
@@ -24,9 +22,8 @@ export class SearchAction {
   }
 
   async function search() {
-    const page = await this.context.newPage();
 
-    await page.goto(this.searchUrl);
+    await this.page.goto(this.searchUrl);
     let currentPage = 1;
     let currentPageLink = this.searchUrl;
     if(!this.searchUrl.includes('&page='))
@@ -37,7 +34,7 @@ export class SearchAction {
     }
     let data = [];
     while (currentPage <= this.pageNum) {
-        let newData = await page.evaluate(() => {
+        let newData = await this.page.evaluate(() => {
           let results = [];
           let items = document.querySelectorAll(selectors.SEARCH_ELEMENT_SELECTOR);
           items.forEach((item) => {
@@ -54,7 +51,7 @@ export class SearchAction {
         currentPage++;
         currentPageLink = currentPageLink.slice(0, -1) + currentPage.toString(); // add page number to the link, works for first 9 pages...
 
-        await page.goto(currentPageLink);
+        await this.page.goto(currentPageLink);
     }
 
     //console.log("..... User Data: .....", data)

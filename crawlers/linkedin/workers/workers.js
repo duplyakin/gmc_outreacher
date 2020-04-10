@@ -1,56 +1,41 @@
-const puppeteer = require("./node_modules/puppeteer");
-const links = require(__dirname + "/./links");
-
 import LoginAction from __dirname  + "/./actions/loginAction.js"
 import SearchAction from __dirname  + "/./actions/searchAction.js"
 import ConnectAction from __dirname  + "/./actions/connectAction.js"
 
-class LoginWorker {
-  constructor(task) {
-    this.email = task.email;
-    this.password = task.password;
 
-    this._cookies = task.cookies;
-  }
+async function loginWorker(task) {
+  let email = task.email;
+  let password = task.password;
+  let cookies = task.cookies;
 
-  async function login() {
-    let loginAction = LoginAction(this.email, this.password, this.cookies);
-    await loginAction.startBrowser();
-    await loginAction.login();
-    await loginAction.closeBrowser();
-  }
+  let loginAction = LoginAction(email, password, cookies);
+  await loginAction.startBrowser();
+  await loginAction.login();
+  await loginAction.closeBrowser();
+
 }
 
-class SearchWorker {
-  constructor(task) {
-    this.searchUrl = task.searchUrl;
-    this.pageNum = task.pageNum;
+async function searchWorker(task) {
+  let searchUrl = task.searchUrl;
+  let pageNum = task.pageNum;
+  let cookies = task.cookies;
 
-    this._cookies = task.cookies;
-  }
+  let searchAction = SearchAction(searchUrl, pageNum, cookies);
+  await searchAction.startBrowser();
+  let data = await searchAction.search();
+  await searchAction.closeBrowser();
 
-  async function search() {
-    let searchAction = SearchAction(this.searchUrl, this.pageNum, this.cookies);
-    await searchAction.startBrowser();
-    let data = await searchAction.search();
-    await searchAction.closeBrowser();
-
-    return data;
-  }
+  return data;
 }
 
-class ConnectWorker {
-  constructor(task) {
-    this.connecthUrl = task.connecthUrl;
-    this.text = task.text;
+async function connectWorker(task) {
+  let connecthUrl = task.connecthUrl;
+  let text = task.text;
+  let cookies = task.cookies;
 
-    this._cookies = task.cookies;
-  }
+  let connectAction = ConnectAction(connecthUrl, text, cookies);
+  await connectAction.startBrowser();
+  await connectAction.connect();
+  await connectAction.closeBrowser();
 
-  async function connect() {
-    let connectAction = ConnectAction(this.connecthUrl, this.text, this.cookies);
-    await connectAction.startBrowser();
-    await connectAction.connect();
-    await connectAction.closeBrowser();
-  }
 }

@@ -6,17 +6,15 @@ export class ConnectAction {
     this.connecthUrl = connecthUrl;
     this.text = text;
 
-    this._cookies = cookies;
+    this.cookies = JSON.parse(cookies);
   }
-
-  cookies() {
-      return this._cookies
-    }
 
   async function startBrowser() {
     //this.browser = await puppeteer.launch({ headless: false });
     this.browser = await puppeteer.launch();
     this.context = await this.browser.createIncognitoBrowserContext();
+    this.page = await this.context.newPage();
+    await page.setCookie(...this.cookies);
   }
 
   async function closeBrowser(browser) {
@@ -24,14 +22,12 @@ export class ConnectAction {
   }
 
   async function connect() {
-    const page = await this.context.newPage();
-
-    await page.goto(url);
-    await page.click(selectors.CONNECT_SELECTOR);
+    await this.page.goto(this.connecthUrl);
+    await this.page.click(selectors.CONNECT_SELECTOR);
     //await page.waitForNavigation();
-    await page.click(selectors.ADD_MSG_BTN_SELECTOR);
-    await page.click(selectors.MSG_SELECTOR);
-    await page.keyboard.type(this.text);
-    await page.click(selectors.SEND_INVITE_TEXT_BTN_SELECTOR);
+    await this.page.click(selectors.ADD_MSG_BTN_SELECTOR);
+    await this.page.click(selectors.MSG_SELECTOR);
+    await this.page.keyboard.type(this.text);
+    await this.page.click(selectors.SEND_INVITE_TEXT_BTN_SELECTOR);
   }
 }
