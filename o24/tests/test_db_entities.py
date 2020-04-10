@@ -447,7 +447,7 @@ GOOGLE_APP_SETTINGS = [{
     'credentials': {"web":{"client_id":"606646624276-qcedt5p3vdad7h6aie2l5s75mg59at7t.apps.googleusercontent.com","project_id":"outreacher24","auth_uri":"https://accounts.google.com/o/oauth2/auth","token_uri":"https://oauth2.googleapis.com/token","auth_provider_x509_cert_url":"https://www.googleapis.com/oauth2/v1/certs","client_secret":"Gn-M_96r8PTML9SQaLxAqqWD","redirect_uris":["http://127.0.0.1:5000/oauth/callback"],"javascript_origins":["http://127.0.0.1:5000"]}},
     'redirect_uri': 'http://127.0.0.1:5000/oauth/callback',
 
-    'gmail_scopes': ['https://www.googleapis.com/auth/gmail.send'],
+    'gmail_scopes': ['https://www.googleapis.com/auth/gmail.send', 'https://www.googleapis.com/auth/gmail.modify'],
     'gmail_access_type': 'offline',
     'gmail_include_granted_scopes': 'true',
 

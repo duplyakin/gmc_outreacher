@@ -3,7 +3,8 @@ import base64
 import email
 from o24.backend import app
 from apiclient import errors
-
+import base64
+import email
 from o24.backend.google.service.api import GoogleApiService
 
 class GmailApiProvider():
@@ -145,6 +146,17 @@ class GmailApiProvider():
 
         return message
 
+
+    def get_mime_message(self, msg_id, user_id='me', format='raw'):
+            message = self.service.users().messages().get(userId=user_id, 
+                                                        id=msg_id,
+                                                        format=format).execute()
+
+            msg_str = base64.urlsafe_b64decode(message['raw']).decode()
+
+            mime_msg = email.message_from_string(msg_str)
+
+            return mime_msg
 
     def watch(self, user_id, request):
         response = self.service.users().watch(userId=user_id, 

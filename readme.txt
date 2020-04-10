@@ -4,6 +4,7 @@ https://realpython.com/python-testing/
 #Setup TEST Envirnment
 $env:APP_ENV="Test"
 
+python -m o24.tests.run_flask_server
 
 #execute all tests in a folder:
 python -m unittest discover -s .\o24\tests\
@@ -46,3 +47,17 @@ http://docs.celeryproject.org/en/latest/django/first-steps-with-django.html#usin
 #start celery worker
 #logic explained here: https://blog.miguelgrinberg.com/post/celery-and-the-flask-application-factory-pattern
 celery -A o24.backend.handlers.worker_start.celery worker -E -l info -P gevent
+
+
+#SOLUTION for flagged emails:
+https://stackoverflow.com/questions/56548494/emails-sent-using-gmail-api-are-being-flagged-as-phishy-by-gmail
+"Emails sent using Gmail API are being flagged as phishy by Gmail"
+https://mediatemple.net/community/products/googleapps/204645590/configuring-the-%22send-mail-as%22-feature-in-g-suite
+https://developers.google.com/gmail/imap/xoauth2-protocol - SMTP Oauth authentication
+https://github.com/google/gmail-oauth2-tools/blob/master/python/oauth2.py - SMTP python usage example
+
+<img width=3D"1" height=3D"1" style=3D"display: block;" alt=3D"" src=3D"h=
+ttps://via.smartreach-mail.com/ot2/ge2tgnbxhe3dk=3D=3D=3D/open">
+
+Send with images:
+https://stackoverflow.com/questions/19171742/send-e-mail-to-gmail-with-inline-image-using-python
