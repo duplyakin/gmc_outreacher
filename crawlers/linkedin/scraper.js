@@ -63,7 +63,7 @@ async function loginLinked(browserGlobal, pageGlobal, url) {
 
   let is_phone = await check_phone_page(page);
   if (is_phone){
-      await this.skip_phone(page);
+      await skip_phone(page);
   }
   // Save Session Cookies
   //newCookies = await page.cookies();

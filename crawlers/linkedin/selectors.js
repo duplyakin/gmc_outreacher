@@ -1,0 +1,24 @@
+// login
+module.exports.USERNAME_SELECTOR = '#username';
+module.exports.PASSWORD_SELECTOR = '#password';
+module.exports.CTA_SELECTOR = '#app__container > main > div > form > div.login__form_action_container > button';
+
+// search
+module.exports.SEARCH_ELEMENT_SELECTOR = '.search-result__wrapper .search-result__info a';
+module.exports.LINK_SELECTOR = 'span > .actor-name';
+module.exports.FULL_NAME_SELECTOR = 'span > .actor-name';
+
+// connect
+module.exports.CONNECT_SELECTOR = '.pv-s-profile-actions.pv-s-profile-actions--connect';
+module.exports.ADD_MSG_BTN_SELECTOR = '.mr1.artdeco-button.artdeco-button--muted';
+module.exports.MSG_SELECTOR = '#custom-message';
+module.exports.SEND_INVITE_TEXT_BTN_SELECTOR = '.ml1.artdeco-button.artdeco-button--3.artdeco-button--primary.ember-view';
+
+// follow
+module.exports.MORE_BTN_SELECTOR = '.ml2.pv-s-profile-actions__overflow-toggle';
+module.exports.FOLLOW_SELECTOR = '.pv-s-profile-actions.pv-s-profile-actions--follow';
+
+// phone form
+module.exports.SKIP_PHONE_FORM_SELECTOR = '.linkedin_phone_skip_div';
+module.exports.SKIP_PHONE_PAGE_SELECTOR = '.linkedin_phone_url';
+module.exports.SKIP_PHONE_BTN_SELECTOR = '.linkedin_phone_skip_button';
