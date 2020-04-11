@@ -22,21 +22,17 @@ export class SearchAction {
   }
 
   async function search() {
-
     await this.page.goto(this.searchUrl);
+    await this.page.waitForNavigation();
+
     let currentPage = 1;
-    let currentPageLink = this.searchUrl;
-    if(!this.searchUrl.includes('&page='))
-      currentPageLink = this.searchUrl + '&page=1';
-    else {
-      let i = this.searchUrl.indexOf('&page='); // todo: if there pages like 11, 123, 1234 - it will not work, juat for first 9 pages
-      currentPage = this.searchUrl.charAt(i + 6);
-    }
     let data = [];
     while (currentPage <= this.pageNum) {
         let newData = await this.page.evaluate(() => {
+
           let results = [];
           let items = document.querySelectorAll(selectors.SEARCH_ELEMENT_SELECTOR);
+
           items.forEach((item) => {
               if(item.querySelector(selectors.LINK_SELECTOR) !== null)
                 results.push({
@@ -49,12 +45,36 @@ export class SearchAction {
         data = data.concat(newData);
 
         currentPage++;
-        currentPageLink = currentPageLink.slice(0, -1) + currentPage.toString(); // add page number to the link, works for first 9 pages...
 
-        await this.page.goto(currentPageLink);
+        await autoScroll(this.page);
+
+        await page.waitForSelector(selectors.NEXT_PAGE_SELECTOR);
+        await page.click(selectors.NEXT_PAGE_SELECTOR);
+
+        await this.page.waitForNavigation();
     }
 
     //console.log("..... User Data: .....", data)
     return data;
   }
+
+  async function autoScroll(page) {
+      await page.evaluate(async () => {
+          await new Promise((resolve, reject) => {
+              var totalHeight = 0;
+              var distance = 100;
+              var timer = setInterval(() => {
+                  var scrollHeight = document.body.scrollHeight;
+                  window.scrollBy(0, distance);
+                  totalHeight += distance;
+
+                  if(totalHeight >= scrollHeight) {
+                      clearInterval(timer);
+                      resolve();
+                  }
+              }, 100);
+          });
+      });
+  }
+
 }

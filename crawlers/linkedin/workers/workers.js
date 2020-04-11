@@ -11,7 +11,7 @@ async function loginWorker(task) {
   let loginAction = LoginAction(email, password, cookies);
   await loginAction.startBrowser();
   await loginAction.login();
-  await loginAction.closeBrowser();
+  //await loginAction.closeBrowser();
 
 }
 

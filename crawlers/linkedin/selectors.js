@@ -7,6 +7,7 @@ module.exports.CTA_SELECTOR = '#app__container > main > div > form > div.login__
 module.exports.SEARCH_ELEMENT_SELECTOR = '.search-result__wrapper .search-result__info a';
 module.exports.LINK_SELECTOR = 'span > .actor-name';
 module.exports.FULL_NAME_SELECTOR = 'span > .actor-name';
+module.exports.NEXT_PAGE_SELECTOR = '.artdeco-pagination__button--next';
 
 // connect
 module.exports.CONNECT_SELECTOR = '.pv-s-profile-actions.pv-s-profile-actions--connect';
@@ -22,3 +23,8 @@ module.exports.FOLLOW_SELECTOR = '.pv-s-profile-actions.pv-s-profile-actions--fo
 module.exports.SKIP_PHONE_FORM_SELECTOR = '.linkedin_phone_skip_div';
 module.exports.SKIP_PHONE_PAGE_SELECTOR = '.linkedin_phone_url';
 module.exports.SKIP_PHONE_BTN_SELECTOR = '.linkedin_phone_skip_button';
+
+// message
+module.exports.WRITE_MSG_BTN_SELECTOR = '.message-anywhere-button'';
+module.exports.MSG_BOX_SELECTOR = '.msg-form__msg-content-container';
+module.exports.SEND_MSG_BTN_SELECTOR = '.msg-form__send-button';

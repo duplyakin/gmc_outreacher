@@ -26,14 +26,13 @@ export class LoginAction {
   async function login() {
 
     await this.page.goto(this.login_url);
-    //await page.waitForSelector(selectors.login_form); // TODO
+    await this.page.waitForNavigation();
 
     await this.page.click(selectors.USERNAME_SELECTOR);
     await this.page.keyboard.type(this.email);
     await this.page.click(selectors.PASSWORD_SELECTOR);
     await this.page.keyboard.type(this.password);
     await this.page.click(selectors.CTA_SELECTOR);
-    await this.page.waitForNavigation();
 
     let is_phone = await this.check_phone_page(this.page);
     if (is_phone) {
