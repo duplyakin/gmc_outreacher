@@ -28,3 +28,7 @@ module.exports.SKIP_PHONE_BTN_SELECTOR = '.linkedin_phone_skip_button';
 module.exports.WRITE_MSG_BTN_SELECTOR = '.message-anywhere-button'';
 module.exports.MSG_BOX_SELECTOR = '.msg-form__msg-content-container';
 module.exports.SEND_MSG_BTN_SELECTOR = '.msg-form__send-button';
+
+// scribe work link
+module.exports.JOB_LINK_SELECTOR = 'a.full-width.ember-view';
+module.exports.JOB_SITE_SELECTOR = '.link-without-visited-state';

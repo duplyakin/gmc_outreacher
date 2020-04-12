@@ -14,7 +14,7 @@ export class MessageAction {
     this.browser = await puppeteer.launch();
     this.context = await this.browser.createIncognitoBrowserContext();
     this.page = await this.context.newPage();
-    await page.setCookie(...this.cookies);
+    await this.page.setCookie(...this.cookies);
   }
 
   async function closeBrowser(browser) {
@@ -25,13 +25,13 @@ export class MessageAction {
     const page = await this.context.newPage();  // feature
 
     await page.goto(this.profileUrl);
-    await this.page.waitForNavigation();
+    //await page.waitForNavigation();
 
     await page.click(selectors.WRITE_MSG_BTN_SELECTOR);
 
     await page.waitForSelector(selectors.MSG_BOX_SELECTOR);
     await page.click(selectors.MSG_BOX_SELECTOR);
-    
+
     await page.keyboard.type(this.text);
     await page.waitForSelector(selectors.SEND_MSG_BTN_SELECTOR);
     await page.waitFor(1000); // wait untill SEND button become active

@@ -16,7 +16,7 @@ export class LoginAction {
     this.browser = await puppeteer.launch();
     this.context = await this.browser.createIncognitoBrowserContext();
     this.page = await this.context.newPage();
-    await page.setCookie(...this.cookies);
+    await this.page.setCookie(...this.cookies);
   }
 
   async function closeBrowser(browser) {

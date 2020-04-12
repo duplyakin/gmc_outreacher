@@ -14,7 +14,7 @@ export class SearchAction {
     this.browser = await puppeteer.launch();
     this.context = await this.browser.createIncognitoBrowserContext();
     this.page = await this.context.newPage();
-    await page.setCookie(...this.cookies);
+    await this.page.setCookie(...this.cookies);
   }
 
   async function closeBrowser(browser) {
@@ -28,7 +28,7 @@ export class SearchAction {
     let currentPage = 1;
     let data = [];
     while (currentPage <= this.pageNum) {
-        let newData = await this.page.evaluate(() => {
+        let newData = await this.page.evaluate((selectors.SEARCH_ELEMENT_SELECTOR, selectors.LINK_SELECTOR, selectors.FULL_NAME_SELECTOR) => {
 
           let results = [];
           let items = document.querySelectorAll(selectors.SEARCH_ELEMENT_SELECTOR);
@@ -41,7 +41,7 @@ export class SearchAction {
                 });
           });
           return results;
-        });
+        }, selectors.SEARCH_ELEMENT_SELECTOR, selectors.LINK_SELECTOR, selectors.FULL_NAME_SELECTOR);
         data = data.concat(newData);
 
         currentPage++;
