@@ -133,6 +133,8 @@ class TaskQueue(db.Document):
     record_type = db.IntField(default=0)
     followup_level = db.IntField(default=0)
 
+    js_action = db.BooleanField(default=False)
+
     def switch_task(self, next_node):
         
         #init to 0
@@ -282,3 +284,21 @@ class TaskQueue(db.Document):
 
     def _commit(self):
         self.save()
+
+
+class AsyncActions(db.Document):
+    #open, reply
+    action_type = db.IntField()
+    
+    count = db.IntField()    
+    
+    #email, linkedin, twitter
+    medium = db.StringField()
+
+    #based on medium, check different tables: Mailbox, Linkedin, Twitter
+    ref = db.ObjectIdField()
+
+    action_meta = db.DictField()
+
+    created = db.DateTimeField( default=datetime.datetime.now() )
+

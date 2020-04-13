@@ -61,3 +61,68 @@ ttps://via.smartreach-mail.com/ot2/ge2tgnbxhe3dk=3D=3D=3D/open">
 
 Send with images:
 https://stackoverflow.com/questions/19171742/send-e-mail-to-gmail-with-inline-image-using-python
+
+How Gmail threading works:
+http://www.sensefulsolutions.com/2010/08/how-does-email-threading-work-in-gmail.html
+
+
+
+How to work with images:
+    def create_multipart_message(self, 
+                                email_from, 
+                                email_to, 
+                                subject, 
+                                html_version, 
+                                plain_version,
+                                thread_id=None,
+                                msgId=None,
+                                image_data=None):
+        # Create the root message and fill in the from, to, and subject headers
+        msgRoot = MIMEMultipart('related')
+        msgRoot['subject'] = subject
+        msgRoot['from'] = email_from
+        msgRoot['to'] = email_to
+        if msgId:
+            msgRoot.add_header('Reference', msgId)
+            msgRoot.add_header('In-Reply-To', msgId)
+
+
+        #msgRoot.preamble = 'This is a multi-part message in MIME format.'
+
+        msgAlternative = MIMEMultipart('alternative')
+        msgRoot.attach(msgAlternative)
+
+        msgText = MIMEText(plain_version, 'plain', 'utf-8')
+        msgAlternative.attach(msgText)
+
+        msg_html = None
+        if image_data:
+            msg_html = MIMEText(html_version.format(alt=html.escape(image_data['title'], quote=True), 
+                                                cid=image_data['cid']), 'html', 'utf-8')
+        else:
+            msg_html = MIMEText(html_version, 'html', 'utf-8')
+
+        msgAlternative.attach(msg_html)
+        
+        if image_data:
+            msg_image = MIMEImage(image_data.get('raw'))
+            msg_image.add_header('Content-ID', '<{}>'.format(image_data['cid']))
+            msgRoot.attach(msg_image)
+
+        raw_message = {'raw': base64.urlsafe_b64encode(msgRoot.as_string().encode()).decode()}
+        if thread_id:
+            raw_message['threadId'] = thread_id
+        
+        return raw_message
+
+
+https://github.com/charlierguo/gmail/blob/master/gmail/gmail.py
+
+Use to search messages: rfc822msgid:9db8b174-b5f7-8253-8c79-defc35f68443@mixmax.com 
+https://developers.google.com/gmail/api/guides/filtering
+
+Generate your own message-ID
+https://stackoverflow.com/questions/22939035/how-to-get-message-id-of-email-sent-from-smtplib
+
+Peoples API:
+https://developers.google.com/people/v1/read-people

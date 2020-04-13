@@ -21,6 +21,7 @@ import smtplib
 import base64
 from o24.tests.email_messages import * 
 import uuid
+from o24.backend.google.provider.gmail_smtp_provider import GmailSmtpProvider
 
 USER_EMAIL = '11@email.com'
 EMAIL_FROM = 'ks.shilov@howtotoken.com'
@@ -48,7 +49,7 @@ class TestGmailSend(unittest.TestCase):
         pass
     
     def test_1_send_GSUITE_email(self):
- 
+        return
         email = USER_EMAIL
 
         user = User.get_user(email=email)
@@ -103,7 +104,6 @@ class TestGmailSend(unittest.TestCase):
         print(res)
 
     def test_2_send_SMTP_email(self):
-        return
         email = USER_EMAIL
 
         user = User.get_user(email=email)
@@ -119,9 +119,6 @@ class TestGmailSend(unittest.TestCase):
         gmail = data.get('email')
         self.assertTrue(access_credentials, "access_credentials not found gmail:{0}".format(data.get('email', None)))
         self.assertTrue(gmail, "email from data empty:{0}".format(gmail))
-
-        mailbox = MailBox()
-        mailbox.save()
 
         user_email = 'ks.shilov@gmail.com'
         auth_string = GenerateOAuth2String(user_email, access_token, base64_encode=False)
@@ -139,7 +136,7 @@ class TestGmailSend(unittest.TestCase):
         msg = header + '\n this is test msg from me \n\n'
         smtp_conn.sendmail('ks.shilov@gmail.com', ['ks.shilov@howtotoken.com', 'ks.shilov@gmail.com','ks.shilov@outreacher24.com'], msg)
 
-
+        print(smtp_conn.data)
         #gmail_controller = GmailController(mailbox=mailbox,
         #                                   credentials=access_credentials)
                                     
@@ -154,6 +151,43 @@ class TestGmailSend(unittest.TestCase):
         #res = gmail_controller.send_email(message=message_data)
         #print(res)
 
+    def test_3_send_YAG_email(self):
+        return
+        email = USER_EMAIL
+
+        user = User.get_user(email=email)
+        self.assertTrue(user, "user not found email:{0}".format(email))
+
+        credentials = Credentials.get_credentials(user_id=user.id, medium='email')
+        self.assertTrue(credentials, "credentials not found email:{0}".format(email))
+
+        data = credentials.get_data()
+        access_credentials = data.get('credentials')
+
+        gmail = data.get('email')
+        self.assertTrue(access_credentials, "access_credentials not found gmail:{0}".format(data.get('email', None)))
+        self.assertTrue(gmail, "email from data empty:{0}".format(gmail))
+
+        subject = "1111 Invite to Hacker Noon roundup - for howtotoken.com"
+        email_to = 'ksshilov@yandex.ru'
+
+        gmail_controller = GmailController(email=gmail,
+                                            credentials=access_credentials,
+                                            smtp=True)
+
+        message = gmail_controller.create_multipart_message( 
+                                            email_from=gmail,
+                                            email_to=email_to,
+                                            subject=subject,
+                                            plain_version=EMAIL_TEXT_1_PLAIN,
+                                            html_version=EMAIL_TEXT_1_HTML)
+
+        self.assertTrue(message, "Empty message:{0}".format(message))
+
+        res = gmail_controller.send_message(email_to=email_to,
+                                            message=message)
+
+        print(res)
 
 def setUpModule():
     env = os.environ.get('APP_ENV', None)

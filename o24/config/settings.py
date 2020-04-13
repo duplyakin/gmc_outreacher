@@ -49,6 +49,8 @@ class BaseConfig():
     #USER_LOGIN_TEMPLATE = 'login/login.html'
     #USER_REGISTER_TEMPLATE = 'login/register.html'
 
+    GMAIL_SMTP_HOST = 'smtp.gmail.com'
+    GMAIL_SMTP_PORT = 587
 
 class DevConfig(BaseConfig):
     FLASK_ENV = 'development'

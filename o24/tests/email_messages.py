@@ -3,8 +3,7 @@ Hi there
 
 Hope you are doing well.
 
-The Hackernoon deadline is this week - do you want to participate? If so, c=
-ould you send your quote till tomorrow?
+The Hackernoon deadline is this week - do you want to participate? If so, could you send your quote till tomorrow?
 
 Here are upcoming:
 1. Which top 3 industries will dominate blockchain tech utilization by the =
@@ -12,26 +11,21 @@ end of 2020, why? (for hackernoon - $220) - answer till 11-March
 2. How can blockchain improve online businesses in 2020? (Tell us about you=
 r niche) (for ambcrypto -$190) - answer till 14-March
 
-If you participate to both I will give you a 20% discount, so total will be=
-: $328
+If you participate to both I will give you a 20% discount, so total will be: $328
 
-Roundup BackLinks works really great in Terms of ranking on google, here is=
- a reference from Mateusz from Alephzero:
-"...Overall we went 4 positions up in the rankings, so it seems to be worki=
-ng :) And considering this as a display ad that has been seen by 7k people,=
+Roundup BackLinks works really great in Terms of ranking on google, here is a reference from Mateusz from Alephzero:
+"...Overall we went 4 positions up in the rankings, so it seems to be working :) And considering this as a display ad that has been seen by 7k people,=
  we're quite happy with the results..."
 
+To participate, send your quote or questions in reply to this email.
 
-To participate, send your quote or questions in reply to this email.=20
-
-For faster communication, I=E2=80=99m happy to chat on telegram: @ksshilov
-
+For faster communication, will be happy to chat on telegram: @ksshilov
 
 Have a great week.
 
 Kirill Shilov,
-Hackernoon.com contributor (https://hackernoon.com/@ks.shilov)=20
-Telegram: @ksshilov=20
+Hackernoon.com contributor (https://hackernoon.com/@ks.shilov)
+Telegram: @ksshilov
 Linkedin: https://www.linkedin.com/in/kirill-shilov-25aa8630/
 '''
 
@@ -49,7 +43,6 @@ EMAIL_TEXT_2_HTML = '''
  so, could you send your quote till tomorrow?
   <br>
   <br>
-  <img src="cid:{cid}" alt="{alt}">  
 <strong>Here are upcoming:</strong>
   <br>Have a great week.
   <br>
@@ -75,7 +68,6 @@ EMAIL_TEXT_1_HTML = '''
  so, could you send your quote till tomorrow?
   <br>
   <br>
-  <img src="cid:{cid}" alt="{alt}">  
 <strong>Here are upcoming:</strong>
   <br>1.&nbsp;
   <span style="color: #e74c3c;">Which top 3 industries will dominate blockchain tech utilization by the end of 2020, why?&nbsp;</span>(for hackernoo=
