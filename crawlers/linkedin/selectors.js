@@ -32,3 +32,7 @@ module.exports.SEND_MSG_BTN_SELECTOR = '.msg-form__send-button';
 // scribe work link
 module.exports.JOB_LINK_SELECTOR = 'a.full-width.ember-view';
 module.exports.JOB_SITE_SELECTOR = '.link-without-visited-state';
+
+// connect check
+module.exports.SEARCH_CONNECTS_SELECTOR = '#mn-connections-search-input';
+module.exports.CONNECTOR_SELECTOR = 'span.mn-connection-card__name';
