@@ -25,9 +25,10 @@ module.exports.SKIP_PHONE_PAGE_SELECTOR = '.linkedin_phone_url';
 module.exports.SKIP_PHONE_BTN_SELECTOR = '.linkedin_phone_skip_button';
 
 // message
-module.exports.WRITE_MSG_BTN_SELECTOR = '.message-anywhere-button'';
+module.exports.WRITE_MSG_BTN_SELECTOR = '.message-anywhere-button';
 module.exports.MSG_BOX_SELECTOR = '.msg-form__msg-content-container';
 module.exports.SEND_MSG_BTN_SELECTOR = '.msg-form__send-button';
+module.exports.LAST_MSG_SELECTOR = '.msg-s-event-listitem__link';
 
 // scribe work link
 module.exports.JOB_LINK_SELECTOR = 'a.full-width.ember-view';
