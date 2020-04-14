@@ -28,6 +28,9 @@ EMAIL_FROM = 'ks.shilov@howtotoken.com'
 EMAIL_TO = 'ks.shilov@gmail.com'
 IMAGE_PATH = './i1.png'
 
+def is_ascii(s):            
+    return all(ord(c) < 128 for c in s)
+
 def GenerateOAuth2String(username, access_token, base64_encode=True):
     """Generates an IMAP OAuth2 authentication string.
     See https://developers.google.com/google-apps/gmail/oauth2_overview
@@ -104,6 +107,7 @@ class TestGmailSend(unittest.TestCase):
         print(res)
 
     def test_2_send_SMTP_email(self):
+        return
         email = USER_EMAIL
 
         user = User.get_user(email=email)
@@ -152,6 +156,95 @@ class TestGmailSend(unittest.TestCase):
         #print(res)
 
     def test_3_send_YAG_email(self):
+        email = USER_EMAIL
+
+        user = User.get_user(email=email)
+        self.assertTrue(user, "user not found email:{0}".format(email))
+
+        credentials = Credentials.get_credentials(user_id=user.id, medium='email')
+        self.assertTrue(credentials, "credentials not found email:{0}".format(email))
+
+        data = credentials.get_data()
+        access_credentials = data.get('credentials')
+
+        gmail = data.get('email')
+        self.assertTrue(access_credentials, "access_credentials not found gmail:{0}".format(data.get('email', None)))
+        self.assertTrue(gmail, "email from data empty:{0}".format(gmail))
+
+        subject = "!!!!! Привет Кирилл Invite to Hacker Noon roundup - for howtotoken.com"
+        email_to = 'ks.shilov@howtotoken.com'
+
+        gmail_controller = GmailController(email=gmail,
+                                            credentials=access_credentials,
+                                            smtp=True)
+
+        message = gmail_controller.create_multipart_message( 
+                                            email_from=gmail,
+                                            email_to=email_to,
+                                            subject=subject,
+                                            plain_version=EMAIL_TEXT_1_PLAIN,
+                                            html_version=EMAIL_TEXT_1_HTML)
+        
+        msgId, message = gmail_controller.add_header_msgId(message)
+        self.assertTrue(msgId, "msgId generation error:{0}".format(msgId))
+
+        res = gmail_controller.send_message(email_to=email_to,
+                                            message=message)
+        
+        self.assertTrue(not res, "gmail_controller.send_message error:{0}".format(res))
+
+        mailbox_id = None
+        prospect_id = Prospects.objects().first().id
+        campaign_id = Campaign.objects().first().id
+
+        data = gmail_controller.construct_data(
+                        message, 
+                        prospect_id, 
+                        campaign_id, 
+                        msgId)
+
+        mailbox = MailBox.add_message(data)
+        self.assertTrue(mailbox, "Error: can't create mailbox:{0}".format(mailbox))
+
+        mailbox_id = mailbox.id
+        
+        time.sleep(10)
+        # Send 3 follow ups to the previous one
+
+        for followup in EMAIL_FOLLOWUPS:
+            message = gmail_controller.create_multipart_message( 
+                                                        email_from=gmail,
+                                                        email_to=email_to,
+                                                        subject=subject,
+                                                        plain_version=EMAIL_TEXT_1_PLAIN,
+                                                        html_version=followup,
+                                                        parent_mailbox=mailbox)
+
+            self.assertTrue(message, "Can't construct followup message error:{0}".format(message))
+            
+            msgId, message = gmail_controller.add_header_msgId(message)
+            self.assertTrue(msgId, "msgId generation error:{0}".format(msgId))
+
+            res = gmail_controller.send_message(email_to=email_to,
+                                                message=message)
+            
+            self.assertTrue(not res, "gmail_controller.send_message error:{0}".format(res))
+            data = gmail_controller.construct_data(
+                        message, 
+                        prospect_id, 
+                        campaign_id, 
+                        msgId,  
+                        mailbox_reply_to_id=mailbox.id)
+
+            mailbox = MailBox.add_message(data, message_type=2)
+
+            get_last = MailBox.get_parent(prospect_id=prospect_id, campaign_id=campaign_id)
+            
+            #self.assertTrue(mailbox.id == get_last.id, "MailBox.get_parent error:{0}".format(get_last))
+
+            time.sleep(10)
+
+    def test_4_trail_construction(self):
         return
         email = USER_EMAIL
 
@@ -168,7 +261,7 @@ class TestGmailSend(unittest.TestCase):
         self.assertTrue(access_credentials, "access_credentials not found gmail:{0}".format(data.get('email', None)))
         self.assertTrue(gmail, "email from data empty:{0}".format(gmail))
 
-        subject = "1111 Invite to Hacker Noon roundup - for howtotoken.com"
+        subject = "999 Invite to Hacker Noon roundup - for howtotoken.com"
         email_to = 'ksshilov@yandex.ru'
 
         gmail_controller = GmailController(email=gmail,
@@ -181,13 +274,79 @@ class TestGmailSend(unittest.TestCase):
                                             subject=subject,
                                             plain_version=EMAIL_TEXT_1_PLAIN,
                                             html_version=EMAIL_TEXT_1_HTML)
+        
+        msgId, message = gmail_controller.add_header_msgId(message)
+        self.assertTrue(msgId, "msgId generation error:{0}".format(msgId))
 
-        self.assertTrue(message, "Empty message:{0}".format(message))
+        prospect_id = Prospects.objects().first().id
+        campaign_id = Campaign.objects().first().id
+
+        data = gmail_controller.construct_data(
+                        message, 
+                        prospect_id, 
+                        campaign_id, 
+                        msgId)
+
+        mailbox = MailBox.add_message(data)
+        self.assertTrue(mailbox, "Error: can't create mailbox:{0}".format(mailbox))
+        print("******** Created mailbox.id:{0}".format(mailbox.id))
+        
+        res = gmail_controller.send_message(email_to=email_to,
+                                            message=message)
+        
+       
+
+    def test_5_send_unicode_data(self): 
+        return
+        #GET DATA for constructor
+        email = USER_EMAIL
+
+        user = User.get_user(email=email)
+        self.assertTrue(user, "user not found email:{0}".format(email))
+
+        credentials = Credentials.get_credentials(user_id=user.id, medium='email')
+        self.assertTrue(credentials, "credentials not found email:{0}".format(email))
+
+        data = credentials.get_data()
+        access_credentials = data.get('credentials')
+
+        gmail = data.get('email')
+        self.assertTrue(access_credentials, "access_credentials not found gmail:{0}".format(data.get('email', None)))
+        self.assertTrue(gmail, "email from data empty:{0}".format(gmail))
+
+        subject = "000 Invite to Hacker Noon roundup - for howtotoken.com"
+        email_to = 'ks.shilov@howtotoken.com'
+
+        gmail_controller = GmailController(email=gmail,
+                                            credentials=access_credentials,
+                                            smtp=True)
+
+        mailbox = MailBox.objects(email_data__msgId='<158688645769.12500.11841317466977919490@outreacher24.com>').first()
+
+        trail = gmail_controller._construct_trail(mailbox)
+
+        text = mailbox.get_text()
+        html = trail
+
+        message = gmail_controller.create_multipart_message( 
+                                            email_from='ks.shilov@gmail.com',
+                                            email_to='ks.shilov@howtotoken.com',
+                                            subject='Encoding test',
+                                            plain_version=text,
+                                            html_version=html)
+        
+        msgId, message = gmail_controller.add_header_msgId(message)
+        self.assertTrue(msgId, "msgId generation error:{0}".format(msgId))
+
+        print("************************** GOING TO SEND*************")
+        print(message)
 
         res = gmail_controller.send_message(email_to=email_to,
                                             message=message)
-
+        
+        print("************************** RESULT *************")
         print(res)
+    
 
 def setUpModule():
     env = os.environ.get('APP_ENV', None)

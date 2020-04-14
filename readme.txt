@@ -126,3 +126,16 @@ https://stackoverflow.com/questions/22939035/how-to-get-message-id-of-email-sent
 
 Peoples API:
 https://developers.google.com/people/v1/read-people
+
+SMTP Rfc:
+https://tools.ietf.org/html/rfc2822
+
+How to encode messages:
+https://en.wikipedia.org/wiki/Quoted-printable
+
+https://stackoverflow.com/questions/31433633/reply-to-email-using-python-3-4/31513615#31513615?newreg=35dfc90756ce4400a91687718a134d39
+
+https://github.com/tausen/mu4e-mimelook/blob/master/mimelook.py
+
+Попробовать вот это:
+https://wordeology.com/computer/how-to-send-good-unicode-email-with-python.html

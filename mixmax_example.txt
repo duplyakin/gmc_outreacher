@@ -1,0 +1,271 @@
+Return-Path: <ks.shilov@gmail.com>
+Received: from [127.0.0.1] (send-21.prod.mixmax-mailer.com. [54.80.120.242])
+        by smtp.gmail.com with ESMTPSA id c48sm10836518qtd.9.2018.12.18.04.30.24
+        for <danielius.stasiulis@bitdegree.org>
+        (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
+        Tue, 18 Dec 2018 04:30:24 -0800 (PST)
+Content-Type: multipart/alternative; boundary="----sinikael-?=_1-15451362243680.4138503476911397"
+From: Kirill Shilov <ks.shilov@gmail.com>
+To: danielius.stasiulis@bitdegree.org
+Subject: Networking
+Message-Id: <9db8b174-b5f7-8253-8c79-defc35f68443@mixmax.com>
+Date: Tue, 18 Dec 2018 12:30:24 +0000
+X-Mixmax-Message-Id: rFYo9cMo0maPrW3Ym
+X-Mailer: Mixmax (mixmax.com)
+MIME-Version: 1.0
+
+------sinikael-?=_1-15451362243680.4138503476911397
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
+
+Hi Danielius
+My name is Kirill and I=E2=80=99m the co-founder of the educational blockch=
+ain website
+Howtotoken. On our site, we cover ratings for the top 100 blockchain course=
+s
+available on the market today, and our list is one of the most visited on t=
+he
+web.
+I=E2=80=99m reaching out to you because I recently came across your crypto =
+course:=20
+bitdegree.org
+Your course looks like it would be relevant to what we do with our educatio=
+nal
+marketing service. As we play host to 100 crypto courses in our rating prof=
+ile,
+we want to add your course to our list.
+The other thing that I want to say is that we=E2=80=99re pretty good at con=
+tent
+marketing for blockchain courses. Here=E2=80=99s what we do: * Along with m=
+y team of 15+
+   crypto writers, we create guides and tutorials for various crypto projec=
+ts
+  =20
+  =20
+ * We work on special
+   projects as well, such as trading stories on tech websites
+  =20
+  =20
+ * We distribute these
+   materials through our newsletter that is read by more than 2,500 traders
+  =20
+  =20
+ * We also distribute
+   content to our partners (all with a readership of more than 10 million) =
+like
+   Hacker Noon, Cryptopanic, trading subreddits on Reddit (we have an array=
+ of
+   high-karma accounts to post from), and relevant postings on Quora
+  =20
+  =20
+
+
+Could I send you our full portfolio that demonstrates our previous work as =
+well
+as our pricing model?
+I=E2=80=99d appreciate any feedback you have and hope that you=E2=80=99ll h=
+ave five minutes this
+week so that we can further discuss marketing your course.
+Thanks,
+Kirill Shilov,
+Co-Founder ofhowtotoken.com
+Hackernoon.comcontributor=C2=A0(medium.com/@kirillshilov)Telegram: @ksshilo=
+v
+------sinikael-?=_1-15451362243680.4138503476911397
+Content-Type: text/html; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
+
+ <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www=
+.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"> <html xmlns=3D"http://www.w=
+3.org/1999/xhtml" xmlns:v=3D"urn:schemas-microsoft-com:vml" xmlns:o=3D"urn:=
+schemas-microsoft-com:office:office"> <head> <meta name=3D"viewport" conten=
+t=3D"width=3Ddevice-width,initial-scale=3D1"> <!--[if gte mso 9]>
+    <xml>
+      <o:OfficeDocumentSettings>
+        <o:AllowPNG/>
+        <o:PixelsPerInch>96</o:PixelsPerInch>
+     </o:OfficeDocumentSettings>
+    </xml>
+    <![endif]--> <style type=3D"text/css">* a:hover{cursor:pointer;}</style=
+> <style>body {-webkit-animation:bugfix infinite 1s;}@-webkit-keyframes bug=
+fix {from {position:relative;}to {position:relative;}}</style> </head> <bod=
+y style=3D"word-wrap:normal;word-break:break-word"> <style>a {word-wrap:nor=
+mal;word-break:break-word;}.background-contain {background-size:contain;}@m=
+edia only screen and (max-width:600px) {.container {-webkit-text-size-adjus=
+t:none !important;}.container,.palm-one-whole {width:100% !important;min-wi=
+dth:100% !important;}.palm-one-half {width:50% !important;min-width:50% !im=
+portant;box-sizing:border-box;}blockquote .container,blockquote .container =
+div,blockquote .container table {width:auto !important;min-width:0 !importa=
+nt;position:relative !important;}img {max-width:100%;}.border-outer,.border=
+-middle,.border-inner,.inner,[title=3D"separator"] {width:100% !important;}=
+.innercell {padding:8px !important;}.palm-block {display:block !important;}=
+td.palm-one-whole {display:inline-block !important;padding:0;}td.palm-one-w=
+hole:first-child:not(:only-child) {margin-bottom:16px;}td.hostname {padding=
+-top:3px !important;}}@media only screen and (min-width:601px) {.preview-ca=
+rd {max-width:600px !important;}}@media only screen and (min-device-width :=
+320px) and (max-device-width :568px),only screen and (min-device-width :768=
+px) and (max-device-width :1024px),only screen and (max-device-width:640px)=
+,only screen and (max-device-width:667px),only screen and (max-width:480px)=
+{.container {width:100% !important;min-width:100% !important;}.p,.small,li,=
+font[size=3D"2"],font[size=3D"3"] {font-size:1em !important;}}@media only s=
+creen and (min-device-width :320px) and (max-device-width :568px),only scre=
+en and (min-device-width :768px) and (max-device-width :1024px),only screen=
+ and (min-device-width :1224px)  {.message-wrapper {padding-top:6px;}.apple=
+-only[style] {display:block !important;max-height:none !important;line-heig=
+ht:normal !important;overflow:visible !important;height:auto !important;wid=
+th:100% !important;position:relative !important;}.no-apple {display:none !i=
+mportant;}form {font-size:inherit;}input[type=3D"text"] {height:43px;paddin=
+g-left:4px !important;}button:hover {cursor:pointer;}}@media only screen an=
+d (min-device-width :1224px)  {.apple-mail-form {display:block !important;b=
+ackground-color:white !important;}}* [office365] .outlook-com-hidden {displ=
+ay:none !important;}* [office365] .outlook-com-button {display:block;}* [of=
+fice365] .outlook-com-only {display:block !important;max-height:none !impor=
+tant;line-height:normal !important;overflow:visible !important;height:auto =
+!important;width:100% !important;position:relative !important;}.ExternalCla=
+ss {width:100%;}.ExternalClass .outlook-com-button {display:block;}.Externa=
+lClass button {height:auto;}.ExternalClass .outlook-com-hidden {display:non=
+e !important;}.ExternalClass .outlook-com-only {display:block !important;ma=
+x-height:none !important;line-height:normal !important;overflow:visible !im=
+portant;height:auto !important;width:100% !important;position:relative !imp=
+ortant;}.ExternalClass .ecxlabels {display:none !important;}.ExternalClass =
+.ecxlabels {display:none !important;}.ExternalClass .ecxarrow {display:none=
+ !important;}.ExternalClass cite >div + div {padding:0 0 4px 0;}.ExternalCl=
+ass .h1 {padding-bottom:5px;}.ExternalClass .h2 {padding-bottom:5px;}.Exter=
+nalClass .h3 {padding-bottom:5px;}.ExternalClass [lang=3D"brand-pinterest"]=
+ {width:280px !important;}</style> <!--[if (gte mso 9)|(IE)]>
+   =20
+    <style>
+      a, body {
+        font-family: 'Calibri', Arial, sans-serif;
+      }
+   =20
+      img {
+        border: none !important;
+        -ms-interpolation-mode:bicubic;
+      }
+   =20
+      td {
+        mso-line-height-rule:exactly !important;
+      }
+   =20
+      .mso-card-inner table {
+        border-collapse: collapse !important;
+        mso-table-lspace:0pt;
+        mso-table-rspace:0pt;
+        vertical-align: top;
+      }
+   =20
+      .outlook-com-only {
+        display: none !important;
+        font-size: 0 !important;
+      }
+   =20
+      #mso-one-whole {
+        width: 100% !important;
+      }
+   =20
+   =20
+   =20
+        .border-outer,
+        .border-middle,
+        .border-inner {
+          border: none !important;
+        }
+   =20
+        .border-middle,
+        .border-inner {
+          width: 100% !important;
+        }
+   =20
+        .mso-border-outer,
+        .mso-border-middle,
+        .mso-border-inner {
+          padding: 1px;
+        }
+   =20
+        .mso-border-outer { background-color: rgb(245, 255, 255); }
+        .mso-border-middle { background-color: rgb(223, 246, 255); }
+        .mso-border-inner { background-color: rgb(153, 176, 225); }
+   =20
+    </style>
+   =20
+    <![endif]--> <table class=3D"container" lang=3D"container" dir=3D"ltr" =
+border=3D"0" cellpadding=3D"0" cellspacing=3D"0" valign=3D"top" style=3D"wi=
+dth:100%"> <tr> <td valign=3D"top" class=3D"message-wrapper" style=3D"color=
+:#222;font-family:arial,sans-serif"> <!--[if mso]><table  border=3D"0" cell=
+padding=3D"0" cellspacing=3D"0" valign=3D"top" style=3D"border-collapse:sep=
+arate;"><tr><td valign=3D"top"><![endif]--> <div style=3D"margin-top:0pt;ma=
+rgin-bottom:0pt"><span style=3D"font-size:11pt;font-family:Arial;color:rgb(=
+0,0,0);background-color:transparent;font-variant-numeric:normal;font-varian=
+t-east-asian:normal;vertical-align:baseline;white-space:pre-wrap">Hi Daniel=
+ius</span></div><div><br></div><div style=3D"margin-top:0pt;margin-bottom:0=
+pt"><span style=3D"font-size:11pt;font-family:Arial;color:rgb(0,0,0);backgr=
+ound-color:transparent;font-variant-numeric:normal;font-variant-east-asian:=
+normal;vertical-align:baseline;white-space:pre-wrap">My name is Kirill and =
+I=E2=80=99m the co-founder of the educational blockchain website Howtotoken=
+. On our site, we cover ratings for the top 100 blockchain courses availabl=
+e on the market today, and our list is one of the most visited on the web.<=
+/span></div><div><br></div><div style=3D"margin-top:0pt;margin-bottom:0pt">=
+<span style=3D"font-size:11pt;font-family:Arial;color:rgb(0,0,0);background=
+-color:transparent;font-variant-numeric:normal;font-variant-east-asian:norm=
+al;vertical-align:baseline;white-space:pre-wrap">I=E2=80=99m reaching out t=
+o you because I recently came across your crypto course: <a target=3D"_blan=
+k" href=3D"http://bitdegree.org">bitdegree.org</a></span></div><div><br></d=
+iv><div style=3D"margin-top:0pt;margin-bottom:0pt"><span style=3D"font-size=
+:11pt;font-family:Arial;color:rgb(0,0,0);background-color:transparent;font-=
+variant-numeric:normal;font-variant-east-asian:normal;vertical-align:baseli=
+ne;white-space:pre-wrap">Your course looks like it would be relevant to wha=
+t we do with our educational marketing service. As we play host to 100 cryp=
+to courses in our rating profile, we want to add your course to our list.</=
+span></div><div><br></div><div style=3D"margin-top:0pt;margin-bottom:0pt"><=
+span style=3D"font-size:11pt;font-family:Arial;color:rgb(0,0,0);background-=
+color:transparent;font-variant-numeric:normal;font-variant-east-asian:norma=
+l;vertical-align:baseline;white-space:pre-wrap">The other thing that I want=
+ to say is that we=E2=80=99re pretty good at content marketing for blockcha=
+in courses. Here=E2=80=99s what we do:</span></div><ul><li><p dir=3D"ltr" s=
+tyle=3D"margin-top:0pt;margin-bottom:0pt"><span style=3D"font-size:11pt;fon=
+t-family:Arial;color:rgb(0,0,0);background-color:transparent;font-variant-n=
+umeric:normal;font-variant-east-asian:normal;vertical-align:baseline;white-=
+space:pre-wrap">Along with my team of 15+ crypto writers, we create guides =
+and tutorials for various crypto projects</span></p></li><li><p dir=3D"ltr"=
+ style=3D"margin-top:0pt;margin-bottom:0pt"><span style=3D"font-size:11pt;f=
+ont-family:Arial;color:rgb(0,0,0);background-color:transparent;font-variant=
+-numeric:normal;font-variant-east-asian:normal;vertical-align:baseline;whit=
+e-space:pre-wrap">We work on special projects as well, such as trading stor=
+ies on tech websites</span></p></li><li><p dir=3D"ltr" style=3D"margin-top:=
+0pt;margin-bottom:0pt"><span style=3D"font-size:11pt;font-family:Arial;colo=
+r:rgb(0,0,0);background-color:transparent;font-variant-numeric:normal;font-=
+variant-east-asian:normal;vertical-align:baseline;white-space:pre-wrap">We =
+distribute these materials through our newsletter that is read by more than=
+ 2,500 traders</span></p></li><li><p dir=3D"ltr" style=3D"margin-top:0pt;ma=
+rgin-bottom:0pt"><span style=3D"font-size:11pt;font-family:Arial;color:rgb(=
+0,0,0);background-color:transparent;font-variant-numeric:normal;font-varian=
+t-east-asian:normal;vertical-align:baseline;white-space:pre-wrap">We also d=
+istribute content to our partners (all with a readership of more than 10 mi=
+llion) like Hacker Noon, Cryptopanic, trading subreddits on Reddit (we have=
+ an array of high-karma accounts to post from), and relevant postings on Qu=
+ora</span></p></li></ul><div><br></div><div style=3D"margin-top:0pt;margin-=
+bottom:0pt"><span style=3D"font-size:11pt;font-family:Arial;color:rgb(0,0,0=
+);background-color:transparent;font-variant-numeric:normal;font-variant-eas=
+t-asian:normal;vertical-align:baseline;white-space:pre-wrap">Could I send y=
+ou our full portfolio that demonstrates our previous work as well as our pr=
+icing model?</span></div><div><br></div><div style=3D"margin-top:0pt;margin=
+-bottom:0pt"><span style=3D"font-size:11pt;font-family:Arial;color:rgb(0,0,=
+0);background-color:transparent;font-variant-numeric:normal;font-variant-ea=
+st-asian:normal;vertical-align:baseline;white-space:pre-wrap">I=E2=80=99d a=
+ppreciate any feedback you have and hope that you=E2=80=99ll have five minu=
+tes this week so that we can further discuss marketing your course.</span><=
+/div><div><br></div><div class=3D"mixmax_signature"><div>Thanks,<br>Kirill =
+Shilov,<br>Co-Founder of=C2=A0<a href=3D"http://r.mailer.howtotoken.com/mk/=
+cl/UnVCLqzCWjU9sMYd28mCd762Z8jbcnth3uQvlCQ8r866EWJ8u0gjH4Zry3Fet46pSd8bNBKv=
+b-oEkIA-tkGCtLV3CRauYUBjWj8uBK_KG0jH">howtotoken.com</a><br><span class=3D"=
+il">Hackernoon</span>.com=C2=A0<span class=3D"il">contributor</span>=C2=A0(=
+<a href=3D"http://r.mailer.howtotoken.com/mk/cl/SSO1CxgZ9haALFqYorN8IaZslCb=
+JbPgRRyzG7wZYlZFDYEehXkshqZKzjzFULFbm7JmmkFWnefuJPnnfsafX5vzVFlDOjMpTq7Vjh-=
+-o6Bai">medium.com/@kirillshilov</a>)</div><div>Telegram: @ksshilov<br></di=
+v></div><img align=3D"left" width=3D"0" height=3D"0" style=3D"border:0;widt=
+h:0px;height:0px" src=3D"https://track.mixmax.com/api/track/v2/rFYo9cMo0maP=
+rW3Ym/i02bj5CbpFWbnBkdvxWaoNnLztmI/IyZy9mLlVmcnVGZ0lmYANXasVXazFGdz5yc1lGbl=
+lmbhRmI/?sc=3Dfalse" alt=3D""> <!--[if mso]></td></tr></table><![endif]--> =
+</td> </tr> </table> </body> </html>=20
+------sinikael-?=_1-15451362243680.4138503476911397--

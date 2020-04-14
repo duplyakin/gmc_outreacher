@@ -60,6 +60,13 @@ EMAIL_TEXT_1_HTML = '''
  <head>
  </head>
  <body>
+
+  happy New Year
+
+  Ευτυχισμένο το Νέο Έτος
+
+  с Новым годом
+
    Hi there
   <br>
   <br>Hope you are doing&nbsp;well.
@@ -101,3 +108,93 @@ n - $220) - answer till 11-March
  </body>
 </html>
 '''
+
+EMAIL_TEXT_FOLLOWUP_1 = '''
+<!doctype html>
+<html>
+ <head>
+ </head>
+ <body>
+   Hi there
+  <br>
+  <br>Hope you are doing&nbsp;well.
+  <br>
+  <br>It's follow up 1 - First follow up
+  <br>
+  <br>
+<strong>Here are upcoming:</strong>
+  <br>1.&nbsp;
+  <span style="color: #e74c3c;">Which top 3 industries will dominate blockchain tech utilization by the end of 2020, why?&nbsp;</span>(for hackernoo=
+n - $220) - answer till 11-March
+  <br>2.&nbsp;
+  <br>Have a great week.
+  <br>
+  <br>Kirill Shilov,
+  <br>Hackernoon.com contributor (https://hackernoon.com/@ks.shilov)
+  <br>Telegram: @ksshilov=20
+  <br>Linkedin: https://www.linkedin.com/in/kirill-shilov-25aa8630/
+ </body>
+</html>
+'''
+
+EMAIL_TEXT_FOLLOWUP_2 = '''
+<!doctype html>
+<html>
+ <head>
+ </head>
+ <body>
+   Hi there
+  <br>
+  <br>Hope you are doing&nbsp;well.
+  <br>
+  <br>It's follow up 2 - Second followup
+  <br>
+  <br>
+<strong>Here are upcoming:</strong>
+  <br>1.&nbsp;
+  <span style="color: #e74c3c;">Which top 3 industries will dominate blockchain tech utilization by the end of 2020, why?&nbsp;</span>(for hackernoo=
+n - $220) - answer till 11-March
+  <br>2.&nbsp;
+  <br>Have a great week.
+  <br>
+  <br>Kirill Shilov,
+  <br>Hackernoon.com contributor (https://hackernoon.com/@ks.shilov)
+  <br>Telegram: @ksshilov=20
+  <br>Linkedin: https://www.linkedin.com/in/kirill-shilov-25aa8630/
+ </body>
+</html>
+'''
+
+EMAIL_TEXT_FOLLOWUP_3 = '''
+<!doctype html>
+<html>
+ <head>
+ </head>
+ <body>
+   Hi there
+  <br>
+  <br>Hope you are doing&nbsp;well.
+  <br>
+  <br>It's follow up 3 - Third followup
+  <br>
+  <br>
+<strong>Here are upcoming:</strong>
+  <br>1.&nbsp;
+  <span style="color: #e74c3c;">Which top 3 industries will dominate blockchain tech utilization by the end of 2020, why?&nbsp;</span>(for hackernoo=
+n - $220) - answer till 11-March
+  <br>2.&nbsp;
+  <br>Have a great week.
+  <br>
+  <br>Kirill Shilov,
+  <br>Hackernoon.com contributor (https://hackernoon.com/@ks.shilov)
+  <br>Telegram: @ksshilov=20
+  <br>Linkedin: https://www.linkedin.com/in/kirill-shilov-25aa8630/
+ </body>
+</html>
+'''
+
+EMAIL_FOLLOWUPS = [
+  EMAIL_TEXT_FOLLOWUP_1,
+  EMAIL_TEXT_FOLLOWUP_2,
+  EMAIL_TEXT_FOLLOWUP_3
+]
