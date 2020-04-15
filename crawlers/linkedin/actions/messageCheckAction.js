@@ -1,14 +1,14 @@
 const puppeteer = require("./node_modules/puppeteer");
 const selectors = require(__dirname + "/./selectors");
 
-export class MessageCheckAction {
+class MessageCheckAction {
   constructor(url, cookies) {
     this.url = url;
 
     this.cookies = JSON.parse(cookies);
   }
 
-  async function startBrowser() {
+  async startBrowser() {
     //this.browser = await puppeteer.launch({ headless: false });
     this.browser = await puppeteer.launch();
     this.context = await this.browser.createIncognitoBrowserContext();
@@ -16,11 +16,11 @@ export class MessageCheckAction {
     await this.page.setCookie(...this.cookies);
   }
 
-  async function closeBrowser(browser) {
+  async closeBrowser(browser) {
     this.browser.close();
   }
 
-  async function messageCheck() {
+  async messageCheck() {
     await this.page.goto(this.url);
     await this.page.waitForSelector(selectors.WRITE_MSG_BTN_SELECTOR);
 

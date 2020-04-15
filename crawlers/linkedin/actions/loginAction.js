@@ -1,17 +1,18 @@
-const puppeteer = require("./node_modules/puppeteer");
-const selectors = require(__dirname + "/./selectors");
-const links = require(__dirname + "/./links");
+const puppeteer = require(__dirname + "/./../../node_modules/puppeteer");
+const selectors = require(__dirname + "/.././selectors");
+const links = require(__dirname + "/.././links");
 
-export class LoginAction {
+class LoginAction {
   constructor(email, password, cookies) {
     this.email = email;
     this.password = password;
 
     this.login_url = links.SIGNIN_LINK;
-    this.cookies = JSON.parse(cookies);
+    //this.cookies = JSON.parse(cookies);
+    this.cookies = cookies;
   }
 
-  async function startBrowser() {
+  async startBrowser() {
     //this.browser = await puppeteer.launch({ headless: false });
     this.browser = await puppeteer.launch();
     this.context = await this.browser.createIncognitoBrowserContext();
@@ -19,11 +20,11 @@ export class LoginAction {
     await this.page.setCookie(...this.cookies);
   }
 
-  async function closeBrowser(browser) {
+  async closeBrowser(browser) {
     this.browser.close();
   }
 
-  async function login() {
+  async login() {
 
     await this.page.goto(this.login_url);
     await this.page.waitForNavigation();
@@ -45,12 +46,12 @@ export class LoginAction {
     // todo: if success - return: true;
   }
 
-  async function skip_phone(page) {
+  async skip_phone(page) {
       await this.page.waitForSelector(selectors.SKIP_PHONE_FORM_SELECTOR);
       await this.page.click(selectors.SKIP_PHONE_BTN_SELECTOR);
   }
 
-  async function check_phone_page(page) {
+  async check_phone_page(page) {
       let url = await page.url();
 
       if (url.includes(selectors.SKIP_PHONE_PAGE_SELECTOR)) {
@@ -59,4 +60,8 @@ export class LoginAction {
 
       return false;
     }
+}
+
+module.exports = {
+    LoginAction: LoginAction
 }

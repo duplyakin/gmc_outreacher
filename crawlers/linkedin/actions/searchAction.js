@@ -1,7 +1,7 @@
-const puppeteer = require("./node_modules/puppeteer");
-const selectors = require(__dirname + "/./selectors");
+const puppeteer = require(__dirname + "/./../../node_modules/puppeteer");
+const selectors = require(__dirname + "/.././selectors");
 
-export class SearchAction {
+class SearchAction {
   constructor(searchUrl, pageNum, cookies) {
     this.searchUrl = searchUrl;
     this.pageNum = pageNum;
@@ -9,7 +9,7 @@ export class SearchAction {
     this.cookies = JSON.parse(cookies);
   }
 
-  async function startBrowser() {
+  async startBrowser() {
     //this.browser = await puppeteer.launch({ headless: false });
     this.browser = await puppeteer.launch();
     this.context = await this.browser.createIncognitoBrowserContext();
@@ -17,11 +17,11 @@ export class SearchAction {
     await this.page.setCookie(...this.cookies);
   }
 
-  async function closeBrowser(browser) {
+  async closeBrowser(browser) {
     this.browser.close();
   }
 
-  async function search() {
+  async search() {
     await this.page.goto(this.searchUrl);
     await this.page.waitForNavigation();
 
@@ -58,7 +58,7 @@ export class SearchAction {
     return data;
   }
 
-  async function autoScroll(page) {
+  async autoScroll(page) {
       await page.evaluate(async () => {
           await new Promise((resolve, reject) => {
               var totalHeight = 0;

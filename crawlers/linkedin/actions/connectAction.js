@@ -1,7 +1,7 @@
 const puppeteer = require("./node_modules/puppeteer");
 const selectors = require(__dirname + "/./selectors");
 
-export class ConnectAction {
+class ConnectAction {
   constructor(connectUrl, text, cookies) {
     this.connectUrl = connectUrl;
     this.text = text;
@@ -9,7 +9,7 @@ export class ConnectAction {
     this.cookies = JSON.parse(cookies);
   }
 
-  async function startBrowser() {
+  async startBrowser() {
     //this.browser = await puppeteer.launch({ headless: false });
     this.browser = await puppeteer.launch();
     this.context = await this.browser.createIncognitoBrowserContext();
@@ -17,11 +17,11 @@ export class ConnectAction {
     await page.setCookie(...this.cookies);
   }
 
-  async function closeBrowser(browser) {
+  async closeBrowser(browser) {
     this.browser.close();
   }
 
-  async function connect() {
+  async connect() {
     await this.page.goto(this.connectUrl);
     await this.page.waitForNavigation();
 
@@ -32,7 +32,7 @@ export class ConnectAction {
 
     await page.waitForSelector(selectors.MSG_SELECTOR);
     await this.page.click(selectors.MSG_SELECTOR);
-    
+
     await this.page.keyboard.type(this.text);
     await this.page.click(selectors.SEND_INVITE_TEXT_BTN_SELECTOR);
   }

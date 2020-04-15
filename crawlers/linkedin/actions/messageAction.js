@@ -1,7 +1,7 @@
 const puppeteer = require("./node_modules/puppeteer");
 const selectors = require(__dirname + "/./selectors");
 
-export class MessageAction {
+class MessageAction {
   constructor(profileUrl, text, cookies) {
     this.profileUrl = profileUrl;
     this.text = text;
@@ -9,7 +9,7 @@ export class MessageAction {
     this.cookies = JSON.parse(cookies);
   }
 
-  async function startBrowser() {
+  async startBrowser() {
     //this.browser = await puppeteer.launch({ headless: false });
     this.browser = await puppeteer.launch();
     this.context = await this.browser.createIncognitoBrowserContext();
@@ -17,11 +17,11 @@ export class MessageAction {
     await this.page.setCookie(...this.cookies);
   }
 
-  async function closeBrowser(browser) {
+  async closeBrowser(browser) {
     this.browser.close();
   }
 
-  async function message() {
+  async message() {
     const page = await this.context.newPage();  // feature
 
     await page.goto(this.profileUrl);

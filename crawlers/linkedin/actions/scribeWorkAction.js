@@ -1,14 +1,14 @@
 const puppeteer = require("./node_modules/puppeteer");
 const selectors = require(__dirname + "/./selectors");
 
-export class ScribeWorkAction {
+class ScribeWorkAction {
   constructor(url, cookies) {
     this.url = url;
 
     this.cookies = JSON.parse(cookies);
   }
 
-  async function startBrowser() {
+  async startBrowser() {
     //this.browser = await puppeteer.launch({ headless: false });
     this.browser = await puppeteer.launch();
     this.context = await this.browser.createIncognitoBrowserContext();
@@ -16,11 +16,11 @@ export class ScribeWorkAction {
     await this.page.setCookie(...this.cookies);
   }
 
-  async function closeBrowser(browser) {
+  async closeBrowser(browser) {
     this.browser.close();
   }
 
-  async function scribe() {
+  async scribe() {
     await this.page.goto(this.url);
     //await page.waitForNavigation();
 
@@ -49,7 +49,7 @@ export class ScribeWorkAction {
     return true;
   }
 
-  async function autoScroll(page) {
+  async autoScroll(page) {
       await page.evaluate(async () => {
           await new Promise((resolve, reject) => {
               var totalHeight = 0;

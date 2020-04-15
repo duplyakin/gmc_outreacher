@@ -2,14 +2,14 @@ const puppeteer = require("./node_modules/puppeteer");
 const selectors = require(__dirname + "/./selectors");
 const links = require(__dirname + "/./links");
 
-export class ConnectCheckAction {
+class ConnectCheckAction {
   constructor(connectName, cookies) {
     this.connectName = connectName;
 
     this.cookies = JSON.parse(cookies);
   }
 
-  async function startBrowser() {
+  async startBrowser() {
     //this.browser = await puppeteer.launch({ headless: false });
     this.browser = await puppeteer.launch();
     this.context = await this.browser.createIncognitoBrowserContext();
@@ -17,11 +17,11 @@ export class ConnectCheckAction {
     await this.page.setCookie(...this.cookies);
   }
 
-  async function closeBrowser(browser) {
+  async closeBrowser(browser) {
     this.browser.close();
   }
 
-  async function connectCheck() {
+  async connectCheck() {
     await this.page.goto(links.CONNECTS_LINK);
     await this.page.waitForSelector(selectors.SEARCH_CONNECTS_SELECTOR);
 
