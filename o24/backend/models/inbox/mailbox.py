@@ -118,5 +118,29 @@ class MailBox(db.Document):
 
         return data_dict
 
+    def get_thread_id(self):
+        thread_id = ''
+
+        api_res = self.email_data.get('api_res', '')
+        if api_res:
+            thread_id = api_res.get('threadId','')
+
+        return thread_id
+
+    def get_api_msg_id(self):
+        msg_id = ''
+        
+        api_res = self.email_data.get('api_res', '')
+        if api_res:
+            msg_id = api_res.get('id','')
+
+        return msg_id
+
+    def set_msgId(self, msgId):
+        self.email_data['msgId'] = msgId
+        self._commit()
+
+        return True
+
     def _commit(self):
         self.save()

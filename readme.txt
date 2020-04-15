@@ -14,6 +14,7 @@ python -m unittest o24.tests.test_scheduler_campaigns.TestScheduler.test_1_start
 
 
 python -m unittest discover -s .\o24\tests\ -p "*test_gmail_send.py"
+python -m unittest discover -s .\o24\tests\ -p "*test_gmail_provider_headers.py"
 
 
 python -m unittest discover -s .\o24\tests\ -p "*mongo_test_lookup.py"

@@ -51,8 +51,7 @@ class TestGmailSend(unittest.TestCase):
     def setUp(self):
         pass
     
-    def test_1_send_GSUITE_email(self):
-        return
+    def test_3_GMAIL_GSUITE_EMAIL(self):
         email = USER_EMAIL
 
         user = User.get_user(email=email)
@@ -63,48 +62,105 @@ class TestGmailSend(unittest.TestCase):
 
         data = credentials.get_data()
         access_credentials = data.get('credentials')
+
+        gmail = data.get('email')
         self.assertTrue(access_credentials, "access_credentials not found gmail:{0}".format(data.get('email', None)))
+        self.assertTrue(gmail, "email from data empty:{0}".format(gmail))
 
-        access_token = access_credentials.get('token')
+        subject = "GSUITE-8 тест привет Invite to roundup - for howtotoken.com"
+        email_to = 'ksshilov@yandex.ru'
 
-        gsuite = data.get('email')
-        self.assertTrue(gsuite == EMAIL_FROM, "wrong from emails data gsuite:{0}  EMAIL_FROM:{1}".format(gsuite, EMAIL_FROM))
+        gmail_controller = GmailController(email=gmail,
+                                            credentials=access_credentials)
 
-        mailbox = MailBox()
-        mailbox.save()
-
-        gmail_controller = GmailController(mailbox=mailbox,
-                                           credentials=access_credentials)
+        message, trail = gmail_controller.create_multipart_message( 
+                                            email_from=gmail,
+                                            email_to=email_to,
+                                            subject=subject,
+                                            plain_version=EMAIL_TEXT_1_PLAIN,
+                                            html_version=EMAIL_TEXT_1_HTML)
         
-        image_data = {}                           
-        fp = open(IMAGE_PATH, 'rb')
-        raw = fp.read()
-        fp.close()
+        raw_message = gmail_controller.add_gmail_api_meta(message=message)
+        self.assertTrue(raw_message, "gmail_controller.add_gmail_api_meta empty:{0}".format(raw_message))
 
-        image_data = {
-            'path' : IMAGE_PATH,
-            'raw' : raw,
-            'title' : 'image_insert1',
-            'cid' : uuid.uuid4()
-        }
+        api_res = gmail_controller.send_message(email_to=email_to, 
+                                                message=raw_message)
         
-        msg_id= '171646a693777b08'
-        msgId = gmail_controller.get_msgId_for_followup(msg_id=msg_id)
-        print("Received msgId:{0}".format(msgId))
-        thread_id= '171645c9f9d69d72'
+        self.assertTrue(api_res, "gmail_controller.send_message error:{0}".format(api_res))
 
-        subject = 'Re:Test email - 345 for howtotoken.com'
-        message_data = gmail_controller.create_multipart_message(email_from=gsuite, 
-                                                                email_to=EMAIL_TO, 
-                                                                subject=subject, 
-                                                                html_version=EMAIL_TEXT_2_HTML, 
-                                                                plain_version=EMAIL_TEXT_1_PLAIN, 
-                                                                image_data=image_data,
-                                                                msgId=msgId,
-                                                                thread_id=thread_id)
+        mailbox_id = None
+        prospect_id = Prospects.objects().first().id
+        campaign_id = Campaign.objects().first().id
 
-        res = gmail_controller.send_email(message=message_data)
-        print(res)
+        data = gmail_controller.construct_data(
+                        message=message, 
+                        prospect_id=prospect_id, 
+                        campaign_id=campaign_id, 
+                        msgId='',
+                        plain_text=EMAIL_TEXT_1_PLAIN,
+                        html_text=EMAIL_TEXT_1_HTML,
+                        trail = trail, 
+                        api_res = api_res)
+
+        mailbox = MailBox.add_message(data)
+        self.assertTrue(mailbox, "Error: can't create mailbox:{0}".format(mailbox))
+
+        mailbox_id = mailbox.id
+        
+        msg_id = mailbox.get_api_msg_id()
+        self.assertTrue(msg_id, "Error: get_api_msg_id msg_id:{0}".format(msg_id))
+
+        msgId = gmail_controller.get_msgId(msg_id=msg_id)
+        self.assertTrue(msgId, "Error: gmail_controller.get_msgId:{0}".format(msgId))
+
+        mailbox.set_msgId(msgId=msgId)
+
+        time.sleep(4)
+        # Send 3 follow ups to the previous one
+
+        for followup in EMAIL_FOLLOWUPS:
+            message, trail = gmail_controller.create_multipart_message( 
+                                            email_from=gmail,
+                                            email_to=email_to,
+                                            subject=subject,
+                                            plain_version=EMAIL_TEXT_1_PLAIN,
+                                            html_version=followup,
+                                            parent_mailbox=mailbox)
+
+            self.assertTrue(message, "Can't construct followup message error:{0}".format(message))
+            
+            raw_message = gmail_controller.add_gmail_api_meta(message=message,
+                                                            parent_mailbox=mailbox)
+            self.assertTrue(raw_message, "gmail_controller.add_gmail_api_meta empty:{0}".format(raw_message))
+
+            api_res = gmail_controller.send_message(email_to=email_to, 
+                                                    message=raw_message)
+            
+            self.assertTrue(api_res, "gmail_controller.send_message error:{0}".format(api_res))
+
+            data = gmail_controller.construct_data(
+                            message=message, 
+                            prospect_id=prospect_id, 
+                            campaign_id=campaign_id, 
+                            msgId='',
+                            plain_text=EMAIL_TEXT_1_PLAIN,
+                            html_text=followup,
+                            trail = trail, 
+                            api_res = api_res,
+                            mailbox_reply_to_id=mailbox.id)
+
+            mailbox = MailBox.add_message(data, message_type=2)
+
+            msg_id = mailbox.get_api_msg_id()
+            self.assertTrue(msg_id, "Error: get_api_msg_id msg_id:{0}".format(msg_id))
+
+            msgId = gmail_controller.get_msgId(msg_id=msg_id)
+            self.assertTrue(msgId, "Error: gmail_controller.get_msgId:{0}".format(msgId))
+
+            mailbox.set_msgId(msgId=msgId)
+
+            time.sleep(4)
+
 
     def test_2_send_SMTP_email(self):
         return
@@ -155,7 +211,8 @@ class TestGmailSend(unittest.TestCase):
         #res = gmail_controller.send_email(message=message_data)
         #print(res)
 
-    def test_3_send_YAG_email(self):
+    def test_3_GMAIL_SMTP_EMAIL_WORKS(self):
+        return
         email = USER_EMAIL
 
         user = User.get_user(email=email)

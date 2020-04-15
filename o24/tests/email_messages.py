@@ -92,7 +92,7 @@ n - $220) - answer till 11-March
   <span style="color: #e74c3c;">...Overall we went 4 positions up in the rankings, so it seems to be working :) And considering this as a display ad that has been seen by 7k people, we're quite happy with the results..</span>
   <br>
   <br>
-  <br>To participate, send your quote or questions=20
+  <br>To participate, send your quote or questions
   <span style="color: #e74c3c;">in reply to this email</span>
   <br>
   <br>For faster communication, happy to chat on

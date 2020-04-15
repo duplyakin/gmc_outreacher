@@ -26,9 +26,30 @@ class GmailController():
 
     #TODO: use prospect_id and campaign_id to get msg_id data
     def get_msgId(self, msg_id):
-        msg = self.provider.get_mime_message(msg_id=msg_id)
-        msgId = format(msg['Message-ID'])
+        msgId = ''
+        msg = self.provider.get_message_data(msg_id=msg_id, metadataHeaders=['Message-Id'])
+        payload = msg.get('payload', '')
+        if payload:
+            headers = payload.get('headers', '')
+            if headers:
+                for header in headers:
+                    if header.get('name', '') == 'Message-Id':
+                        msgId = header.get('value', '')
+                        break
         return msgId
+
+    #message - is a MIMEMultipart object
+    def add_gmail_api_meta(self, message, parent_mailbox=None):
+        raw_message = {
+            'raw' : base64.urlsafe_b64encode(message.as_string().encode()).decode()
+        }
+
+        if parent_mailbox:
+            thread_id = parent_mailbox.get_thread_id()        
+            if thread_id:
+                raw_message['threadId'] = thread_id
+
+        return raw_message
 
     #msgId - is the global ID from gmail, example: <CAAfG+wAyJgc8uZVpbh78LzEENnQJWkru6VWtHZSyJOYnyZ8w5g@mail.gmail.com>
     def create_multipart_message(self, 
@@ -97,8 +118,8 @@ class GmailController():
             soup.head.unwrap()
 
         data_dict = parent_mailbox.get_wrote_on_data()
-        wrote_on = "On {week_day}, {date} {month} {year}, {sender} wrote:".format(**data_dict)
 
+        wrote_on = "On {week_day}, {date} {month} {year}, {sender} wrote:".format(**data_dict)
         start = '''<br><div class="gmail_quote"><div dir="ltr" class="gmail_attr">''' + wrote_on + '''<br></div><blockquote class="gmail_quote" style="margin:0px 0px 0px 0.8ex;border-left:1px solid rgb(204,204,204);padding-left:1ex"><u></u><div>'''
         end = '''</div></blockquote></div>'''
 
@@ -146,7 +167,8 @@ class GmailController():
                         plain_text='',
                         html_text='',
                         trail = '', 
-                        mailbox_reply_to_id='', 
+                        mailbox_reply_to_id='',
+                        api_res = {},
                         sender_meta={}):
 
         references = message.get(name='References', failobj='')
@@ -160,8 +182,19 @@ class GmailController():
             'text' : plain_text,
             'html' : html_text,
             'trail' : trail,
-            'sender' : sender
+            'sender' : sender,
+            'api_res' : api_res
         }
+
+        
+        if not sender_meta:
+            sender_meta = {
+                'credentials' : self.credentials
+            }
+            if self.smtp:
+                sender_meta['type'] = 'SMTP'
+            else:
+                sender_meta['type'] = 'API'
 
         data = {}
 
@@ -179,7 +212,7 @@ class GmailController():
             return self.smtp_provider.send_message(email_to=email_to,
                                                     message=message)
         else:
-            pass
+            return self.provider.send_message(message=message)
 
         return {'Error' : 'Something went wrong'}
     

@@ -19,7 +19,7 @@ class GmailApiProvider():
         try:
             message = (self.service.users().messages().send(userId=user_id, body=message)
                .execute())
-            print("Message Id: {0}".format(message['id']))
+
             return message
         except errors.HttpError as error:
             print("An error occurred: {0}".format(error))
@@ -139,15 +139,23 @@ class GmailApiProvider():
         return messages
 
 
-    def get_message_data(self, msg_id, user_id='me', format='metadata'):
-        message = self.service.users().messages().get(userId=user_id, 
+    def get_message_data(self, msg_id, user_id='me', format='metadata', metadataHeaders=[]):
+        message = ''
+        if metadataHeaders:
+            message = self.service.users().messages().get(userId=user_id, 
+                                                    id=msg_id,
+                                                    format=format,
+                                                    metadataHeaders=metadataHeaders).execute()
+
+        else:
+            message = self.service.users().messages().get(userId=user_id, 
                                                     id=msg_id,
                                                     format=format).execute()
 
         return message
 
 
-    def get_mime_message(self, msg_id, user_id='me', format='raw'):
+    def get_mime_message(self, msg_id, user_id='me', format='full'):
             message = self.service.users().messages().get(userId=user_id, 
                                                         id=msg_id,
                                                         format=format).execute()
