@@ -36,7 +36,7 @@ class GmailController():
                                 email_to, 
                                 subject,  
                                 plain_version,
-                                html_version=None,
+                                html_version='',
                                 parent_mailbox=None):
         
         charset.add_charset('utf-8', charset.QP, charset.QP, 'utf-8')
@@ -62,18 +62,27 @@ class GmailController():
             msg_html = MIMEText(html_version.encode('utf-8'), 'html', 'UTF-8')
             msgAlternative.attach(msg_html)
 
+        trail = html_version
+
         #Need to construct reply email body in Gmail format
         if parent_mailbox:
-            msgRoot.add_header('References', parent_mailbox.get_references())
-            msgRoot.add_header('In-Reply-To', parent_mailbox.get_msgId())
+            in_reply_to = parent_mailbox.get_msgId()
+            references = parent_mailbox.get_references()
+            if not references:
+                references = in_reply_to
+            else:
+                references = references + ' ' + in_reply_to
+
+            msgRoot.add_header('References', references)
+            msgRoot.add_header('In-Reply-To', in_reply_to)
 
             if 'Re:' not in subject:
                 msgRoot['Subject'] = 'Re: '+ subject
 
-        return msgRoot
+        return msgRoot, trail
 
     def _construct_trail(self, parent_mailbox):
-        trail = parent_mailbox.get_html()
+        trail = parent_mailbox.get_trail()
         if not trail:
             return ''
 
@@ -87,11 +96,13 @@ class GmailController():
         if '<head>' in trail:
             soup.head.unwrap()
 
+        data_dict = parent_mailbox.get_wrote_on_data()
+        wrote_on = "On {week_day}, {date} {month} {year}, {sender} wrote:".format(**data_dict)
 
-        start = '''<div style="margin-left: 1em; color: #500050; padding-top: 20px;"><div>On Mon, 03 Feb 2020, Kirill Shilov &lt;ks.shilov@gmail.com&gt; wrote:</div><div style="border-left: 1px solid black; padding-left: 1em;">'''
-        end = '''</div></div>'''
+        start = '''<br><div class="gmail_quote"><div dir="ltr" class="gmail_attr">''' + wrote_on + '''<br></div><blockquote class="gmail_quote" style="margin:0px 0px 0px 0.8ex;border-left:1px solid rgb(204,204,204);padding-left:1ex"><u></u><div>'''
+        end = '''</div></blockquote></div>'''
 
-        trail = start + str(soup) + end
+        trail = start + str(soup) + end  
 
         return trail
 
@@ -109,10 +120,11 @@ class GmailController():
 
         return msg_id, message
 
+    #NOT USED
     def _get_payload(self, message):
         text = ''
         html = ''
-        references = message.get(name='references', failobj='')
+        references = message.get(name='References', failobj='')
 
         for part in message.walk():
             content_type = part.get(name='content-type')
@@ -130,19 +142,25 @@ class GmailController():
                         message, 
                         prospect_id, 
                         campaign_id, 
-                        msgId,  
+                        msgId,
+                        plain_text='',
+                        html_text='',
+                        trail = '', 
                         mailbox_reply_to_id='', 
                         sender_meta={}):
 
-        text, html, references = self._get_payload(message)
+        references = message.get(name='References', failobj='')
+        sender = message.get(name='From', failobj=self.email)
 
         email_data = {
             'msgId' : msgId,
             'mailbox_parent_id' : mailbox_reply_to_id,
             'message' : message,
             'references' : references.strip(),
-            'text' : text,
-            'html' : html
+            'text' : plain_text,
+            'html' : html_text,
+            'trail' : trail,
+            'sender' : sender
         }
 
         data = {}

@@ -3,6 +3,31 @@ from o24.globals import *
 from o24.backend import db
 from mongoengine.queryset.visitor import Q
 import datetime
+week_day_map = {
+    0 : 'Mon',
+    1 : 'Tue',
+    2 : 'Wed',
+    3 : 'Thu',
+    4 : 'Fri',
+    5 : 'Sat',
+    6 : 'Sun'
+}
+
+month_map = {
+    1 : 'Jan',
+    2 : 'Feb',
+    3 : 'Mar',
+    4 : 'Apr',
+    5 : 'May',
+    6 : 'Jun',
+    7 : 'Jul',
+    8 : 'Aug',
+    9 : 'Sep',
+    10 : 'Oct',
+    11 : 'Nov',
+    12 : 'Dec'
+}
+
 
 class MailBox(db.Document):
     prospect_id = db.ReferenceField(models.Prospects)
@@ -69,6 +94,29 @@ class MailBox(db.Document):
 
     def get_msgId(self):
         return self.email_data.get('msgId', '')
+
+    def get_trail(self):
+        return self.email_data.get('trail', '')
+
+    def get_wrote_on_data(self):
+        data_dict = {
+            'sender' : '',
+            'week_day' : '',
+            'date' : '',
+            'month' : '',
+            'year' : ''
+        }
+
+        data_dict['sender'] = self.email_data.get('sender', '')
+
+        date = self.created
+
+        data_dict['week_day'] = week_day_map[date.weekday()]
+        data_dict['date'] = date.day
+        data_dict['month'] = month_map[date.month]
+        data_dict['year'] = date.year
+
+        return data_dict
 
     def _commit(self):
         self.save()

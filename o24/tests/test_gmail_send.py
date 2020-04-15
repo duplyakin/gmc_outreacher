@@ -171,14 +171,14 @@ class TestGmailSend(unittest.TestCase):
         self.assertTrue(access_credentials, "access_credentials not found gmail:{0}".format(data.get('email', None)))
         self.assertTrue(gmail, "email from data empty:{0}".format(gmail))
 
-        subject = "!!!!! Привет Кирилл Invite to Hacker Noon roundup - for howtotoken.com"
-        email_to = 'ks.shilov@howtotoken.com'
+        subject = "ХАХА-3 с blockquote Кирилл апрель Invite to roundup - for howtotoken.com"
+        email_to = 'ksshilov@yandex.ru'
 
         gmail_controller = GmailController(email=gmail,
                                             credentials=access_credentials,
                                             smtp=True)
 
-        message = gmail_controller.create_multipart_message( 
+        message, trail = gmail_controller.create_multipart_message( 
                                             email_from=gmail,
                                             email_to=email_to,
                                             subject=subject,
@@ -201,7 +201,10 @@ class TestGmailSend(unittest.TestCase):
                         message, 
                         prospect_id, 
                         campaign_id, 
-                        msgId)
+                        msgId,
+                        plain_text=EMAIL_TEXT_1_PLAIN,
+                        html_text=EMAIL_TEXT_1_HTML,
+                        trail=trail)
 
         mailbox = MailBox.add_message(data)
         self.assertTrue(mailbox, "Error: can't create mailbox:{0}".format(mailbox))
@@ -212,7 +215,7 @@ class TestGmailSend(unittest.TestCase):
         # Send 3 follow ups to the previous one
 
         for followup in EMAIL_FOLLOWUPS:
-            message = gmail_controller.create_multipart_message( 
+            message, trail = gmail_controller.create_multipart_message( 
                                                         email_from=gmail,
                                                         email_to=email_to,
                                                         subject=subject,
@@ -233,7 +236,10 @@ class TestGmailSend(unittest.TestCase):
                         message, 
                         prospect_id, 
                         campaign_id, 
-                        msgId,  
+                        msgId,
+                        plain_text=EMAIL_TEXT_1_PLAIN,
+                        html_text=followup,
+                        trail=trail,
                         mailbox_reply_to_id=mailbox.id)
 
             mailbox = MailBox.add_message(data, message_type=2)
@@ -245,7 +251,8 @@ class TestGmailSend(unittest.TestCase):
             time.sleep(10)
 
     def test_4_trail_construction(self):
-        return
+        return 
+
         email = USER_EMAIL
 
         user = User.get_user(email=email)
@@ -268,7 +275,7 @@ class TestGmailSend(unittest.TestCase):
                                             credentials=access_credentials,
                                             smtp=True)
 
-        message = gmail_controller.create_multipart_message( 
+        message, trail = gmail_controller.create_multipart_message( 
                                             email_from=gmail,
                                             email_to=email_to,
                                             subject=subject,
@@ -285,15 +292,49 @@ class TestGmailSend(unittest.TestCase):
                         message, 
                         prospect_id, 
                         campaign_id, 
-                        msgId)
+                        msgId,
+                        plain_text=EMAIL_TEXT_1_PLAIN,
+                        html_text=EMAIL_TEXT_1_HTML,
+                        trail=trail)
 
         mailbox = MailBox.add_message(data)
         self.assertTrue(mailbox, "Error: can't create mailbox:{0}".format(mailbox))
         print("******** Created mailbox.id:{0}".format(mailbox.id))
         
-        res = gmail_controller.send_message(email_to=email_to,
-                                            message=message)
-        
+        print("####################### Message Intro:")
+        print(message.as_string())
+
+        mailbox_id = mailbox.id
+        for followup in EMAIL_FOLLOWUPS:
+            message, trail = gmail_controller.create_multipart_message( 
+                                                        email_from=gmail,
+                                                        email_to=email_to,
+                                                        subject=subject,
+                                                        plain_version=EMAIL_TEXT_1_PLAIN,
+                                                        html_version=followup,
+                                                        parent_mailbox=mailbox)
+
+            self.assertTrue(message, "Can't construct followup message error:{0}".format(message))
+            
+            msgId, message = gmail_controller.add_header_msgId(message)
+            self.assertTrue(msgId, "msgId generation error:{0}".format(msgId))
+
+            data = gmail_controller.construct_data(
+                        message, 
+                        prospect_id, 
+                        campaign_id, 
+                        msgId,
+                        plain_text=EMAIL_TEXT_1_PLAIN,
+                        html_text=followup,
+                        trail=trail,
+                        mailbox_reply_to_id=mailbox.id)
+
+            mailbox = MailBox.add_message(data, message_type=2)
+
+            print("####################### Message Followup:")
+            print(message.as_string())
+
+
        
 
     def test_5_send_unicode_data(self): 
