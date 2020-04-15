@@ -24,7 +24,9 @@ class GmailController():
         if self.smtp:
             self.smtp_provider = gmail_smtp_provider.GmailSmtpProvider(email, credentials)
 
-    #TODO: use prospect_id and campaign_id to get msg_id data
+    def current_email(self):
+        return self.email
+            
     def get_msgId(self, msg_id):
         msgId = ''
         msg = self.provider.get_message_data(msg_id=msg_id, metadataHeaders=['Message-Id'])
