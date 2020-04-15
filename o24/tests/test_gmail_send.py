@@ -67,8 +67,8 @@ class TestGmailSend(unittest.TestCase):
         self.assertTrue(access_credentials, "access_credentials not found gmail:{0}".format(data.get('email', None)))
         self.assertTrue(gmail, "email from data empty:{0}".format(gmail))
 
-        subject = "GSUITE-8 тест привет Invite to roundup - for howtotoken.com"
-        email_to = 'ksshilov@yandex.ru'
+        subject = "GSUITE-9 тест привет Invite to roundup - for howtotoken.com"
+        email_to = 'ks.shilov@gmail.com'
 
         gmail_controller = GmailController(email=gmail,
                                             credentials=access_credentials)

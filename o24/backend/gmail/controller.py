@@ -64,7 +64,15 @@ class GmailController():
 
         # Create the root message and fill in the from, to, and subject headers
         msgRoot = MIMEMultipart('related')
-        msgRoot['Subject'] = subject
+        
+        if parent_mailbox:
+            if 'Re:' not in subject:
+                msgRoot['Subject'] = 'Re: '+ subject
+            else:
+                msgRoot['Subject'] = subject
+        else:
+            msgRoot['Subject'] = subject
+        
         msgRoot['From'] = email_from
         msgRoot['To'] = email_to
 
@@ -97,8 +105,6 @@ class GmailController():
             msgRoot.add_header('References', references)
             msgRoot.add_header('In-Reply-To', in_reply_to)
 
-            if 'Re:' not in subject:
-                msgRoot['Subject'] = 'Re: '+ subject
 
         return msgRoot, trail
 
