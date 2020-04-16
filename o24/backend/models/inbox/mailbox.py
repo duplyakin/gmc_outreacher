@@ -33,6 +33,9 @@ class MailBox(db.Document):
     prospect_id = db.ReferenceField(models.Prospects)
     campaign_id = db.ReferenceField(models.Campaign)
 
+    #it's incremented inside (prospect_id, campaign_id)
+    sequence = db.IntField(default=0)
+
     email_data = db.DictField()
 
     sender_meta = db.DictField()
@@ -47,7 +50,7 @@ class MailBox(db.Document):
     # we will use this field to store task meta that this email belongs to 
     task_meta = db.DictField()
 
-    created = db.DateTimeField(default=datetime.datetime.now())
+    created = db.DateTimeField(default=datetime.datetime.utcnow())
 
     @classmethod
     def add_message(cls, data, task_meta={}, tracker_token='', message_type=1):
@@ -56,21 +59,28 @@ class MailBox(db.Document):
         new_message.prospect_id = data.get('prospect_id')
         new_message.campaign_id = data.get('campaign_id')
 
+        has_parent = cls.get_parent(prospect_id=new_message.prospect_id,
+                                            campaign_id=new_message.campaign_id)
+        current_sequence = 0
+        if has_parent:
+            current_sequence = has_parent.sequence + 1
+
+        new_message.sequence = current_sequence
+
         new_message.email_data = data.get('email_data')
         new_message.sender_meta = data.get('sender_meta')
 
         new_message.task_meta = task_meta
         new_message.tracker_token = tracker_token
         new_message.message_type = message_type
-
+    
 
         new_message._commit()
         return new_message
     
     @classmethod
     def get_parent(cls, prospect_id, campaign_id):
-        return cls.objects(Q(prospect_id=prospect_id) and Q(campaign_id=campaign_id)).order_by('created').first()
-
+        return cls.objects(Q(prospect_id=prospect_id) & Q(campaign_id=campaign_id)).order_by('-sequence').first()
 
     @classmethod
     #msgId - Global goole msgId 

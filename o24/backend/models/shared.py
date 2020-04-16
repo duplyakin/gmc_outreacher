@@ -53,6 +53,8 @@ class Funnel(db.Document):
 
     template = db.DictField()
 
+    data = db.DictField() #any info here, like delay for DELAY action
+
     @classmethod
     def next_node(cls, current_node, result):
         next_node = None
@@ -105,6 +107,12 @@ class Funnel(db.Document):
         
         if data.get('if_false', None):
             self.if_false = data.get('if_false')
+        
+        if data.get('template', None):
+            self.template = data.get('template')
+
+        if data.get('data', None):
+            self.data = data.get('data')
 
         self._commit()
         
@@ -174,6 +182,14 @@ class TaskQueue(db.Document):
         self.status = FINISHED
         self._commit()
 
+    def get_mail_data(self):
+        result = {}
+        prospect = models.Prospects.objects(id=self.prospect_id).get()
+        
+        result['template'] = self.current_node.template
+        result['email_to'] = prospect.get_email()
+        
+        return result
 
     @classmethod
     def get_task(cls, task_id):

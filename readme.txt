@@ -16,6 +16,7 @@ python -m unittest o24.tests.test_scheduler_campaigns.TestScheduler.test_1_start
 python -m unittest discover -s .\o24\tests\ -p "*test_gmail_send.py"
 python -m unittest discover -s .\o24\tests\ -p "*test_gmail_provider_headers.py"
 
+python -m unittest discover -s .\o24\tests\ -p "*test_gmail_handlers.py"
 
 python -m unittest discover -s .\o24\tests\ -p "*mongo_test_lookup.py"
 
@@ -140,3 +141,6 @@ https://github.com/tausen/mu4e-mimelook/blob/master/mimelook.py
 
 Попробовать вот это:
 https://wordeology.com/computer/how-to-send-good-unicode-email-with-python.html
+
+Tests for Flask_user:
+https://github.com/lingthio/Flask-User/blob/a379fa0a281789618c484b459cb41236779b95b1/flask_user/tests/test_roles.py#L67

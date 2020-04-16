@@ -26,7 +26,7 @@ class GmailController():
 
     def current_email(self):
         return self.email
-            
+       
     def get_msgId(self, msg_id):
         msgId = ''
         msg = self.provider.get_message_data(msg_id=msg_id, metadataHeaders=['Message-Id'])
@@ -224,9 +224,9 @@ class GmailController():
 
         return {'Error' : 'Something went wrong'}
     
-    def parse_tags(self, message):
-        pass
+    def insert_tags(self, text):
+        return text
     
-    def parse_images(self, message, images):
-        pass
+    def insert_images(self, text):
+        return text
 

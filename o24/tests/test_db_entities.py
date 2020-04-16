@@ -4,19 +4,19 @@ USERS = [
      'active' : True,
      'credentials' : [
          {
-         'data' : { 'oauth-token' : 'gmail1-token'},
+         'data' : { 'sender' : 'smtp'},
          'medium' : 'email'
          },
         {
-         'data' : { 'oauth-token' : 'gsuite1-token'},
+         'data' : { 'sender' : 'api'},
          'medium' : 'email'
          },
          {
          'data' : { 'email' : 'linkedin1-email', 'password' : 'linkedin1-password'},
          'medium' : 'linkedin'
          },
-   {
-         'data' : { 'special-medium' : 'special-medium'},
+         {
+         'data' : { 'sender' : 'special-medium'},
          'medium' : 'special-medium'
          },
      ]
@@ -26,19 +26,19 @@ USERS = [
      'active' : True,
       'credentials' : [
          {
-         'data' : { 'oauth-token' : 'gmail2-token'},
+         'data' : { 'sender' : 'smtp'},
          'medium' : 'email'
          },
         {
-         'data' : { 'oauth-token' : 'gsuite2-token'},
+         'data' : { 'sender' : 'api'},
          'medium' : 'email'
          },
          {
          'data' : { 'email' : 'linkedin2-email', 'password' : 'linkedin2-password'},
          'medium' : 'linkedin'
          },
-   {
-         'data' : { 'special-medium' : 'special-medium'},
+         {
+         'data' : { 'sender' : 'special-medium'},
          'medium' : 'special-medium'
          },
      ]
@@ -48,7 +48,7 @@ USERS = [
      'active' : True,
       'credentials' : [
          {
-         'data' : { 'oauth-token' : 'gmail3-token'},
+         'data' : { 'sender' : 'smtp'},
          'medium' : 'email'
          },
          {
@@ -56,7 +56,7 @@ USERS = [
          'medium' : 'linkedin'
          },
    {
-         'data' : { 'special-medium' : 'special-medium'},
+         'data' : { 'sender' : 'special-medium'},
          'medium' : 'special-medium'
          },
      ]
@@ -67,7 +67,7 @@ USERS = [
      'active' : True,
       'credentials' : [
          {
-         'data' : { 'oauth-token' : 'gmail4-token'},
+         'data' : { 'sender' : 'smtp'},
          'medium' : 'email'
          },
          {
@@ -75,7 +75,7 @@ USERS = [
          'medium' : 'linkedin'
          },
    {
-         'data' : { 'special-medium' : 'special-medium'},
+         'data' : { 'sender' : 'special-medium'},
          'medium' : 'special-medium'
          },
       ]
@@ -86,7 +86,7 @@ USERS = [
      'active' : True,
      'credentials' : [
          {
-         'data' : { 'oauth-token' : 'gmail5-token'},
+         'data' : { 'sender' : 'smtp'},
          'medium' : 'email'
          },
          {
@@ -94,7 +94,7 @@ USERS = [
          'medium' : 'linkedin'
          },
    {
-         'data' : { 'special-medium' : 'special-medium'},
+         'data' : { 'sender' : 'special-medium'},
          'medium' : 'special-medium'
          },
       ]
@@ -104,7 +104,7 @@ USERS = [
      'active' : True,
      'credentials' : [
          {
-         'data' : { 'oauth-token' : 'gmail6-token'},
+         'data' : { 'sender' : 'smtp'},
          'medium' : 'email'
          },
          {
@@ -112,7 +112,7 @@ USERS = [
          'medium' : 'linkedin'
          },
    {
-         'data' : { 'special-medium' : 'special-medium'},
+         'data' : { 'sender' : 'special-medium'},
          'medium' : 'special-medium'
          },
       ]
@@ -123,7 +123,7 @@ USERS = [
      'active' : True,
      'credentials' : [
          {
-         'data' : { 'oauth-token' : 'gmail7-token'},
+         'data' : { 'sender' : 'smtp'},
          'medium' : 'email'
          },
          {
@@ -131,7 +131,7 @@ USERS = [
          'medium' : 'linkedin'
          },
    {
-         'data' : { 'special-medium' : 'special-medium'},
+         'data' : { 'sender' : 'special-medium'},
          'medium' : 'special-medium'
          },
       ]
@@ -142,7 +142,7 @@ USERS = [
      'active' : True,
      'credentials' : [
          {
-         'data' : { 'oauth-token' : 'gmail8-token'},
+         'data' : { 'sender' : 'smtp'},
          'medium' : 'email'
          },
          {
@@ -150,7 +150,7 @@ USERS = [
          'medium' : 'linkedin'
          },
    {
-         'data' : { 'special-medium' : 'special-medium'},
+         'data' : { 'sender' : 'special-medium'},
          'medium' : 'special-medium'
          },
       ]
@@ -160,7 +160,7 @@ USERS = [
      'active' : True,
      'credentials' : [
          {
-         'data' : { 'oauth-token' : 'gmail9-token'},
+         'data' : { 'sender' : 'smtp'},
          'medium' : 'email'
          },
          {
@@ -168,7 +168,7 @@ USERS = [
          'medium' : 'linkedin'
          },
          {
-         'data' : { 'special-medium' : 'special-medium'},
+         'data' : { 'sender' : 'special-medium'},
          'medium' : 'special-medium'
          },
       ]
@@ -179,7 +179,7 @@ USERS = [
      'active' : True,
      'credentials' : [
          {
-         'data' : { 'oauth-token' : 'gmail10-token'},
+         'data' : { 'sender' : 'smtp'},
          'medium' : 'email'
          },
          {
@@ -187,7 +187,7 @@ USERS = [
          'medium' : 'linkedin'
          },
          {
-         'data' : { 'special-medium' : 'special-medium'},
+         'data' : { 'sender' : 'special-medium'},
          'medium' : 'special-medium'
          },         
       ]
@@ -332,7 +332,7 @@ FUNNELS = [
 
         'wait-1' : {
             'key' : 'delay-linkedin',
-            'data' : 10,
+            'data' : { 'delay' : 10},
             'if_true' : 'check-connect-1',
             'if_false' : 'check-connect-1'
         },
@@ -345,14 +345,13 @@ FUNNELS = [
 
                 'connect-approve-1' : {
                     'key' : 'linkedin-send-message',
-                    'data' : 'Hello on Linkedin',
                     'if_true' : 'wait-2',
                     'if_false' : 'wait-2'
                 },
 
                 'wait-2' : {
                     'key' : 'delay-linkedin',
-                    'data' : 10,
+                    'data' : { 'delay' : 10},
                     'if_true': 'check-reply-1',
                     'if_false': 'check-reply-1'
                 },
@@ -365,14 +364,13 @@ FUNNELS = [
 
         'connect-deny-1' : {
             'key' : 'email-send-message',
-            'data' : 'hello on email',
             'if_true' : 'wait-22',
             'if_false' : 'wait-22'
         },
 
                 'wait-22' : {
                     'key' : 'delay-email',
-                    'data' : 10,
+                    'data' : { 'delay' : 10},
                     'if_true' : 'check-reply-intro',
                     'if_false' : 'check-reply-intro'
                 },
@@ -385,14 +383,13 @@ FUNNELS = [
 
                 'email-followup-1' :  {
                     'key' : 'email-send-message',
-                    'data' : 'hello on email - follow up 1',
                     'if_true' : 'wait-3',
                     'if_false' : 'wait-3'
                 },
 
                 'wait-3' : {
                     'key' : 'delay-email',
-                    'data' : 10,
+                    'data' : { 'delay' : 10},
                     'if_true' : 'check-reply-followup-1',
                     'if_false' : 'check-reply-followup-1'
                 },

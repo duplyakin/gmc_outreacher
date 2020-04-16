@@ -25,7 +25,7 @@ class Scheduler():
         # follow up level = 0(reserve the current followups) 1(execute followup_level=1 until finished)
         
         current_priority = Priority.get_priority()
-        follow_ups = TaskQueue.objects(Q(record_type=FOLLOWUP) and Q(status__ne=FINISHED))
+        follow_ups = TaskQueue.objects(Q(record_type=FOLLOWUP) & Q(status__ne=FINISHED))
     
         #if we don't have followups then we need to execute INTRO
         if follow_ups.count() <= 0:

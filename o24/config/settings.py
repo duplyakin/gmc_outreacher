@@ -80,11 +80,14 @@ class ProductionConfig(BaseConfig):
 class TestConfig(BaseConfig):
     FLASK_ENV = 'test'
     DEBUG = True
+    TESTING = True
     CELERY_TASK_ALWAYS_EAGER = True
     CELERY_BROKER = 'amqp://guest:guest@localhost:5672//'
     CELERY_BACKEND_RESULT_EXPIRES = 300
     os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
 
+    WTF_CSRF_ENABLED = False
+    LOGIN_DISABLED=False
     MONGODB_SETTINGS = {
         'db': 'O24Mc-test',
         'host': '127.0.0.1',

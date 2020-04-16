@@ -111,11 +111,6 @@ class Credentials(db.Document):
     current_daily_counter = db.IntField(default=0)
     current_hourly_counter = db.IntField(default=0) #NOT USED
 
-    #current_day = db.DateTimeField(default=datetime.datetime(1970, 1, 1))
-    #current_hour = db.DateTimeField(default=datetime.datetime(1970, 1, 1))
-    #daily_counter = db.IntField(default=0)
-    #hourly_counter = db.IntField(default=0)
-
     @classmethod
     def ready_ids(cls, utc_now):
         #ids = [p.get('_id') for p in cls.objects(next_action__lte=utc_now).only('id').all().as_pymongo()]
@@ -138,8 +133,12 @@ class Credentials(db.Document):
         return new_credentials
     
     @classmethod
-    def get_credentials(cls, user_id, medium):
-        credentials = cls.objects(Q(owner=user_id) & Q(medium=medium)).first()
+    def get_credentials(cls, user_id, medium=None, sender=None):
+        if medium:
+            return cls.objects(Q(owner=user_id) & Q(medium=medium)).first()
+
+        if sender:
+            return cls.objects(Q(owner=user_id) & Q(data__sender=sender)).first()
 
         return credentials
 
@@ -261,6 +260,7 @@ class Campaign(db.Document):
                 credentials_dict['id'] = c.id
                 credentials_dict['data'] = c.data
                 credentials_dict['medium'] = medium
+                break
         
         return credentials_dict
                 
@@ -351,6 +351,9 @@ class Prospects(db.Document):
     @classmethod
     def update_prospects(cls, ids, status):
         return cls.objects(Q(id__in=ids)).update(status=status)
+
+    def get_email(self):
+        return self.data.get('email', '')
 
     def update_status(self, status):
         self.status = status

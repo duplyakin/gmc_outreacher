@@ -10,7 +10,9 @@ def create_funnel_node(current):
         raise Exception('No such action for key:{0}'.format(current.get('key', None)))
     
     data = {
-        'action' : action.id
+        'action' : action.id,
+        'template' : current.get('template', ''),
+        'data' : current.get('data', '')
     }
     if current.get('root', None):
         data['root'] = current.get('root')

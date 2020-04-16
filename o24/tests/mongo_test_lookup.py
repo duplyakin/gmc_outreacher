@@ -186,7 +186,7 @@ class TestLookupQuery(unittest.TestCase):
             credentials = Credentials.objects(medium=task.get('credentials_id')).first()
             self.assertTrue(credentials, "credentials not found, medium:{0}".format(task.get('credentials_id')))
 
-            next_prospect = Prospects.objects(Q(id__in=propspects) and Q(assign_to=campaign.id)).filter(Q(id__nin=p_nin)).first()
+            next_prospect = Prospects.objects(Q(id__in=propspects) & Q(assign_to=campaign.id)).filter(Q(id__nin=p_nin)).first()
             self.assertTrue(next_prospect, "next_prospect not found")
 
             p_nin.append(next_prospect.id)

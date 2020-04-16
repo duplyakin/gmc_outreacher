@@ -29,6 +29,124 @@ Telegram: @ksshilov
 Linkedin: https://www.linkedin.com/in/kirill-shilov-25aa8630/
 '''
 
+INTRO_TEMPALTE = {
+  'subject' : '😎 Для кирилла из {company}',
+  'plain' : '''
+  {first_name}, добрый день!
+
+  У меня есть предложения по сотрудничеству.
+
+  Whom can I talk to?
+
+  Here is my telegram: @ksshilov
+
+  Kirill Shilov,
+  Hackernoon.com contributor (https://hackernoon.com/@ks.shilov)
+  Telegram: @ksshilov
+  Linkedin: https://www.linkedin.com/in/kirill-shilov-25aa8630/
+  ''',
+  'html' :'''
+  <html>
+  <head>
+  </head>
+  <body>
+    {first_name}, добрый день!
+    <br>
+    <br>  У меня есть предложения по сотрудничеству.
+    <br>
+    Whom can I talk to?
+
+    Here is my telegram: @ksshilov    <br>
+    <br>
+    <br>Kirill Shilov,
+    <br>Hackernoon.com contributor (https://hackernoon.com/@ks.shilov)
+    <br>Telegram: @ksshilov=20
+    <br>Linkedin: https://www.linkedin.com/in/kirill-shilov-25aa8630/
+  </body>
+  </html>
+  '''
+}
+
+
+
+FOLLOW_UP_1 = {
+  'subject' : '😎 Для кирилла из {company}',
+  'plain' : '''
+  {first_name}, еще раз!
+
+  Это первый follow up - 1
+  
+  Напишу вам завтра.
+
+  Kirill Shilov,
+  Hackernoon.com contributor (https://hackernoon.com/@ks.shilov)
+  Telegram: @ksshilov
+  Linkedin: https://www.linkedin.com/in/kirill-shilov-25aa8630/
+  ''',
+
+  'html' :'''
+  <html>
+  <head>
+  </head>
+  <body>
+    {first_name}, еще раз!
+    <br>
+    Это первый follow up - 1
+    
+    Напишу вам завтра.
+    <br>
+    <br>Kirill Shilov,
+    <br>Hackernoon.com contributor (https://hackernoon.com/@ks.shilov)
+    <br>Telegram: @ksshilov=20
+    <br>Linkedin: https://www.linkedin.com/in/kirill-shilov-25aa8630/
+  </body>
+  </html>
+  '''
+}
+
+FOLLOW_UP_2 = {
+  'subject' : '😎 Для кирилла из {company}',
+  'plain' : '''
+  {first_name}, еще раз hello!
+
+  Это второй follow up - 2
+  
+  Напишу вам после завтра.
+
+  Kirill Shilov,
+  Hackernoon.com contributor (https://hackernoon.com/@ks.shilov)
+  Telegram: @ksshilov
+  Linkedin: https://www.linkedin.com/in/kirill-shilov-25aa8630/
+  ''',
+  
+  'html' :'''
+  <html>
+  <head>
+  </head>
+  <body>
+    {first_name}, еще раз hello!
+    <br>
+    Это второй follow up - 2
+    
+    Напишу вам после завтра.
+    <br>
+    <br>Kirill Shilov,
+    <br>Hackernoon.com contributor (https://hackernoon.com/@ks.shilov)
+    <br>Telegram: @ksshilov=20
+    <br>Linkedin: https://www.linkedin.com/in/kirill-shilov-25aa8630/
+  </body>
+  </html>
+  '''
+}
+
+
+
+
+
+
+
+
+
 EMAIL_TEXT_2_HTML = '''
 <!doctype html>
 <html>

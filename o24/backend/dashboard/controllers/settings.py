@@ -45,12 +45,16 @@ def dashboard_oauth_callback():
 
     access_credentials, email = provider.set_gmail_auth_credentials(request.url, current_state)
 
+    GMAIL_TYPE = 'api'
+    if '@gmail.com' in email:
+        GMAIL_TYPE = 'smtp'
+
     data = {}
     data['medium'] = 'email'
     data['data'] = {
         'email' : email,
         'credentials' : access_credentials,
-        'type' : GMAIL_TYPE
+        'sender' : GMAIL_TYPE
     }
     Credentials.create_credentials(owner=current_user.id, 
                                     data=data)
