@@ -1,57 +1,115 @@
-let mongoose = require('mongoose')
+let mongoose = require('mongoose');
+let Schema = mongoose.Schema;
 
-let actionSchema = new mongoose.Schema({
-
-    event: {
-        type: Boolean,
-        default: false
-    },
-    data : {}
-})
-
-let funnelSchema = new mongoose.Schema({
-
-    action: {
-        type: Boolean,
-        default: false
-    },
-    frequency : {},
-    parent: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Funnel"
-      },
-    
-    if_true: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Funnel"
+let actionSchema = new Schema({
+    action_type : {
+      type: Number,
+      default: 0,
     },
 
-    if_false: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Funnel"
-    }
-
-})
-
-let TaskQueueSchema = new mongoose.Schema({
-    current: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Funnel"
-    },
-
-    status : {
-        type: Number,
-        default : 0
-    },
-    
     data : {},
-    result : {},
-    credentials : {}
-})
 
+    medium : String,
+
+    key : String,
+});
+
+let funnelSchema = new Schema({
+    action : {
+      type: Schema.Types.ObjectId,
+      ref: 'Action',
+    },
+
+    paramters : {},
+
+    root : {
+      type: Boolean,
+      default: false,
+    },
+
+    if_true : {
+      type: Number,
+      default: None,
+    },
+
+    if_false : {
+      type: Number,
+      default: None,
+    },
+
+    template : {},
+});
+
+let taskQueueSchema = new Schema({
+  current_node : {
+    type: Schema.Types.ObjectId,
+    ref: Funnel,
+  },
+
+  action_key : String,
+
+  status : {
+    type: Number,
+    default: NEW, // ???
+  },
+
+  ack : {
+    type: Number,
+    default: 0,
+  },
+
+  credentials_dict : {},
+
+  credentials_id : Number,
+
+  result_data : {},
+
+  prospect_id : {
+    type: Number,
+    unique: true,
+  },
+
+  campaign_id : Number,
+
+  record_type : {
+    type: Number,
+    default: 0,
+  },
+
+  followup_level : {
+    type: Number,
+    default: 0,
+  },
+
+  js_action : {
+    type: Boolean,
+    default: false,
+  },
+});
+
+let asyncActionsSchema = new Schema({
+  // open, reply
+  action_type : Number,
+
+  count : Number,
+
+  // email, linkedin, twitter
+  medium : String,
+
+  // based on medium, check different tables: Mailbox, Linkedin, Twitter
+  ref : Number,
+
+  action_meta : {},
+
+  created : {
+    type: Date,
+    default: Date.now,
+  }
+});
 
 module.exports = {
    Action : mongoose.model('Action', actionSchema),
    Funnel : mongoose.model('Funnel', funnelSchema),
-   TaskQueue : mongoose.model('TaskQueue', TaskQueueSchema)
+   TaskQueue : mongoose.model('TaskQueue', taskQueueSchema),
+   AsyncActions : mongoose.model('AsyncActions', asyncActionsSchema),
 }

@@ -1,5 +1,5 @@
-//const workers = require(__dirname + "/workers/workers.js");
 const workers = require(__dirname + '/workers/workers.js');
+
 const myCookies = [
   {
     "name": "lidc",
