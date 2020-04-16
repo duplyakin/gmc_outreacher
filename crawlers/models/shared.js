@@ -43,7 +43,7 @@ let funnelSchema = new Schema({
 let taskQueueSchema = new Schema({
   current_node : {
     type: Schema.Types.ObjectId,
-    ref: Funnel,
+    ref: 'Funnel',
   },
 
   action_key : String,
