@@ -7,7 +7,7 @@ let actionSchema = new Schema({
       default: 0,
     },
 
-    data : {},
+    data : Object,
 
     medium : String,
 
@@ -20,7 +20,7 @@ let funnelSchema = new Schema({
       ref: 'Action',
     },
 
-    paramters : {},
+    paramters : Object,
 
     root : {
       type: Boolean,
@@ -37,7 +37,7 @@ let funnelSchema = new Schema({
       default: None,
     },
 
-    template : {},
+    template : Object,
 });
 
 let taskQueueSchema = new Schema({
@@ -50,7 +50,7 @@ let taskQueueSchema = new Schema({
 
   status : {
     type: Number,
-    default: NEW, // ???
+    default: 0, // NEW
   },
 
   ack : {
@@ -58,11 +58,11 @@ let taskQueueSchema = new Schema({
     default: 0,
   },
 
-  credentials_dict : {},
+  credentials_dict : Object,
 
   credentials_id : Number,
 
-  result_data : {},
+  result_data : Object,
 
   prospect_id : {
     type: Number,
@@ -99,7 +99,7 @@ let asyncActionsSchema = new Schema({
   // based on medium, check different tables: Mailbox, Linkedin, Twitter
   ref : Number,
 
-  action_meta : {},
+  action_meta : Object,
 
   created : {
     type: Date,
