@@ -24,6 +24,10 @@ class LoginAction {
     }
   }
 
+  async setContext(context) {
+    this.context = context;
+  }
+
   async closeBrowser(browser) {
     this.browser.close();
   }
