@@ -224,7 +224,7 @@ const CONNECT_URL = "https://www.linkedin.com/in/kirill-shilov-25aa8630/";
     pageNum: 9,
   };
 
-  //await workers.loginWorker(task);
+  // do search with OLD cookies
   await workers.searchWorker(task);
 
 })();

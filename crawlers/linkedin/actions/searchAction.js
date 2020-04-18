@@ -30,7 +30,6 @@ class SearchAction {
     for(let i = 0; i < 3; i++) {
       await this.page.goto(url);
       let current_url = await this.page.url();
-      console.log("..... URL: .....", current_url)
       if(current_url.includes('login') || current_url.includes('signup')) {
         let loginAction = new LoginAction.LoginAction(this.email, this.password, this.cookies);
         await loginAction.startBrowser();
@@ -47,17 +46,20 @@ class SearchAction {
   async gotoChecker(url) {
     await this.page.goto(url);
     let current_url = await this.page.url();
-    console.log("..... URL: .....", current_url)
     if(current_url.includes('login') || current_url.includes('signup')) {
       let loginAction = new LoginAction.LoginAction(this.email, this.password, this.cookies);
       await loginAction.setContext(this.context);
-      await loginAction.startBrowser();
-      await loginAction.login();
+      let result = await loginAction.login();
+      if(!result) {
+        // TODO: throw exception
+        return false;
+      } else {
+        await this.page.goto(url);
+        return true;
+      }
     } else {
       return true;
     }
-    return false;
-    // TODO: throw exception
   }
 
   async search() {

@@ -210,6 +210,7 @@ const myCookies = {
 
 const SEARCH_URL = "https://www.linkedin.com/search/results/people/?keywords=marketer&origin=GLOBAL_SEARCH_HEADER";
 const CONNECT_URL = "https://www.linkedin.com/in/kirill-shilov-25aa8630/";
+const CONNECT_URL_2 = "https://www.linkedin.com/in/lukaknezic/";
 
 // test running
 
@@ -219,12 +220,19 @@ const CONNECT_URL = "https://www.linkedin.com/in/kirill-shilov-25aa8630/";
   let task = {
     email: "grinnbob@rambler.ru",
     password: "linked123",
-    url: SEARCH_URL,
+    url: CONNECT_URL,
     cookies: myCookies,
     pageNum: 9,
+    text: 'hi! test',
+    connectName: 'Kirill Shilov',
   };
 
   //await workers.loginWorker(task);
-  await workers.searchWorker(task);
+  //await workers.searchWorker(task);
+  //await workers.connectWorker(task);
+  //await workers.messageWorker(task);
+  //await workers.scribeWorkWorker(task);
+  //await workers.messageCheckWorker(task);
+  await workers.connectCheckWorker(task);
 
 })();

@@ -1,27 +1,36 @@
-const puppeteer = require("./node_modules/puppeteer");
-const selectors = require(__dirname + "/./selectors");
-const links = require(__dirname + "/./links");
+const puppeteer = require(__dirname + "/./../../node_modules/puppeteer");
+const selectors = require(__dirname + "/.././selectors");
+const links = require(__dirname + "/.././links");
+const LoginAction = require(__dirname + '/loginAction.js');
 
 class ConnectCheckAction {
-  constructor(connectName, cookies) {
+  constructor(email, password, cookies, connectName) {
+    this.email = email;
+    this.password = password;
+
     this.connectName = connectName;
 
     //this.cookies = JSON.parse(cookies);
     this.cookies = cookies;
+  }
 
-    // check cookies
-    if(this.cookies !== undefined || this.cookies !== null) {
-      this.cookies.forEach((item) => {
-        if(item.name === 'li_at') {
-          if(Date.now() / 1000 > item.expires) {
-            let loginAction = new LoginAction(email, password, cookies);
-            loginAction.login();
-          }
-        }
-      });
+  // do 1 trie to connect URL or goto login
+  async gotoChecker(url) {
+    await this.page.goto(url);
+    let current_url = await this.page.url();
+    if(current_url.includes('login') || current_url.includes('signup')) {
+      let loginAction = new LoginAction.LoginAction(this.email, this.password, this.cookies);
+      await loginAction.setContext(this.context);
+      let result = await loginAction.login();
+      if(!result) {
+        // TODO: throw exception
+        return false;
+      } else {
+        await this.page.goto(url);
+        return true;
+      }
     } else {
-      let loginAction = new LoginAction(email, password, cookies);
-      loginAction.login();
+      return true;
     }
   }
 
@@ -38,7 +47,7 @@ class ConnectCheckAction {
   }
 
   async connectCheck() {
-    await this.page.goto(links.CONNECTS_LINK);
+    await this.gotoChecker(links.CONNECTS_LINK);
     await this.page.waitForSelector(selectors.SEARCH_CONNECTS_SELECTOR);
 
     await this.page.click(selectors.SEARCH_CONNECTS_SELECTOR);
@@ -46,13 +55,15 @@ class ConnectCheckAction {
 
     await this.page.waitForSelector(selectors.CONNECTOR_SELECTOR);
     await this.page.waitFor(1000);  // wait linkedIn loading process
-    let connect = await this.page.evaluate((selectors.CONNECTOR_SELECTOR) => {
-      let a = document.querySelector(selectors.CONNECTOR_SELECTOR);
+
+    let selector = selectors.CONNECTOR_SELECTOR;
+    let connect = await this.page.evaluate((selector) => {
+      let a = document.querySelector(selector);
       if(a !== null) {
         a = a.innerText;
       };
       return a;
-    }, selectors.CONNECTOR_SELECTOR);
+    }, selector);
 
    if(connect === this.connectName) {
      console.log("..... connect found - success: .....", connect)
@@ -62,4 +73,8 @@ class ConnectCheckAction {
     console.log("..... connect NOT found: .....", connect)
     return false;
   }
+}
+
+module.exports = {
+    ConnectCheckAction: ConnectCheckAction
 }

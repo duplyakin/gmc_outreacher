@@ -26,6 +26,7 @@ class LoginAction {
 
   async setContext(context) {
     this.context = context;
+    this.page = await this.context.newPage();
   }
 
   async closeBrowser(browser) {
@@ -64,6 +65,7 @@ class LoginAction {
   //  });
 
     // todo: if success - return: true;
+    await this.page.close();
     return true;
   }
 

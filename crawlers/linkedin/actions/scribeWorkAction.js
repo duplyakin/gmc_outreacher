@@ -1,32 +1,41 @@
-const puppeteer = require("./node_modules/puppeteer");
-const selectors = require(__dirname + "/./selectors");
+const puppeteer = require(__dirname + "/./../../node_modules/puppeteer");
+const selectors = require(__dirname + "/.././selectors");
+const LoginAction = require(__dirname + '/loginAction.js');
 
 class ScribeWorkAction {
-  constructor(url, cookies) {
+  constructor(email, password, cookies, url) {
+    this.email = email;
+    this.password = password;
+
     this.url = url;
 
     //this.cookies = JSON.parse(cookies);
     this.cookies = cookies;
+  }
 
-    // check cookies
-    if(this.cookies !== undefined || this.cookies !== null) {
-      this.cookies.forEach((item) => {
-        if(item.name === 'li_at') {
-          if(Date.now() / 1000 > item.expires) {
-            let loginAction = new LoginAction(email, password, cookies);
-            loginAction.login();
-          }
-        }
-      });
+  // do 1 trie to connect URL or goto login
+  async gotoChecker(url) {
+    await this.page.goto(url);
+    let current_url = await this.page.url();
+    if(current_url.includes('login') || current_url.includes('signup')) {
+      let loginAction = new LoginAction.LoginAction(this.email, this.password, this.cookies);
+      await loginAction.setContext(this.context);
+      let result = await loginAction.login();
+      if(!result) {
+        // TODO: throw exception
+        return false;
+      } else {
+        await this.page.goto(url);
+        return true;
+      }
     } else {
-      let loginAction = new LoginAction(email, password, cookies);
-      loginAction.login();
+      return true;
     }
   }
 
   async startBrowser() {
-    //this.browser = await puppeteer.launch({ headless: false });
-    this.browser = await puppeteer.launch();
+    this.browser = await puppeteer.launch({ headless: false });
+    //this.browser = await puppeteer.launch();
     this.context = await this.browser.createIncognitoBrowserContext();
     this.page = await this.context.newPage();
     await this.page.setCookie(...this.cookies);
@@ -37,16 +46,17 @@ class ScribeWorkAction {
   }
 
   async scribe() {
-    await this.page.goto(this.url);
+    await this.gotoChecker(this.url);
     //await page.waitForNavigation();
 
-    await autoScroll(this.page);
+    await this.autoScroll(this.page);
     await this.page.waitForSelector(selectors.JOB_LINK_SELECTOR);
 
-    let link = await this.page.evaluate((selectors.JOB_LINK_SELECTOR) => {
-      let a = document.querySelector(selectors.JOB_LINK_SELECTOR).href;
+    let selector = selectors.JOB_LINK_SELECTOR;
+    let link = await this.page.evaluate((selector) => {
+      let a = document.querySelector(selector).href;
       return a;
-    }, selectors.JOB_LINK_SELECTOR);
+    }, selector);
 
     if(link === null || link === undefined) {
       console.log("..... link-null: .....", link)
@@ -54,12 +64,13 @@ class ScribeWorkAction {
     }
 
     await this.page.goto(link + '/about');
-    //await page.waitForNavigation();
     await this.page.waitForSelector(selectors.JOB_SITE_SELECTOR);
+    // TODO: add logic, when company page has no ABOUT page
 
-    await this.page.evaluate((selectors.JOB_SITE_SELECTOR) => {
-      link = document.querySelector(selectors.JOB_SITE_SELECTOR).href;
-    }, selectors.JOB_SITE_SELECTOR);
+    selector = selectors.JOB_SITE_SELECTOR;
+    await this.page.evaluate((selector) => {
+      link = document.querySelector(selector).href;
+    }, selector);
 
     //console.log("..... link: .....", link)
     return true;
@@ -84,4 +95,8 @@ class ScribeWorkAction {
       });
   }
 
+}
+
+module.exports = {
+    ScribeWorkAction: ScribeWorkAction
 }
