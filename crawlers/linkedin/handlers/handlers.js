@@ -53,12 +53,11 @@ async function bullConsumer() {
 async function taskStatusListener() {
   // start cron every minute
   cron.schedule("* * * * *", () => {
-    let tasks = TaskQueue.find({status: 'IN_PROGRESS', js_action: true});
+    let tasks = await TaskQueue.find({status: 'IN_PROGRESS', js_action: true});
     if(Array.isArray(tasks) && tasks.length !== 0) {
       tasks.forEach((task) => {
         let data = {
-          username: task.username,
-          pass: task.pass,
+          task_id: task.id,
           action_key: task.action_key,
         };
         await bull_workers.add(data);

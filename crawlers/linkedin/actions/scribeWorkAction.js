@@ -5,7 +5,23 @@ class ScribeWorkAction {
   constructor(url, cookies) {
     this.url = url;
 
-    this.cookies = JSON.parse(cookies);
+    //this.cookies = JSON.parse(cookies);
+    this.cookies = cookies;
+
+    // check cookies
+    if(this.cookies !== undefined || this.cookies !== null) {
+      this.cookies.forEach((item) => {
+        if(item.name === 'li_at') {
+          if(Date.now() / 1000 > item.expires) {
+            let loginAction = new LoginAction(email, password, cookies);
+            loginAction.login();
+          }
+        }
+      });
+    } else {
+      let loginAction = new LoginAction(email, password, cookies);
+      loginAction.login();
+    }
   }
 
   async startBrowser() {

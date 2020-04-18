@@ -1,12 +1,5 @@
-//import LoginAction from __dirname  + "/./actions/loginAction.js"
-//import SearchAction from __dirname  + "/./actions/searchAction.js"
-//import ConnectAction from __dirname  + "/./actions/connectAction.js"
-//import MessageAction from __dirname  + "/./actions/messageAction.js"
-//import ScribeWorkAction from __dirname  + "/./actions/scribeWorkAction.js"
-//import * from __dirname  + "/./actions/"
-//const actions = require(__dirname + "/actions/LoginAction.js");
 const modules = require('../modules.js');
-module.exports.loginWorker = loginWorker;
+
 
 async function loginWorker(task) {
   let email = task.email;
@@ -21,15 +14,32 @@ async function loginWorker(task) {
 }
 
 async function searchWorker(task) {
+  let email = task.email;
+  let password = task.password;
   let searchUrl = task.url;
   let pageNum = task.pageNum;
   let cookies = task.cookies;
 
-  let searchAction = new SearchAction(searchUrl, pageNum, cookies);
+  // check cookies
+  if(cookies != undefined || cookies != null) {
+    if(Date.now() / 1000 > cookies.expires) {
+      let loginAction = new modules.loginAction.LoginAction(email, password, cookies.data);
+      await loginAction.startBrowser();
+      await loginAction.login();
+    }
+  } else {
+    let loginAction = new modules.loginAction.LoginAction(email, password, cookies.data);
+    await loginAction.startBrowser();
+    await loginAction.login();
+  }
+
+  // start work
+  let searchAction = new modules.searchAction.SearchAction(email, password, cookies.data, searchUrl, pageNum);
   await searchAction.startBrowser();
   let data = await searchAction.search();
   await searchAction.closeBrowser();
 
+  // TODO: write in taskQueue resultData
   return data;
 }
 
@@ -38,7 +48,7 @@ async function connectWorker(task) {
   let text = task.text;
   let cookies = task.cookies;
 
-  let connectAction = new ConnectAction(connecthUrl, text, cookies);
+  let connectAction = new modules.ConnectAction(connecthUrl, text, cookies);
   await connectAction.startBrowser();
   await connectAction.connect();
   await connectAction.closeBrowser();
@@ -50,7 +60,7 @@ async function messageWorker(task) {
   let text = task.text;
   let cookies = task.cookies;
 
-  let messageAction = new MessageAction(profileUrl, text, cookies);
+  let messageAction = new modules.MessageAction(profileUrl, text, cookies);
   await messageAction.startBrowser();
   await messageAction.message();
   await messageAction.closeBrowser();
@@ -61,9 +71,14 @@ async function scribeWorkWorker(task) {
   let url = task.url;
   let cookies = task.cookies;
 
-  let scribeWorkAction = new ScribeWorkAction(url, cookies);
+  let scribeWorkAction = new modules.ScribeWorkAction(url, cookies);
   await scribeWorkAction.startBrowser();
   await scribeWorkAction.scribe();
   await scribeWorkAction.closeBrowser();
 
+}
+
+module.exports = {
+    loginWorker: loginWorker,
+    searchWorker: searchWorker,
 }
