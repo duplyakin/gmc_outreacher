@@ -7,11 +7,9 @@ class ConnectCheckAction {
   constructor(email, password, cookies, connectName) {
     this.email = email;
     this.password = password;
+    this.cookies = cookies;
 
     this.connectName = connectName;
-
-    //this.cookies = JSON.parse(cookies);
-    this.cookies = cookies;
   }
 
   // do 1 trie to connect URL or goto login

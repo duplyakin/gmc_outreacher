@@ -210,7 +210,6 @@ const myCookies = {
 
 const SEARCH_URL = "https://www.linkedin.com/search/results/people/?keywords=marketer&origin=GLOBAL_SEARCH_HEADER";
 const CONNECT_URL = "https://www.linkedin.com/in/kirill-shilov-25aa8630/";
-const CONNECT_URL_2 = "https://www.linkedin.com/in/lukaknezic/";
 
 // test running
 

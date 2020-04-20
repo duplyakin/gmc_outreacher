@@ -6,11 +6,9 @@ class ScribeWorkAction {
   constructor(email, password, cookies, url) {
     this.email = email;
     this.password = password;
+    this.cookies = cookies;
 
     this.url = url;
-
-    //this.cookies = JSON.parse(cookies);
-    this.cookies = cookies;
   }
 
   // do 1 trie to connect URL or goto login
@@ -67,13 +65,19 @@ class ScribeWorkAction {
     await this.page.waitForSelector(selectors.JOB_SITE_SELECTOR);
     // TODO: add logic, when company page has no ABOUT page
 
+    let job_link = undefined;
     selector = selectors.JOB_SITE_SELECTOR;
     await this.page.evaluate((selector) => {
-      link = document.querySelector(selector).href;
+      job_link = document.querySelector(selector).href;
     }, selector);
 
     //console.log("..... link: .....", link)
-    return true;
+    if(job_link === undefined || job_link === null) {
+      console.log("..... job_link not found: .....", job_link)
+      return null;
+    }
+    console.log("..... job_link: .....", job_link)
+    return job_link;
   }
 
   async autoScroll(page) {

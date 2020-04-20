@@ -1,4 +1,5 @@
-let mongoose = require('mongoose');
+let mongooseConnect = require('./connect.js');
+let mongoose = mongooseConnect.mongoose;
 let Schema = mongoose.Schema;
 
 let actionSchema = new Schema({

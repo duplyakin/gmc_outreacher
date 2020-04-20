@@ -6,12 +6,10 @@ class MessageAction {
   constructor(email, password, cookies, profileUrl, text) {
     this.email = email;
     this.password = password;
+    this.cookies = cookies;
 
     this.profileUrl = profileUrl;
     this.text = text;
-
-    //this.cookies = JSON.parse(cookies);
-    this.cookies = cookies;
   }
 
   // do 1 trie to connect URL or goto login
@@ -62,6 +60,8 @@ class MessageAction {
     await page.waitFor(1000); // wait untill SEND button become active
     await page.click(selectors.SEND_MSG_BTN_SELECTOR);
     //await page.waitFor(100000); // to see result
+
+    return true;
   }
 }
 

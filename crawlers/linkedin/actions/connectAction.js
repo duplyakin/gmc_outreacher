@@ -6,12 +6,10 @@ class ConnectAction {
   constructor(email, password, cookies, connectUrl, text) {
     this.email = email;
     this.password = password;
+    this.cookies = cookies;
 
     this.connectUrl = connectUrl;
     this.text = text;
-
-    //this.cookies = JSON.parse(cookies);
-    this.cookies = cookies;
   }
 
   // do 1 trie to connect URL or goto login
@@ -50,7 +48,7 @@ class ConnectAction {
     await this.gotoChecker(this.connectUrl);
 
     await this.page.click(selectors.CONNECT_SELECTOR);
-    // TODO: add logic for connected links
+    // TODO: add logic for already connected links
 
     await this.page.waitForSelector(selectors.ADD_MSG_BTN_SELECTOR);
     await this.page.click(selectors.ADD_MSG_BTN_SELECTOR);
@@ -60,6 +58,8 @@ class ConnectAction {
 
     await this.page.keyboard.type(this.text);
     await this.page.click(selectors.SEND_INVITE_TEXT_BTN_SELECTOR);
+
+    return true;
   }
 }
 

@@ -1,22 +1,19 @@
 const puppeteer = require(__dirname + "/../../node_modules/puppeteer");
 const selectors = require(__dirname + "/.././selectors");
 const links = require(__dirname + "/.././links");
-//const cookieModel = require(__dirname + "/../.././models/models.js");
+const cookieModel = require(__dirname + "/../.././models/models.js");
 
 class LoginAction {
   constructor(email, password, cookies) {
     this.email = email;
     this.password = password;
 
-    this.login_url = links.SIGNIN_LINK;
-    //this.cookies = JSON.parse(cookies);
     this.cookies = cookies;
-
   }
 
   async startBrowser() {
-    //this.browser = await puppeteer.launch({ headless: false });
-    this.browser = await puppeteer.launch();
+    this.browser = await puppeteer.launch({ headless: false });
+    //this.browser = await puppeteer.launch();
     this.context = await this.browser.createIncognitoBrowserContext();
     this.page = await this.context.newPage();
     if(this.cookies != undefined || this.cookies != null) {
@@ -35,7 +32,7 @@ class LoginAction {
 
   async login() {
 
-    await this.page.goto(this.login_url);
+    await this.page.goto(links.SIGNIN_LINK);
     await this.page.waitForSelector(selectors.USERNAME_SELECTOR);
 
     await this.page.click(selectors.USERNAME_SELECTOR);
@@ -58,15 +55,41 @@ class LoginAction {
       }
     });
 
-    //let newCookiesDocument = await new Cookie({username: email, expires: newExpires, data: newCookies});
-    //await newCookiesDocument.save(function (err) {
+    // delete users from DB
+    //await cookieModel.Cookies.deleteMany({username: this.email}, function (err) {
     //if (err) return handleError(err);
-    // saved!
-  //  });
+    // deleted!
+    //console.log('........deleted in mongoDB.......');
+    //});
 
-    // todo: if success - return: true;
-    await this.page.close();
-    return true;
+    let user = await cookieModel.Cookies.findOne({username: this.email});
+    //console.log('........find object: ........', user);
+    if(user === undefined || user === null) {
+       // create new user
+       let newCookiesDocument = await new cookieModel.Cookies({username: this.email, expires: newExpires, data: newCookies});
+       await newCookiesDocument.save(function (err) {
+       if (err) return handleError(err);
+       // saved!
+       console.log('........saved in mongoDB.......');
+       });
+     } else {
+       // update user info
+       await user.updateOne({expires: newExpires, data: newCookies}, function(err, res) {
+         // updated!
+         console.log('........updated in mongoDB.......');
+       });
+     }
+
+    // check - if login success
+    let currentPage = await this.page.url();
+    if(currentPage === links.START_PAGE_LINK) {
+      console.log('........login success.......');
+      await this.page.close();
+      return true;
+    } else {
+      console.log('........ login error - check credentials .......');
+      return false;
+    }
   }
 
   async skip_phone(page) {

@@ -6,7 +6,6 @@ class SearchAction {
   constructor(email, password, cookies, searchUrl, pageNum) {
     this.email = email;
     this.password = password;
-    //this.cookies = JSON.parse(cookies);
     this.cookies = cookies;
 
     this.searchUrl = searchUrl;

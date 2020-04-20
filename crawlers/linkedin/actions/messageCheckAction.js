@@ -6,11 +6,9 @@ class MessageCheckAction {
   constructor(email, password, cookies, url) {
     this.email = email;
     this.password = password;
+    this.cookies = cookies;
 
     this.url = url;
-
-    //this.cookies = JSON.parse(cookies);
-    this.cookies = cookies;
   }
 
   // do 1 trie to connect URL or goto login
