@@ -144,3 +144,17 @@ https://wordeology.com/computer/how-to-send-good-unicode-email-with-python.html
 
 Tests for Flask_user:
 https://github.com/lingthio/Flask-User/blob/a379fa0a281789618c484b459cb41236779b95b1/flask_user/tests/test_roles.py#L67
+
+
+Vue bootstrap project structure documentation:
+http://vuejs-templates.github.io/webpack/
+
+All vue API methods (like derictives) here:
+https://vuejs.org/v2/api/#Options-Data
+
+VUE discord community:
+https://discordapp.com/channels/325477692906536972/568340117052456970
+
+
+Vue.js authentication:
+https://www.reddit.com/r/flask/comments/e0gtuf/how_to_implement_authentication_when_using_flask/
