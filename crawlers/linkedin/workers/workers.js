@@ -48,7 +48,7 @@ async function searchWorker(task) {
   let result = await searchAction.search();
   await searchAction.closeBrowser();
 
-  await task.updateOne({result_data: result}, function(err, res) {
+  await task.updateOne({status: 4, result_data: result}, function(err, res) {
     // updated!
     console.log('........result_data added in mongoDB.......');
   });
@@ -71,7 +71,7 @@ async function connectWorker(task) {
   let result = await connectAction.connect();
   await connectAction.closeBrowser();
 
-  await task.updateOne({result_data: result}, function(err, res) {
+  await task.updateOne({status: 4, result_data: result}, function(err, res) {
     // updated!
     console.log('........result_data added in mongoDB.......');
   });
@@ -94,7 +94,7 @@ async function messageWorker(task) {
   let result = await messageAction.message();
   await messageAction.closeBrowser();
 
-  await task.updateOne({result_data: result}, function(err, res) {
+  await task.updateOne({status: 4, result_data: result}, function(err, res) {
     // updated!
     console.log('........result_data added in mongoDB.......');
   });
@@ -116,7 +116,7 @@ async function scribeWorkWorker(task) {
   let result = await scribeWorkAction.scribe();
   await scribeWorkAction.closeBrowser();
 
-  await task.updateOne({result_data: result}, function(err, res) {
+  await task.updateOne({status: 4, result_data: result}, function(err, res) {
     // updated!
     console.log('........result_data added in mongoDB.......');
   });
@@ -138,7 +138,7 @@ async function messageCheckWorker(task) {
   let result = await messageCheckAction.messageCheck();
   await messageCheckAction.closeBrowser();
 
-  await task.updateOne({result_data: result}, function(err, res) {
+  await task.updateOne({status: 4, result_data: result}, function(err, res) {
     // updated!
     console.log('........result_data added in mongoDB.......');
   });
@@ -160,7 +160,7 @@ async function connectCheckWorker(task) {
   let result = await connectCheckAction.connectCheck();
   await connectCheckAction.closeBrowser();
 
-  await task.updateOne({result_data: result}, function(err, res) {
+  await task.updateOne({status: 4, result_data: result}, function(err, res) {
     // updated!
     console.log('........result_data added in mongoDB.......');
   });
