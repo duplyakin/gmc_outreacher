@@ -53,6 +53,8 @@ class Funnel(db.Document):
 
     template = db.DictField()
 
+    data = db.DictField() #any info here, like delay for DELAY action
+
     @classmethod
     def next_node(cls, current_node, result):
         next_node = None
@@ -89,7 +91,7 @@ class Funnel(db.Document):
     def get_action_key(self):
         return self.action.key
 
-    def chek_true(self, result):
+    def check_true(self, result):
         return self.action.is_true(result)
 
     def update_data(self, data):
@@ -105,6 +107,12 @@ class Funnel(db.Document):
         
         if data.get('if_false', None):
             self.if_false = data.get('if_false')
+        
+        if data.get('template', None):
+            self.template = data.get('template')
+
+        if data.get('data', None):
+            self.data = data.get('data')
 
         self._commit()
         
@@ -132,6 +140,8 @@ class TaskQueue(db.Document):
     
     record_type = db.IntField(default=0)
     followup_level = db.IntField(default=0)
+
+    js_action = db.BooleanField(default=False)
 
     def switch_task(self, next_node):
         
@@ -172,6 +182,14 @@ class TaskQueue(db.Document):
         self.status = FINISHED
         self._commit()
 
+    def get_mail_data(self):
+        result = {}
+        prospect = models.Prospects.objects(id=self.prospect_id).get()
+        
+        result['template'] = self.current_node.template
+        result['email_to'] = prospect.get_email()
+        
+        return result
 
     @classmethod
     def get_task(cls, task_id):
@@ -282,3 +300,21 @@ class TaskQueue(db.Document):
 
     def _commit(self):
         self.save()
+
+
+class AsyncActions(db.Document):
+    #open, reply
+    action_type = db.IntField()
+    
+    count = db.IntField()    
+    
+    #email, linkedin, twitter
+    medium = db.StringField()
+
+    #based on medium, check different tables: Mailbox, Linkedin, Twitter
+    ref = db.ObjectIdField()
+
+    action_meta = db.DictField()
+
+    created = db.DateTimeField( default=datetime.datetime.now() )
+

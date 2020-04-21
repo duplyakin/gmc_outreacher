@@ -4,19 +4,19 @@ USERS = [
      'active' : True,
      'credentials' : [
          {
-         'data' : { 'oauth-token' : 'gmail1-token'},
+         'data' : { 'sender' : 'smtp'},
          'medium' : 'email'
          },
         {
-         'data' : { 'oauth-token' : 'gsuite1-token'},
+         'data' : { 'sender' : 'api'},
          'medium' : 'email'
          },
          {
          'data' : { 'email' : 'linkedin1-email', 'password' : 'linkedin1-password'},
          'medium' : 'linkedin'
          },
-   {
-         'data' : { 'special-medium' : 'special-medium'},
+         {
+         'data' : { 'sender' : 'special-medium'},
          'medium' : 'special-medium'
          },
      ]
@@ -26,19 +26,19 @@ USERS = [
      'active' : True,
       'credentials' : [
          {
-         'data' : { 'oauth-token' : 'gmail2-token'},
+         'data' : { 'sender' : 'smtp'},
          'medium' : 'email'
          },
         {
-         'data' : { 'oauth-token' : 'gsuite2-token'},
+         'data' : { 'sender' : 'api'},
          'medium' : 'email'
          },
          {
          'data' : { 'email' : 'linkedin2-email', 'password' : 'linkedin2-password'},
          'medium' : 'linkedin'
          },
-   {
-         'data' : { 'special-medium' : 'special-medium'},
+         {
+         'data' : { 'sender' : 'special-medium'},
          'medium' : 'special-medium'
          },
      ]
@@ -48,7 +48,7 @@ USERS = [
      'active' : True,
       'credentials' : [
          {
-         'data' : { 'oauth-token' : 'gmail3-token'},
+         'data' : { 'sender' : 'smtp'},
          'medium' : 'email'
          },
          {
@@ -56,7 +56,7 @@ USERS = [
          'medium' : 'linkedin'
          },
    {
-         'data' : { 'special-medium' : 'special-medium'},
+         'data' : { 'sender' : 'special-medium'},
          'medium' : 'special-medium'
          },
      ]
@@ -67,7 +67,7 @@ USERS = [
      'active' : True,
       'credentials' : [
          {
-         'data' : { 'oauth-token' : 'gmail4-token'},
+         'data' : { 'sender' : 'smtp'},
          'medium' : 'email'
          },
          {
@@ -75,7 +75,7 @@ USERS = [
          'medium' : 'linkedin'
          },
    {
-         'data' : { 'special-medium' : 'special-medium'},
+         'data' : { 'sender' : 'special-medium'},
          'medium' : 'special-medium'
          },
       ]
@@ -86,7 +86,7 @@ USERS = [
      'active' : True,
      'credentials' : [
          {
-         'data' : { 'oauth-token' : 'gmail5-token'},
+         'data' : { 'sender' : 'smtp'},
          'medium' : 'email'
          },
          {
@@ -94,7 +94,7 @@ USERS = [
          'medium' : 'linkedin'
          },
    {
-         'data' : { 'special-medium' : 'special-medium'},
+         'data' : { 'sender' : 'special-medium'},
          'medium' : 'special-medium'
          },
       ]
@@ -104,7 +104,7 @@ USERS = [
      'active' : True,
      'credentials' : [
          {
-         'data' : { 'oauth-token' : 'gmail6-token'},
+         'data' : { 'sender' : 'smtp'},
          'medium' : 'email'
          },
          {
@@ -112,7 +112,7 @@ USERS = [
          'medium' : 'linkedin'
          },
    {
-         'data' : { 'special-medium' : 'special-medium'},
+         'data' : { 'sender' : 'special-medium'},
          'medium' : 'special-medium'
          },
       ]
@@ -123,7 +123,7 @@ USERS = [
      'active' : True,
      'credentials' : [
          {
-         'data' : { 'oauth-token' : 'gmail7-token'},
+         'data' : { 'sender' : 'smtp'},
          'medium' : 'email'
          },
          {
@@ -131,7 +131,7 @@ USERS = [
          'medium' : 'linkedin'
          },
    {
-         'data' : { 'special-medium' : 'special-medium'},
+         'data' : { 'sender' : 'special-medium'},
          'medium' : 'special-medium'
          },
       ]
@@ -142,7 +142,7 @@ USERS = [
      'active' : True,
      'credentials' : [
          {
-         'data' : { 'oauth-token' : 'gmail8-token'},
+         'data' : { 'sender' : 'smtp'},
          'medium' : 'email'
          },
          {
@@ -150,7 +150,7 @@ USERS = [
          'medium' : 'linkedin'
          },
    {
-         'data' : { 'special-medium' : 'special-medium'},
+         'data' : { 'sender' : 'special-medium'},
          'medium' : 'special-medium'
          },
       ]
@@ -160,7 +160,7 @@ USERS = [
      'active' : True,
      'credentials' : [
          {
-         'data' : { 'oauth-token' : 'gmail9-token'},
+         'data' : { 'sender' : 'smtp'},
          'medium' : 'email'
          },
          {
@@ -168,7 +168,7 @@ USERS = [
          'medium' : 'linkedin'
          },
          {
-         'data' : { 'special-medium' : 'special-medium'},
+         'data' : { 'sender' : 'special-medium'},
          'medium' : 'special-medium'
          },
       ]
@@ -179,7 +179,7 @@ USERS = [
      'active' : True,
      'credentials' : [
          {
-         'data' : { 'oauth-token' : 'gmail10-token'},
+         'data' : { 'sender' : 'smtp'},
          'medium' : 'email'
          },
          {
@@ -187,11 +187,17 @@ USERS = [
          'medium' : 'linkedin'
          },
          {
-         'data' : { 'special-medium' : 'special-medium'},
+         'data' : { 'sender' : 'special-medium'},
          'medium' : 'special-medium'
          },         
       ]
 
+    },
+    {
+        'email' : '11@email.com',
+        'password' : 'password11',
+        'active' : True,
+        'credentials' : []
     }
 ]
 
@@ -321,12 +327,14 @@ FUNNELS = [
             'key' : 'linkedin-connect',
             'root' : True,
             'if_true' : 'wait-1',
+            'if_false' : 'wait-1',
         },
 
         'wait-1' : {
             'key' : 'delay-linkedin',
-            'data' : 10,
-            'if_true' : 'check-connect-1'
+            'data' : { 'delay' : 10},
+            'if_true' : 'check-connect-1',
+            'if_false' : 'check-connect-1'
         },
 
         'check-connect-1' : {
@@ -337,14 +345,15 @@ FUNNELS = [
 
                 'connect-approve-1' : {
                     'key' : 'linkedin-send-message',
-                    'data' : 'Hello on Linkedin',
-                    'if_true' : 'wait-2'
+                    'if_true' : 'wait-2',
+                    'if_false' : 'wait-2'
                 },
 
                 'wait-2' : {
                     'key' : 'delay-linkedin',
-                    'data' : 10,
-                    'if_true': 'check-reply-1'
+                    'data' : { 'delay' : 10},
+                    'if_true': 'check-reply-1',
+                    'if_false': 'check-reply-1'
                 },
 
                 'check-reply-1' : {
@@ -355,14 +364,15 @@ FUNNELS = [
 
         'connect-deny-1' : {
             'key' : 'email-send-message',
-            'data' : 'hello on email',
-            'if_true' : 'wait-22'
+            'if_true' : 'wait-22',
+            'if_false' : 'wait-22'
         },
 
                 'wait-22' : {
                     'key' : 'delay-email',
-                    'data' : 10,
-                    'if_true' : 'check-reply-intro'
+                    'data' : { 'delay' : 10},
+                    'if_true' : 'check-reply-intro',
+                    'if_false' : 'check-reply-intro'
                 },
 
                 'check-reply-intro' : {
@@ -373,14 +383,15 @@ FUNNELS = [
 
                 'email-followup-1' :  {
                     'key' : 'email-send-message',
-                    'data' : 'hello on email - follow up 1',
-                    'if_true' : 'wait-3'
+                    'if_true' : 'wait-3',
+                    'if_false' : 'wait-3'
                 },
 
                 'wait-3' : {
                     'key' : 'delay-email',
-                    'data' : 10,
-                    'if_true' : 'check-reply-followup-1'
+                    'data' : { 'delay' : 10},
+                    'if_true' : 'check-reply-followup-1',
+                    'if_false' : 'check-reply-followup-1'
                 },
 
                     'check-reply-followup-1' : {
@@ -427,6 +438,22 @@ PROSPECTS = [
     },
 ]
 
+
+GOOGLE_APP_SETTINGS = [{
+    'title': 'Outreacher24 - web app credentials - development local',
+    'credentials': {"web":{"client_id":"606646624276-qcedt5p3vdad7h6aie2l5s75mg59at7t.apps.googleusercontent.com","project_id":"outreacher24","auth_uri":"https://accounts.google.com/o/oauth2/auth","token_uri":"https://oauth2.googleapis.com/token","auth_provider_x509_cert_url":"https://www.googleapis.com/oauth2/v1/certs","client_secret":"Gn-M_96r8PTML9SQaLxAqqWD","redirect_uris":["http://127.0.0.1:5000/oauth/callback"],"javascript_origins":["http://127.0.0.1:5000"]}},
+    'redirect_uri': 'http://127.0.0.1:5000/oauth/callback',
+
+    'gmail_scopes': ['https://mail.google.com/', 'https://www.googleapis.com/auth/gmail.send', 'https://www.googleapis.com/auth/gmail.modify', 'https://www.googleapis.com/auth/gmail.metadata'],
+    'gmail_access_type': 'offline',
+    'gmail_include_granted_scopes': 'true',
+
+    'gmail_api_name': 'gmail',
+    'gmail_api_version': 'v1',
+
+    'active' : True
+}]
+
 import unittest
 import os
 import o24.config as config
@@ -436,6 +463,7 @@ from o24.backend import db
 from o24.backend.models.shared import Action, Funnel
 from o24.backend.utils.funnel import construct_funnel
 
+from o24.backend.google.models import GoogleAppSetting
 
 class TestUsersCampaignsProspects(unittest.TestCase):
     def setUp(self):
@@ -529,6 +557,28 @@ class TestUsersCampaignsProspects(unittest.TestCase):
                 new_prospect = Prospects.create_prospect(owner_id=owner.id,
                                                         campaign_id=campaign.id)
                 self.assertTrue(new_prospect is not None, "Can't create prospect")
+
+    def test_8_create_google_app_settings(self):
+
+        for setting in GOOGLE_APP_SETTINGS:
+            s = GoogleAppSetting()
+
+            s.title = setting.get('title')
+            s.credentials = setting.get('credentials')
+            s.redirect_uri = setting.get('redirect_uri')
+
+            s.gmail_scopes = setting.get('gmail_scopes')
+            s.gmail_access_type = setting.get('gmail_access_type')
+            s.gmail_include_granted_scopes = setting.get('gmail_include_granted_scopes')
+
+            s.gmail_api_name = setting.get('gmail_api_name')
+            s.gmail_api_version = setting.get('gmail_api_version')
+
+            s.active = setting.get('active')
+
+            s.save()
+
+
 
 def setUpModule():
     env = os.environ.get('APP_ENV', None)

@@ -1,0 +1,501 @@
+Return-Path: <ks.shilov@gmail.com>
+Received: from [127.0.0.1] (send-21.prod.mixmax-mailer.com. [54.80.120.242])
+        by smtp.gmail.com with ESMTPSA id l73sm11565467qkl.16.2018.12.11.08.59.44
+        for <simondixon@bnktothefuture.com>
+        (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
+        Tue, 11 Dec 2018 08:59:44 -0800 (PST)
+Content-Type: multipart/alternative; boundary="----sinikael-?=_1-15445475844120.018857606639389513"
+From: Kirill Shilov <ks.shilov@gmail.com>
+To: simondixon@bnktothefuture.com
+Subject: Re: Networking
+Message-Id: <cc0eec30-e960-1cfc-54ce-2d2f176ee0a1@mixmax.com>
+Date: Tue, 11 Dec 2018 16:59:44 +0000
+In-Reply-To: <854a9cda-a606-3301-6947-e3ef07c52883@mixmax.com>
+References: <c8307466-e2bc-e581-c01d-e1df3a0c81ab@mixmax.com> <1ce7c1ff-d34e-1434-dca8-0be2c02f9ec5@mixmax.com> <854a9cda-a606-3301-6947-e3ef07c52883@mixmax.com>
+X-Mixmax-Message-Id: KyK7oRe5yvj8Yepv3
+X-Mailer: Mixmax (mixmax.com)
+MIME-Version: 1.0
+
+------sinikael-?=_1-15445475844120.018857606639389513
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
+
+Hi=C2=A0Simon,
+There is a thin line between persistence and annoyance. I fear I may have
+crossed the line. Based on your silence, I am assuming that you are not
+interested in learning more about Howtotoken's proposition. If I have misre=
+ad
+you, please suggest me what would be the best next step. In case, here is o=
+ur
+commercial offer:
+https://drive.google.com/file/d/1TMrmmpiyepSmtOsHn6qKnSmciXoVOMec/view?usp=
+=3Dsharing
+Thanks,Kirill Shilov,Co-Founder howtotoken.comHackernoon.com  contributor (
+medium.com/@kirillshilov)Telegram: @ksshilovLinkedin:=20
+https://www.linkedin.com/in/kirill-shilov-25aa8630/ =20
+
+
+
+
+
+On Sun, Dec 9, 2018 8:18 AM, Kirill Shilov ks.shilov@gmail.com  wrote:
+Hi=C2=A0Simon,
+How are you?Here is an example of an article on Hacker Noon from our portfo=
+lio:=20
+https://hackernoon.com/artificial-intelligence-blockchain-passive-income-fo=
+rever-edad8c27844e=20
+ Do you have five minutes this week so we can talk a bit more about our
+proposition? Thanks,Kirill Shilov,Co-Founder howtotoken.comHackernoon.com=
+=20
+contributor (medium.com/@kirillshilov)Telegram: @ksshilovLinkedin:=20
+https://www.linkedin.com/in/kirill-shilov-25aa8630/ =20
+
+
+
+
+
+On Fri, Dec 7, 2018 1:03 AM, Kirill Shilov ks.shilov@gmail.com  wrote:
+Simon,
+I'm following up on the mail I sent you yesterday. Did you get it? Kind reg=
+ards
+Thanks,Kirill Shilov,Co-Founder howtotoken.comHackernoon.com  contributor (
+medium.com/@kirillshilov)Telegram: @ksshilovLinkedin:=20
+https://www.linkedin.com/in/kirill-shilov-25aa8630/ =20
+
+
+
+
+
+On Thu, Dec 6, 2018 6:32 AM, Kirill Shilov ks.shilov@gmail.com  wrote:
+Hi Simon,
+My name is Kirill from Howtotoken - a blockchain marketing agency that
+specializes in providing educational content to the community.=20
+I=E2=80=99ve been paying attention to bf-token.bnktothefuture.com  blog and=
+ news for
+some time now and I=E2=80=99ve found a few ways in which we could improve y=
+our content
+strategy.=20
+Our goal at Howtotoken is to create in-depth content (articles, tutorials,
+how-to guides, listings) that meet different goals, such as increasing traf=
+fic
+and awareness or educating users.=20
+When the market was booming last year, we built a dedicated team of more th=
+an
+15+ blockchain experts who specialize in researching your product and build=
+ing
+content strategies for your platform, all while continuously meeting deadli=
+nes.
+We work with companies like Exmo, Metahash, Waves, Tokenbox, and many other=
+s.
+How well is your current marketing strategy going for you now? I=E2=80=99d =
+be happy to
+send over a portfolio that highlights the previous work we have done for al=
+l of
+our happy clients.
+I appreciate your time and I hope you enjoy the rest of your day.
+Thanks,Kirill Shilov,Co-Founder howtotoken.comHackernoon.com  contributor (
+medium.com/@kirillshilov)Telegram: @ksshilovLinkedin:=20
+https://www.linkedin.com/in/kirill-shilov-25aa8630/
+------sinikael-?=_1-15445475844120.018857606639389513
+Content-Type: text/html; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
+
+ <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www=
+.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"> <html xmlns=3D"http://www.w=
+3.org/1999/xhtml" xmlns:v=3D"urn:schemas-microsoft-com:vml" xmlns:o=3D"urn:=
+schemas-microsoft-com:office:office"> <head> <meta name=3D"viewport" conten=
+t=3D"width=3Ddevice-width,initial-scale=3D1"> <!--[if gte mso 9]>
+    <xml>
+      <o:OfficeDocumentSettings>
+        <o:AllowPNG/>
+        <o:PixelsPerInch>96</o:PixelsPerInch>
+     </o:OfficeDocumentSettings>
+    </xml>
+    <![endif]--> <style type=3D"text/css">* a:hover{cursor:pointer;}</style=
+> <style>body {-webkit-animation:bugfix infinite 1s;}@-webkit-keyframes bug=
+fix {from {position:relative;}to {position:relative;}}</style> </head> <bod=
+y style=3D"word-wrap:normal;word-break:break-word"> <style>a {word-wrap:nor=
+mal;word-break:break-word;}.background-contain {background-size:contain;}@m=
+edia only screen and (max-width:600px) {.container {-webkit-text-size-adjus=
+t:none !important;}.container,.palm-one-whole {width:100% !important;min-wi=
+dth:100% !important;}.palm-one-half {width:50% !important;min-width:50% !im=
+portant;box-sizing:border-box;}blockquote .container,blockquote .container =
+div,blockquote .container table {width:auto !important;min-width:0 !importa=
+nt;position:relative !important;}img {max-width:100%;}.border-outer,.border=
+-middle,.border-inner,.inner,[title=3D"separator"] {width:100% !important;}=
+.innercell {padding:8px !important;}.palm-block {display:block !important;}=
+td.palm-one-whole {display:inline-block !important;padding:0;}td.palm-one-w=
+hole:first-child:not(:only-child) {margin-bottom:16px;}td.hostname {padding=
+-top:3px !important;}}@media only screen and (min-width:601px) {.preview-ca=
+rd {max-width:600px !important;}}@media only screen and (min-device-width :=
+320px) and (max-device-width :568px),only screen and (min-device-width :768=
+px) and (max-device-width :1024px),only screen and (max-device-width:640px)=
+,only screen and (max-device-width:667px),only screen and (max-width:480px)=
+{.container {width:100% !important;min-width:100% !important;}.p,.small,li,=
+font[size=3D"2"],font[size=3D"3"] {font-size:1em !important;}}@media only s=
+creen and (min-device-width :320px) and (max-device-width :568px),only scre=
+en and (min-device-width :768px) and (max-device-width :1024px),only screen=
+ and (min-device-width :1224px)  {.message-wrapper {padding-top:6px;}.apple=
+-only[style] {display:block !important;max-height:none !important;line-heig=
+ht:normal !important;overflow:visible !important;height:auto !important;wid=
+th:100% !important;position:relative !important;}.no-apple {display:none !i=
+mportant;}form {font-size:inherit;}input[type=3D"text"] {height:43px;paddin=
+g-left:4px !important;}button:hover {cursor:pointer;}}@media only screen an=
+d (min-device-width :1224px)  {.apple-mail-form {display:block !important;b=
+ackground-color:white !important;}}* [office365] .outlook-com-hidden {displ=
+ay:none !important;}* [office365] .outlook-com-button {display:block;}* [of=
+fice365] .outlook-com-only {display:block !important;max-height:none !impor=
+tant;line-height:normal !important;overflow:visible !important;height:auto =
+!important;width:100% !important;position:relative !important;}.ExternalCla=
+ss {width:100%;}.ExternalClass .outlook-com-button {display:block;}.Externa=
+lClass button {height:auto;}.ExternalClass .outlook-com-hidden {display:non=
+e !important;}.ExternalClass .outlook-com-only {display:block !important;ma=
+x-height:none !important;line-height:normal !important;overflow:visible !im=
+portant;height:auto !important;width:100% !important;position:relative !imp=
+ortant;}.ExternalClass .ecxlabels {display:none !important;}.ExternalClass =
+.ecxlabels {display:none !important;}.ExternalClass .ecxarrow {display:none=
+ !important;}.ExternalClass cite >div + div {padding:0 0 4px 0;}.ExternalCl=
+ass .h1 {padding-bottom:5px;}.ExternalClass .h2 {padding-bottom:5px;}.Exter=
+nalClass .h3 {padding-bottom:5px;}.ExternalClass [lang=3D"brand-pinterest"]=
+ {width:280px !important;}</style> <!--[if (gte mso 9)|(IE)]>
+   =20
+    <style>
+      a, body {
+        font-family: 'Calibri', Arial, sans-serif;
+      }
+   =20
+      img {
+        border: none !important;
+        -ms-interpolation-mode:bicubic;
+      }
+   =20
+      td {
+        mso-line-height-rule:exactly !important;
+      }
+   =20
+      .mso-card-inner table {
+        border-collapse: collapse !important;
+        mso-table-lspace:0pt;
+        mso-table-rspace:0pt;
+        vertical-align: top;
+      }
+   =20
+      .outlook-com-only {
+        display: none !important;
+        font-size: 0 !important;
+      }
+   =20
+      #mso-one-whole {
+        width: 100% !important;
+      }
+   =20
+   =20
+   =20
+        .border-outer,
+        .border-middle,
+        .border-inner {
+          border: none !important;
+        }
+   =20
+        .border-middle,
+        .border-inner {
+          width: 100% !important;
+        }
+   =20
+        .mso-border-outer,
+        .mso-border-middle,
+        .mso-border-inner {
+          padding: 1px;
+        }
+   =20
+        .mso-border-outer { background-color: rgb(245, 255, 255); }
+        .mso-border-middle { background-color: rgb(223, 246, 255); }
+        .mso-border-inner { background-color: rgb(153, 176, 225); }
+   =20
+    </style>
+   =20
+    <![endif]--> <table class=3D"container" lang=3D"container" dir=3D"ltr" =
+border=3D"0" cellpadding=3D"0" cellspacing=3D"0" valign=3D"top" style=3D"wi=
+dth:100%"> <tr> <td valign=3D"top" class=3D"message-wrapper" style=3D"color=
+:#222;font-family:arial,sans-serif"> <!--[if mso]><table  border=3D"0" cell=
+padding=3D"0" cellspacing=3D"0" valign=3D"top" style=3D"border-collapse:sep=
+arate;"><tr><td valign=3D"top"><![endif]--> <div>Hi=C2=A0Simon,</div><div><=
+br></div><div>There is a thin line between persistence and annoyance. I fea=
+r I may have crossed the line. </div><div>=C2=A0</div><div>Based on your si=
+lence, I am assuming that you are not interested in learning more about How=
+totoken's proposition. If I have misread you, please suggest me what would =
+be the best next step. </div><div>=C2=A0</div><div>In case, here is our com=
+mercial offer:=C2=A0</div><div><a target=3D"_blank" href=3D"https://drive.g=
+oogle.com/file/d/1TMrmmpiyepSmtOsHn6qKnSmciXoVOMec/view?usp=3Dsharing">http=
+s://drive.google.com/file/d/1TMrmmpiyepSmtOsHn6qKnSmciXoVOMec/view?usp=3Dsh=
+aring</a>=C2=A0</div><div><br></div><div>=C2=A0</div><div style=3D"margin-t=
+op:0pt;margin-bottom:0pt"><span style=3D"font-size:10.5pt;font-family:Arial=
+;color:rgb(60,72,88);background-color:transparent;font-variant-numeric:norm=
+al;font-variant-east-asian:normal;vertical-align:baseline;white-space:pre-w=
+rap">Thanks,</span></div><div style=3D"margin-top:0pt;margin-bottom:0pt"><s=
+pan style=3D"font-size:10.5pt;font-family:Arial;color:rgb(60,72,88);backgro=
+und-color:transparent;font-variant-numeric:normal;font-variant-east-asian:n=
+ormal;vertical-align:baseline;white-space:pre-wrap">Kirill Shilov,</span></=
+div><div style=3D"margin-top:0pt;margin-bottom:0pt"><span style=3D"font-siz=
+e:10.5pt;font-family:Arial;color:rgb(60,72,88);background-color:transparent=
+;font-variant-numeric:normal;font-variant-east-asian:normal;vertical-align:=
+baseline;white-space:pre-wrap">Co-Founder </span><a href=3D"http://r.mailer=
+.howtotoken.com/mk/cl/8AkdYL8L0ASint9Y3ReVRmF7kQdd3-03v4YxqfG3Wu6TW9v4V6K7M=
+K1I2v-K_logMmZ5-QqNhqjEhxmCbtmtacejKQm2-nPjAZ9NY5dkYBy6q-If"><span style=3D=
+"font-size:10.5pt;font-family:Arial;color:rgb(52,153,219);background-color:=
+transparent;font-variant-numeric:normal;font-variant-east-asian:normal;text=
+-decoration-line:underline;text-decoration-skip-ink:none;vertical-align:bas=
+eline;white-space:pre-wrap">howtotoken.com</span></a></div><div style=3D"ma=
+rgin-top:0pt;margin-bottom:0pt"><span style=3D"font-size:10.5pt;font-family=
+:Arial;color:rgb(60,72,88);background-color:transparent;font-variant-numeri=
+c:normal;font-variant-east-asian:normal;vertical-align:baseline;white-space=
+:pre-wrap"><a target=3D"_blank" href=3D"http://Hackernoon.com">Hackernoon.c=
+om</a> contributor (</span><a href=3D"http://r.mailer.howtotoken.com/mk/cl/=
+9Kh4eNWoyLC9INM5OiO8sDJ9fn-42M458Mo2VnDza7UmUdI9g9YQyAKca2PuHf-Zt5yTnL9V0FG=
+ODwC-YxO-Pwc91e73d_57EoJ8sCYjVUJQYqfp"><span style=3D"font-size:10.5pt;font=
+-family:Arial;color:rgb(52,153,219);background-color:transparent;font-varia=
+nt-numeric:normal;font-variant-east-asian:normal;text-decoration-line:under=
+line;text-decoration-skip-ink:none;vertical-align:baseline;white-space:pre-=
+wrap">medium.com/@kirillshilov</span></a><span style=3D"font-size:10.5pt;fo=
+nt-family:Arial;color:rgb(60,72,88);background-color:transparent;font-varia=
+nt-numeric:normal;font-variant-east-asian:normal;vertical-align:baseline;wh=
+ite-space:pre-wrap">)</span></div><div style=3D"margin-top:0pt;margin-botto=
+m:0pt"><span style=3D"font-size:10.5pt;font-family:Arial;color:rgb(60,72,88=
+);background-color:transparent;font-variant-numeric:normal;font-variant-eas=
+t-asian:normal;vertical-align:baseline;white-space:pre-wrap">Telegram: @kss=
+hilov</span></div><div style=3D"margin-top:0pt;margin-bottom:0pt"><span sty=
+le=3D"font-size:10.5pt;font-family:Arial;color:rgb(60,72,88);background-col=
+or:transparent;font-variant-numeric:normal;font-variant-east-asian:normal;v=
+ertical-align:baseline;white-space:pre-wrap">Linkedin: </span><a href=3D"ht=
+tps://www.linkedin.com/in/kirill-shilov-25aa8630/"><span style=3D"font-size=
+:10.5pt;font-family:Arial;background-color:transparent;font-variant-numeric=
+:normal;font-variant-east-asian:normal;text-decoration-line:underline;text-=
+decoration-skip-ink:none;vertical-align:baseline;white-space:pre-wrap">http=
+s://www.linkedin.com/in/kirill-shilov-25aa8630/</span></a></div><img align=
+=3D"left" width=3D"0" height=3D"0" style=3D"border:0;width:0px;height:0px" =
+src=3D"https://track.mixmax.com/api/track/v2/KyK7oRe5yvj8Yepv3/i02bj5CbpFWb=
+nBkdvxWaoNnLztmI/gIt92YuUmc1RXdGVGaU9GVr5mQA52b4lGZu9WbpNnI/?sc=3Dfalse" al=
+t=3D""> <!--[if mso]></td></tr></table><![endif]--> </td> </tr> </table> <d=
+iv> <div> <p data-m-apply-default-font=3D"true"><br></p> <div class=3D"gmai=
+l_extra"> <p data-m-apply-default-font=3D"true"><br></p> <div class=3D"gmai=
+l_quote"> On Sun, Dec 9, 2018 8:18 AM, Kirill Shilov <span dir=3D"ltr"> <a =
+href=3D"mailto:ks.shilov@gmail.com" target=3D"_blank">ks.shilov@gmail.com</=
+a></span> wrote:<br> <blockquote class=3D"gmail_quote" style=3D"margin:0 0 =
+0 .8ex;border-left:1px #ccc solid;padding-left:1ex"> <u></u> <table style=
+=3D"width:100%" valign=3D"top" cellspacing=3D"0" cellpadding=3D"0" border=
+=3D"0" dir=3D"ltr" lang=3D"container"> <tbody><tr> <td style=3D"color:#222;=
+font-family:arial,sans-serif" valign=3D"top"> <div>Hi=C2=A0Simon,</div><div=
+><br></div><div>How are you?</div><div>=C2=A0</div><div>Here is an example =
+of an article on Hacker Noon from our portfolio: <a href=3D"https://hackern=
+oon.com/artificial-intelligence-blockchain-passive-income-forever-edad8c278=
+44e" target=3D"_blank">https://hackernoon.com/artificial-intelligence-block=
+chain-passive-income-forever-edad8c27844e</a> </div><div>=C2=A0</div><div>=
+=C2=A0</div><div>Do you have five minutes this week so we can talk a bit mo=
+re about our proposition? </div><div>=C2=A0</div><div style=3D"margin-top:0=
+pt;margin-bottom:0pt"><span style=3D"font-size:10.5pt;font-family:Arial;col=
+or:rgb(60,72,88);background-color:transparent;font-variant-numeric:normal;f=
+ont-variant-east-asian:normal;vertical-align:baseline;white-space:pre-wrap"=
+>Thanks,</span></div><div style=3D"margin-top:0pt;margin-bottom:0pt"><span =
+style=3D"font-size:10.5pt;font-family:Arial;color:rgb(60,72,88);background-=
+color:transparent;font-variant-numeric:normal;font-variant-east-asian:norma=
+l;vertical-align:baseline;white-space:pre-wrap">Kirill Shilov,</span></div>=
+<div style=3D"margin-top:0pt;margin-bottom:0pt"><span style=3D"font-size:10=
+.5pt;font-family:Arial;color:rgb(60,72,88);background-color:transparent;fon=
+t-variant-numeric:normal;font-variant-east-asian:normal;vertical-align:base=
+line;white-space:pre-wrap">Co-Founder </span><a href=3D"http://r.mailer.how=
+totoken.com/mk/cl/8AkdYL8L0ASint9Y3ReVRmF7kQdd3-03v4YxqfG3Wu6TW9v4V6K7MK1I2=
+v-K_logMmZ5-QqNhqjEhxmCbtmtacejKQm2-nPjAZ9NY5dkYBy6q-If" target=3D"_blank">=
+<span style=3D"font-size:10.5pt;font-family:Arial;color:rgb(52,153,219);bac=
+kground-color:transparent;font-variant-numeric:normal;font-variant-east-asi=
+an:normal;text-decoration-line:underline;text-decoration-skip-ink:none;vert=
+ical-align:baseline;white-space:pre-wrap">howtotoken.com</span></a></div><d=
+iv style=3D"margin-top:0pt;margin-bottom:0pt"><span style=3D"font-size:10.5=
+pt;font-family:Arial;color:rgb(60,72,88);background-color:transparent;font-=
+variant-numeric:normal;font-variant-east-asian:normal;vertical-align:baseli=
+ne;white-space:pre-wrap"><a href=3D"http://Hackernoon.com" target=3D"_blank=
+">Hackernoon.com</a> contributor (</span><a href=3D"http://r.mailer.howtoto=
+ken.com/mk/cl/9Kh4eNWoyLC9INM5OiO8sDJ9fn-42M458Mo2VnDza7UmUdI9g9YQyAKca2PuH=
+f-Zt5yTnL9V0FGODwC-YxO-Pwc91e73d_57EoJ8sCYjVUJQYqfp" target=3D"_blank"><spa=
+n style=3D"font-size:10.5pt;font-family:Arial;color:rgb(52,153,219);backgro=
+und-color:transparent;font-variant-numeric:normal;font-variant-east-asian:n=
+ormal;text-decoration-line:underline;text-decoration-skip-ink:none;vertical=
+-align:baseline;white-space:pre-wrap">medium.com/@kirillshilov</span></a><s=
+pan style=3D"font-size:10.5pt;font-family:Arial;color:rgb(60,72,88);backgro=
+und-color:transparent;font-variant-numeric:normal;font-variant-east-asian:n=
+ormal;vertical-align:baseline;white-space:pre-wrap">)</span></div><div styl=
+e=3D"margin-top:0pt;margin-bottom:0pt"><span style=3D"font-size:10.5pt;font=
+-family:Arial;color:rgb(60,72,88);background-color:transparent;font-variant=
+-numeric:normal;font-variant-east-asian:normal;vertical-align:baseline;whit=
+e-space:pre-wrap">Telegram: @ksshilov</span></div><div style=3D"margin-top:=
+0pt;margin-bottom:0pt"><span style=3D"font-size:10.5pt;font-family:Arial;co=
+lor:rgb(60,72,88);background-color:transparent;font-variant-numeric:normal;=
+font-variant-east-asian:normal;vertical-align:baseline;white-space:pre-wrap=
+">Linkedin: </span><a href=3D"https://www.linkedin.com/in/kirill-shilov-25a=
+a8630/" target=3D"_blank"><span style=3D"font-size:10.5pt;font-family:Arial=
+;background-color:transparent;font-variant-numeric:normal;font-variant-east=
+-asian:normal;text-decoration-line:underline;text-decoration-skip-ink:none;=
+vertical-align:baseline;white-space:pre-wrap">https://www.linkedin.com/in/k=
+irill-shilov-25aa8630/</span></a></div><img alt=3D"" src=3D"https://compose=
+.mixmax.com/img/blank.png" style=3D"border:0;width:0px;height:0px" height=
+=3D"0" width=3D"0" align=3D"left"> </td> </tr> </tbody></table> <div> <div>=
+ <p data-m-apply-default-font=3D"true"><br></p> <div> <p data-m-apply-defau=
+lt-font=3D"true"><br></p> <div> On Fri, Dec 7, 2018 1:03 AM, Kirill Shilov =
+<span dir=3D"ltr"> <a href=3D"mailto:ks.shilov@gmail.com" target=3D"_blank"=
+>ks.shilov@gmail.com</a></span> wrote:<br> <blockquote style=3D"margin:0 0 =
+0 .8ex;border-left:1px #ccc solid;padding-left:1ex"> <u></u> <table lang=3D=
+"container" dir=3D"ltr" border=3D"0" cellpadding=3D"0" cellspacing=3D"0" va=
+lign=3D"top" style=3D"width:100%"> <tbody><tr> <td valign=3D"top" style=3D"=
+color:#222;font-family:arial,sans-serif"> <div>Simon,</div><div><br></div><=
+div>I'm following up on the mail I sent you yesterday. Did you get it? </di=
+v><div>=C2=A0</div><div>Kind regards</div><div><br></div><div><div style=3D=
+"margin-top:0pt;margin-bottom:0pt;transition:all 150ms ease-in-out 0s"><spa=
+n style=3D"font-size:10.5pt;font-family:Arial;color:rgb(60,72,88);backgroun=
+d-color:transparent;font-variant-numeric:normal;font-variant-east-asian:nor=
+mal;vertical-align:baseline;white-space:pre-wrap">Thanks,</span></div><div =
+style=3D"margin-top:0pt;margin-bottom:0pt;transition:all 150ms ease-in-out =
+0s"><span style=3D"font-size:10.5pt;font-family:Arial;color:rgb(60,72,88);b=
+ackground-color:transparent;font-variant-numeric:normal;font-variant-east-a=
+sian:normal;vertical-align:baseline;white-space:pre-wrap">Kirill Shilov,</s=
+pan></div><div style=3D"margin-top:0pt;margin-bottom:0pt;transition:all 150=
+ms ease-in-out 0s"><span style=3D"font-size:10.5pt;font-family:Arial;color:=
+rgb(60,72,88);background-color:transparent;font-variant-numeric:normal;font=
+-variant-east-asian:normal;vertical-align:baseline;white-space:pre-wrap">Co=
+-Founder </span><a href=3D"http://r.mailer.howtotoken.com/mk/cl/8AkdYL8L0AS=
+int9Y3ReVRmF7kQdd3-03v4YxqfG3Wu6TW9v4V6K7MK1I2v-K_logMmZ5-QqNhqjEhxmCbtmtac=
+ejKQm2-nPjAZ9NY5dkYBy6q-If" target=3D"_blank"><span style=3D"font-size:10.5=
+pt;font-family:Arial;color:rgb(52,153,219);background-color:transparent;fon=
+t-variant-numeric:normal;font-variant-east-asian:normal;text-decoration-lin=
+e:underline;text-decoration-skip-ink:none;vertical-align:baseline;white-spa=
+ce:pre-wrap">howtotoken.com</span></a></div><div style=3D"margin-top:0pt;ma=
+rgin-bottom:0pt;transition:all 150ms ease-in-out 0s"><span style=3D"font-si=
+ze:10.5pt;font-family:Arial;color:rgb(60,72,88);background-color:transparen=
+t;font-variant-numeric:normal;font-variant-east-asian:normal;vertical-align=
+:baseline;white-space:pre-wrap"><a href=3D"http://Hackernoon.com" target=3D=
+"_blank">Hackernoon.com</a> contributor (</span><a href=3D"http://r.mailer.=
+howtotoken.com/mk/cl/9Kh4eNWoyLC9INM5OiO8sDJ9fn-42M458Mo2VnDza7UmUdI9g9YQyA=
+Kca2PuHf-Zt5yTnL9V0FGODwC-YxO-Pwc91e73d_57EoJ8sCYjVUJQYqfp" target=3D"_blan=
+k"><span style=3D"font-size:10.5pt;font-family:Arial;color:rgb(52,153,219);=
+background-color:transparent;font-variant-numeric:normal;font-variant-east-=
+asian:normal;text-decoration-line:underline;text-decoration-skip-ink:none;v=
+ertical-align:baseline;white-space:pre-wrap">medium.com/@kirillshilov</span=
+></a><span style=3D"font-size:10.5pt;font-family:Arial;color:rgb(60,72,88);=
+background-color:transparent;font-variant-numeric:normal;font-variant-east-=
+asian:normal;vertical-align:baseline;white-space:pre-wrap">)</span></div><d=
+iv style=3D"margin-top:0pt;margin-bottom:0pt;transition:all 150ms ease-in-o=
+ut 0s"><span style=3D"font-size:10.5pt;font-family:Arial;color:rgb(60,72,88=
+);background-color:transparent;font-variant-numeric:normal;font-variant-eas=
+t-asian:normal;vertical-align:baseline;white-space:pre-wrap">Telegram: @kss=
+hilov</span></div><div style=3D"margin-top:0pt;margin-bottom:0pt;transition=
+:all 150ms ease-in-out 0s"><span style=3D"font-size:10.5pt;font-family:Aria=
+l;color:rgb(60,72,88);background-color:transparent;font-variant-numeric:nor=
+mal;font-variant-east-asian:normal;vertical-align:baseline;white-space:pre-=
+wrap">Linkedin: </span><a href=3D"https://www.linkedin.com/in/kirill-shilov=
+-25aa8630/" target=3D"_blank"><span style=3D"font-size:10.5pt;font-family:A=
+rial;background-color:transparent;font-variant-numeric:normal;font-variant-=
+east-asian:normal;text-decoration-line:underline;text-decoration-skip-ink:n=
+one;vertical-align:baseline;white-space:pre-wrap">https://www.linkedin.com/=
+in/kirill-shilov-25aa8630/</span></a></div></div><img align=3D"left" width=
+=3D"0" height=3D"0" style=3D"border:0;width:0px;height:0px" src=3D"https://=
+compose.mixmax.com/img/blank.png" alt=3D""> </td> </tr> </tbody></table> <d=
+iv> <div> <p data-m-apply-default-font=3D"true"><br></p> <div> <p data-m-ap=
+ply-default-font=3D"true"><br></p> <div> On Thu, Dec 6, 2018 6:32 AM, Kiril=
+l Shilov <span dir=3D"ltr"> <a href=3D"mailto:ks.shilov@gmail.com" target=
+=3D"_blank">ks.shilov@gmail.com</a></span> wrote:<br> <blockquote style=3D"=
+margin:0 0 0 .8ex;border-left:1px #ccc solid;padding-left:1ex"> <u></u> <ta=
+ble style=3D"width:100%" valign=3D"top" cellspacing=3D"0" cellpadding=3D"0"=
+ border=3D"0" dir=3D"ltr" lang=3D"container"> <tbody><tr> <td style=3D"colo=
+r:#222;font-family:arial,sans-serif" valign=3D"top"> <div style=3D"margin-t=
+op:0pt;margin-bottom:0pt"><span style=3D"font-size:11pt;font-family:Arial;c=
+olor:rgb(0,0,0);background-color:transparent;font-variant-numeric:normal;fo=
+nt-variant-east-asian:normal;vertical-align:baseline;white-space:pre-wrap">=
+Hi Simon,</span></div><div><br></div><div style=3D"margin-top:0pt;margin-bo=
+ttom:0pt"><span style=3D"font-size:11pt;font-family:Arial;color:rgb(0,0,0);=
+background-color:transparent;font-variant-numeric:normal;font-variant-east-=
+asian:normal;vertical-align:baseline;white-space:pre-wrap">My name is Kiril=
+l from Howtotoken - a blockchain marketing agency that specializes in provi=
+ding educational content to the community. </span></div><div><br></div><div=
+ style=3D"margin-top:0pt;margin-bottom:0pt"><span style=3D"font-size:11pt;f=
+ont-family:Arial;color:rgb(0,0,0);background-color:transparent;font-variant=
+-numeric:normal;font-variant-east-asian:normal;vertical-align:baseline;whit=
+e-space:pre-wrap">I=E2=80=99ve been paying attention to <a href=3D"http://b=
+f-token.bnktothefuture.com" target=3D"_blank">bf-token.bnktothefuture.com</=
+a> blog and news for some time now and I=E2=80=99ve found a few ways in whi=
+ch we could improve your content strategy. </span></div><div><br></div><div=
+ style=3D"margin-top:0pt;margin-bottom:0pt"><span style=3D"font-size:11pt;f=
+ont-family:Arial;color:rgb(0,0,0);background-color:transparent;font-variant=
+-numeric:normal;font-variant-east-asian:normal;vertical-align:baseline;whit=
+e-space:pre-wrap">Our goal at Howtotoken is to create in-depth content (art=
+icles, tutorials, how-to guides, listings) that meet different goals, such =
+as increasing traffic and awareness or educating users. </span></div><div><=
+br></div><div style=3D"margin-top:0pt;margin-bottom:0pt"><span style=3D"fon=
+t-size:11pt;font-family:Arial;color:rgb(0,0,0);background-color:transparent=
+;font-variant-numeric:normal;font-variant-east-asian:normal;vertical-align:=
+baseline;white-space:pre-wrap">When the market was booming last year, we bu=
+ilt a dedicated team of more than 15+ blockchain experts who specialize in =
+researching your product and building content strategies for your platform,=
+ all while continuously meeting deadlines.</span></div><div><br></div><div =
+style=3D"margin-top:0pt;margin-bottom:0pt"><span style=3D"font-size:11pt;fo=
+nt-family:Arial;color:rgb(0,0,0);background-color:transparent;font-variant-=
+numeric:normal;font-variant-east-asian:normal;vertical-align:baseline;white=
+-space:pre-wrap">We work with companies like Exmo, Metahash, Waves, Tokenbo=
+x, and many others.</span></div><div><br></div><div style=3D"margin-top:0pt=
+;margin-bottom:0pt"><span style=3D"font-size:11pt;font-family:Arial;color:r=
+gb(0,0,0);background-color:transparent;font-variant-numeric:normal;font-var=
+iant-east-asian:normal;vertical-align:baseline;white-space:pre-wrap">How we=
+ll is your current marketing strategy going for you now? I=E2=80=99d be hap=
+py to send over a portfolio that highlights the previous work we have done =
+for all of our happy clients.</span></div><div><br></div><div style=3D"marg=
+in-top:0pt;margin-bottom:0pt"><span style=3D"font-size:11pt;font-family:Ari=
+al;color:rgb(0,0,0);background-color:transparent;font-variant-numeric:norma=
+l;font-variant-east-asian:normal;vertical-align:baseline;white-space:pre-wr=
+ap">I appreciate your time and I hope you enjoy the rest of your day.</span=
+></div><div><br></div><div style=3D"margin-top:0pt;margin-bottom:0pt"><span=
+ style=3D"font-size:10.5pt;font-family:Arial;color:rgb(60,72,88);background=
+-color:transparent;font-variant-numeric:normal;font-variant-east-asian:norm=
+al;vertical-align:baseline;white-space:pre-wrap">Thanks,</span></div><div s=
+tyle=3D"margin-top:0pt;margin-bottom:0pt"><span style=3D"font-size:10.5pt;f=
+ont-family:Arial;color:rgb(60,72,88);background-color:transparent;font-vari=
+ant-numeric:normal;font-variant-east-asian:normal;vertical-align:baseline;w=
+hite-space:pre-wrap">Kirill Shilov,</span></div><div style=3D"margin-top:0p=
+t;margin-bottom:0pt"><span style=3D"font-size:10.5pt;font-family:Arial;colo=
+r:rgb(60,72,88);background-color:transparent;font-variant-numeric:normal;fo=
+nt-variant-east-asian:normal;vertical-align:baseline;white-space:pre-wrap">=
+Co-Founder </span><a href=3D"http://r.mailer.howtotoken.com/mk/cl/8AkdYL8L0=
+ASint9Y3ReVRmF7kQdd3-03v4YxqfG3Wu6TW9v4V6K7MK1I2v-K_logMmZ5-QqNhqjEhxmCbtmt=
+acejKQm2-nPjAZ9NY5dkYBy6q-If" target=3D"_blank"><span style=3D"font-size:10=
+.5pt;font-family:Arial;color:rgb(52,153,219);background-color:transparent;f=
+ont-variant-numeric:normal;font-variant-east-asian:normal;text-decoration-l=
+ine:underline;text-decoration-skip-ink:none;vertical-align:baseline;white-s=
+pace:pre-wrap">howtotoken.com</span></a></div><div style=3D"margin-top:0pt;=
+margin-bottom:0pt"><span style=3D"font-size:10.5pt;font-family:Arial;color:=
+rgb(60,72,88);background-color:transparent;font-variant-numeric:normal;font=
+-variant-east-asian:normal;vertical-align:baseline;white-space:pre-wrap"><a=
+ href=3D"http://Hackernoon.com" target=3D"_blank">Hackernoon.com</a> contri=
+butor (</span><a href=3D"http://r.mailer.howtotoken.com/mk/cl/9Kh4eNWoyLC9I=
+NM5OiO8sDJ9fn-42M458Mo2VnDza7UmUdI9g9YQyAKca2PuHf-Zt5yTnL9V0FGODwC-YxO-Pwc9=
+1e73d_57EoJ8sCYjVUJQYqfp" target=3D"_blank"><span style=3D"font-size:10.5pt=
+;font-family:Arial;color:rgb(52,153,219);background-color:transparent;font-=
+variant-numeric:normal;font-variant-east-asian:normal;text-decoration-line:=
+underline;text-decoration-skip-ink:none;vertical-align:baseline;white-space=
+:pre-wrap">medium.com/@kirillshilov</span></a><span style=3D"font-size:10.5=
+pt;font-family:Arial;color:rgb(60,72,88);background-color:transparent;font-=
+variant-numeric:normal;font-variant-east-asian:normal;vertical-align:baseli=
+ne;white-space:pre-wrap">)</span></div><div style=3D"margin-top:0pt;margin-=
+bottom:0pt"><span style=3D"font-size:10.5pt;font-family:Arial;color:rgb(60,=
+72,88);background-color:transparent;font-variant-numeric:normal;font-varian=
+t-east-asian:normal;vertical-align:baseline;white-space:pre-wrap">Telegram:=
+ @ksshilov</span></div><div style=3D"margin-top:0pt;margin-bottom:0pt"><spa=
+n style=3D"font-size:10.5pt;font-family:Arial;color:rgb(60,72,88);backgroun=
+d-color:transparent;font-variant-numeric:normal;font-variant-east-asian:nor=
+mal;vertical-align:baseline;white-space:pre-wrap">Linkedin: </span><a href=
+=3D"https://www.linkedin.com/in/kirill-shilov-25aa8630/" target=3D"_blank">=
+<span style=3D"font-size:10.5pt;font-family:Arial;background-color:transpar=
+ent;font-variant-numeric:normal;font-variant-east-asian:normal;text-decorat=
+ion-line:underline;text-decoration-skip-ink:none;vertical-align:baseline;wh=
+ite-space:pre-wrap">https://www.linkedin.com/in/kirill-shilov-25aa8630/</sp=
+an></a></div><img alt=3D"" src=3D"https://compose.mixmax.com/img/blank.png"=
+ style=3D"border:0;width:0px;height:0px" height=3D"0" width=3D"0" align=3D"=
+left"> </td> </tr> </tbody></table> </blockquote> </div> </div> </div> </di=
+v> </blockquote> </div> </div> </div> </div> </blockquote> </div> </div> </=
+div> </div> </body> </html>=20
+------sinikael-?=_1-15445475844120.018857606639389513--

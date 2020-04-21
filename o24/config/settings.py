@@ -43,11 +43,14 @@ class BaseConfig():
 
     #UI specific settings
     PER_PAGE = 10
+    USER_PASSLIB_CRYPTCONTEXT_SCHEMES = ["pbkdf2_sha256"]
 
     #Flask-User customization
-    USER_LOGIN_TEMPLATE = 'login/login.html'
-    USER_REGISTER_TEMPLATE = 'login/register.html'
+    #USER_LOGIN_TEMPLATE = 'login/login.html'
+    #USER_REGISTER_TEMPLATE = 'login/register.html'
 
+    GMAIL_SMTP_HOST = 'smtp.gmail.com'
+    GMAIL_SMTP_PORT = 587
 
 class DevConfig(BaseConfig):
     FLASK_ENV = 'development'
@@ -77,11 +80,14 @@ class ProductionConfig(BaseConfig):
 class TestConfig(BaseConfig):
     FLASK_ENV = 'test'
     DEBUG = True
+    TESTING = True
     CELERY_TASK_ALWAYS_EAGER = True
     CELERY_BROKER = 'amqp://guest:guest@localhost:5672//'
     CELERY_BACKEND_RESULT_EXPIRES = 300
     os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
 
+    WTF_CSRF_ENABLED = False
+    LOGIN_DISABLED=False
     MONGODB_SETTINGS = {
         'db': 'O24Mc-test',
         'host': '127.0.0.1',
