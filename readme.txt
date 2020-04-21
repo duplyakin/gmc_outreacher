@@ -158,3 +158,13 @@ https://discordapp.com/channels/325477692906536972/568340117052456970
 
 Vue.js authentication:
 https://www.reddit.com/r/flask/comments/e0gtuf/how_to_implement_authentication_when_using_flask/
+
+#Mongo
+C:\Program Files\MongoDB\Server\4.2\bin
+./mongod -f ./mongod.cfg
+
+#Test Json requests with this:
+https://chrome.google.com/webstore/detail/advanced-rest-client/hgmloofddffdnphfgcellkdfbfbjeloo/related
+
+#Flask Mongo Rest-API:
+https://dev.to/paurakhsharma/flask-rest-api-part-1-using-mongodb-with-flask-3g7d

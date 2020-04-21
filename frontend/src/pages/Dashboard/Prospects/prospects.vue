@@ -11,34 +11,41 @@
             <el-select
               class="select-default mb-3"
               style="width: 200px"
-              v-model="pagination.perPage"
-              placeholder="Per page">
+              v-model="filters.campaign_any"
+              placeholder="Select campaign">
               <el-option
                 class="select-default"
-                v-for="item in pagination.perPageOptions"
-                :key="item"
-                :label="item"
-                :value="item">
+                v-for="campaign in filters.campaigns"
+                :key="campaign._id.$oid"
+                :label="campaign.title"
+                :value="campaign.title">
               </el-option>
             </el-select>
-            <el-input type="search"
-                      class="mb-3"
-                      style="width: 200px"
-                      placeholder="Search records"
-                      v-model="searchQuery"
-                      aria-controls="datatables"/>
+
+            <el-select
+              class="select-default mb-3"
+              style="width: 200px"
+              v-model="filters.list_any"
+              placeholder="Select list">
+              <el-option
+                class="select-default"
+                v-for="list in filters.lists"
+                :key="list._id.$oid"
+                :label="list.title"
+                :value="list.title">
+              </el-option>
+            </el-select>
+         
           </div>
           <div class="col-sm-12">
             <el-table stripe
                       style="width: 100%;"
-                      :data="queriedData"
-                      max-height="250"
+                      :data="prospects"
+                      max-height="500"
                       border>
-              <el-table-column v-for="column in tableColumns"
-                               :key="column.label"
-                               :min-width="column.minWidth"
-                               :prop="column.prop"
-                               :label="column.label">
+              <el-table-column v-for="column in prospects_data.columns"
+                               :key="column"
+                               :label="column">
               </el-table-column>
               <el-table-column
                 :min-width="120"
@@ -159,15 +166,33 @@
         ],
         tableData: users,
         prospects: null,
+        prospects_data: {
+          columns : null,
+          prospects : null,
+        },
+
+        filters: {
+          campaign_any : 'Any campaign',
+          list_any : 'Any list',
+
+          lists : null,
+          campaigns: null
+        },
         fuseSearch: null
       }
     },
     methods: {
-      getProspects(page) {
+      initProspects() {
         const path = 'http://127.0.0.1:5000/prospects';
         axios.get(path)
           .then((res) => {
-            this.prospects = res.data;
+            var r = res.data;
+            this.filters.campaigns = JSON.parse(r.campaigns);
+            this.filters.lists = JSON.parse(r.lists);
+
+            this.prospects = JSON.parse(r.prospects);
+            this.prospects_data.columns = JSON.parse(r.columns);
+
           })
           .catch((error) => {
             // eslint-disable-next-line
@@ -191,7 +216,7 @@
       this.fuseSearch = new Fuse(this.tableData, {keys: ['email']})
     },
     created() {
-      this.getProspects(1);
+      this.initProspects();
     },
 
   }

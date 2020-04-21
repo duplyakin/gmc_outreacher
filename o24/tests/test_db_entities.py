@@ -419,22 +419,61 @@ CAMPAIGNS = [
     },
 
     {
+        'title' : 'campaign-11',
+        'owner' : '1@email.com',
+        'medium' : ['linkedin', 'email', 'special-medium']
+    },
+
+    {
         'title' : 'campaign-2',
         'owner' : '3@email.com',
         'medium' : ['linkedin', 'email', 'special-medium']
     }   
 ]
 
-PROSPECTS = [
+LISTS = [
     {
         'owner' : '1@email.com',
-        'amount' : 5,
-        'assign_to' : 'campaign-1'
+        'title' : 'List-1 1@email.com'
+    },
+    {
+        'owner' : '1@email.com',
+        'title' : 'List-2 1@email.com'
+    },
+    {
+        'owner' : '1@email.com',
+        'title' : 'List-3 1@email.com'
     },
     {
         'owner' : '3@email.com',
-        'amount' : 5,
-        'assign_to' : 'campaign-2'
+        'title' : 'List-1 3@email.com'
+    },
+    {
+        'owner' : '3@email.com',
+        'title' : 'List-2 3@email.com'
+    },
+    {
+        'owner' : '3@email.com',
+        'title' : 'List-3 3@email.com'
+    },
+]
+
+PROSPECTS = [
+    {
+        'owner' : '1@email.com',
+        'amount' : 10,
+        'assign_to' : 'campaign-1',
+        'email_name' : 'ksshilov',
+        'email_domain' : '@yandex.ru',
+        'lists' : ['List-1 1@email.com']
+    },
+    {
+        'owner' : '1@email.com',
+        'amount' : 10,
+        'assign_to' : 'campaign-11',
+        'email_name' : 'ks.shilov',
+        'email_domain' : '@gmail.ru',
+        'lists' : ['List-2 1@email.com', 'List-3 1@email.com']
     },
 ]
 
@@ -457,7 +496,7 @@ GOOGLE_APP_SETTINGS = [{
 import unittest
 import os
 import o24.config as config
-from o24.backend.dashboard.models import User, Team, Credentials, Campaign, Prospects
+from o24.backend.dashboard.models import User, Team, Credentials, Campaign, Prospects, ProspectsList
 from o24.backend import app
 from o24.backend import db
 from o24.backend.models.shared import Action, Funnel
@@ -540,10 +579,21 @@ class TestUsersCampaignsProspects(unittest.TestCase):
             data['credentials'] = credentials
             data['title'] = campaign.get('title','')
 
-            new_campaign = Campaign.create_campaign(data)
+            new_campaign = Campaign.create_campaign(data, owner=db_user.id)
             self.assertTrue(new_campaign is not None, "can't create campaign")
 
-    def test_7_create_prospects(self):
+    def test_7_create_lists(self):
+        lists = LISTS
+        for lst in lists:
+            owner = User.get_user(lst.get('owner'))
+            self.assertTrue(owner is not None, "No such user")
+
+            new_list = ProspectsList.create_list(owner_id=owner.id,
+                                                    title=lst.get('title'))
+            self.assertTrue(new_list is not None, "Can't create new_list")
+
+    def test_8_create_prospects(self):
+        
         prospects = PROSPECTS
         for prospect in prospects:
             owner = User.get_user(prospect.get('owner'))
@@ -553,12 +603,32 @@ class TestUsersCampaignsProspects(unittest.TestCase):
             self.assertTrue(campaign is not None, "No such campaign")
 
             amount = prospect.get('amount')
-            for p in range(amount):
+            email_name = prospect.get('email_name')
+            email_domain = prospect.get('email_domain')
+            email = email_name + email_domain
+            
+            lists = []
+            for l in prospect.get('lists', []):
+                next_list = ProspectsList.get_lists(owner=owner.id, title=l)
+                self.assertTrue(next_list, "No such next_list")
+                lists.append(next_list.id)
+    
+
+            count = 1
+            for i in range(amount):
+                data = {
+                    'email' : email
+                }
                 new_prospect = Prospects.create_prospect(owner_id=owner.id,
-                                                        campaign_id=campaign.id)
+                                                        campaign_id=campaign.id,
+                                                        data=data,
+                                                        lists=lists)
                 self.assertTrue(new_prospect is not None, "Can't create prospect")
 
-    def test_8_create_google_app_settings(self):
+                email = email_name + '+' + str(count) + email_domain
+                count = count + 1
+
+    def test_9_create_google_app_settings(self):
 
         for setting in GOOGLE_APP_SETTINGS:
             s = GoogleAppSetting()

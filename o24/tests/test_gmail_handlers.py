@@ -124,7 +124,6 @@ CAMPAIGNS_TO_START = [
     },
 ]
 
-
 PROSPECTS = [
     {
         'owner' : 'test@email.com',
@@ -334,7 +333,7 @@ class TestGmailHandlers(unittest.TestCase):
             data['credentials'] = credentials
             data['title'] = campaign.get('title','')
 
-            new_campaign = Campaign.create_campaign(data)
+            new_campaign = Campaign.create_campaign(data, owner=db_user.id)
             self.assertTrue(new_campaign is not None, "can't create campaign")
 
         #CREATE PROSPECTS

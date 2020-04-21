@@ -12,10 +12,12 @@ import traceback
 
 from werkzeug.security import check_password_hash, generate_password_hash
 from o24.globals import *
+import o24.config as config
 
 from passlib.context import CryptContext
 
 import o24.backend.models.shared as shared
+from bson import ObjectId
 
 class User(db.Document, UserMixin):
     email = db.EmailField(unique=True)
@@ -201,6 +203,7 @@ class Team(db.Document):
         self.save()
 
 class Campaign(db.Document):
+    owner = db.ReferenceField(User)
     title = db.StringField()
     credentials = db.ListField(db.ReferenceField(Credentials))
 
@@ -225,6 +228,14 @@ class Campaign(db.Document):
     templates = db.DictField()
 
     @classmethod
+    def list_campaigns(cls, owner):
+        return cls.objects(owner=owner).all()
+
+    @classmethod
+    def async_campaigns(cls, owner):
+        return cls.objects(owner=owner).only('id', 'title').all()
+
+    @classmethod
     def get_campaign(cls, id=None, title=None):
         
         campaign = None
@@ -236,9 +247,11 @@ class Campaign(db.Document):
         return campaign
 
     @classmethod
-    def create_campaign(cls, data):
+    def create_campaign(cls, data, owner):
         new_campaign = cls()
-        
+
+        new_campaign.owner = owner
+
         new_campaign.title = data.get('title', '')
         new_campaign.credentials = data.get('credentials')
         new_campaign.funnel = data.get('funnel')
@@ -316,6 +329,44 @@ class Campaign(db.Document):
     def _commit(self):
         self.save()
 
+
+class ProspectsList(db.Document):
+    owner = db.ReferenceField(User)
+    
+    title = db.StringField()
+
+    created = db.DateTimeField( default=datetime.now() )
+    
+    # 0 - just created
+    # 1 - in progress
+    # 2 - paused
+    # 3 - finished
+
+    @classmethod
+    def async_lists(cls, owner):
+        return cls.objects(owner=owner).only('id', 'title').all()
+
+    @classmethod
+    def get_lists(cls, owner, title=None):
+        if title:
+            return cls.objects(owner=owner, title=title).first()
+        else:
+            return cls.objects(owner=owner).all()
+
+    @classmethod
+    def create_list(cls, owner_id, title):
+        new_list = cls()
+        
+        new_list.owner = owner_id
+        new_list.title = title
+
+        new_list._commit()
+        return new_list
+
+    def _commit(self):
+        self.save()
+
+
 class Prospects(db.Document):
     owner = db.ReferenceField(User)
     
@@ -331,18 +382,49 @@ class Prospects(db.Document):
     status = db.IntField(default=0)
     
     tags = db.ListField(db.StringField())
+    lists = db.ListField(db.ReferenceField(ProspectsList))
+
+    created = db.DateTimeField( default=datetime.now() )
 
     @classmethod
-    def create_prospect(cls, owner_id, campaign_id, data={}):
+    def create_prospect(cls, owner_id, campaign_id, data={}, lists=[]):
         new_prospect = cls()
 
         new_prospect.owner = owner_id
         new_prospect.assign_to = campaign_id
         new_prospect.data = data
 
+        if lists:
+            new_prospect.lists = lists
+
         new_prospect._commit()
 
         return new_prospect
+
+    @classmethod
+    def async_prospects(cls, owner, list_filter, page, per_page=config.PROSPECTS_PER_PAGE):
+        if page <= 1:
+            page = 1
+
+        object_fields = ['team', 'assign_to', 'status', 'lists']
+
+        #remove denied values
+        list_filter.pop('owner', '')
+        list_filter.pop('_id', '')
+
+        #construct list_filter
+        #list_filter = {'field_name' : {'operator' : 'value'}}
+        query = {
+        }
+        for k,v in list_filter.items():            
+            key = 'data.' + str(k)
+            if k in object_fields:
+                key = k
+            query[key] = v
+
+        return cls.objects(__raw__=query). \
+                    only('id', 'data', 'assign_to', 'status', 'lists'). \
+                    skip(per_page * (page-1)).limit(per_page).all()
 
     @classmethod
     def get_prospects(cls, status, campaign_id):
@@ -362,6 +444,7 @@ class Prospects(db.Document):
 
     def _commit(self):
         self.save()
+
 
 class MediumSettings(db.Document):
     # which medium
