@@ -45,7 +45,7 @@ class BaseConfig():
     PER_PAGE = 10
     USER_PASSLIB_CRYPTCONTEXT_SCHEMES = ["pbkdf2_sha256"]
 
-    PROSPECTS_PER_PAGE = 4
+    PROSPECTS_PER_PAGE = 100
     #Flask-User customization
     #USER_LOGIN_TEMPLATE = 'login/login.html'
     #USER_REGISTER_TEMPLATE = 'login/register.html'

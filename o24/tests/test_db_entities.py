@@ -616,8 +616,12 @@ class TestUsersCampaignsProspects(unittest.TestCase):
 
             count = 1
             for i in range(amount):
+                linkedin = 'http://linkedin.com/u'+ email_name + str(count)
                 data = {
-                    'email' : email
+                    'email' : email,
+                    'assign_to' : campaign.title,
+                    'lists' : lists,
+                    'linkedin' : linkedin
                 }
                 new_prospect = Prospects.create_prospect(owner_id=owner.id,
                                                         campaign_id=campaign.id,

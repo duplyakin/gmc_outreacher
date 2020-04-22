@@ -168,3 +168,9 @@ https://chrome.google.com/webstore/detail/advanced-rest-client/hgmloofddffdnphfg
 
 #Flask Mongo Rest-API:
 https://dev.to/paurakhsharma/flask-rest-api-part-1-using-mongodb-with-flask-3g7d
+
+#Vuejs github
+https://github.com/vuejs/vue/tree/6fe07ebf5ab3fea1860c59fe7cdd2ec1b760f9b0
+
+#element-ui el-select source code:
+https://github.com/ElemeFE/element/blob/3270276c3c1b7e477ca65b6b7e2f5015e6baa92e/packages/select/src/select.vue

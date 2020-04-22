@@ -36,6 +36,33 @@ PROSPECTS = [
 
 ]
 
+COLUMNS = [
+    {
+        'label' : 'Email',
+        'prop' : 'email'
+    },
+    {
+        'label' : 'Linkedin',
+        'prop' : 'linkedin'
+    },
+    {
+        'label' : 'First Name',
+        'prop' : 'first_name'
+    },
+    {
+        'label' : 'Last Name',
+        'prop' : 'last_name'
+    },
+    {
+        'label' : 'Assigned campaign',
+        'prop' : 'assign_to'
+    },
+    {
+        'label' : 'Assigned lists',
+        'prop' : 'lists'
+    }
+]
+
 CORS(app, resources={r'/*': {'origins': '*'}})
 
 def get_current_user():
@@ -46,7 +73,7 @@ def get_current_user():
     return user
 
 
-@bp_dashboard.route('/prospects', defaults={'page': 1})
+@bp_dashboard.route('/prospects', defaults={'page': 1}, methods=['GET', 'POST'])
 @bp_dashboard.route('/prospects/<int:page>', methods=['GET', 'POST'])
 #@login_required
 def list_prospects(page):
@@ -56,7 +83,7 @@ def list_prospects(page):
         'lists' : '',
         'campaigns' : '',
         'prospects' : '',
-        'columns' : '["Email", "First name", "Last name", "Linkedin", "Campaign", "List"]'
+        'columns' : json.dumps(COLUMNS)
     }
     list_filter = {}
 
@@ -68,7 +95,9 @@ def list_prospects(page):
         campaigns = Campaign.async_campaigns(owner=current_user.id)
         if campaigns:
             result['campaigns'] = campaigns.to_json()
-
+    elif request.method == 'POST':
+        print(request.form)
+        return jsonify('POST received')
 
     prospects = Prospects.async_prospects(owner=current_user.id,
                                         list_filter=list_filter,
