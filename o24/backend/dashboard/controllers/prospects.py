@@ -80,30 +80,37 @@ def list_prospects(page):
 
     current_user = get_current_user()
     result = {
+        'code' : 1,
+        'msg' : '',
         'lists' : '',
         'campaigns' : '',
         'prospects' : '',
         'columns' : json.dumps(COLUMNS)
     }
     list_filter = {}
+    try:
+        if request.method == 'GET':
+            lists = ProspectsList.async_lists(owner=current_user.id)
+            if lists:
+                result['lists'] = lists.to_json()
 
-    if request.method == 'GET':
-        lists = ProspectsList.async_lists(owner=current_user.id)
-        if lists:
-            result['lists'] = lists.to_json()
+            campaigns = Campaign.async_campaigns(owner=current_user.id)
+            if campaigns:
+                result['campaigns'] = campaigns.to_json()
+        elif request.method == 'POST':
+            raw_data = request.form['_filters']
+            
+            js_data = json.loads(raw_data)
+            page = 2
 
-        campaigns = Campaign.async_campaigns(owner=current_user.id)
-        if campaigns:
-            result['campaigns'] = campaigns.to_json()
-    elif request.method == 'POST':
-        print(request.form)
-        return jsonify('POST received')
-
-    prospects = Prospects.async_prospects(owner=current_user.id,
-                                        list_filter=list_filter,
-                                        page=page)    
-    if prospects:
-        result['prospects'] = prospects.to_json()
+        prospects = Prospects.async_prospects(owner=current_user.id,
+                                            list_filter=list_filter,
+                                            page=page)    
+        if prospects:
+            result['prospects'] = prospects.to_json()
+    except Exception as e:
+        result['code'] = -1
+        result['msg'] = str(e)
 
     return jsonify(result)
 
@@ -112,10 +119,38 @@ def list_prospects(page):
 def remove_prospect(prospect_id):
     return jsonify(PROSPECTS)
 
-@bp_dashboard.route('/prospects/edit/<prospect_id>', methods=['GET', 'POST'])
+@bp_dashboard.route('/prospects/edit', methods=['POST'])
 #@login_required
-def edit_prospect(prospect_id):
-    return jsonify(PROSPECTS)
+def edit_prospect():
+    result = {
+        'code' : -1,
+        'msg' : '',
+        'updated' : ''
+    }
+    if request.method == 'POST':
+        try:
+            raw_data = request.form['_prospect']
+
+            js_data = json.loads(raw_data)
+            data = js_data['data']
+            if not data:
+                raise Exception('Error: prospect data can not be empty')
+
+            prospect_id = js_data['_id']['$oid']
+            
+            exist = Prospects.objects(id=prospect_id).first()
+            if not exist:
+                raise Exception('Prospect does not exist')
+
+            exist.update_data(data=data)
+            exist.reload()
+
+            result['code'] = 1
+            result['updated'] = exist.to_json()
+        except Exception as e:
+            result['msg'] = 'EDIT SERVER ERROR: ' + str(e)
+
+    return jsonify(result)
 
 
 @bp_dashboard.route('/prospects/add', methods=['GET', 'POST'])

@@ -437,6 +437,12 @@ class Prospects(db.Document):
     def get_email(self):
         return self.data.get('email', '')
 
+    def update_data(self, data):
+        #TEST ONLY:
+        data['lists'] = 'Updated list - FIX IT'
+        self.data = data
+        self._commit()
+
     def update_status(self, status):
         self.status = status
 

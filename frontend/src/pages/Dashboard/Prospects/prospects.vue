@@ -96,6 +96,7 @@
           </div>
           <div class="col-12">
             <el-table stripe
+                      ref="prospects_data_table"
                       style="width: 100%;"
                       @selection-change="handleSelectionChange"
                       :data="prospects_data.prospects"
@@ -114,7 +115,7 @@
                         :fixed="column.label === 'Email' ? true : false"
                         show-overflow-tooltip>
                         <template slot-scope="scope">
-                          <a href=""  v-if="column.label === 'Email'">{{ scope.row.data[column.prop] }}</a>
+                          <a @click.prevent="editProspect(scope.row, scope.$index)" href="#"  v-if="column.label === 'Email'">{{ scope.row.data[column.prop] }}</a>
                           <template v-else> {{ scope.row.data[column.prop] }} </template>
                         </template>     
               </el-table-column>
@@ -134,40 +135,40 @@
       </card>
     </div>
   </div>
+  <modal
+    :width = "720"
+    name="edit-prospect">
+  </modal>
+
 </div>
 </template>
 <script>
   import { Table, TableColumn, Select, Option } from 'element-ui'
   import {Pagination as LPagination} from 'src/components/index'
+  import NotificationMessage from './notification.vue';
+
+  import ProspectEdit from './prospectEdit.vue'
   import users from './dummy.js'
   import Fuse from 'fuse.js'
   import axios from 'axios'
 
+
+
   export default {
     components: {
       LPagination,
+      ProspectEdit,
       [Select.name]: Select,
       [Option.name]: Option,
       [Table.name]: Table,
       [TableColumn.name]: TableColumn
     },
+    on: {
+
+    },
     computed: {
       pagedData () {
         return this.tableData.slice(this.from, this.to)
-      },
-      /***
-       * Searches through table data and returns a paginated array.
-       * Note that this should not be used for table with a lot of data as it might be slow!
-       * Do the search and the pagination on the server and display the data retrieved from server instead.
-       * @returns {computed.pagedData}
-       */
-      queriedData () {
-        let result = this.tableData
-        if (this.searchQuery !== '') {
-          result = this.fuseSearch.search(this.searchQuery)
-          this.pagination.total = result.length
-        }
-        return result.slice(this.from, this.to)
       },
       to () {
         let highBound = this.from + this.pagination.perPage
@@ -200,28 +201,6 @@
         requiredText: '',
         searchQuery: '',
         propsToSearch: ['name', 'email', 'age'],
-        tableColumns: [
-          {
-            prop: 'name',
-            label: 'Name',
-            minWidth: 200
-          },
-          {
-            prop: 'email',
-            label: 'Email',
-            minWidth: 250
-          },
-          {
-            prop: 'age',
-            label: 'Age',
-            minWidth: 100
-          },
-          {
-            prop: 'salary',
-            label: 'Salary',
-            minWidth: 120
-          }
-        ],
         tableData: users,
         prospects_data: {
           columns : null,
@@ -237,8 +216,7 @@
           contains: '',
           error: '',
           message: ''
-        },
-        fuseSearch: null
+        }
       }
     },
     methods: {
@@ -250,30 +228,35 @@
         this.filters.error = '';
       },
       submitFilter(event) {
-        if (this.filters.contains == ''){
-          this.filters.error = 'Input contains value';
+        if ((this.filters.column != '') & (this.filters.contains == '')){
+          this.filters.error = 'Input value for column filter...';
           return false;
         }
         this.filters.error = '';
 
         var filterFormData = new FormData();
-        filterFormData.append('_contains', this.filters.contains);
-        filterFormData.append('_campaign_field', this.filters.campaign);
+        filterFormData.append('_filters', JSON.stringify(this.filters));
 
         const path = 'http://127.0.0.1:5000/prospects';
         axios
-          .post(path, filterFormData)
-          .then((res) => {
-            var r = res.data;
-            console.log("request received");
-            console.log(r);
-          })
-          .catch((error) => {
-            // eslint-disable-next-line
-            console.error(error);
-          });
+        .post(path, filterFormData)
+        .then((res) => {
+            var result = res.data;
+            if (result.code > 0){
+              this.prospects_data.prospects = [];
+              
+              var filtered_prospects = JSON.parse(result.prospects);
+              console.log(filtered_prospects);
+              this.prospects_data.prospects = filtered_prospects;
+            }else{
+                var msg = result.msg;
+                alert(msg)
+            }
+        })
+        .catch((error) => {
+            alert(error);
+        });
 
-        console.log(this.filters);
       },
       initProspects() {
         const path = 'http://127.0.0.1:5000/prospects';
@@ -288,11 +271,32 @@
 
           })
           .catch((error) => {
-            // eslint-disable-next-line
             console.error(error);
           });
       },
-  
+      editProspect(prospect_dict, row_index) {
+        const current_index = row_index;
+        const _table = this.$refs.prospects_data_table;
+
+        this.$modal.show(ProspectEdit, {
+            prospectObj: prospect_dict,
+            valueUpdated:(newValue) => {
+              this.$set(this.prospects_data.prospects, current_index, newValue);
+              _table.$forceUpdate();
+              this.$notify(
+                {
+                  component: NotificationMessage,
+                  message: 'Updated Success',
+                  icon: 'nc-icon nc-bulb-63',
+                  type: 'success'
+                })
+            }
+          },
+          {
+            width: '720',
+            height: 'auto'
+          })
+      },
       handleSelectionChange(val) {
         this.multipleSelection = val;
         console.log(this.multipleSelection);
@@ -311,10 +315,9 @@
       }
     },
     mounted () {
-      this.fuseSearch = new Fuse(this.tableData, {keys: ['email']})
+      this.initProspects();
     },
     created() {
-      this.initProspects();
     },
 
   }
