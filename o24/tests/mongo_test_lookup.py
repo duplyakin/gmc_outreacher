@@ -159,7 +159,7 @@ class TestLookupQuery(unittest.TestCase):
                 'credentials' : credentials_lst,
                 'funnel' : funnel.id
             }
-            new_campaign = Campaign.create_campaign(data)
+            new_campaign = Campaign.create_campaign(data, owner=user.id)
             self.assertTrue(new_campaign, "campaign")
             if 'PAUSED' in c.get('title'):
                 new_campaign.status = PAUSED

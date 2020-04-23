@@ -1,5 +1,6 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
+import VModal from 'vue-js-modal'
 import LightBootstrap from './light-bootstrap-main'
 // Plugins
 import App from './App.vue'
@@ -9,6 +10,7 @@ import routes from './routes/routes'
 // plugin setup
 Vue.use(VueRouter)
 Vue.use(LightBootstrap)
+Vue.use(VModal, { dynamic: true, injectModalsContainer: true })
 
 // configure router
 const router = new VueRouter({
