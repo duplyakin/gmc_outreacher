@@ -44,6 +44,7 @@ const Charts = () => import('src/pages/Dashboard/Charts.vue')
 
 //CUSTOM components created by me
 const Prospects = () => import('src/pages/Dashboard/Prospects/prospects.vue')
+const Campaigns = () => import('src/pages/Dashboard/Campaigns/campaigns.vue')
 
 const filterForm = () => import('src/pages/Dashboard/TestComponents/formComponent.vue')
 const randomComponent = () => import('src/pages/Dashboard/TestComponents/randomComponent.vue')
@@ -264,6 +265,11 @@ const routes = [
         path: 'prospects',
         name: 'Prospects',
         component: Prospects
+      },
+      {
+        path: 'campaigns',
+        name: 'Campaigns',
+        component: Campaigns
       }
     ]
   },
