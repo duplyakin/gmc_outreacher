@@ -18,6 +18,7 @@ from passlib.context import CryptContext
 
 import o24.backend.models.shared as shared
 from bson import ObjectId
+from o24.backend.utils.filter_data import *
 
 class User(db.Document, UserMixin):
     email = db.EmailField(unique=True)
@@ -387,12 +388,14 @@ class Prospects(db.Document):
     created = db.DateTimeField( default=datetime.now() )
 
     @classmethod
-    def create_prospect(cls, owner_id, campaign_id, data={}, lists=[]):
+    def create_prospect(cls, owner_id, campaign_id=None, data={}, lists=[]):
         new_prospect = cls()
 
         new_prospect.owner = owner_id
-        new_prospect.assign_to = campaign_id
         new_prospect.data = data
+
+        if campaign_id:
+            new_prospect.assign_to = campaign_id
 
         if lists:
             new_prospect.lists = lists
@@ -401,12 +404,27 @@ class Prospects(db.Document):
 
         return new_prospect
 
+
+    @classmethod
+    def delete_prospects(cls, owner_id, prospects_ids):
+        if not prospects_ids:
+            return 0
+
+        return Prospects.objects(owner=owner_id, id__in=prospects_ids).delete()
+
+    @classmethod
+    def unassign_prospects(cls, owner_id, prospects_ids):
+        if not prospects_ids:
+            return 0
+        
+        return Prospects.objects(owner=owner_id, id__in=prospects_ids).update(data__assign_to='')
+
     @classmethod
     def async_prospects(cls, owner, list_filter, page, per_page=config.PROSPECTS_PER_PAGE):
         if page <= 1:
             page = 1
 
-        object_fields = ['team', 'assign_to', 'status', 'lists']
+        filter_fields = ['assign_to', 'list', 'column', 'contains']     
 
         #remove denied values
         list_filter.pop('owner', '')
@@ -415,20 +433,25 @@ class Prospects(db.Document):
         #construct list_filter
         #list_filter = {'field_name' : {'operator' : 'value'}}
         query = {
+            'owner' : owner
         }
-        for k,v in list_filter.items():            
-            key = 'data.' + str(k)
-            if k in object_fields:
-                key = k
-            query[key] = v
 
-        return cls.objects(__raw__=query). \
-                    only('id', 'data', 'assign_to', 'status', 'lists'). \
-                    skip(per_page * (page-1)).limit(per_page).all()
+        q = construct_prospect_filter(filter_data=list_filter, 
+                                        filter_fields=filter_fields)
+        if q:
+            query.update(q)
+
+        db_query = cls.objects(__raw__=query). \
+                    only('id', 'data', 'assign_to', 'status', 'lists')
+        
+        total = db_query.count()
+        results = db_query.skip(per_page * (page-1)).limit(per_page).order_by('-created').all()
+
+        return (total, results)
 
     @classmethod
     def get_prospects(cls, status, campaign_id):
-        return cls.objects(Q(status=status) & Q(assign_to=campaign_id)).all()
+        return cls.objects(Q(status=status) & Q(assign_to=campaign_id)).order_by('-created').all()
 
     @classmethod
     def update_prospects(cls, ids, status):
