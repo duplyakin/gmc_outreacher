@@ -18,6 +18,7 @@ from passlib.context import CryptContext
 
 import o24.backend.models.shared as shared
 from bson import ObjectId
+from o24.backend.utils.filter_data import *
 
 class User(db.Document, UserMixin):
     email = db.EmailField(unique=True)
@@ -406,7 +407,7 @@ class Prospects(db.Document):
         if page <= 1:
             page = 1
 
-        object_fields = ['team', 'assign_to', 'status', 'lists']
+        filter_fields = ['assign_to', 'list', 'column', 'contains']     
 
         #remove denied values
         list_filter.pop('owner', '')
@@ -415,16 +416,21 @@ class Prospects(db.Document):
         #construct list_filter
         #list_filter = {'field_name' : {'operator' : 'value'}}
         query = {
+            'owner' : owner
         }
-        for k,v in list_filter.items():            
-            key = 'data.' + str(k)
-            if k in object_fields:
-                key = k
-            query[key] = v
 
-        return cls.objects(__raw__=query). \
-                    only('id', 'data', 'assign_to', 'status', 'lists'). \
-                    skip(per_page * (page-1)).limit(per_page).all()
+        q = construct_prospect_filter(filter_data=list_filter, 
+                                        filter_fields=filter_fields)
+        if q:
+            query.update(q)
+
+        db_query = cls.objects(__raw__=query). \
+                    only('id', 'data', 'assign_to', 'status', 'lists')
+        
+        total = db_query.count()
+        results = db_query.skip(per_page * (page-1)).limit(per_page).all()
+
+        return (total, results)
 
     @classmethod
     def get_prospects(cls, status, campaign_id):

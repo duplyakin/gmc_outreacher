@@ -65,6 +65,7 @@ export default {
     name : 'prospect-edit',
     props : {
         prospectObj: Object,
+        api_url : String,
         valueUpdated: Function
     },
     data() {
@@ -88,7 +89,7 @@ export default {
     },
     methods: {
         submitProspectData(){
-           const path = 'http://127.0.0.1:5000/prospects/edit';
+           const path = this.api_url;
            if (confirm("Are you sure?")){
 
                 var prospectData = new FormData();
@@ -103,12 +104,13 @@ export default {
                         this.$emit('close');
                         this.valueUpdated(updated_prospect);
                     }else{
-                        var msg = result.msg;
+                        var msg = 'Error editing prospect ' + result.msg;
                         alert(msg)
                     }
                 })
                 .catch((error) => {
-                    alert(error);
+                    var msg = 'Error editing prospect ' + error;
+                    alert(msg);
                 });
            };
         },

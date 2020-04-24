@@ -52,7 +52,7 @@
                 <div class="col-2">
                     <el-select
                     class="select-default mb-3"
-                    v-model="filters.campaign"
+                    v-model="filters.assign_to"
                     placeholder="Select campaign">
                     <el-option
                       class="select-default"
@@ -115,7 +115,7 @@
                         :fixed="column.label === 'Email' ? true : false"
                         show-overflow-tooltip>
                         <template slot-scope="scope">
-                          <a @click.prevent="editProspect(scope.row, scope.$index)" href="#"  v-if="column.label === 'Email'">{{ scope.row.data[column.prop] }}</a>
+                          <a @click.prevent="editProspect(scope.row, scope.$index)" href="#"  v-if="column.label === 'email'">{{ scope.row.data[column.prop] }}</a>
                           <template v-else> {{ scope.row.data[column.prop] }} </template>
                         </template>     
               </el-table-column>
@@ -126,11 +126,12 @@
           <div class="">
             <p class="card-category">Showing {{from + 1}} to {{to}} of {{total}} entries</p>
           </div>
-          <l-pagination class="pagination-no-border"
-                        v-model="pagination.currentPage"
-                        :per-page="pagination.perPage"
-                        :total="pagination.total">
-          </l-pagination>
+          <prospect-pagination class="pagination-no-border"
+                        v-model="prospects_data.pagination.currentPage"
+                        :per-page="prospects_data.pagination.perPage"
+                        :total="prospects_data.pagination.total"
+                        v-on:switch-page="switchPage">
+          </prospect-pagination>
         </div>
       </card>
     </div>
@@ -144,7 +145,7 @@
 </template>
 <script>
   import { Table, TableColumn, Select, Option } from 'element-ui'
-  import {Pagination as LPagination} from 'src/components/index'
+  import ProspectPagination from './prospectPagination.vue'
   import NotificationMessage from './notification.vue';
 
   import ProspectEdit from './prospectEdit.vue'
@@ -152,65 +153,51 @@
   import Fuse from 'fuse.js'
   import axios from 'axios'
 
-
+  const PROSPECTS_API_LIST = 'http://127.0.0.1:5000/prospects';
+  const PROSPECTS_API_EDIT = 'http://127.0.0.1:5000/prospects/edit';
 
   export default {
     components: {
-      LPagination,
+      ProspectPagination,
       ProspectEdit,
       [Select.name]: Select,
       [Option.name]: Option,
       [Table.name]: Table,
       [TableColumn.name]: TableColumn
     },
-    on: {
-
-    },
     computed: {
-      pagedData () {
-        return this.tableData.slice(this.from, this.to)
-      },
       to () {
-        let highBound = this.from + this.pagination.perPage
+        let highBound = this.from + this.prospects_data.pagination.perPage
         if (this.total < highBound) {
           highBound = this.total
         }
         return highBound
       },
       from () {
-        return this.pagination.perPage * (this.pagination.currentPage - 1)
+        return this.prospects_data.pagination.perPage * (this.prospects_data.pagination.currentPage - 1)
       },
       total () {
-        this.pagination.total = this.tableData.length
-        return this.tableData.length
+        return this.prospects_data.pagination.total;
       }
     },
     data () {
       return {
-        pagination: {
-          perPage: 50,
-          currentPage: 1,
-          perPageOptions: [5, 10, 25, 50],
-          total: 0
-        },
-        modelValidations: {
-          requiredText: {
-            required: true
-          }
-        },
-        requiredText: '',
-        searchQuery: '',
-        propsToSearch: ['name', 'email', 'age'],
-        tableData: users,
         prospects_data: {
           columns : null,
-          prospects : [],
           lists : null,
-          campaigns: null
+          campaigns: null,
+
+          prospects : [],
+
+          pagination : {
+            perPage : 0,
+            currentPage : 1,
+            total : 0
+          }
         },
         multipleSelection: [],
         filters: {
-          campaign : '',
+          assign_to : '',
           list : '',
           column : '',
           contains: '',
@@ -220,14 +207,31 @@
       }
     },
     methods: {
+      switchPage(page){
+        this.submitFilter(event=null, page=page);
+      },
+      update_prospects_data(newData, init=0){
+        if (init == 1){
+          this.prospects_data.campaigns = JSON.parse(newData.campaigns);
+          this.prospects_data.lists = JSON.parse(newData.lists);
+          this.prospects_data.columns = JSON.parse(newData.columns);
+        }
+
+        if (newData.prospects){
+          this.prospects_data.prospects = JSON.parse(newData.prospects);
+        }
+        this.prospects_data.pagination = JSON.parse(newData.pagination);
+      },
       filterClear(){
         this.filters.column = '';
-        this.filters.campaign = '';
+        this.filters.assign_to = '';
         this.filters.list = '';
         this.filters.contains = '';
         this.filters.error = '';
+
+        this.submitFilter(event=null);
       },
-      submitFilter(event) {
+      submitFilter(event, page=1) {
         if ((this.filters.column != '') & (this.filters.contains == '')){
           this.filters.error = 'Input value for column filter...';
           return false;
@@ -236,42 +240,46 @@
 
         var filterFormData = new FormData();
         filterFormData.append('_filters', JSON.stringify(this.filters));
+        filterFormData.append('_page', page);
 
-        const path = 'http://127.0.0.1:5000/prospects';
-        axios
-        .post(path, filterFormData)
+        const path = PROSPECTS_API_LIST;
+        
+        axios.post(path, filterFormData)
         .then((res) => {
-            var result = res.data;
-            if (result.code > 0){
+            var r = res.data;
+            if (r.code > 0){
               this.prospects_data.prospects = [];
-              
-              var filtered_prospects = JSON.parse(result.prospects);
-              console.log(filtered_prospects);
-              this.prospects_data.prospects = filtered_prospects;
+              this.update_prospects_data(r);
             }else{
-                var msg = result.msg;
+                var msg = 'Server Error loading prospects ' + r.msg;
                 alert(msg)
             }
         })
         .catch((error) => {
-            alert(error);
+            var msg = 'Error loading prospects ' + error;
+            alert(msg);
         });
 
       },
       initProspects() {
-        const path = 'http://127.0.0.1:5000/prospects';
-        axios.get(path)
+        const path = PROSPECTS_API_LIST;
+
+        var initData = new FormData();
+        initData.append('_init', 1);
+
+        axios.post(path, initData)
           .then((res) => {
             var r = res.data;
-            this.prospects_data.campaigns = JSON.parse(r.campaigns);
-            this.prospects_data.lists = JSON.parse(r.lists);
-
-            this.prospects_data.prospects = JSON.parse(r.prospects);
-            this.prospects_data.columns = JSON.parse(r.columns);
-
+            if (r.code <= 0){
+              msg = "Error loading prospects " + r.msg;
+              alert(msg);
+            }else{
+              this.update_prospects_data(r, 1);
+            }
           })
           .catch((error) => {
-            console.error(error);
+            msg = "Error loading prospects " + error;
+            alert(msg);
           });
       },
       editProspect(prospect_dict, row_index) {
@@ -280,6 +288,8 @@
 
         this.$modal.show(ProspectEdit, {
             prospectObj: prospect_dict,
+            api_url : PROSPECTS_API_EDIT,
+
             valueUpdated:(newValue) => {
               this.$set(this.prospects_data.prospects, current_index, newValue);
               _table.$forceUpdate();
@@ -299,19 +309,6 @@
       },
       handleSelectionChange(val) {
         this.multipleSelection = val;
-        console.log(this.multipleSelection);
-      },
-      handleLike (index, row) {
-        alert(`Your want to like ${row.name}`)
-      },
-      handleEdit (index, row) {
-        alert(`Your want to edit ${row.name}`)
-      },
-      handleDelete (index, row) {
-        let indexToDelete = this.tableData.findIndex((tableRow) => tableRow.id === row.id)
-        if (indexToDelete >= 0) {
-          this.tableData.splice(indexToDelete, 1)
-        }
       }
     },
     mounted () {
@@ -319,7 +316,6 @@
     },
     created() {
     },
-
   }
 </script>
 <style>

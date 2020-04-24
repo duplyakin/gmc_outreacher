@@ -475,6 +475,14 @@ PROSPECTS = [
         'email_domain' : '@gmail.ru',
         'lists' : ['List-2 1@email.com', 'List-3 1@email.com']
     },
+    {
+        'owner' : '3@email.com',
+        'amount' : 10,
+        'assign_to' : 'campaign-2',
+        'email_name' : 'yana.shilov',
+        'email_domain' : '@gmail.ru',
+        'lists' : []
+    },
 ]
 
 

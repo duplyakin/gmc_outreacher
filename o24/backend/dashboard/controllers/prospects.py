@@ -11,6 +11,7 @@ from flask_cors import CORS
 import o24.config as config
 from o24.backend.utils.serialize import JSONEncoder
 import json
+import traceback
 
 PROSPECTS = [
     {
@@ -38,27 +39,27 @@ PROSPECTS = [
 
 COLUMNS = [
     {
-        'label' : 'Email',
+        'label' : 'email',
         'prop' : 'email'
     },
     {
-        'label' : 'Linkedin',
+        'label' : 'linkedin',
         'prop' : 'linkedin'
     },
     {
-        'label' : 'First Name',
+        'label' : 'first_name',
         'prop' : 'first_name'
     },
     {
-        'label' : 'Last Name',
+        'label' : 'last_name',
         'prop' : 'last_name'
     },
     {
-        'label' : 'Assigned campaign',
+        'label' : 'assign_to',
         'prop' : 'assign_to'
     },
     {
-        'label' : 'Assigned lists',
+        'label' : 'lists',
         'prop' : 'lists'
     }
 ]
@@ -73,42 +74,67 @@ def get_current_user():
     return user
 
 
-@bp_dashboard.route('/prospects', defaults={'page': 1}, methods=['GET', 'POST'])
-@bp_dashboard.route('/prospects/<int:page>', methods=['GET', 'POST'])
+@bp_dashboard.route('/prospects', methods=['POST'])
 #@login_required
-def list_prospects(page):
+def list_prospects():
 
     current_user = get_current_user()
+
+    per_page = config.PROSPECTS_PER_PAGE
+    page = 1
+
+    pagination = {
+            'perPage' : per_page,
+            'currentPage' : page,
+            'total' : 0
+    }
+
     result = {
-        'code' : 1,
-        'msg' : '',
+        'code' : -1,
+        'msg' : 'Unknown request',
         'lists' : '',
         'campaigns' : '',
         'prospects' : '',
+        'pagination' : json.dumps(pagination),
         'columns' : json.dumps(COLUMNS)
     }
     list_filter = {}
+
     try:
-        if request.method == 'GET':
-            lists = ProspectsList.async_lists(owner=current_user.id)
-            if lists:
-                result['lists'] = lists.to_json()
+        if request.method == 'POST':
+            print(request.form)
+            is_init = request.form.get('_init', 0)
+            if int(is_init):
+                lists = ProspectsList.async_lists(owner=current_user.id)
+                if lists:
+                    result['lists'] = lists.to_json()
 
-            campaigns = Campaign.async_campaigns(owner=current_user.id)
-            if campaigns:
-                result['campaigns'] = campaigns.to_json()
-        elif request.method == 'POST':
-            raw_data = request.form['_filters']
-            
-            js_data = json.loads(raw_data)
-            page = 2
+                campaigns = Campaign.async_campaigns(owner=current_user.id)
+                if campaigns:
+                    result['campaigns'] = campaigns.to_json()
 
-        prospects = Prospects.async_prospects(owner=current_user.id,
-                                            list_filter=list_filter,
-                                            page=page)    
-        if prospects:
-            result['prospects'] = prospects.to_json()
+            page = int(request.form.get('_page',1))
+            raw_data = request.form.get('_filters', {})
+            if raw_data:
+                list_filter = json.loads(raw_data)
+
+
+            total, prospects = Prospects.async_prospects(owner=current_user.id,
+                                                list_filter=list_filter,
+                                                page=page)    
+            if prospects:
+                result['prospects'] = prospects.to_json()
+                result['pagination'] = json.dumps({
+                    'perPage' : per_page,
+                    'currentPage' : page,
+                    'total' : total
+                })
+
+            result['code'] = 1
+            result['msg'] = 'Success'
     except Exception as e:
+        print(e)
+        traceback.print_exc()
         result['code'] = -1
         result['msg'] = str(e)
 
