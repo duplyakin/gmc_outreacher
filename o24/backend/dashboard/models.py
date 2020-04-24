@@ -388,12 +388,14 @@ class Prospects(db.Document):
     created = db.DateTimeField( default=datetime.now() )
 
     @classmethod
-    def create_prospect(cls, owner_id, campaign_id, data={}, lists=[]):
+    def create_prospect(cls, owner_id, campaign_id=None, data={}, lists=[]):
         new_prospect = cls()
 
         new_prospect.owner = owner_id
-        new_prospect.assign_to = campaign_id
         new_prospect.data = data
+
+        if campaign_id:
+            new_prospect.assign_to = campaign_id
 
         if lists:
             new_prospect.lists = lists
@@ -401,6 +403,21 @@ class Prospects(db.Document):
         new_prospect._commit()
 
         return new_prospect
+
+
+    @classmethod
+    def delete_prospects(cls, owner_id, prospects_ids):
+        if not prospects_ids:
+            return 0
+
+        return Prospects.objects(owner=owner_id, id__in=prospects_ids).delete()
+
+    @classmethod
+    def unassign_prospects(cls, owner_id, prospects_ids):
+        if not prospects_ids:
+            return 0
+        
+        return Prospects.objects(owner=owner_id, id__in=prospects_ids).update(data__assign_to='')
 
     @classmethod
     def async_prospects(cls, owner, list_filter, page, per_page=config.PROSPECTS_PER_PAGE):
@@ -428,13 +445,13 @@ class Prospects(db.Document):
                     only('id', 'data', 'assign_to', 'status', 'lists')
         
         total = db_query.count()
-        results = db_query.skip(per_page * (page-1)).limit(per_page).all()
+        results = db_query.skip(per_page * (page-1)).limit(per_page).order_by('-created').all()
 
         return (total, results)
 
     @classmethod
     def get_prospects(cls, status, campaign_id):
-        return cls.objects(Q(status=status) & Q(assign_to=campaign_id)).all()
+        return cls.objects(Q(status=status) & Q(assign_to=campaign_id)).order_by('-created').all()
 
     @classmethod
     def update_prospects(cls, ids, status):

@@ -7,12 +7,14 @@
       </div>
       <div class="col-8 d-flex flex-row-reverse align-self-center">
 
-          <button type="button" class="btn btn-wd btn-danger mx-1">Delete</button>
-          <button type="button" class="btn btn-default btn-success mx-1">Unassign</button>
-          <button type="button" class="btn btn-default btn-success mx-1">Assign</button>
+          <div v-if="multipleSelection.length > 0">
+          <button @click.prevent="unassignProspects" type="button" class="btn btn-default btn-success mx-1">Unassign</button>
+          <button @click.prevent="assignProspects" type="button" class="btn btn-default btn-success mx-1">Assign</button>
+          <button @click.prevent="deleteProspects" type="button" class="btn btn-wd btn-danger mx-1">Delete</button>
+          </div>
 
           <button type="button" class="btn btn-default btn-success mx-1">Upload</button>
-          <button type="button" class="btn btn-default btn-success mx-1">Add manually</button>
+          <button @click.prevent="addProspect" type="button" class="btn btn-default btn-success mx-1">Add manually</button>
       
         </div>
 
@@ -155,6 +157,9 @@
 
   const PROSPECTS_API_LIST = 'http://127.0.0.1:5000/prospects';
   const PROSPECTS_API_EDIT = 'http://127.0.0.1:5000/prospects/edit';
+  const PROSPECTS_API_CREATE = 'http://127.0.0.1:5000/prospects/create';
+  const PROSPECTS_API_DELETE = 'http://127.0.0.1:5000/prospects/remove';
+  const PROSPECTS_API_UNASSIGN = 'http://127.0.0.1:5000/prospects/unassign';
 
   export default {
     components: {
@@ -196,6 +201,7 @@
           }
         },
         multipleSelection: [],
+
         filters: {
           assign_to : '',
           list : '',
@@ -262,8 +268,10 @@
 
       },
       initProspects() {
-        const path = PROSPECTS_API_LIST;
+        this.filterClear();
 
+        const path = PROSPECTS_API_LIST;
+        
         var initData = new FormData();
         initData.append('_init', 1);
 
@@ -282,6 +290,29 @@
             alert(msg);
           });
       },
+      addProspect(){
+        const _table = this.$refs.prospects_data_table;
+        this.$modal.show(ProspectEdit, {
+            prospectObj: {},
+            modalTitle: "Prospect create",
+            action: 'create',
+            api_url : PROSPECTS_API_CREATE,
+            valueUpdated:(newValue) => {
+              this.$notify(
+                {
+                  component: NotificationMessage,
+                  message: 'Prospect created Success',
+                  icon: 'nc-icon nc-bulb-63',
+                  type: 'success'
+                })
+                this.initProspects();   
+            }
+          },
+          {
+            width: '720',
+            height: 'auto'
+          })
+      },
       editProspect(prospect_dict, row_index) {
         const current_index = row_index;
         const _table = this.$refs.prospects_data_table;
@@ -289,7 +320,8 @@
         this.$modal.show(ProspectEdit, {
             prospectObj: prospect_dict,
             api_url : PROSPECTS_API_EDIT,
-
+            action: 'edit',
+            modalTitle: "Prospect edit",
             valueUpdated:(newValue) => {
               this.$set(this.prospects_data.prospects, current_index, newValue);
               _table.$forceUpdate();
@@ -309,6 +341,71 @@
       },
       handleSelectionChange(val) {
         this.multipleSelection = val;
+      },
+      assignProspects(){
+
+      },
+      unassignProspects(){
+        if (confirm("Are you sure? This will stop all campaigns for prospects")){
+          const path = PROSPECTS_API_UNASSIGN;
+
+          var unassignData = new FormData();
+          unassignData.append('_unassign', JSON.stringify(this.multipleSelection));
+
+          axios.post(path, unassignData)
+            .then((res) => {
+              var r = res.data;
+              if (r.code <= 0){
+                msg = "Error " + r.msg;
+                alert(msg);
+              }else{
+                this.$notify(
+                {
+                  component: NotificationMessage,
+                  message: 'Unassign success',
+                  icon: 'nc-icon nc-bulb-63',
+                  type: 'success'
+                });
+                this.initProspects();
+              }
+            })
+            .catch((error) => {
+              msg = "Error " + error;
+              alert(msg);
+            });
+
+        }
+      },
+      deleteProspects(){
+        if (confirm("Are you sure? This action CAN'T be undone")){
+          const path = PROSPECTS_API_DELETE;
+
+          var deleteData = new FormData();
+          deleteData.append('_delete', JSON.stringify(this.multipleSelection));
+
+          axios.post(path, deleteData)
+            .then((res) => {
+              var r = res.data;
+              if (r.code <= 0){
+                msg = "Error deleting prospects " + r.msg;
+                alert(msg);
+              }else{
+                this.$notify(
+                {
+                  component: NotificationMessage,
+                  message: 'Delete success',
+                  icon: 'nc-icon nc-bulb-63',
+                  type: 'success'
+                });
+                this.initProspects();
+              }
+            })
+            .catch((error) => {
+              msg = "Error loading prospects " + error;
+              alert(msg);
+            });
+
+        }
       }
     },
     mounted () {

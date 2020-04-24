@@ -133,21 +133,90 @@ def list_prospects():
             result['code'] = 1
             result['msg'] = 'Success'
     except Exception as e:
+        #TODO: change to loggin
         print(e)
         traceback.print_exc()
+
         result['code'] = -1
         result['msg'] = str(e)
 
     return jsonify(result)
 
-@bp_dashboard.route('/prospects/remove/<prospect_id>', methods=['GET', 'POST'])
+@bp_dashboard.route('/prospects/remove', methods=['POST'])
 #@login_required
-def remove_prospect(prospect_id):
-    return jsonify(PROSPECTS)
+def remove_prospect():
+    current_user = get_current_user()
+
+    result = {
+        'code' : -1,
+        'msg' : '',
+        'deleted' : 0
+    }
+    if request.method == 'POST':
+        try:
+            raw_data = request.form['_delete']
+
+            js_data = json.loads(raw_data)
+
+            ids = [x["_id"]["$oid"] for x in js_data]
+
+            res = Prospects.delete_prospects(owner_id=current_user.id,
+                                            prospects_ids=ids)
+            print(res)
+
+            result['code'] = 1
+            result['deleted'] = res
+        except Exception as e:
+            #TODO: change to loggin
+            print(e)
+            traceback.print_exc()
+
+            result['code'] = -1
+            result['msg'] = 'SERVER ERROR: ' + str(e)
+
+    return jsonify(result)
+
+
+@bp_dashboard.route('/prospects/unassign', methods=['POST'])
+#@login_required
+def unassign_prospect():
+    current_user = get_current_user()
+
+    result = {
+        'code' : -1,
+        'msg' : '',
+        'unassigned' : 0
+    }
+    if request.method == 'POST':
+        try:
+            raw_data = request.form['_unassign']
+
+            js_data = json.loads(raw_data)
+
+            ids = [x["_id"]["$oid"] for x in js_data]
+
+            res = Prospects.unassign_prospects(owner_id=current_user.id,
+                                            prospects_ids=ids)
+
+            result['code'] = 1
+            result['unassigned'] = res
+        except Exception as e:
+            #TODO: change to loggin
+            print(e)
+            traceback.print_exc()
+
+            result['code'] = -1
+            result['msg'] = 'SERVER ERROR: ' + str(e)
+
+    return jsonify(result)
+
+
 
 @bp_dashboard.route('/prospects/edit', methods=['POST'])
 #@login_required
 def edit_prospect():
+    current_user = get_current_user()
+
     result = {
         'code' : -1,
         'msg' : '',
@@ -164,7 +233,7 @@ def edit_prospect():
 
             prospect_id = js_data['_id']['$oid']
             
-            exist = Prospects.objects(id=prospect_id).first()
+            exist = Prospects.objects(owner=current_user.id, id=prospect_id).first()
             if not exist:
                 raise Exception('Prospect does not exist')
 
@@ -174,15 +243,52 @@ def edit_prospect():
             result['code'] = 1
             result['updated'] = exist.to_json()
         except Exception as e:
+            #TODO: change to loggin
+            print(e)
+            traceback.print_exc()
+
             result['msg'] = 'EDIT SERVER ERROR: ' + str(e)
 
     return jsonify(result)
 
 
-@bp_dashboard.route('/prospects/add', methods=['GET', 'POST'])
+@bp_dashboard.route('/prospects/create', methods=['POST'])
 #@login_required
-def add_prospect():
-    return jsonify(PROSPECTS)
+def create_prospect():
+    current_user = get_current_user()
+
+    result = {
+        'code' : -1,
+        'msg' : '',
+        'updated' : ''
+    }
+    if request.method == 'POST':
+        try:
+            raw_data = request.form['_prospect']
+
+            js_data = json.loads(raw_data)
+            data = js_data['data']
+            if not data:
+                raise Exception('Error: prospect data can not be empty')
+
+            email = data['email']
+            
+            exist = Prospects.objects(data__email=email).first()
+            if exist:
+                raise Exception('Prospect with this email already exist')
+
+            prospect = Prospects.create_prospect(owner_id=current_user.id, data=data)
+
+            result['code'] = 1
+            result['updated'] = prospect.to_json()
+        except Exception as e:
+            #TODO: change to loggin
+            print(e)
+            traceback.print_exc()
+
+            result['msg'] = 'SERVER ERROR: ' + str(e)
+
+    return jsonify(result)
 
 @bp_dashboard.route('/prospects/upload', methods=['GET', 'POST'])
 #@login_required

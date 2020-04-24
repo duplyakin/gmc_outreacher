@@ -1,6 +1,6 @@
 <template>
 <div>
-<card title="Prospect info">
+<card :title="modalTitle">
     <form @submit.prevent="submitProspectData">
         <card>
         <div class="row">
@@ -64,6 +64,8 @@ export default {
     },
     name : 'prospect-edit',
     props : {
+        modalTitle: String,
+        action: String,
         prospectObj: Object,
         api_url : String,
         valueUpdated: Function
@@ -90,6 +92,11 @@ export default {
     methods: {
         submitProspectData(){
            const path = this.api_url;
+            if (this.prospect_data.data.email == ''){
+                alert("Email can't be empty");
+                return false;
+            }
+
            if (confirm("Are you sure?")){
 
                 var prospectData = new FormData();
@@ -119,7 +126,9 @@ export default {
         }
     },
     mounted() {
-        this.prospect_data =  JSON.parse(JSON.stringify(this.prospectObj));
+        if (this.action == 'edit'){
+            this.prospect_data =  JSON.parse(JSON.stringify(this.prospectObj));
+        }
     }
 }
 </script>
