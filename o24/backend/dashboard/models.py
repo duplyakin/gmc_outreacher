@@ -413,6 +413,14 @@ class Prospects(db.Document):
         return Prospects.objects(owner=owner_id, id__in=prospects_ids).delete()
 
     @classmethod
+    def assign_prospects(cls, owner_id, prospects_ids, campaign_id):
+        if not prospects_ids or not campaign_id:
+            return 0
+        
+        return Prospects.objects(owner=owner_id, id__in=prospects_ids).update(data__assign_to=campaign_id)
+
+
+    @classmethod
     def unassign_prospects(cls, owner_id, prospects_ids):
         if not prospects_ids:
             return 0

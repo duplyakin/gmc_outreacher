@@ -12,9 +12,11 @@
           <button @click.prevent="assignProspects" type="button" class="btn btn-default btn-success mx-1">Assign</button>
           <button @click.prevent="deleteProspects" type="button" class="btn btn-wd btn-danger mx-1">Delete</button>
           </div>
-
-          <button type="button" class="btn btn-default btn-success mx-1">Upload</button>
+          
+          <div v-if="multipleSelection.length == 0">
           <button @click.prevent="addProspect" type="button" class="btn btn-default btn-success mx-1">Add manually</button>
+          <button @click.prevent="uploadProspect" type="button" class="btn btn-default btn-success mx-1">Upload</button>
+          </div>
       
         </div>
 
@@ -151,6 +153,9 @@
   import NotificationMessage from './notification.vue';
 
   import ProspectEdit from './prospectEdit.vue'
+  import ProspectAssign from './prospectAssign.vue'
+  import Upload from './upload/upload.vue'
+
   import users from './dummy.js'
   import Fuse from 'fuse.js'
   import axios from 'axios'
@@ -160,11 +165,15 @@
   const PROSPECTS_API_CREATE = 'http://127.0.0.1:5000/prospects/create';
   const PROSPECTS_API_DELETE = 'http://127.0.0.1:5000/prospects/remove';
   const PROSPECTS_API_UNASSIGN = 'http://127.0.0.1:5000/prospects/unassign';
+  const PROSPECTS_API_ASSIGN = 'http://127.0.0.1:5000/prospects/assign';
+  const PROSPECTS_API_UPLOAD = 'http://127.0.0.1:5000/prospects/upload';
 
   export default {
     components: {
       ProspectPagination,
       ProspectEdit,
+      Upload,
+      ProspectAssign,
       [Select.name]: Select,
       [Option.name]: Option,
       [Table.name]: Table,
@@ -185,7 +194,7 @@
         return this.prospects_data.pagination.total;
       }
     },
-    data () {
+    data () {     
       return {
         prospects_data: {
           columns : null,
@@ -290,6 +299,24 @@
             alert(msg);
           });
       },
+      uploadProspect(){
+        this.$modal.show(Upload, {
+            api_url : PROSPECTS_API_UPLOAD,
+            valueUpdated:(uploaded) => {
+              this.$notify(
+                {
+                  component: NotificationMessage,
+                  message: 'Prospect uploaded Success. Update the page',
+                  icon: 'nc-icon nc-bulb-63',
+                  type: 'success'
+                })
+            }
+          },
+          {
+            width: '720',
+            height: 'auto'
+          })
+      },
       addProspect(){
         const _table = this.$refs.prospects_data_table;
         this.$modal.show(ProspectEdit, {
@@ -343,6 +370,50 @@
         this.multipleSelection = val;
       },
       assignProspects(){
+
+        var prospects = this.multipleSelection;
+        this.$modal.show(ProspectAssign, {
+            campaigns: this.prospects_data.campaigns,
+            valueUpdated: (campaign_id) => {
+                  
+                  const path = PROSPECTS_API_ASSIGN;
+
+                  var assignData = new FormData();
+                  assignData.append('_prospects', JSON.stringify(prospects));
+                  assignData.append('_campaign_id', campaign_id);
+
+
+                  axios.post(path, assignData)
+                    .then((res) => {
+                      var r = res.data;
+                      if (r.code <= 0){
+                        msg = "Error " + r.msg;
+                        alert(msg);
+                      }else{
+                        this.$notify(
+                        {
+                          component: NotificationMessage,
+                          message: 'Assign success',
+                          icon: 'nc-icon nc-bulb-63',
+                          type: 'success'
+                        });
+
+                        this.initProspects();
+                        
+                      }
+                    })
+                    .catch((error) => {
+                      msg = "Error " + error;
+                      alert(msg);
+                    });
+
+              //End here
+            }
+          },
+          {
+            width: '720',
+            height: 'auto'
+          })
 
       },
       unassignProspects(){
