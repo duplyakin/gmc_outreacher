@@ -141,8 +141,9 @@
     </div>
   </div>
   <modal
+    style="overflow: auto;"
     :width = "720"
-    name="edit-prospect">
+    name="major_modal">
   </modal>
 
 </div>
@@ -154,7 +155,7 @@
 
   import ProspectEdit from './prospectEdit.vue'
   import ProspectAssign from './prospectAssign.vue'
-  import Upload from './upload/upload.vue'
+  import CsvUpload from './upload_csv/upload.vue'
 
   import users from './dummy.js'
   import Fuse from 'fuse.js'
@@ -172,7 +173,7 @@
     components: {
       ProspectPagination,
       ProspectEdit,
-      Upload,
+      CsvUpload,
       ProspectAssign,
       [Select.name]: Select,
       [Option.name]: Option,
@@ -300,7 +301,7 @@
           });
       },
       uploadProspect(){
-        this.$modal.show(Upload, {
+        this.$modal.show(CsvUpload, {
             api_url : PROSPECTS_API_UPLOAD,
             valueUpdated:(uploaded) => {
               this.$notify(

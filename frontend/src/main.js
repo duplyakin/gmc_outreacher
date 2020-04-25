@@ -2,6 +2,7 @@ import Vue from 'vue'
 import VueRouter from 'vue-router'
 import VModal from 'vue-js-modal'
 import LightBootstrap from './light-bootstrap-main'
+import VueDragscroll from 'vue-dragscroll'
 // Plugins
 import App from './App.vue'
 
@@ -11,6 +12,7 @@ import routes from './routes/routes'
 Vue.use(VueRouter)
 Vue.use(LightBootstrap)
 Vue.use(VModal, { dynamic: true, injectModalsContainer: true })
+Vue.use(VueDragscroll)
 
 // configure router
 const router = new VueRouter({

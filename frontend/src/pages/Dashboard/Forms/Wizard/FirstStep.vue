@@ -64,6 +64,7 @@
       },
       validate () {
         return this.$validator.validateAll().then(res => {
+          console.log(res);
           this.$emit('on-validated', res, this.model)
           return res
         })
