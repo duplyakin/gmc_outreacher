@@ -136,12 +136,11 @@
                         :total="prospects_data.pagination.total"
                         v-on:switch-page="switchPage">
           </prospect-pagination>
-        </div>
+        </div>      
       </card>
     </div>
   </div>
   <modal
-    style="overflow: auto;"
     :width = "720"
     name="major_modal">
   </modal>

@@ -73,9 +73,6 @@ export default {
         return false;
     },
     onChangeFile(file, fileList){
-        console.log(file);
-        console.log(this.model);
-
         var isValid = this._checkValid(file);
 
         if (!isValid){
@@ -91,7 +88,7 @@ export default {
             return false;
         }
 
-        this.$emit('on-validated', isValid, this.model);
+        this.$emit('on-validated', 'file_upload', isValid, this.model);
 
         return true;
     },

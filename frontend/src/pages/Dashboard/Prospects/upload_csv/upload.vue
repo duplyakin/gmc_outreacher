@@ -1,5 +1,5 @@
 <template>
-<div v-dragscroll="true">
+<div>
     <div class="row d-flex justify-content-center">
         <div class="card card-wizard" id="wizardCard">
                 <form-wizard shape="tab"
@@ -7,11 +7,18 @@
                 error-color="#FB404B"
                 color="#35495E">
 
+                <tab-content title="Select file"
+                class="col-12"
+                :before-change="() => validateStep('firstStep')"
+                icon="nc-icon nc-cloud-upload-94">
+                <first-step ref="firstStep" @on-validated="onStepValidated"></first-step>
+                </tab-content>
+
                 <tab-content title="Map fields"
                     class="col-12"
                     :before-change="() => validateStep('secondStep')"
                     icon="nc-icon nc-cloud-upload-94">
-                <second-step ref="secondStep" @on-validated="onStepValidated"></second-step>
+                <second-step style="width: 100%;" :file="file" ref="secondStep" @on-validated="onStepValidated"></second-step>
                 </tab-content>
 
                 <tab-content title="Check status"
@@ -47,7 +54,8 @@ export default {
     name: 'upload',
     data () {
     return {
-        upload_data: {}
+        upload_data: {},
+        file : null,
     }
     },
     components: {
@@ -61,8 +69,11 @@ export default {
     validateStep (ref) {
         return this.$refs[ref].validate()
     },
-    onStepValidated (validated, model) {
+    onStepValidated (step, validated, model) {
         this.upload_data = {...this.upload_data, ...model}
+        if (step == 'file_upload' && validated){
+            this.file = model.file;
+        }
     },
     wizardComplete () {
         //Upload to server code here
@@ -72,6 +83,12 @@ export default {
 }
 </script>
 <style lang="scss">
+.card-wizard {
+    width: 100%;
+    margin: 10px, 10px, 10px, 10px;
+    overflow: auto;
+}
+
 .vue-form-wizard .wizard-icon-circle.tab_shape {
     background-color: #9A9A9A !important;
     color: white;
