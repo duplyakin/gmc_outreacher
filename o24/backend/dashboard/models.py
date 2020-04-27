@@ -146,6 +146,24 @@ class Credentials(db.Document):
         return credentials
 
     @classmethod
+    def async_credentials(cls, owner, page, per_page=config.CREDENTIALS_PER_PAGE):
+        if page <= 1:
+            page = 1
+
+        query = {
+            'owner' : owner
+        }
+
+        db_query = cls.objects(__raw__=query). \
+                    only('id', 'data', 'status', 'limit_per_day', 'last_action', 'next_action')
+        
+        total = db_query.count()
+        results = db_query.skip(per_page * (page-1)).limit(per_page).order_by('status').all()
+
+        return (total, results)
+
+
+    @classmethod
     def list_credentials(cls, credential_ids):
         return cls.objects(Q(id__in=credential_ids)).all()
 
