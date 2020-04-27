@@ -28,12 +28,23 @@
             </tab-content>
 
             <tab-content
-              title="Step 2"
+              v-if="this.$store.state.campaign.funnel === this.funnel_email || this.$store.state.campaign.funnel === this.funnel_email_linkedin"
+              title="Step 2 Email"
               class="col-12"
-              :before-change="() => validateStep('secondStep')"
+              :before-change="() => validateStep('secondStepEmail')"
               icon="nc-icon nc-notes"
             >
-              <second-step ref="secondStep" @on-validated="onStepValidated"></second-step>
+              <second-step-email ref="secondStepEmail" @on-validated="onStepValidated"></second-step-email>
+            </tab-content>
+
+            <tab-content
+              v-if="this.$store.state.campaign.funnel === this.funnel_linkedin || this.$store.state.campaign.funnel === this.funnel_email_linkedin"
+              title="Step 2 LinkedIn"
+              class="col-12"
+              :before-change="() => validateStep('secondStepLinkedin')"
+              icon="nc-icon nc-notes"
+            >
+              <second-step-linkedin ref="secondStepLinkedin" @on-validated="onStepValidated"></second-step-linkedin>
             </tab-content>
 
             <tab-content
@@ -68,7 +79,8 @@ import { FormWizard, TabContent } from "vue-form-wizard";
 import "vue-form-wizard/dist/vue-form-wizard.min.css";
 import ZeroStep from "./Wizard/ZeroStep.vue";
 import FirstStep from "./Wizard/FirstStep.vue";
-import SecondStep from "./Wizard/SecondStep.vue";
+import SecondStepEmail from "./Wizard/SecondStepEmail.vue";
+import SecondStepLinkedin from "./Wizard/SecondStepLinkedin.vue";
 import ThirdStep from "./Wizard/ThirdStep.vue";
 import LastStep from "./Wizard/LastStep.vue";
 import swal from "sweetalert2";
@@ -76,6 +88,9 @@ import swal from "sweetalert2";
 export default {
   data() {
     return {
+      funnel_email: 'Email campaign',
+      funnel_linkedin: 'LinkedIn campaign',
+      funnel_email_linkedin: 'Email & LinkedIn campaign',
       //campaignName: '11111111',
       //campaignType: '',
       wizardModel: {
@@ -88,7 +103,8 @@ export default {
     TabContent,
     ZeroStep,
     FirstStep,
-    SecondStep,
+    SecondStepEmail,
+    SecondStepLinkedin,
     ThirdStep,
     LastStep
   },
@@ -97,7 +113,7 @@ export default {
       return this.$refs[ref].validate();
     },
     onStepValidated(step, validated, model) {
-      this.wizardModel.stepsData[step] = JSON.parse(JSON.stringify(model));
+      //this.wizardModel.stepsData[step] = JSON.parse(JSON.stringify(model));
     },
     wizardComplete() {
       swal("Good job!", "You clicked the finish button!", "success");

@@ -32,19 +32,38 @@
       </div>
     </card>
     <card>
-      <h4 class="text-center">Step 2</h4>
+      <div v-if="this.$store.state.campaign.funnel === this.funnel_email || this.$store.state.campaign.funnel === this.funnel_email_linkedin">
+      <h4 class="text-center">Step 2 Email</h4>
       <div class="typo-line">
         <h5>
           <p class="category">Content:</p>
         </h5>
       </div>
       <ul id="days">
-        <li v-for="item in this.$store.state.campaign.messagesList" :key="item.id">
+        <li v-for="item in this.$store.state.campaign.messagesListEmail" :key="item.id">
           Day {{ item.id }}:
           Subject: {{ item.subject }}
           Interval: {{ item.interval }}
         </li>
       </ul>
+      </div>
+    </card>
+    <card>
+      <div v-if="this.$store.state.campaign.funnel === this.funnel_linkedin || this.$store.state.campaign.funnel === this.funnel_email_linkedin">
+      <h4 class="text-center">Step 2 Linkedin</h4>
+      <div class="typo-line">
+        <h5>
+          <p class="category">Content:</p>
+        </h5>
+      </div>
+      <ul id="days">
+        <li v-for="item in this.$store.state.campaign.messagesListLinkedin" :key="item.id">
+          Day {{ item.id }}:
+          Subject: {{ item.subject }}
+          Interval: {{ item.interval }}
+        </li>
+      </ul>
+      </div>
     </card>
     <card>
       <h4 class="text-center">Step 3</h4>
@@ -100,7 +119,10 @@ export default {
   //},
   data() {
     return {
-      campaignName: this.$store.state.campaign.name, // not working
+      funnel_email: 'Email campaign',
+      funnel_linkedin: 'LinkedIn campaign',
+      funnel_email_linkedin: 'Email & LinkedIn campaign',
+      //campaignName: this.$store.state.campaign.name, // not working
       messages_data_preview: {}
     };
   },

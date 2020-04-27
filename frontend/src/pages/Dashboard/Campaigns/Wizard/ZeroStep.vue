@@ -63,7 +63,7 @@ export default {
     return {
       model: {},
       selects: {
-        simple: "",
+        simple: this.$store.state.campaign.funnel,
         types: [
           { value: "Email campaign", label: "Email campaign" },
           { value: "LinkedIn campaign", label: "LinkedIn campaign" },
@@ -71,8 +71,8 @@ export default {
         ],
         multiple: "ARS"
       },
-      campaignName: '',
-      campaignType: '',
+      campaignName: this.$store.state.campaign.name,
+      campaignType: this.$store.state.campaign.funnel,
       modelValidations: {
         campaignName: {
           required: true,
@@ -94,10 +94,13 @@ export default {
         funnel: this.selects.simple,
       };
       //console.log(this.campaignName);
-      this.$store.commit("step_0", data);
+      //this.$store.commit("step_0", data);
 
       return this.$validator.validateAll().then(res => {
         this.$emit('on-validated', res, this.model)
+        if(res === true) {
+          this.$store.commit("step_0", data);
+        }
         return res
       });
     }

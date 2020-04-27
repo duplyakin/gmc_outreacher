@@ -98,12 +98,12 @@ export default {
   data() {
     return {
       selects: {
-        simple: "",
+        simple: timezones.find(x => x.value === this.$store.state.campaign.timeTable.timezone).label,
         types: timezones,
         multiple: "ARS"
       },
-      timePickerFrom: "",
-      timePickerTill: "",
+      timePickerFrom: this.$store.state.campaign.timeTable.from,
+      timePickerTill: this.$store.state.campaign.timeTable.till,
       model: {
         timePickerTill: ""
       },
@@ -118,36 +118,7 @@ export default {
           required: true
         }
       },
-      tableData: [
-        {
-          day: "Sun",
-          active: false
-        },
-        {
-          day: "Mon",
-          active: true
-        },
-        {
-          day: "Tue",
-          active: true
-        },
-        {
-          day: "Wed",
-          active: true
-        },
-        {
-          day: "Thu",
-          active: true
-        },
-        {
-          day: "Fri",
-          active: true
-        },
-        {
-          day: "Sat",
-          active: false
-        }
-      ]
+      tableData: this.$store.state.campaign.timeTable.days,
     };
   },
   methods: {
@@ -161,7 +132,7 @@ export default {
         timezone: this.selects.simple,
         days: this.tableData,
       };
-      console.log(data);
+      //console.log(data);
       this.$store.commit("step_3", data);
 
       return this.$validator.validateAll().then(res => {

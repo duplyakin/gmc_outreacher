@@ -71,12 +71,12 @@ export default {
   data() {
     return {
       accountsList: {
-        simple: "",
+        simple: this.$store.state.campaign.account,
         types: accounts,
         multiple: "ARS"
       },
       prospectsLists: {
-        simple: "",
+        simple: this.$store.state.campaign.prospectsList,
         types: prospects,
         multiple: "ARS"
       },

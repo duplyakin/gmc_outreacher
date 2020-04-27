@@ -23,7 +23,8 @@ const store = new Vuex.Store({
       funnel: '',
       account: '',
       prospectsList: '',
-      messagesList: [],
+      messagesListEmail: [],
+      messagesListLinkedin: [],
       timeTable: {
         from: '',
         till: '',
@@ -42,13 +43,20 @@ const store = new Vuex.Store({
       state.campaign.account = data.account;
       state.campaign.prospectsList = data.prospectsList;
     },
-    step_2 (state, data) {
-      state.campaign.messagesList = data;
-      //console.log('messagesList: ', state.campaign.messagesList);
+    step_2_email (state, data) {
+      state.campaign.messagesListEmail = data;
+      //console.log('messagesList: ', state.campaign.messagesListEmail);
+    },
+    step_2_linkedin (state, data) {
+      state.campaign.messagesListLinkedin = data;
+      //console.log('messagesList: ', state.campaign.messagesListLinkedin);
     },
     step_3 (state, data) {
       state.campaign.timeTable = data;
-    }
+    },
+    campaign_edit (state, data) {
+      state.campaign = data;
+    },
   },
   actions: {}
  })

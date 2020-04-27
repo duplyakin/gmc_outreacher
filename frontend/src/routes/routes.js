@@ -268,8 +268,8 @@ const routes = [
         component: Prospects
       },
       {
-        path: 'campaigns',
-        name: 'CampaignsWizard',
+        path: 'campaignWizard',
+        name: 'CampaignWizard',
         component: CampaignWizard
       },
       {

@@ -120,7 +120,8 @@
           },
         ],
 
-          messages : get_messages,
+          //messages : get_messages,
+          messages : this.$store.state.campaign.messagesListEmail,
 
           pagination : {
             perPage : 0,
@@ -211,7 +212,7 @@
           })
       },
       validate() {
-        this.$store.commit("step_2", this.messages_data.messages);
+        this.$store.commit("step_2_email", this.messages_data.messages);
 
         return this.$validator.validateAll().then(res => {
           this.$emit("on-validated", 1, res, this.model);
