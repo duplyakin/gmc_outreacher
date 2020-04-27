@@ -13,7 +13,7 @@
             v-validate="modelValidations.account"
           >
             <el-option
-              v-for="acc in accountsList"
+              v-for="acc in accountsList.types"
               class="select-primary"
               :value="acc.value"
               :label="acc.label"
@@ -32,10 +32,10 @@
             size="large"
             placeholder="Select prospects list"
             v-model="prospectsLists.simple"
-            v-validate="modelValidations.prospect"
+            v-validate="modelValidations.prospects"
           >
             <el-option
-              v-for="prospect in prospectsLists"
+              v-for="prospect in prospectsLists.types"
               class="select-primary"
               :value="prospect.value"
               :label="prospect.label"
@@ -70,17 +70,24 @@ export default {
   },
   data() {
     return {
-      accountsList: accounts,
-      prospectsLists: prospects,
+      accountsList: {
+        simple: "",
+        types: accounts,
+        multiple: "ARS"
+      },
+      prospectsLists: {
+        simple: "",
+        types: prospects,
+        multiple: "ARS"
+      },
       model: {
         campaignName: "",
-        email: ""
       },
       modelValidations: {
         account: {
           required: true,
         },
-        prospect: {
+        prospects: {
           required: true
         }
       }
@@ -91,8 +98,16 @@ export default {
       return this.errors.first(fieldName);
     },
     validate() {
+      let data = {
+        account: this.accountsList.simple,
+        prospectsList: this.prospectsLists.simple,
+      };
+      //console.log("account: ", this.accountsList.simple);
+      //console.log("prospectsList: ", this.prospectsList.label);
+      this.$store.commit("step_1", data);
+
       return this.$validator.validateAll().then(res => {
-        this.$emit("step-validated", 1, res, this.model);
+        this.$emit("on-validated", 1, res, this.model);
         return res;
       });
     }

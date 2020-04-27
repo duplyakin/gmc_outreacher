@@ -7,7 +7,7 @@
           label="Campaign name"
           name="Campaign name"
           v-validate="modelValidations.campaignName"
-          v-model="model.campaignName"
+          v-model="campaignName"
           :error="getError('Campaign name')"
           placeholder="ex: My email campaign"
         ></fg-input>
@@ -46,7 +46,12 @@ import {
   Checkbox as LCheckbox,
   FormGroupInput as FgInput
 } from "src/components/index";
+
 export default {
+  //props: {
+    //campaignName: String,
+    //campaignType: String,
+  //},
   components: {
     [Input.name]: Input,
     [Button.name]: Button,
@@ -56,22 +61,18 @@ export default {
   },
   data() {
     return {
+      model: {},
       selects: {
         simple: "",
         types: [
           { value: "Email campaign", label: "Email campaign" },
           { value: "LinkedIn campaign", label: "LinkedIn campaign" },
-          {
-            value: "Email & LinkedIn campaign",
-            label: "Email & LinkedIn campaign"
-          }
+          { value: "Email & LinkedIn campaign", label: "Email & LinkedIn campaign" }
         ],
         multiple: "ARS"
       },
-      model: {
-        campaignName: "",
-        email: ""
-      },
+      campaignName: '',
+      campaignType: '',
       modelValidations: {
         campaignName: {
           required: true,
@@ -88,11 +89,21 @@ export default {
       return this.errors.first(fieldName);
     },
     validate() {
+      let data = {
+        name: this.campaignName,
+        funnel: this.selects.simple,
+      };
+      //console.log(this.campaignName);
+      this.$store.commit("step_0", data);
+
       return this.$validator.validateAll().then(res => {
-        this.$emit("on-validated", res, this.model);
-        return res;
+        this.$emit('on-validated', res, this.model)
+        return res
       });
     }
+  },
+  mounted() {
+    //console.log("campaignName: ", this.campaignName);
   }
 };
 </script>

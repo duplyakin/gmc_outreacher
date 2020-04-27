@@ -11,15 +11,14 @@
                 rows="1"
                 name="Subject"
                 v-model="message_data.subject"
-                v-validate="modelValidations.message_data.subject"
+                v-validate="modelValidations.subject"
               ></textarea>
             </fg-input>
             <fg-input :error="getError('body text')">
               <editor
                 name="body text"
                 v-model="message_data.body"
-                v-validate="modelValidations.message_data.body"
-                api-key="no-api-key"
+                api-key="o5wuoncsvrewlx7zeflsjb4wo2a252lvnrnlslv30ohh31ex"
                 :init="{
          height: 200,
          menubar: false,
@@ -41,7 +40,6 @@
               <el-input-number
                 v-model="message_data.interval"
                 placeholder="ex: 1.00"
-                name="interval"
               ></el-input-number>
             </fg-input>
           </div>
@@ -69,7 +67,6 @@ export default {
     [Option.name]: Option,
     editor: Editor
   },
-  name: "prospect-edit",
   props: {
     messageObj: Object,
     valueUpdated: Function,
@@ -78,13 +75,9 @@ export default {
     return {
       object_before_changes: null,
       message_data: {
-        subject: "",
-        body: "",
-        interval: ""
-      },
-      filters: {
-        campaings: "",
-        lists: ""
+        subject: '',
+        body: '',
+        interval: ''
       },
       modelValidations: {
         message_data: {
@@ -108,40 +101,9 @@ export default {
     },
     submitMessageData() {
         if (confirm("Are you sure?")) {
-          var messageData = new FormData();
-          messageData.append("message", JSON.stringify(this.message_data));
-
-          //fs.appendFile('msg.js', messageData, function (err) {
-            //if (err) throw err;
-          //});
-          this.$set(messageData);
           this.$emit('close');
-          this.valueUpdated(messageData);
+          this.valueUpdated(this.message_data);
         }
-    },
-    submitMessageData_2() {
-      const path = "http://127.0.0.1:5000/prospects/edit";
-      if (confirm("Are you sure?")) {
-        var prospectData = new FormData();
-        prospectData.append("_prospect", JSON.stringify(this.prospect_data));
-
-        axios
-          .post(path, prospectData)
-          .then(res => {
-            var result = res.data;
-            if (result.code > 0) {
-              var updated_prospect = JSON.parse(result.updated);
-              this.$emit("close");
-              this.valueUpdated(updated_prospect);
-            } else {
-              var msg = result.msg;
-              alert(msg);
-            }
-          })
-          .catch(error => {
-            alert(error);
-          });
-      }
     },
     discardEdit() {
       this.$emit("close");

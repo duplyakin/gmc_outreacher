@@ -104,7 +104,6 @@ export default {
       },
       timePickerFrom: "",
       timePickerTill: "",
-      timeZone: "",
       model: {
         timePickerTill: ""
       },
@@ -156,6 +155,15 @@ export default {
       return this.errors.first(fieldName);
     },
     validate() {
+      let data = {
+        from: this.timePickerFrom,
+        till: this.timePickerTill,
+        timezone: this.selects.simple,
+        days: this.tableData,
+      };
+      console.log(data);
+      this.$store.commit("step_3", data);
+
       return this.$validator.validateAll().then(res => {
         this.$emit("on-validated", res, this.model);
         return res;

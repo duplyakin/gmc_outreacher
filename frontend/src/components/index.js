@@ -20,6 +20,7 @@ import Pagination from './Pagination.vue'
 
 import SidebarPlugin from './SidebarPlugin'
 
+
 let components = {
   Checkbox,
   Switch,
@@ -56,3 +57,4 @@ export {
 }
 
 export default components
+
