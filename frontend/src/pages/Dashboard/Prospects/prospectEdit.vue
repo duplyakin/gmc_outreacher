@@ -1,5 +1,5 @@
 <template>
-<div>
+<div class="prospect-edit-modal">
 <card :title="modalTitle">
     <form @submit.prevent="submitProspectData">
         <card>
