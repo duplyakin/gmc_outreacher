@@ -348,9 +348,11 @@ class ProspectsList(db.Document):
         return cls.objects(owner=owner).only('id', 'title').all()
 
     @classmethod
-    def get_lists(cls, owner, title=None):
+    def get_lists(cls, owner, title=None, id=None):
         if title:
             return cls.objects(owner=owner, title=title).first()
+        elif id:
+            return cls.objects(owner=owner, id=id).first()
         else:
             return cls.objects(owner=owner).all()
 
@@ -388,7 +390,7 @@ class Prospects(db.Document):
     created = db.DateTimeField( default=datetime.now() )
 
     @classmethod
-    def create_prospect(cls, owner_id, campaign_id=None, data={}, lists=[]):
+    def create_prospect(cls, owner_id, campaign_id=None, data={}, lists=[], commit=True):
         new_prospect = cls()
 
         new_prospect.owner = owner_id
@@ -400,7 +402,8 @@ class Prospects(db.Document):
         if lists:
             new_prospect.lists = lists
 
-        new_prospect._commit()
+        if commit:
+            new_prospect._commit()
 
         return new_prospect
 
@@ -411,6 +414,41 @@ class Prospects(db.Document):
             return 0
 
         return Prospects.objects(owner=owner_id, id__in=prospects_ids).delete()
+
+    @classmethod
+    def upload(cls, owner_id, csv_with_header, map_to, add_to_list):
+
+        prospects_list = []
+        
+        i = 0
+        for row in csv_with_header:
+            i = i + 1
+
+            #pass header
+            if i == 1:
+                continue
+
+            data = {}
+            if add_to_list:
+                data['lists'] = [add_to_list.title]
+
+            for m_t in map_to.keys():
+                row_data = row[m_t]
+                field_name = map_to[m_t]
+
+                data[field_name] = row_data
+
+            next_prospect = cls.create_prospect(owner_id=owner_id,
+                                                data=data, 
+                                                lists=add_to_list, 
+                                                commit=False)
+            prospects_list.append(next_prospect)
+
+        if not prospects_list:
+            return 0
+
+        ids = cls.objects.insert(prospects_list, load_bulk=False)
+        return len(ids)
 
     @classmethod
     def assign_prospects(cls, owner_id, prospects_ids, campaign_id):

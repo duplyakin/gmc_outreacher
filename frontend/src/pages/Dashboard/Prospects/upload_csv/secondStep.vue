@@ -56,7 +56,7 @@
 </template>
 <script>
 import { Table, TableColumn, Select, Option } from 'element-ui'
-import { drop, every, forEach, get, isArray, map, set } from 'lodash';
+import { drop, every, forEach, some, get, isArray, map, set } from 'lodash';
 
 import Papa from 'papaparse';
 import mimeTypes from "mime-types";
@@ -72,15 +72,20 @@ export default {
     },
     data () {
     return {
-        model :{
+        model:{
+            _csv: null,
+            columnsChecked : []
         },
         error: false,
         error_message : 'Selection required',
-        columnsChecked : [],
         csv_data : [],
 
         _sample: null,
-        _csv: null,
+        modelValidations: {
+          map_selected: {
+            required: true
+          },
+        },
 
         current_file : '',
         map_selected : '',
@@ -89,26 +94,65 @@ export default {
     },
     watch: {
         file(newValue) {
-            console.log("File watch changed to: ");
-            console.log(newValue);
+            this.clearState();
+
             this.current_file = newValue.raw;
             
-            this.error = false;
             this._load(this.current_file);
         }
     },
     methods: {
-        handleSelectionChange(val) {
-            this.columnsChecked = val;
+        clearState(){
+            this.model._csv = null;
+
+            this.error = false;
+            this.model.columnsChecked = [];
+            this.csv_data = [];
+
+            this._sample = null;
+
+            this.current_file = '';
+            this.map_selected = '';
         },
-        check(){
-            console.log(this.file);
+        _checkValid(){
+            if (this.model.columnsChecked.length == 0){
+                this.error = true;
+                this.error_message = 'Mapping should not be empty';
+                return false;
+            }else{
+                var isError = some(this.model.columnsChecked, function (val, i) {
+                                var map_selected = val.map_selected || '';
+                                return !map_selected;
+                                });
+                if (isError){
+                    this.error = true;
+                    this.error_message = 'Select map to field for a column';
+                    return false;
+                }
+            }
+
+            if (this.model._csv == null){
+                this.error = true;
+                this.error_message = 'Mapping error';
+                return false;
+            }
+
+            this.error = false;
+            return true;
+        },
+        handleSelectionChange(val) {
+            this.model.columnsChecked = val;
         },
         validate () {
-            return this.$validator.validateAll().then(res => {
-            this.$emit('on-validated', res, 'fields_maped', this.model)
-            return res
-            })
+            var isValid = this._checkValid();
+            
+            if (!isValid){
+                return false;
+            }
+
+
+            this.$emit('on-validated', 'fields_mapped', isValid, this.model);
+            return isValid;
         },
 
         /* CSV file loading methods */
@@ -116,7 +160,7 @@ export default {
             const _this = this;
             this._readFile(file, (output) => {
                 _this._sample = get(Papa.parse(output, { preview: 2, skipEmptyLines: true }), "data");
-                _this._csv = get(Papa.parse(output, { skipEmptyLines: true }), "data");
+                _this.model._csv = get(Papa.parse(output, { skipEmptyLines: true }), "data");
                 
                 var _headers = _this._sample[0];
                 forEach(_headers, function(val, i) {

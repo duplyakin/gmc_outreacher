@@ -302,11 +302,12 @@
       uploadProspect(){
         this.$modal.show(CsvUpload, {
             api_url : PROSPECTS_API_UPLOAD,
+            lists: this.prospects_data.lists,
             valueUpdated:(uploaded) => {
               this.$notify(
                 {
                   component: NotificationMessage,
-                  message: 'Prospect uploaded Success. Update the page',
+                  message: 'Prospect uploaded Success. The data will be available soon. Update the page in 10 seconds',
                   icon: 'nc-icon nc-bulb-63',
                   type: 'success'
                 })
