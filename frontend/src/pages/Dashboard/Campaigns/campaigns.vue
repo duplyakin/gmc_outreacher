@@ -226,13 +226,15 @@ export default {
       }
     },
     async addCampaign() {
-      await this.$store.commit("campaign_edit", this.emptyCampaign);
+      //await this.$store.commit("campaign_edit", this.emptyCampaign);
       await this.$router.push("CampaignWizard").catch(err => {
         console.log(err);
       });
     },
     async editCampaign(msg_dict) {
-      await this.$store.commit("campaign_edit", msg_dict);
+      //await this.$store.commit("campaign_edit", msg_dict);
+      console.log('camp: ', msg_dict);
+      
       await this.$router.push("CampaignWizard").catch(err => {
         console.log(err);
       });

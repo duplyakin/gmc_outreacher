@@ -7,7 +7,7 @@
           label="Campaign name"
           name="Campaign name"
           v-validate="modelValidations.campaignName"
-          v-model="campaignName"
+          v-model="model.campaignName"
           :error="getError('Campaign name')"
           placeholder="ex: My email campaign"
         ></fg-input>
@@ -61,9 +61,13 @@ export default {
   },
   data() {
     return {
-      model: {},
+      model: {
+        campaignName: '',
+        campaignType: '',
+      },
       selects: {
-        simple: this.$store.state.campaign.funnel,
+        //simple: this.campaign.funnel,
+        simple: '',
         types: [
           { value: "Email campaign", label: "Email campaign" },
           { value: "LinkedIn campaign", label: "LinkedIn campaign" },
@@ -71,8 +75,8 @@ export default {
         ],
         multiple: "ARS"
       },
-      campaignName: this.$store.state.campaign.name,
-      campaignType: this.$store.state.campaign.funnel,
+      //campaignName: this.$store.state.campaign.name,
+      //campaignType: this.$store.state.campaign.funnel,
       modelValidations: {
         campaignName: {
           required: true,
@@ -97,11 +101,11 @@ export default {
       //this.$store.commit("step_0", data);
 
       return this.$validator.validateAll().then(res => {
-        this.$emit('on-validated', res, this.model)
-        if(res === true) {
-          this.$store.commit("step_0", data);
-        }
-        return res
+        if(res) {
+          this.model.campaignType = this.selects.simple;
+          this.$emit('on-validated', 'step_0', res, this.model);
+        };
+        return res;
       });
     }
   },

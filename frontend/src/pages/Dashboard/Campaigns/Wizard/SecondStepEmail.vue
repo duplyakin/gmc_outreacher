@@ -98,6 +98,9 @@
     },
     data () {
       return {
+        model: {
+          messages: [],
+        },
         pagination: {
           perPage: 5,
           currentPage: 1,
@@ -121,7 +124,8 @@
         ],
 
           //messages : get_messages,
-          messages : this.$store.state.campaign.messagesListEmail,
+          //messages : this.campaign.messagesListEmail,
+          messages : [],
 
           pagination : {
             perPage : 0,
@@ -212,10 +216,11 @@
           })
       },
       validate() {
-        this.$store.commit("step_2_email", this.messages_data.messages);
-
         return this.$validator.validateAll().then(res => {
-          this.$emit("on-validated", 1, res, this.model);
+          if(res) {
+            this.model.messages = this.messages_data.messages;
+            this.$emit("on-validated", 'step_2_email', res, this.model);
+          };
           return res;
         });
     }

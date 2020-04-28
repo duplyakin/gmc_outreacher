@@ -28,7 +28,7 @@
             </tab-content>
 
             <tab-content
-              v-if="this.$store.state.campaign.funnel === this.funnel_email || this.$store.state.campaign.funnel === this.funnel_email_linkedin"
+              v-if="this.campaign.funnel === this.funnel_email || this.campaign.funnel === this.funnel_email_linkedin"
               title="Step 2 Email"
               class="col-12"
               :before-change="() => validateStep('secondStepEmail')"
@@ -38,7 +38,7 @@
             </tab-content>
 
             <tab-content
-              v-if="this.$store.state.campaign.funnel === this.funnel_linkedin || this.$store.state.campaign.funnel === this.funnel_email_linkedin"
+              v-if="this.campaign.funnel === this.funnel_linkedin || this.campaign.funnel === this.funnel_email_linkedin"
               title="Step 2 LinkedIn"
               class="col-12"
               :before-change="() => validateStep('secondStepLinkedin')"
@@ -62,7 +62,7 @@
               :before-change="() => validateStep('lastStep')"
               icon="nc-icon nc-check-2"
             >
-              <last-step ref="lastStep" @on-validated="onStepValidated"></last-step>
+              <last-step ref="lastStep" :campaign="campaign" @on-validated="onStepValidated"></last-step>
             </tab-content>
 
             <button slot="prev" class="btn btn-default btn-fill btn-wd btn-back">Back</button>
@@ -91,8 +91,20 @@ export default {
       funnel_email: 'Email campaign',
       funnel_linkedin: 'LinkedIn campaign',
       funnel_email_linkedin: 'Email & LinkedIn campaign',
-      //campaignName: '11111111',
-      //campaignType: '',
+      campaign: {
+        name: '',
+        funnel: '',
+        account: '',
+        prospectsList: '',
+        messagesListEmail: [],
+        messagesListLinkedin: [],
+        timeTable: {
+          from: '',
+          till: '',
+          timezone: '',
+          days: [],
+        },
+      },
       wizardModel: {
         stepsData: {}
       }
@@ -114,6 +126,28 @@ export default {
     },
     onStepValidated(step, validated, model) {
       //this.wizardModel.stepsData[step] = JSON.parse(JSON.stringify(model));
+      switch(step) {
+        case 'step_0': 
+          //console.log('step_0: ', model);
+          this.campaign.name = model.campaignName;
+          this.campaign.funnel = model.campaignType;
+          break;
+        case 'step_1':
+          this.campaign.account = model.account;
+          this.campaign.prospectsList = model.prospectsList;
+          break;
+        case 'step_2_email':
+          //console.log('step_2_email: ', model);
+          //console.log('step_2_email campaign: ', this.campaign.messagesListEmail);
+          this.campaign.messagesListEmail = model.messages;
+          break;
+        case 'step_2_linkedin':
+          this.campaign.messagesListLinkedin = model.messages;
+          break;
+        case 'step_3':
+          this.campaign.timeTable = model.timeTable;
+          break;
+      }
     },
     wizardComplete() {
       swal("Good job!", "You clicked the finish button!", "success");

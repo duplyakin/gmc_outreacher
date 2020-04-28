@@ -10,7 +10,7 @@
               <fg-input :error="getError('From time')">
                 <el-time-select
                   name="From time"
-                  v-model="timePickerFrom"
+                  v-model="model.timeTable.from"
                   v-validate="modelValidations.timePickerFrom"
                   :picker-options="{
                   start: '00:00',
@@ -26,7 +26,7 @@
               <fg-input :error="getError('Till time has to be after FROM time')">
                 <el-time-select
                   name="Till time has to be after FROM time"
-                  v-model="timePickerTill"
+                  v-model="model.timeTable.till"
                   v-validate="modelValidations.timePickerTill"
                   :picker-options="{
                   start: '00:00',
@@ -97,15 +97,19 @@ export default {
   },
   data() {
     return {
+      model: {
+        timeTable: {
+          from: '',
+          till: '',
+          timezone: '',
+          days: this.tableData,
+        },
+      },
       selects: {
-        simple: timezones.find(x => x.value === this.$store.state.campaign.timeTable.timezone).label,
+        //simple: timezones.find(x => x.value === this.campaign.timeTable.timezone).label,
+        simple: '',
         types: timezones,
         multiple: "ARS"
-      },
-      timePickerFrom: this.$store.state.campaign.timeTable.from,
-      timePickerTill: this.$store.state.campaign.timeTable.till,
-      model: {
-        timePickerTill: ""
       },
       modelValidations: {
         timePickerTill: {
@@ -118,7 +122,37 @@ export default {
           required: true
         }
       },
-      tableData: this.$store.state.campaign.timeTable.days,
+      //tableData: this.campaign.timeTable.days,
+      tableData: [
+            {
+              day: "Sun",
+              active: false
+            },
+            {
+              day: "Mon",
+              active: true
+            },
+            {
+              day: "Tue",
+              active: true
+            },
+            {
+              day: "Wed",
+              active: true
+            },
+            {
+              day: "Thu",
+              active: true
+            },
+            {
+              day: "Fri",
+              active: true
+            },
+            {
+              day: "Sat",
+              active: false
+            }
+          ],
     };
   },
   methods: {
@@ -126,19 +160,14 @@ export default {
       return this.errors.first(fieldName);
     },
     validate() {
-      let data = {
-        from: this.timePickerFrom,
-        till: this.timePickerTill,
-        timezone: this.selects.simple,
-        days: this.tableData,
-      };
-      //console.log(data);
-      this.$store.commit("step_3", data);
-
       return this.$validator.validateAll().then(res => {
-        this.$emit("on-validated", res, this.model);
-        return res;
-      });
+          if(res) {
+            this.model.timeTable.timezone = this.selects.simple,
+            this.model.timeTable.days = this.tableData,
+            this.$emit("on-validated", 'step_3', res, this.model);
+          };
+          return res;
+        });
     }
   }
 };

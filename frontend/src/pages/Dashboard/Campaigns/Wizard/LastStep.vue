@@ -6,13 +6,13 @@
       <div class="typo-line">
         <h5>
           <p class="category">Campaign name:</p>
-          {{this.$store.state.campaign.name}}
+          {{this.campaign.name}}
         </h5>
       </div>
-      <div class="typo-line">
+    <div class="typo-line">
         <h5>
           <p class="category">Campaign type:</p>
-          {{this.$store.state.campaign.funnel}}
+          {{this.campaign.funnel}}
         </h5>
       </div>
     </card>
@@ -21,18 +21,18 @@
       <div class="typo-line">
         <h5>
           <p class="category">Campaign account:</p>
-          {{this.$store.state.campaign.account}}
+          {{this.campaign.account}}
         </h5>
       </div>
       <div class="typo-line">
         <h5>
           <p class="category">Campaign prospects:</p>
-          {{this.$store.state.campaign.prospectsList}}
+          {{this.campaign.prospectsList}}
         </h5>
       </div>
     </card>
     <card>
-      <div v-if="this.$store.state.campaign.funnel === this.funnel_email || this.$store.state.campaign.funnel === this.funnel_email_linkedin">
+      <div v-if="this.campaign.funnel === this.funnel_email || this.campaign.funnel === this.funnel_email_linkedin">
       <h4 class="text-center">Step 2 Email</h4>
       <div class="typo-line">
         <h5>
@@ -40,7 +40,7 @@
         </h5>
       </div>
       <ul id="days">
-        <li v-for="item in this.$store.state.campaign.messagesListEmail" :key="item.id">
+        <li v-for="item in this.campaign.messagesListEmail" :key="item.id">
           Day {{ item.id }}:
           Subject: {{ item.subject }}
           Interval: {{ item.interval }}
@@ -49,7 +49,7 @@
       </div>
     </card>
     <card>
-      <div v-if="this.$store.state.campaign.funnel === this.funnel_linkedin || this.$store.state.campaign.funnel === this.funnel_email_linkedin">
+      <div v-if="this.campaign.funnel === this.funnel_linkedin || this.campaign.funnel === this.funnel_email_linkedin">
       <h4 class="text-center">Step 2 Linkedin</h4>
       <div class="typo-line">
         <h5>
@@ -57,7 +57,7 @@
         </h5>
       </div>
       <ul id="days">
-        <li v-for="item in this.$store.state.campaign.messagesListLinkedin" :key="item.id">
+        <li v-for="item in this.campaign.messagesListLinkedin" :key="item.id">
           Day {{ item.id }}:
           Subject: {{ item.subject }}
           Interval: {{ item.interval }}
@@ -70,19 +70,19 @@
       <div class="typo-line">
         <h5>
           <p class="category">From:</p>
-          {{this.$store.state.campaign.timeTable.from}}
+          {{this.campaign.timeTable.from}}
         </h5>
       </div>
       <div class="typo-line">
         <h5>
           <p class="category">Till:</p>
-          {{this.$store.state.campaign.timeTable.till}}
+          {{this.campaign.timeTable.till}}
         </h5>
       </div>
       <div class="typo-line">
         <h5>
           <p class="category">Timezone:</p>
-          {{this.$store.state.campaign.timeTable.timezone}}
+          {{this.campaign.timeTable.timezone}}
         </h5>
       </div>
       <div class="typo-line">
@@ -92,7 +92,7 @@
       </div>
       <ul id="days">
         <li
-          v-for="item in this.$store.state.campaign.timeTable.days"
+          v-for="item in this.campaign.timeTable.days"
           :key="item.day"
         >{{ item.day }} : {{ item.active }}</li>
       </ul>
@@ -113,17 +113,27 @@ export default {
     [Table.name]: Table,
     [TableColumn.name]: TableColumn
   },
-  //props: {
-  //campaignName: String,
-  //campaignType: String,
-  //},
+  props: {
+    campaign: {
+        name: String,
+        funnel: String,
+        account: String,
+        prospectsList: String,
+        messagesListEmail: Array,
+        messagesListLinkedin: Array,
+        timeTable: {
+          from: String,
+          till: String,
+          timezone: String,
+          days: Array,
+        },
+    },
+  },
   data() {
     return {
       funnel_email: 'Email campaign',
       funnel_linkedin: 'LinkedIn campaign',
       funnel_email_linkedin: 'Email & LinkedIn campaign',
-      //campaignName: this.$store.state.campaign.name, // not working
-      messages_data_preview: {}
     };
   },
   methods: {
@@ -157,7 +167,7 @@ export default {
       }
     },
     validate() {
-      this.sendData(this.$store.state.campaign);
+      this.sendData(this.campaign);
       return this.$validator.validateAll().then(res => {
         this.$emit("on-validated", res, this.model);
         return res;

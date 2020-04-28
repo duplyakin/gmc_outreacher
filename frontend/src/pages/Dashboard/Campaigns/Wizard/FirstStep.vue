@@ -70,18 +70,21 @@ export default {
   },
   data() {
     return {
+      model: {
+        account: '',
+        prospectsList: '',
+      },
       accountsList: {
-        simple: this.$store.state.campaign.account,
+        //simple: this.campaign.account,
+        simple: '',
         types: accounts,
         multiple: "ARS"
       },
       prospectsLists: {
-        simple: this.$store.state.campaign.prospectsList,
+        //simple: this.campaign.prospectsList,
+        simple: '',
         types: prospects,
         multiple: "ARS"
-      },
-      model: {
-        campaignName: "",
       },
       modelValidations: {
         account: {
@@ -98,16 +101,12 @@ export default {
       return this.errors.first(fieldName);
     },
     validate() {
-      let data = {
-        account: this.accountsList.simple,
-        prospectsList: this.prospectsLists.simple,
-      };
-      //console.log("account: ", this.accountsList.simple);
-      //console.log("prospectsList: ", this.prospectsList.label);
-      this.$store.commit("step_1", data);
-
       return this.$validator.validateAll().then(res => {
-        this.$emit("on-validated", 1, res, this.model);
+        if(res) {
+          this.model.account = this.accountsList.simple;
+          this.model.prospectsList = this.prospectsLists.simple;
+          this.$emit("on-validated", 'step_1', res, this.model);
+        }
         return res;
       });
     }
