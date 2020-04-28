@@ -4,15 +4,15 @@ USERS = [
      'active' : True,
      'credentials' : [
          {
-         'data' : { 'sender' : 'smtp'},
+         'data' : { 'sender' : 'smtp', 'account' : 'ks.shilov@gmail.com'},
          'medium' : 'email'
          },
         {
-         'data' : { 'sender' : 'api'},
+         'data' : { 'sender' : 'api', 'account' : 'ks.shilov@howtotoken.com'},
          'medium' : 'email'
          },
          {
-         'data' : { 'email' : 'linkedin1-email', 'password' : 'linkedin1-password'},
+         'data' : { 'sender' : 'linkedin', 'account' : 'linkedin.com/ksshilov', 'password' : 'linkedin1-password'},
          'medium' : 'linkedin'
          },
          {

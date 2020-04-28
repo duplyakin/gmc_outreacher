@@ -13,6 +13,7 @@
             
             <div v-if="multipleSelection.length == 0">
             <button @click.prevent="addAccount" type="button" class="btn btn-default btn-success mx-1">Add account</button>
+            <button @click.prevent="loadCredentials" type="button" class="btn btn-default btn-success mx-1">Reload</button>
             </div>
         </div>
 
@@ -28,13 +29,13 @@
                         ref="accounts_data_table"
                         style="width: 100%;"
                         @selection-change="handleSelectionChange"
-                        :data="accounts_data.accounts"
+                        :data="accounts_data.credentials"
                         max-height="500"
                         border>
                 <el-table-column
                         type="selection"
                         width="55"
-                        v-if="accounts_data.columns"
+                        v-if="accounts_data.credentials"
                         fixed>
                 </el-table-column>
                 <el-table-column v-for="column in accounts_data.columns"
@@ -45,7 +46,7 @@
                         show-overflow-tooltip>
                         <template slot-scope="scope">
                             <a @click.prevent="editAccount(scope.row, scope.$index)" href="#"  v-if="column.prop === 'account'">{{ scope.row.data[column.prop] }}</a>
-                            <template v-else> {{ scope.row.data[column.prop] }} </template>
+                            <template v-else> {{ column.data ? scope.row.data[column.prop] : scope.row[column.prop] }} </template>
                         </template>     
                 </el-table-column>
             </el-table>
@@ -76,15 +77,24 @@
 <script>
     import { Table, TableColumn, Select, Option } from 'element-ui'
     import O24Pagination from 'src/components/O24Pagination.vue'
-    import O24NotificationMessage from 'src/components/O24Notification.vue';
+    import O24NotificationMessage from 'src/components/O24Notification.vue'
+    import AccountEdit from './accountEdit.vue'
+    import AccountAdd from './accountAdd.vue'
+
     import axios from 'axios'
 
     const CREDENTIALS_API_LIST = 'http://127.0.0.1:5000/credentials';
+    const CREDENTIALS_API_EDIT = 'http://127.0.0.1:5000/credentials/edit';
+    const CREDENTIALS_API_DELETE = 'http://127.0.0.1:5000/credentials/delete';
+    const CREDENTIALS_API_ADD = 'http://127.0.0.1:5000/credentials/add';
+
 
     export default {
     components: {
         O24NotificationMessage,
         O24Pagination,
+        AccountEdit,
+        AccountAdd,
         [Select.name]: Select,
         [Option.name]: Option,
         [Table.name]: Table,
@@ -134,7 +144,6 @@
             this.accounts_data.pagination = JSON.parse(newData.pagination);
         },
         loadCredentials(event=null, page=1) {
-
             var data = new FormData();
             data.append('_page', page);
 
@@ -165,7 +174,6 @@
         this.$modal.show(AccountEdit, {
             accountObj: account_dict,
             api_url : CREDENTIALS_API_EDIT,
-            action: 'edit',
             modalTitle: "Account edit",
             valueUpdated:(newValue) => {
                 this.$set(this.accounts_data.credentials, current_index, newValue);
@@ -198,7 +206,7 @@
             .then((res) => {
                 var r = res.data;
                 if (r.code <= 0){
-                    msg = "Error deleting account " + r.msg;
+                    var msg = "Error deleting account " + r.msg;
                     alert(msg);
                 }else{
                 this.$notify(
@@ -212,12 +220,31 @@
                 }
             })
             .catch((error) => {
-                msg = "Error loading credentials " + error;
+                var msg = "Error deleting account " + error;
                 alert(msg);
             });
 
         }
-        }
+        },
+        addAccount(){
+            this.$modal.show(AccountAdd, {
+            api_url : CREDENTIALS_API_ADD,
+            valueUpdated:(newValue) => {
+                this.$notify(
+                {
+                    component: O24NotificationMessage,
+                    message: 'Account added success',
+                    icon: 'nc-icon nc-bulb-63',
+                    type: 'success'
+                });
+                this.loadCredentials();
+            }
+            },
+            {
+                width: '720',
+                height: 'auto'
+            })
+        },
     },
     mounted () {
         this.loadCredentials();
