@@ -87,6 +87,16 @@ import { Table, TableColumn, TimeSelect, Select, Option } from "element-ui";
 import LSwitch from "src/components/Switch.vue";
 import timezones from "./timezone";
 export default {
+  props: {
+    campaign: {
+        timeTable: {
+          from: String,
+          till: String,
+          timezone: String,
+          days: Array,
+        },
+    },
+  },
   components: {
     LSwitch,
     [Table.name]: Table,
@@ -99,15 +109,15 @@ export default {
     return {
       model: {
         timeTable: {
-          from: '',
-          till: '',
-          timezone: '',
-          days: this.tableData,
+          from: this.campaign.timeTable.from,
+          till: this.campaign.timeTable.till,
+          timezone: this.campaign.timeTable.timezone,
+          days: this.campaign.timeTable.days,
         },
       },
       selects: {
-        //simple: timezones.find(x => x.value === this.campaign.timeTable.timezone).label,
-        simple: '',
+        simple: timezones.find(x => x.value === this.campaign.timeTable.timezone).label,
+        //simple: '',
         types: timezones,
         multiple: "ARS"
       },
@@ -122,37 +132,7 @@ export default {
           required: true
         }
       },
-      //tableData: this.campaign.timeTable.days,
-      tableData: [
-            {
-              day: "Sun",
-              active: false
-            },
-            {
-              day: "Mon",
-              active: true
-            },
-            {
-              day: "Tue",
-              active: true
-            },
-            {
-              day: "Wed",
-              active: true
-            },
-            {
-              day: "Thu",
-              active: true
-            },
-            {
-              day: "Fri",
-              active: true
-            },
-            {
-              day: "Sat",
-              active: false
-            }
-          ],
+      tableData: this.campaign.timeTable.days,
     };
   },
   methods: {

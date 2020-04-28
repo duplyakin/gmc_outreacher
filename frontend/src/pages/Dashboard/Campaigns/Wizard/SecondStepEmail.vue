@@ -55,6 +55,11 @@
   import NotificationMessage from './notification.vue';
 
   export default {
+    props: {
+    campaign: {
+        messagesListEmail: Array,
+    },
+  },
     components: {
       MessageEdit,
       LPagination,
@@ -124,8 +129,8 @@
         ],
 
           //messages : get_messages,
-          //messages : this.campaign.messagesListEmail,
-          messages : [],
+          messages : this.campaign.messagesListEmail,
+          //messages : [],
 
           pagination : {
             perPage : 0,

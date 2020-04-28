@@ -59,6 +59,12 @@ import {
   FormGroupInput as FgInput
 } from "src/components/index";
 export default {
+  props: {
+    campaign: {
+        account: String,
+        prospectsList: String,
+    }
+  },
   components: {
     [Slider.name]: Slider,
     [Tag.name]: Tag,
@@ -75,14 +81,14 @@ export default {
         prospectsList: '',
       },
       accountsList: {
-        //simple: this.campaign.account,
-        simple: '',
+        simple: this.campaign.account,
+        //simple: '',
         types: accounts,
         multiple: "ARS"
       },
       prospectsLists: {
-        //simple: this.campaign.prospectsList,
-        simple: '',
+        simple: this.campaign.prospectsList,
+        //simple: '',
         types: prospects,
         multiple: "ARS"
       },

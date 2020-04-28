@@ -15,7 +15,7 @@
               :before-change="() => validateStep('zeroStep')"
               icon="nc-icon nc-badge"
             >
-              <zero-step ref="zeroStep" @on-validated="onStepValidated"></zero-step>
+              <zero-step ref="zeroStep" :campaign="campaign" @on-validated="onStepValidated"></zero-step>
             </tab-content>
 
             <tab-content
@@ -24,7 +24,7 @@
               :before-change="() => validateStep('firstStep')"
               icon="nc-icon nc-badge"
             >
-              <first-step ref="firstStep" @on-validated="onStepValidated"></first-step>
+              <first-step ref="firstStep" :campaign="campaign" @on-validated="onStepValidated"></first-step>
             </tab-content>
 
             <tab-content
@@ -34,7 +34,7 @@
               :before-change="() => validateStep('secondStepEmail')"
               icon="nc-icon nc-notes"
             >
-              <second-step-email ref="secondStepEmail" @on-validated="onStepValidated"></second-step-email>
+              <second-step-email ref="secondStepEmail" :campaign="campaign" @on-validated="onStepValidated"></second-step-email>
             </tab-content>
 
             <tab-content
@@ -44,7 +44,7 @@
               :before-change="() => validateStep('secondStepLinkedin')"
               icon="nc-icon nc-notes"
             >
-              <second-step-linkedin ref="secondStepLinkedin" @on-validated="onStepValidated"></second-step-linkedin>
+              <second-step-linkedin ref="secondStepLinkedin" :campaign="campaign" @on-validated="onStepValidated"></second-step-linkedin>
             </tab-content>
 
             <tab-content
@@ -53,7 +53,7 @@
               :before-change="() => validateStep('thirdStep')"
               icon="nc-icon nc-notes"
             >
-              <third-step ref="thirdStep" @on-validated="onStepValidated"></third-step>
+              <third-step ref="thirdStep" :campaign="campaign" @on-validated="onStepValidated"></third-step>
             </tab-content>
 
             <tab-content
@@ -84,6 +84,7 @@ import SecondStepLinkedin from "./Wizard/SecondStepLinkedin.vue";
 import ThirdStep from "./Wizard/ThirdStep.vue";
 import LastStep from "./Wizard/LastStep.vue";
 import swal from "sweetalert2";
+import CAMPAIGN_API_LIST from "./dummy_campaigns";
 
 export default {
   data() {
@@ -91,20 +92,7 @@ export default {
       funnel_email: 'Email campaign',
       funnel_linkedin: 'LinkedIn campaign',
       funnel_email_linkedin: 'Email & LinkedIn campaign',
-      campaign: {
-        name: '',
-        funnel: '',
-        account: '',
-        prospectsList: '',
-        messagesListEmail: [],
-        messagesListLinkedin: [],
-        timeTable: {
-          from: '',
-          till: '',
-          timezone: '',
-          days: [],
-        },
-      },
+      campaign: CAMPAIGN_API_LIST.find(x => x.id === this.$route.query.id),
       wizardModel: {
         stepsData: {}
       }
@@ -121,6 +109,14 @@ export default {
     LastStep
   },
   methods: {
+    initCampaign(id){
+        let campaignsList = CAMPAIGN_API_LIST;
+        //console.log('campaignsList: ', campaignsList);
+
+        // TODO: async axios to server
+        this.campaign = campaignsList.find(x => x.id === id);
+        console.log('11campaign: ', this.campaign);
+    },
     validateStep(ref) {
       return this.$refs[ref].validate();
     },
@@ -151,6 +147,15 @@ export default {
     },
     wizardComplete() {
       swal("Good job!", "You clicked the finish button!", "success");
+    }
+  },
+  mounted() {
+    let id = this.$route.query.id;
+    //console.log('id: ', id);
+    //check don't working!
+    if(id !== undefined || id !== null){
+      this.initCampaign(id);
+      //console.log('hi: ', id);
     }
   }
 };

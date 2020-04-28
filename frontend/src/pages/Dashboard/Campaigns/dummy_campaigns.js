@@ -195,7 +195,7 @@ export default [
         },
       },
       {
-        'id': 3,
+        'id': 4,
         'name': 'My campaign - 2',
         'funnel': 'Email & LinkedIn campaign',
         'account': 'oko2345v@gmail.com',
@@ -239,7 +239,7 @@ export default [
         },
       },
       {
-        'id': 3,
+        'id': 5,
         'name': 'My campaign - 5',
         'funnel': 'LinkedIn campaign',
         'account': 'shilov@gmail.com',
@@ -283,7 +283,7 @@ export default [
         },
       },
       {
-        'id': 3,
+        'id': 6,
         'name': 'test campaign',
         'funnel': 'Email campaign',
         'account': 'ks.shilov@gmail.com',
@@ -327,7 +327,7 @@ export default [
         },
       },
       {
-        'id': 3,
+        'id': 7,
         'name': 'My campaign - 11',
         'funnel': 'LinkedIn campaign',
         'account': 'ks.shilov@gmail.com',
@@ -371,7 +371,7 @@ export default [
         },
       },
       {
-        'id': 3,
+        'id': 8,
         'name': 'TEST',
         'funnel': 'EMAIL campaign',
         'account': 'shilov@ya.ru',

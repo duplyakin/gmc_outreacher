@@ -48,10 +48,12 @@ import {
 } from "src/components/index";
 
 export default {
-  //props: {
-    //campaignName: String,
-    //campaignType: String,
-  //},
+  props: {
+    campaign: {
+        name: String,
+        funnel: String,
+    },
+  },
   components: {
     [Input.name]: Input,
     [Button.name]: Button,
@@ -62,12 +64,12 @@ export default {
   data() {
     return {
       model: {
-        campaignName: '',
+        campaignName: this.campaign.name,
         campaignType: '',
       },
       selects: {
-        //simple: this.campaign.funnel,
-        simple: '',
+        simple: this.campaign.funnel,
+        //simple: '',
         types: [
           { value: "Email campaign", label: "Email campaign" },
           { value: "LinkedIn campaign", label: "LinkedIn campaign" },
@@ -75,8 +77,8 @@ export default {
         ],
         multiple: "ARS"
       },
-      //campaignName: this.$store.state.campaign.name,
-      //campaignType: this.$store.state.campaign.funnel,
+      //campaignName: this.campaign.name,
+      //campaignType: this.campaign.funnel,
       modelValidations: {
         campaignName: {
           required: true,
@@ -110,7 +112,9 @@ export default {
     }
   },
   mounted() {
-    //console.log("campaignName: ", this.campaignName);
+    console.log("campaign: ", this.campaign);
+    //this.campaignName = this.campaign.name;
+    console.log("campaignName: ", this.campaignName);
   }
 };
 </script>
