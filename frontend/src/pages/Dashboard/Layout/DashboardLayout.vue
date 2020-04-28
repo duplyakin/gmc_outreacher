@@ -9,6 +9,7 @@
         </sidebar-item>
         <sidebar-item :link="{name: 'Prospects', icon: 'nc-icon nc-chart-bar-32', path: '/admin/prospects'}"></sidebar-item>
         <sidebar-item :link="{name: 'Campaigns', icon: 'nc-icon nc-chart-bar-32', path: '/admin/campaigns'}"></sidebar-item>
+        <sidebar-item :link="{name: 'TEST json campaigns', icon: 'nc-icon nc-chart-bar-32', path: '/admin/campaigns_test_json'}"></sidebar-item>
 
         <sidebar-item :link="{name: 'Accounts', icon: 'nc-icon nc-chart-bar-32', path: '/admin/accounts'}"></sidebar-item>
 

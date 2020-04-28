@@ -163,8 +163,8 @@ class Credentials(db.Document):
         return credentials
 
     @classmethod
-    def async_credentials(cls, owner, page, per_page=config.CREDENTIALS_PER_PAGE):
-        if page <= 1:
+    def async_credentials(cls, owner, page=None, per_page=config.CREDENTIALS_PER_PAGE):
+        if page and page <= 1:
             page = 1
 
         query = {
@@ -172,11 +172,15 @@ class Credentials(db.Document):
         }
 
         db_query = cls.objects(__raw__=query). \
-                    only('id', 'data', 'status', 'limit_per_day', 'last_action', 'next_action')
+                    only('id', 'data', 'status', 'medium', 'limit_per_day', 'last_action', 'next_action')
         
         total = db_query.count()
-        results = db_query.skip(per_page * (page-1)).limit(per_page).order_by('status').all()
-
+        results = []
+        if page:
+            results = db_query.skip(per_page * (page-1)).limit(per_page).order_by('status').all()
+        else:
+            results = db_query.order_by('status').all()
+            
         return (total, results)
 
 
@@ -271,23 +275,47 @@ class Campaign(db.Document):
     last_action = db.DateTimeField(default=datetime.now())
     next_action = db.DateTimeField(default=datetime.now())
 
+    data = db.DictField()
     
     #not used now
     priorities = db.IntField(default=0)
+
     templates = db.DictField()
+
+    created = db.DateTimeField( default=datetime.now() )
 
     @classmethod
     def list_campaigns(cls, owner):
         return cls.objects(owner=owner).all()
 
     @classmethod
-    def async_campaigns(cls, owner):
-        return cls.objects(owner=owner).only('id', 'title').all()
+    def async_campaigns(cls, owner, page=None, per_page=config.CAMPAIGNS_PER_PAGE):
+        if page and page <= 1:
+            page = 1
+
+        query = {
+            'owner' : owner
+        }
+
+        db_query = cls.objects(__raw__=query). \
+                    only('id', 'title', 'status', 'templates', 'data', 'created', 'credentials')
+        
+        total = db_query.count()
+        results = []
+
+        if page:
+            results = db_query.skip(per_page * (page-1)).limit(per_page).order_by('-created').all()
+        else:
+            results = db_query.order_by('-created').all()
+        
+        return (total, results)
 
     @classmethod
-    def get_campaign(cls, id=None, title=None):
+    def get_campaign(cls, owner=None, id=None, title=None):
         
         campaign = None
+        if owner:
+            campaign = cls.objects(owner=owner, id=id).first()
         if title:
             campaign = cls.objects(title=title).first()
         elif id:
@@ -304,7 +332,9 @@ class Campaign(db.Document):
         new_campaign.title = data.get('title', '')
         new_campaign.credentials = data.get('credentials')
         new_campaign.funnel = data.get('funnel')
-        
+
+        new_campaign.data = data.get('data')
+
         new_campaign.status = NEW
 
         new_campaign._commit()
@@ -334,6 +364,20 @@ class Campaign(db.Document):
         for c in campaigns:
             c.save()
    
+    def get_node_template(self, template_key, medium):
+        if not template_key:
+            return ''
+        
+        if not medium:
+            raise Exception("ERROR: get_node_template, medium can't be empty")
+        
+        templates_for_medium = self.templates.get(medium, '')
+        if not templates_for_medium:
+            return ''
+        
+        template = templates_for_medium.get(template_key, '')
+        return template
+
     def change_limits(self, now):
         current_hour = now.hour
         current_day = now.day
@@ -363,6 +407,14 @@ class Campaign(db.Document):
             next_day = next_day + 1
 
         return delta
+
+    #can delete only if:
+    # not in progress
+    # no prospects assigned
+    def safe_delete(self):
+        if self.status == IN_PROGRESS:
+            raise Exception("DELETE ERROR: campaign in progress, stop it first")
+        
 
 
     def inprogress(self):

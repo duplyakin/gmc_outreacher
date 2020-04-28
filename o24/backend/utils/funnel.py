@@ -11,8 +11,8 @@ def create_funnel_node(current):
     
     data = {
         'action' : action.id,
-        'template' : current.get('template', ''),
-        'data' : current.get('data', '')
+        'data' : current.get('data', ''),
+        'json' : current
     }
     if current.get('root', None):
         data['root'] = current.get('root')

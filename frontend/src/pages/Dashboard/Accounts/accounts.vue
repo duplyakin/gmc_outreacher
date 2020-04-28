@@ -35,7 +35,7 @@
                 <el-table-column
                         type="selection"
                         width="55"
-                        v-if="accounts_data.credentials"
+                        v-if="accounts_data.columns"
                         fixed>
                 </el-table-column>
                 <el-table-column v-for="column in accounts_data.columns"

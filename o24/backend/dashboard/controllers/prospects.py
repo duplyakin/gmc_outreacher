@@ -108,7 +108,7 @@ def list_prospects():
                 if lists:
                     result['lists'] = lists.to_json()
 
-                campaigns = Campaign.async_campaigns(owner=current_user.id)
+                total, campaigns = Campaign.async_campaigns(owner=current_user.id)
                 if campaigns:
                     result['campaigns'] = campaigns.to_json()
 

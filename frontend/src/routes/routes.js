@@ -48,6 +48,8 @@ const CampaignWizard = () => import('src/pages/Dashboard/Campaigns/campaignWizar
 const Campaigns = () => import('src/pages/Dashboard/Campaigns/campaigns.vue')
 const Accounts = () => import('src/pages/Dashboard/Accounts/accounts.vue')
 
+const test_json_campaign = () => import('src/pages/Dashboard/Campaigns/test_json_from_server.vue')
+
 
 const filterForm = () => import('src/pages/Dashboard/TestComponents/formComponent.vue')
 const randomComponent = () => import('src/pages/Dashboard/TestComponents/randomComponent.vue')
@@ -278,6 +280,11 @@ const routes = [
         path: 'campaigns',
         name: 'Campaigns',
         component: Campaigns
+      },
+      {
+        path: 'campaigns_test_json',
+        name: 'Campaigns TEST JSON',
+        component: test_json_campaign
       },
       {
         path: 'accounts',

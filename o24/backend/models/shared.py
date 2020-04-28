@@ -46,14 +46,22 @@ class Funnel(db.Document):
     action = db.ReferenceField(Action)
     paramters = db.DictField()
 
+    title = db.StringField()
+    templates_required = db.DictField()
+    template_key = db.StringField(default='')
+    
     root = db.BooleanField(default=False)
 
     if_true = db.ObjectIdField(default=None)
     if_false = db.ObjectIdField(default=None)
 
-    template = db.DictField()
-
     data = db.DictField() #any info here, like delay for DELAY action
+
+    @classmethod
+    def async_funnels(cls, owner=None):
+        return cls.objects(root=True).\
+                only('id', 'title', 'templates_required', 'root').\
+                all()
 
     @classmethod
     def next_node(cls, current_node, result):
@@ -95,10 +103,32 @@ class Funnel(db.Document):
         return self.action.is_true(result)
 
     def update_data(self, data):
+        
+        json = data.get('json')
+        root = data.get('root', None)
+        if json:
+            template_key = json.get('template_key', '')
+            if template_key:
+                self.template_key = template_key
+
+            templates_required = json.get('templates_required', {})
+            if root and not templates_required:
+                raise Exception("ERROR: templates_required for root funnel can't be empty")
+            
+            if templates_required:
+                self.templates_required = templates_required
+        
+            title = json.get('title', '')
+            if root and not title:
+                raise Exception("ERROR: title for root funnel can't be empty")
+            
+            if title:
+                self.title = title
+
 
         if data.get('root', None):
             self.root = data.get('root')
-        
+
         if data.get('action', None):
             self.action = data.get('action')
 
@@ -108,9 +138,6 @@ class Funnel(db.Document):
         if data.get('if_false', None):
             self.if_false = data.get('if_false')
         
-        if data.get('template', None):
-            self.template = data.get('template')
-
         if data.get('data', None):
             self.data = data.get('data')
 
@@ -182,11 +209,13 @@ class TaskQueue(db.Document):
         self.status = FINISHED
         self._commit()
 
-    def get_mail_data(self):
+    def get_email_data(self):
         result = {}
         prospect = models.Prospects.objects(id=self.prospect_id).get()
-        
-        result['template'] = self.current_node.template
+        campaign = models.Campaign.objects(id=self.campaign_id).get()
+
+        result['template'] = campaign.get_node_template(template_key=self.current_node.template_key,
+                                                        medium='email')
         result['email_to'] = prospect.get_email()
         
         return result
