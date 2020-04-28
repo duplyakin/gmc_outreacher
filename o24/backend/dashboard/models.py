@@ -122,19 +122,36 @@ class Credentials(db.Document):
 
     @classmethod
     def create_credentials(cls, owner, data):
-        new_credentials = cls()
+        exist = None
+        new_data = data.get('data')
 
-        new_credentials.owner = owner
-        new_credentials.medium = data.get('medium')
-        new_credentials.data = data.get('data')
+        account = new_data.get('account', '')
+        if account:
+            exist = Credentials.objects(Q(owner=owner) & Q(data__account=account) ).first()
 
-        #defaults
-        new_credentials.limits = {}
+        if not exist:
+            exist = cls()
+
+        exist.owner = owner
+        exist.medium = data.get('medium')
+        exist.data = new_data
         
-        new_credentials._commit()
+        exist._commit()
 
-        return new_credentials
+        return exist
     
+    @classmethod
+    def delete_credentials(cls, owner_id, credentials_ids):
+        if not owner_id or not credentials_ids:
+            return 0
+        
+        active_campaign = Campaign.objects(owner=owner_id, credentials__in=credentials_ids, status=1).first()
+        if active_campaign:
+            raise Exception("Can't delete - you have active campaigns on this account")
+        
+        return Credentials.objects(owner=owner_id, id__in=credentials_ids).delete()
+
+
     @classmethod
     def get_credentials(cls, user_id, medium=None, sender=None):
         if medium:
@@ -144,6 +161,24 @@ class Credentials(db.Document):
             return cls.objects(Q(owner=user_id) & Q(data__sender=sender)).first()
 
         return credentials
+
+    @classmethod
+    def async_credentials(cls, owner, page, per_page=config.CREDENTIALS_PER_PAGE):
+        if page <= 1:
+            page = 1
+
+        query = {
+            'owner' : owner
+        }
+
+        db_query = cls.objects(__raw__=query). \
+                    only('id', 'data', 'status', 'limit_per_day', 'last_action', 'next_action')
+        
+        total = db_query.count()
+        results = db_query.skip(per_page * (page-1)).limit(per_page).order_by('status').all()
+
+        return (total, results)
+
 
     @classmethod
     def list_credentials(cls, credential_ids):
@@ -174,6 +209,19 @@ class Credentials(db.Document):
         else:
             self.next_action = now + timedelta(seconds=self.limit_interval)        
 
+    def update_data(self, data, allow_update=['limit_per_day', 'li_at']):
+        new_limit_per_day = int(data.get('limit_per_day', 0))
+        if new_limit_per_day > 0:
+            self.limit_per_day = new_limit_per_day
+
+        data_prop = data.get('data', '')
+        if data_prop:
+            li_at = data_prop.get('li_at', None)
+            if li_at is not None:
+                self.data['li_at'] = li_at
+        
+        self._commit()
+    
     def warmup(self):
         self.limit_per_day = round(self.limit_per_day * 1.3)
 
@@ -348,9 +396,11 @@ class ProspectsList(db.Document):
         return cls.objects(owner=owner).only('id', 'title').all()
 
     @classmethod
-    def get_lists(cls, owner, title=None):
+    def get_lists(cls, owner, title=None, id=None):
         if title:
             return cls.objects(owner=owner, title=title).first()
+        elif id:
+            return cls.objects(owner=owner, id=id).first()
         else:
             return cls.objects(owner=owner).all()
 
@@ -388,7 +438,7 @@ class Prospects(db.Document):
     created = db.DateTimeField( default=datetime.now() )
 
     @classmethod
-    def create_prospect(cls, owner_id, campaign_id=None, data={}, lists=[]):
+    def create_prospect(cls, owner_id, campaign_id=None, data={}, lists=[], commit=True):
         new_prospect = cls()
 
         new_prospect.owner = owner_id
@@ -400,7 +450,8 @@ class Prospects(db.Document):
         if lists:
             new_prospect.lists = lists
 
-        new_prospect._commit()
+        if commit:
+            new_prospect._commit()
 
         return new_prospect
 
@@ -411,6 +462,41 @@ class Prospects(db.Document):
             return 0
 
         return Prospects.objects(owner=owner_id, id__in=prospects_ids).delete()
+
+    @classmethod
+    def upload(cls, owner_id, csv_with_header, map_to, add_to_list):
+
+        prospects_list = []
+        
+        i = 0
+        for row in csv_with_header:
+            i = i + 1
+
+            #pass header
+            if i == 1:
+                continue
+
+            data = {}
+            if add_to_list:
+                data['lists'] = [add_to_list.title]
+
+            for m_t in map_to.keys():
+                row_data = row[m_t]
+                field_name = map_to[m_t]
+
+                data[field_name] = row_data
+
+            next_prospect = cls.create_prospect(owner_id=owner_id,
+                                                data=data, 
+                                                lists=add_to_list, 
+                                                commit=False)
+            prospects_list.append(next_prospect)
+
+        if not prospects_list:
+            return 0
+
+        ids = cls.objects.insert(prospects_list, load_bulk=False)
+        return len(ids)
 
     @classmethod
     def assign_prospects(cls, owner_id, prospects_ids, campaign_id):

@@ -10,6 +10,8 @@
         <sidebar-item :link="{name: 'Prospects', icon: 'nc-icon nc-chart-bar-32', path: '/admin/prospects'}"></sidebar-item>
         <sidebar-item :link="{name: 'Campaigns', icon: 'nc-icon nc-chart-bar-32', path: '/admin/campaigns'}"></sidebar-item>
 
+        <sidebar-item :link="{name: 'Accounts', icon: 'nc-icon nc-chart-bar-32', path: '/admin/accounts'}"></sidebar-item>
+
         <sidebar-item :link="{name: 'Test Components', icon: 'nc-icon nc-chart-bar-32'}">
           <sidebar-item :link="{name: 'Filter Form', path: '/test/1'}"></sidebar-item>
           <sidebar-item :link="{name: 'Random Component', path: '/test/2'}"></sidebar-item>

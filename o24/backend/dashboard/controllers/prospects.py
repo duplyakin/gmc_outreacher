@@ -325,12 +325,67 @@ def create_prospect():
 
     return jsonify(result)
 
-@bp_dashboard.route('/prospects/upload', methods=['GET', 'POST'])
+@bp_dashboard.route('/prospects/upload', methods=['POST'])
 #@login_required
 def upload_prospects ():
-    return jsonify(PROSPECTS)
+    current_user = get_current_user()
 
-@bp_dashboard.route('/list/create', methods=['GET', 'POST'])
-#@login_required
-def create_list():
-    return jsonify(PROSPECTS)
+    result = {
+        'code' : -1,
+        'msg' : '',
+        'uploaded' : 0
+    }
+
+    if request.method == 'POST':
+        try:
+            raw_data = request.form['_upload_data']
+
+            js_data = json.loads(raw_data)
+
+            #headers as the first row
+            _csv_array = js_data['fields_mapped']['_csv']
+            _csv_header = js_data['fields_mapped']['_csv'][0]
+
+            _columns_checked = js_data['fields_mapped']['columnsChecked']
+
+            index_map_to_fields = {}
+            for ch in _columns_checked:
+                header = ch.get('header','')
+                map_selected = ch.get('map_selected', '')
+
+                if header and map_selected:
+                    index = _csv_header.index(header)
+                    index_map_to_fields[index] = map_selected
+            
+            _add_to_list = js_data['list_selected']['list']['list_selected_id']
+            _create_new = js_data['list_selected']['createNew']
+            if _create_new:
+                _add_to_list = js_data['list_selected']['list']['list_new_label']
+                _add_to_list = ProspectsList.create_list(owner_id=current_user.id, title=_add_to_list)
+                if not _add_to_list:
+                    raise Exception('Error creatin the list')
+            else:
+                _add_to_list = ProspectsList.get_lists(owner=current_user.id, id=_add_to_list)
+                if not _add_to_list:
+                    raise Exception('List not found')
+
+
+            res = Prospects.upload(owner_id=current_user.id,
+                                    csv_with_header=_csv_array,
+                                    map_to=index_map_to_fields,
+                                    add_to_list=_add_to_list)
+
+            if not res:
+                raise Exception('Prospects creation error - 0 prospects created')
+
+            result['code'] = 1
+            result['uploaded'] = res
+        except Exception as e:
+            #TODO: change to loggin
+            print(e)
+            traceback.print_exc()
+
+            result['code'] = -1
+            result['msg'] = 'SERVER ERROR: ' + str(e)
+
+    return jsonify(result)

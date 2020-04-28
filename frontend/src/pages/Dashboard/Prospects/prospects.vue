@@ -288,25 +288,26 @@
           .then((res) => {
             var r = res.data;
             if (r.code <= 0){
-              msg = "Error loading prospects " + r.msg;
+              var msg = "Error loading prospects " + r.msg;
               alert(msg);
             }else{
               this.update_prospects_data(r, 1);
             }
           })
           .catch((error) => {
-            msg = "Error loading prospects " + error;
+            var msg = "Error loading prospects " + error;
             alert(msg);
           });
       },
       uploadProspect(){
         this.$modal.show(CsvUpload, {
             api_url : PROSPECTS_API_UPLOAD,
+            lists: this.prospects_data.lists,
             valueUpdated:(uploaded) => {
               this.$notify(
                 {
                   component: NotificationMessage,
-                  message: 'Prospect uploaded Success. Update the page',
+                  message: 'Prospect uploaded Success. The data will be available soon. Update the page in 10 seconds',
                   icon: 'nc-icon nc-bulb-63',
                   type: 'success'
                 })
@@ -387,7 +388,7 @@
                     .then((res) => {
                       var r = res.data;
                       if (r.code <= 0){
-                        msg = "Error " + r.msg;
+                        var msg = "Error " + r.msg;
                         alert(msg);
                       }else{
                         this.$notify(
@@ -403,7 +404,7 @@
                       }
                     })
                     .catch((error) => {
-                      msg = "Error " + error;
+                      var msg = "Error " + error;
                       alert(msg);
                     });
 
@@ -427,7 +428,7 @@
             .then((res) => {
               var r = res.data;
               if (r.code <= 0){
-                msg = "Error " + r.msg;
+                var msg = "Error " + r.msg;
                 alert(msg);
               }else{
                 this.$notify(
@@ -441,7 +442,7 @@
               }
             })
             .catch((error) => {
-              msg = "Error " + error;
+              var msg = "Error " + error;
               alert(msg);
             });
 
@@ -458,7 +459,7 @@
             .then((res) => {
               var r = res.data;
               if (r.code <= 0){
-                msg = "Error deleting prospects " + r.msg;
+                var msg = "Error deleting prospects " + r.msg;
                 alert(msg);
               }else{
                 this.$notify(
@@ -472,7 +473,7 @@
               }
             })
             .catch((error) => {
-              msg = "Error loading prospects " + error;
+              var msg = "Error loading prospects " + error;
               alert(msg);
             });
 

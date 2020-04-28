@@ -46,6 +46,8 @@ const Charts = () => import('src/pages/Dashboard/Charts.vue')
 const Prospects = () => import('src/pages/Dashboard/Prospects/prospects.vue')
 const CampaignWizard = () => import('src/pages/Dashboard/Campaigns/campaignWizard.vue')
 const Campaigns = () => import('src/pages/Dashboard/Campaigns/campaigns.vue')
+const Accounts = () => import('src/pages/Dashboard/Accounts/accounts.vue')
+
 
 const filterForm = () => import('src/pages/Dashboard/TestComponents/formComponent.vue')
 const randomComponent = () => import('src/pages/Dashboard/TestComponents/randomComponent.vue')
@@ -276,6 +278,11 @@ const routes = [
         path: 'campaigns',
         name: 'Campaigns',
         component: Campaigns
+      },
+      {
+        path: 'accounts',
+        name: 'Accounts',
+        component: Accounts
       }
     ]
   },
