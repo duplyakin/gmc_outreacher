@@ -224,6 +224,15 @@ ACTIONS = [
     {
         'action_type' : 0,
         'data' : {
+            'what' : 'parse-linkedin'
+        },
+        'medium' : 'linkedin',
+        'key' : 'parse-linkedin'
+    },
+
+    {
+        'action_type' : 0,
+        'data' : {
             'what' : 'visit-profile'
         },
         'medium' : 'linkedin',
@@ -324,8 +333,171 @@ ACTIONS = [
 FUNNELS = [
     {
         'root' : {
-            'key' : 'linkedin-connect',
+            'key' : 'parse-linkedin',
+            'title' : 'Parse linkedin funnel',
             'root' : True,
+            'templates_required' : {
+                'search_url' : True
+            },
+            'if_true' : 'success',
+            'if_false' : 'finished',
+        },
+
+        'finished' : {
+            'key' : 'finished'
+        },
+
+        'success' : {
+            'key' : 'success'
+        }
+
+    },
+
+    {
+        'root' : {
+            'key' : 'email-send-message',
+            'title' : 'Email only 4 emails sequence',
+            'template_key' : 'intro_email',
+            'root' : True,
+            'templates_required' : {
+                'email' : {
+                    '0' : {
+                        'title' : 'Intro email',
+                        'template_key' : 'intro_email'
+                    },
+                    '1' : {
+                        'title' : 'Follow up email - 1',
+                        'template_key' : 'email_followup_1'
+                    },
+                    '2': {
+                        'title' : 'Follow up email - 2',
+                        'template_key' : 'email_followup_2'
+                    },
+                    '3': {
+                        'title' : 'Follow up email - 3',
+                        'template_key' : 'email_followup_3'
+                    },
+
+                }
+            },
+            'if_true' : 'wait-email-intro',
+            'if_false' : 'wait-email-intro',
+        },
+
+        'wait-email-intro' : {
+            'key' : 'delay-email',
+            'data' : { 'delay' : 10},
+            'if_true' : 'check-reply-intro',
+            'if_false' : 'check-reply-intro'
+        },
+
+        'check-reply-intro' : {
+            'key' : 'email-check-reply',
+            'if_true' : 'success',
+            'if_false' : 'email-followup-1'
+        },
+
+        'email-followup-1' :  {
+            'key' : 'email-send-message',
+            'template_key' : 'email_followup_1',
+            'if_true' : 'wait-followup-1',
+            'if_false' : 'wait-followup-1'
+        },
+
+        'wait-followup-1' : {
+            'key' : 'delay-email',
+            'data' : { 'delay' : 10},
+            'if_true' : 'check-reply-followup-1',
+            'if_false' : 'check-reply-followup-1'
+        },
+
+        'check-reply-followup-1' : {
+                'key' : 'email-check-reply',
+                'if_true' : 'success',
+                'if_false' : 'email-followup-2'
+        },
+
+        'email-followup-2' :  {
+            'key' : 'email-send-message',
+            'template_key' : 'email_followup_2',
+            'if_true' : 'wait-followup-2',
+            'if_false' : 'wait-followup-2'
+        },
+
+        'wait-followup-2' : {
+            'key' : 'delay-email',
+            'data' : { 'delay' : 10},
+            'if_true' : 'check-reply-followup-2',
+            'if_false' : 'check-reply-followup-2'
+        },
+
+        'check-reply-followup-2' : {
+                'key' : 'email-check-reply',
+                'if_true' : 'success',
+                'if_false' : 'email-followup-3'
+        },
+
+        'email-followup-3' :  {
+            'key' : 'email-send-message',
+            'template_key' : 'email_followup_3',
+            'if_true' : 'wait-followup-3',
+            'if_false' : 'wait-followup-3'
+        },
+
+        'wait-followup-3' : {
+            'key' : 'delay-email',
+            'data' : { 'delay' : 10},
+            'if_true' : 'check-reply-followup-3',
+            'if_false' : 'check-reply-followup-3'
+        },
+
+        'check-reply-followup-3' : {
+                'key' : 'email-check-reply',
+                'if_true' : 'success',
+                'if_false' : 'finished'
+        },
+
+        'finished' : {
+            'key' : 'finished'
+        },
+
+        'success' : {
+            'key' : 'success'
+        }
+
+    },
+
+    {
+        'root' : {
+            'key' : 'linkedin-connect',
+            'title' : 'Linkedin + email funnel',
+            'root' : True,
+            'templates_required' : {
+                'email' : {
+                    '0' : {
+                        'title' : 'Intro email',
+                        'template_key' : 'intro_email'
+                    },
+                    '1' : {
+                        'title' : 'Follow up email - 1',
+                        'template_key' : 'email_followup_1'
+                    },
+                    '2': {
+                        'title' : 'Follow up email - 2',
+                        'template_key' : 'email_followup_2'
+                    }
+                },
+                'linkedin' : {
+                    '0' : {
+                        'title' : 'Intro linkedin message',
+                        'template_key' : 'intro_linkedin'
+                    },
+                    '1' : {
+                        'title' : 'Follow up linkedin - 1',
+                        'template_key' : 'linkedin_followup_1'
+                    }
+                }
+            },
             'if_true' : 'wait-1',
             'if_false' : 'wait-1',
         },
@@ -345,6 +517,7 @@ FUNNELS = [
 
                 'connect-approve-1' : {
                     'key' : 'linkedin-send-message',
+                    'template_key' : 'intro_linkedin',
                     'if_true' : 'wait-2',
                     'if_false' : 'wait-2'
                 },
@@ -359,11 +532,31 @@ FUNNELS = [
                 'check-reply-1' : {
                     'key' : 'linkedin-check-reply',
                     'if_true' : 'success',
+                    'if_false' : 'linkedin-send-followup-1'
+                },
+
+                'linkedin-send-followup-1' : {
+                    'key' : 'linkedin-send-message',
+                    'template_key' : 'linkedin_followup_1',
+                    'if_true' : 'wait-linkedin-followup-1',
+                    'if_false' : 'wait-linkedin-followup-1'
+                },
+
+                'wait-linkedin-followup-1' : {
+                    'key' : 'delay-linkedin',
+                    'data' : { 'delay' : 10},
+                    'if_true': 'check-reply-followup-1',
+                    'if_false': 'check-reply-followup-1'
+                },
+                'check-reply-followup-1' : {
+                    'key' : 'linkedin-check-reply',
+                    'if_true' : 'success',
                     'if_false' : 'connect-deny-1'
                 },
 
         'connect-deny-1' : {
             'key' : 'email-send-message',
+            'template_key' : 'intro_email',
             'if_true' : 'wait-22',
             'if_false' : 'wait-22'
         },
@@ -383,6 +576,7 @@ FUNNELS = [
 
                 'email-followup-1' :  {
                     'key' : 'email-send-message',
+                    'template_key' : 'email_followup_1',
                     'if_true' : 'wait-3',
                     'if_false' : 'wait-3'
                 },
@@ -397,8 +591,29 @@ FUNNELS = [
                     'check-reply-followup-1' : {
                         'key' : 'email-check-reply',
                         'if_true' : 'success',
+                        'if_false' : 'email-followup-2'
+                },
+
+                'email-followup-2' :  {
+                    'key' : 'email-send-message',
+                    'template_key' : 'email_followup_2',
+
+                    'if_true' : 'wait-4',
+                    'if_false' : 'wait-4'
+                },
+
+                'wait-4' : {
+                    'key' : 'delay-email',
+                    'data' : { 'delay' : 10},
+                    'if_true' : 'check-reply-followup-2',
+                    'if_false' : 'check-reply-followup-2'
+                },
+
+                'check-reply-followup-2' : {
+                        'key' : 'email-check-reply',
+                        'if_true' : 'success',
                         'if_false' : 'finished'
-                    },
+                },
 
         'finished' : {
             'key' : 'finished'
@@ -586,6 +801,11 @@ class TestUsersCampaignsProspects(unittest.TestCase):
             data['funnel'] = funnel.id
             data['credentials'] = credentials
             data['title'] = campaign.get('title','')
+            data['data'] = {
+                'funnel_title': funnel.title,
+                'prospects_list' : '',
+                'account' : ''
+            }
 
             new_campaign = Campaign.create_campaign(data, owner=db_user.id)
             self.assertTrue(new_campaign is not None, "can't create campaign")

@@ -47,6 +47,7 @@ class BaseConfig():
 
     PROSPECTS_PER_PAGE = 500
     CREDENTIALS_PER_PAGE = 20
+    CAMPAIGNS_PER_PAGE = 100
     #Flask-User customization
     #USER_LOGIN_TEMPLATE = 'login/login.html'
     #USER_REGISTER_TEMPLATE = 'login/register.html'
