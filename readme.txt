@@ -1,5 +1,37 @@
+
+#HOW to launch server to test frontend
+
+0. Запускаем монгу (на винде):
+идем сюда: C:\Program Files\MongoDB\Server\4.2\bin
+в командной строке: ./mongod -f ./mongod.cfg
+
+
+Все шаги делаем из корня: mc_outreacher\
+1. Устанвливаем тестовую переменную окружения (!!!)
+$env:APP_ENV="Test"
+
+
+2. Создаем базу с тестоваыми данными:
+python -m unittest discover -s .\o24\tests\ -p "*db_entities.py"
+
+3. Запускаем тестовый сервер
+python -m o24.tests.run_flask_server
+
+
+ПОСЛЕ ЭТОГО запускаем фронтенд:
+4. Идем в mc_outreacher\frontend
+5. Запускаем фронтенд:
+npm run dev
+
+
+Если не установлен модуль для питона, то в корне: mc_outreacher\ 
+6. pip install <module_name>
+
+
 #unittest docs:
 https://realpython.com/python-testing/
+
+
 
 #Setup TEST Envirnment
 $env:APP_ENV="Test"
