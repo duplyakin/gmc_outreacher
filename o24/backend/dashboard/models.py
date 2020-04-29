@@ -19,6 +19,8 @@ from passlib.context import CryptContext
 import o24.backend.models.shared as shared
 from bson import ObjectId
 from o24.backend.utils.filter_data import *
+from o24.backend.utils.helpers import template_key_dict 
+
 
 class User(db.Document, UserMixin):
     email = db.EmailField(unique=True)
@@ -197,6 +199,9 @@ class Credentials(db.Document):
             e.save()
         #cls.objects.update(arr)
 
+    def get_account(self):
+        return self.data['account']
+
     def get_data(self):
         return self.data
 
@@ -259,6 +264,7 @@ class Campaign(db.Document):
     owner = db.ReferenceField(User)
     title = db.StringField()
     credentials = db.ListField(db.ReferenceField(Credentials))
+    prospects_list = db.ReferenceField('ProspectsList')
 
     # 0 - created
     # 1 - in progress
@@ -268,9 +274,11 @@ class Campaign(db.Document):
 
     funnel = db.ReferenceField(shared.Funnel)
     
+    #get from timeTable
     sending_days = db.DictField(default=DEFAULT_SENDING_DAYS)
     from_hour = db.IntField(default=DEFAULT_FROM_HOUR)
     to_hour = db.IntField(default=DEFAULT_TO_HOUR)
+    time_zone = db.StringField(default='')
 
     last_action = db.DateTimeField(default=datetime.now())
     next_action = db.DateTimeField(default=datetime.now())
@@ -297,8 +305,7 @@ class Campaign(db.Document):
             'owner' : owner
         }
 
-        db_query = cls.objects(__raw__=query). \
-                    only('id', 'title', 'status', 'templates', 'data', 'created', 'credentials')
+        db_query = cls.objects(__raw__=query)
         
         total = db_query.count()
         results = []
@@ -332,6 +339,17 @@ class Campaign(db.Document):
         new_campaign.title = data.get('title', '')
         new_campaign.credentials = data.get('credentials')
         new_campaign.funnel = data.get('funnel')
+
+        if data.get('templates', ''):
+            new_campaign.templates = data.get('templates')
+        
+        if data.get('time_table', ''):
+            timeTable = data.get('time_table')
+            new_campaign.sending_days = timeTable.get('sending_days')
+            new_campaign.from_hour = timeTable.get('from_hour')
+            new_campaign.to_hour = timeTable.get('to_hour')
+            new_campaign.time_zone = timeTable.get('time_zone')
+
 
         new_campaign.data = data.get('data')
 
@@ -414,8 +432,30 @@ class Campaign(db.Document):
     def safe_delete(self):
         if self.status == IN_PROGRESS:
             raise Exception("DELETE ERROR: campaign in progress, stop it first")
+    
+    def async_edit(self, data):
+        new_title = data.get('title', '')
+        if new_title:
+            self.title = new_title
         
+        new_templates = data.get('templates', '')
+        if new_templates:
+            mapped_templates = template_key_dict(new_templates)
+            if not mapped_templates:
+                raise Exception("Wrong templates format")
 
+            self.templates = mapped_templates
+        
+        if data.get('time_table', ''):
+            timeTable = data.get('time_table')
+            self.sending_days = timeTable.get('sending_days')
+            self.from_hour = timeTable.get('from_hour')
+            self.to_hour = timeTable.get('to_hour')
+            self.time_zone = timeTable.get('time_zone')
+
+
+        self._commit()
+        return True
 
     def inprogress(self):
         if self.status == 1:
