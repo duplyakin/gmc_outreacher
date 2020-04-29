@@ -158,7 +158,7 @@ export default {
           }
         ],
 
-        campaigns: get_campaigns,
+        campaigns: [],
 
         pagination: {
           perPage: 0,
@@ -166,7 +166,7 @@ export default {
           total: 0
         }
       },
-      
+
       tableData: get_campaigns,
 
       fuseSearch: null,
@@ -216,6 +216,10 @@ export default {
     };
   },
   methods: {
+    initCampaigns(){
+      //TODO: connect server
+      this.campaigns_data.campaigns = get_campaigns;
+    },
     handleTest(index, row) {
       alert(`Your want to like ${row.name}`);
     },
@@ -247,7 +251,7 @@ export default {
     }
   },
   mounted() {
-    //this.fuseSearch = new Fuse(this.tableData, {keys: ['name', 'email']});
+    this.initCampaigns();
   }
 };
 </script>

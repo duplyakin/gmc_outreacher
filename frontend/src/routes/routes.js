@@ -47,6 +47,8 @@ const Prospects = () => import('src/pages/Dashboard/Prospects/prospects.vue')
 const CampaignWizard = () => import('src/pages/Dashboard/Campaigns/campaignWizard.vue')
 const Campaigns = () => import('src/pages/Dashboard/Campaigns/campaigns.vue')
 const Accounts = () => import('src/pages/Dashboard/Accounts/accounts.vue')
+const Team = () => import('src/pages/Dashboard/Team/team.vue')
+const Actions = () => import('src/pages/Dashboard/Actions/actions.vue')
 
 
 const filterForm = () => import('src/pages/Dashboard/TestComponents/formComponent.vue')
@@ -283,6 +285,16 @@ const routes = [
         path: 'accounts',
         name: 'Accounts',
         component: Accounts
+      },
+      {
+        path: 'team',
+        name: 'Team',
+        component: Team
+      },
+      {
+        path: 'actions',
+        name: 'Actions',
+        component: Actions
       }
     ]
   },

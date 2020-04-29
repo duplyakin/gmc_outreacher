@@ -11,6 +11,9 @@
         <sidebar-item :link="{name: 'Campaigns', icon: 'nc-icon nc-chart-bar-32', path: '/admin/campaigns'}"></sidebar-item>
 
         <sidebar-item :link="{name: 'Accounts', icon: 'nc-icon nc-chart-bar-32', path: '/admin/accounts'}"></sidebar-item>
+        <sidebar-item :link="{name: 'Team', icon: 'nc-icon nc-chart-bar-32', path: '/admin/team'}"></sidebar-item>
+
+        <sidebar-item :link="{name: 'Actions', icon: 'nc-icon nc-chart-bar-32', path: '/admin/actions'}"></sidebar-item>
 
         <sidebar-item :link="{name: 'Test Components', icon: 'nc-icon nc-chart-bar-32'}">
           <sidebar-item :link="{name: 'Filter Form', path: '/test/1'}"></sidebar-item>

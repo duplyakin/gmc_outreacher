@@ -17,6 +17,7 @@
             <fg-input :error="getError('body text')">
               <editor
                 name="body text"
+                output-format="html"
                 v-model="message_data.body"
                 api-key="o5wuoncsvrewlx7zeflsjb4wo2a252lvnrnlslv30ohh31ex"
                 :init="{
@@ -30,7 +31,8 @@
          toolbar:
            'undo redo | formatselect | bold italic backcolor | \
            alignleft aligncenter alignright alignjustify | \
-           bullist numlist outdent indent | removeformat | help'
+           bullist numlist outdent indent | removeformat | help \
+           image | link | autolink'
        }"
               />
             </fg-input>
@@ -59,7 +61,6 @@
 import { Select, Option } from "element-ui";
 import axios from "axios";
 import Editor from "@tinymce/tinymce-vue";
-var fs = require('fs');
 
 export default {
   components: {
@@ -73,10 +74,11 @@ export default {
   },
   data() {
     return {
-      object_before_changes: null,
       message_data: {
         subject: '',
         body: '',
+        //body_plain: '',
+        //body_html: '',
         interval: ''
       },
       modelValidations: {
@@ -99,10 +101,28 @@ export default {
         return res;
       });
     },
+    convertToPlainText(htmlText){
+      let res = htmlText.replace(/<style([\s\S]*?)<\/style>/gi, '');
+      res = res.replace(/<script([\s\S]*?)<\/script>/gi, '');
+      res = res.replace(/<\/div>/ig, '\n');
+      res = res.replace(/<\/li>/ig, '\n');
+      res = res.replace(/<li>/ig, '  *  ');
+      res = res.replace(/<\/ul>/ig, '\n');
+      res = res.replace(/<\/p>/ig, '\n');
+      res = res.replace(/<br\s*[\/]?>/gi, "\n");
+      res = res.replace(/<[^>]+>/ig, '');
+
+      return res;
+    },
     submitMessageData() {
         if (confirm("Are you sure?")) {
+          // variant 1
+          //this.message_data.body_plain = this.message_data.body.replace(/<(style|script|iframe)[^>]*?>[\s\S]+?<\/\1\s*>/gi,'').replace(/<[^>]+?>/g,'').replace(/\s+/g,' ').replace(/ /g,' ').replace(/>/g,' '); 
+          // variant 2
+          //this.message_data.body_plain = this.convertToPlainText(this.message_data.body);
           this.$emit('close');
           this.valueUpdated(this.message_data);
+          console.log('TEXT: ', this.message_data);
         }
     },
     discardEdit() {
