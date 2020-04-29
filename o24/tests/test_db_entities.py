@@ -361,21 +361,25 @@ FUNNELS = [
             'root' : True,
             'templates_required' : {
                 'email' : {
-                    '0' : {
+                    'intro_email' : {
                         'title' : 'Intro email',
-                        'template_key' : 'intro_email'
+                        'template_key' : 'intro_email',
+                        'order' : 0
                     },
-                    '1' : {
+                    'email_followup_1' : {
                         'title' : 'Follow up email - 1',
-                        'template_key' : 'email_followup_1'
+                        'template_key' : 'email_followup_1',
+                        'order' : 1
                     },
-                    '2': {
+                    'email_followup_2': {
                         'title' : 'Follow up email - 2',
-                        'template_key' : 'email_followup_2'
+                        'template_key' : 'email_followup_2',
+                        'order' : 2
                     },
-                    '3': {
+                    'email_followup_3': {
                         'title' : 'Follow up email - 3',
-                        'template_key' : 'email_followup_3'
+                        'template_key' : 'email_followup_3',
+                        'order' : 3
                     },
 
                 }
@@ -474,27 +478,32 @@ FUNNELS = [
             'root' : True,
             'templates_required' : {
                 'email' : {
-                    '0' : {
+                    'intro_email' : {
                         'title' : 'Intro email',
-                        'template_key' : 'intro_email'
+                        'template_key' : 'intro_email',
+                        'order' : 0
                     },
-                    '1' : {
+                    'email_followup_1' : {
                         'title' : 'Follow up email - 1',
-                        'template_key' : 'email_followup_1'
+                        'template_key' : 'email_followup_1',
+                        'order' : 1
                     },
-                    '2': {
+                    'email_followup_2': {
                         'title' : 'Follow up email - 2',
-                        'template_key' : 'email_followup_2'
+                        'template_key' : 'email_followup_2',
+                        'order' : 2
                     }
                 },
                 'linkedin' : {
-                    '0' : {
+                    'intro_linkedin' : {
                         'title' : 'Intro linkedin message',
-                        'template_key' : 'intro_linkedin'
+                        'template_key' : 'intro_linkedin',
+                        'order' : 0
                     },
-                    '1' : {
+                    'linkedin_followup_1' : {
                         'title' : 'Follow up linkedin - 1',
-                        'template_key' : 'linkedin_followup_1'
+                        'template_key' : 'linkedin_followup_1',
+                        'order' : 1
                     }
                 }
             },
