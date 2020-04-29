@@ -25,7 +25,7 @@
             <p>Response from server</p>
         </div>
         <div class="col-12 d-flex align-self-center">
-          <pre>{{ response_json }}</pre>
+            <pre>{{ response_json }}</pre>
         </div>
     </div>
     <div class="row">
@@ -131,7 +131,7 @@
       <div class="row">
         <div class="col-12">
           <card title="Select accounts based on medium (Linkedin or email)">
-            <div class="col-6">
+            <div v-if="hasMedium('email')" class="col-6">
                 <p>Select email account</p>
                 <el-select
                   class="select-default mb-3"
@@ -148,7 +148,7 @@
                     </el-option>
                 </el-select>  
             </div>
-            <div class="col-6">
+            <div v-if="hasMedium('linkedin')" class="col-6">
                 <p>Select linkedin account</p>
                 <el-select
                   class="select-default mb-3"
@@ -234,7 +234,6 @@ import TemplateEdit from './test_create_templates.vue'
 
 const CAMPAIGNS_API_LIST = 'http://127.0.0.1:5000/campaigns';
 const CAMPAIGNS_API_GET_BY_ID = 'http://127.0.0.1:5000/campaigns/get';
-
 const CAMPAIGNS_API_CREATE = 'http://127.0.0.1:5000/campaigns/create';
 const CAMPAIGNS_API_EDIT = 'http://127.0.0.1:5000/campaigns/edit';
 
@@ -244,6 +243,15 @@ components: {
     [Option.name]: Option,
     [Table.name]: Table,
     [TableColumn.name]: TableColumn
+},
+filters: {
+    pretty: function(value) {
+      try {
+        return JSON.stringify(value, null, 2);
+      }catch(error) {
+        return error;
+      }
+    }
 },
 data() {
     return {
@@ -330,12 +338,38 @@ data() {
     }
 },
 methods: {
+  hasMedium(medium){
+    
+    var templates_required = this.funnel_selected.templates_required || null;
+    if (templates_required){
+        var email = templates_required.email || null;
+        var linkedin = templates_required.linkedin || null;
+
+        if (medium == 'email'){
+          if (email){
+            return true;
+          }else{
+            return false;
+          }
+        }
+
+        if (medium == 'linkedin'){
+          if (linkedin){
+            return true;
+          }else{
+            return false;
+          }
+        }
+    }
+
+    return false;
+  },
   toggleDay(ref){
     var btn = this.$refs[ref];
     if (!btn){
       return false;
     }
-
+    
     var index = ref.split('_')[1];
     
     this.days_selected[index] = !this.days_selected[index];    
@@ -452,7 +486,7 @@ methods: {
       /* clear all data first */
       this.email_data.templates = [];
       this.linkedin_data.templates = [];
-      
+            
       var templates_required = this.funnel_selected.templates_required || null;
       if (templates_required){
         var email = templates_required.email || null;
@@ -486,7 +520,6 @@ methods: {
     },
     update_campaigns(newJson, init){
         if (init == 1){
-          this.list_campaigns.campaigns = JSON.parse(newJson.campaigns);
           this.list_campaigns.prospect_lists = JSON.parse(newJson.prospect_lists);
           this.list_campaigns.columns = JSON.parse(newJson.columns);
           this.list_campaigns.funnels = JSON.parse(newJson.funnels);
@@ -501,7 +534,7 @@ methods: {
           this.response_json = newJson;
         }
         this.list_campaigns.pagination = JSON.parse(newJson.pagination);
-
+        console.log(this.list_campaigns);
     },
     initCampaigns(){
         this.listCampaigns(1,1);
