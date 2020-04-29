@@ -71,6 +71,7 @@
           </el-table-column>
         </el-table>
       </div>
+
     </card>
   </div>
 </template>
@@ -93,7 +94,7 @@ export default {
   },
   computed: {
     pagedData() {
-      return this.tableData.slice(this.from, this.to);
+      return this.campaigns_data.campaigns.slice(this.from, this.to);
     },
     /***
      * Searches through table data and returns a paginated array.
@@ -102,7 +103,7 @@ export default {
      * @returns {computed.pagedData}
      */
     queriedData() {
-      let result = this.tableData;
+      let result = this.campaigns_data.campaigns;
       if (this.searchQuery !== "") {
         result = this.fuseSearch.search(this.searchQuery);
         this.pagination.total = result.length;
@@ -120,8 +121,8 @@ export default {
       return this.pagination.perPage * (this.pagination.currentPage - 1);
     },
     total() {
-      this.pagination.total = this.tableData.length;
-      return this.tableData.length;
+      this.pagination.total = this.campaigns_data.campaigns.length;
+      return this.campaigns_data.campaigns.length;
     }
   },
   data() {
@@ -166,53 +167,6 @@ export default {
           total: 0
         }
       },
-
-      tableData: get_campaigns,
-
-      fuseSearch: null,
-      emptyCampaign: {
-        name: "",
-        funnel: "",
-        account: "",
-        prospectsList: "",
-        messagesListEmail: [],
-        messagesListLinkedin: [],
-        timeTable: {
-          from: "",
-          till: "",
-          timezone: "",
-          days: [
-            {
-              day: "Sun",
-              active: false
-            },
-            {
-              day: "Mon",
-              active: true
-            },
-            {
-              day: "Tue",
-              active: true
-            },
-            {
-              day: "Wed",
-              active: true
-            },
-            {
-              day: "Thu",
-              active: true
-            },
-            {
-              day: "Fri",
-              active: true
-            },
-            {
-              day: "Sat",
-              active: false
-            }
-          ]
-        }
-      }
     };
   },
   methods: {
@@ -232,12 +186,12 @@ export default {
       }
     },
     async addCampaign() {
-      await this.$router.push("CampaignWizard").catch(err => {
+      await this.$router.push({ path: "CampaignWizard", query: { type: 'add' } }).catch(err => {
         console.log(err);
       });
     },
     async editCampaign(msg_dict) {
-      await this.$router.push({ path: "CampaignWizard", query: { id: msg_dict.id } }).catch(err => {
+      await this.$router.push({ path: "CampaignWizard", query: { type: 'edit', id: msg_dict.id } }).catch(err => {
         console.log(err);
       });
     },

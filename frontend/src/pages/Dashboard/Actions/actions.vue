@@ -80,8 +80,6 @@ export default {
   },
   data() {
     return {
-      multipleSelection: [],
-      searchQuery: "",
       multiple: "ARS",
 
       actions_data: {
@@ -118,9 +116,6 @@ export default {
         }
       },
       fuseSearch: null,
-
-      sortKey: '',
-      reverse: false,
     };
   },
   methods: {

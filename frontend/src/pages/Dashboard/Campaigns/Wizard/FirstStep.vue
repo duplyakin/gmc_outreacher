@@ -81,14 +81,14 @@ export default {
         prospectsList: '',
       },
       accountsList: {
-        simple: this.campaign.account,
-        //simple: '',
+        //simple: this.campaign.account,
+        simple: '',
         types: accounts,
         multiple: "ARS"
       },
       prospectsLists: {
-        simple: this.campaign.prospectsList,
-        //simple: '',
+        //simple: this.campaign.prospectsList,
+        simple: '',
         types: prospects,
         multiple: "ARS"
       },
@@ -116,6 +116,12 @@ export default {
         return res;
       });
     }
+  },
+  mounted() {
+    this.$nextTick(function () {
+      this.accountsList.simple = this.campaign.account;
+      this.prospectsLists.simple = this.campaign.prospectsList;
+    })
   }
 };
 </script>

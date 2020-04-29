@@ -9,7 +9,7 @@
           {{this.campaign.name}}
         </h5>
       </div>
-    <div class="typo-line">
+      <div class="typo-line">
         <h5>
           <p class="category">Campaign type:</p>
           {{this.campaign.funnel}}
@@ -31,40 +31,44 @@
         </h5>
       </div>
     </card>
-    <card>
-      <div v-if="this.campaign.funnel === this.funnel_email || this.campaign.funnel === this.funnel_email_linkedin">
-      <h4 class="text-center">Step 2 Email</h4>
-      <div class="typo-line">
-        <h5>
-          <p class="category">Content:</p>
-        </h5>
-      </div>
-      <ul id="days">
-        <li v-for="item in this.campaign.messagesListEmail" :key="item.id">
-          Day {{ item.id }}:
-          Subject: {{ item.subject }}
-          Interval: {{ item.interval }}
-        </li>
-      </ul>
-      </div>
-    </card>
-    <card>
-      <div v-if="this.campaign.funnel === this.funnel_linkedin || this.campaign.funnel === this.funnel_email_linkedin">
-      <h4 class="text-center">Step 2 Linkedin</h4>
-      <div class="typo-line">
-        <h5>
-          <p class="category">Content:</p>
-        </h5>
-      </div>
-      <ul id="days">
-        <li v-for="item in this.campaign.messagesListLinkedin" :key="item.id">
-          Day {{ item.id }}:
-          Subject: {{ item.subject }}
-          Interval: {{ item.interval }}
-        </li>
-      </ul>
-      </div>
-    </card>
+    <div
+      v-if="this.campaign.funnel === this.funnel_email || this.campaign.funnel === this.funnel_email_linkedin"
+    >
+      <card>
+        <h4 class="text-center">Step 2 Email</h4>
+        <div class="typo-line">
+          <h5>
+            <p class="category">Content:</p>
+          </h5>
+        </div>
+        <ul id="days">
+          <li v-for="item in this.campaign.messagesListEmail" :key="item.id">
+            Day {{ item.id }}:
+            Subject: {{ item.subject }}
+            Interval: {{ item.interval }}
+          </li>
+        </ul>
+      </card>
+    </div>
+    <div
+      v-if="this.campaign.funnel === this.funnel_linkedin || this.campaign.funnel === this.funnel_email_linkedin"
+    >
+      <card>
+        <h4 class="text-center">Step 2 Linkedin</h4>
+        <div class="typo-line">
+          <h5>
+            <p class="category">Content:</p>
+          </h5>
+        </div>
+        <ul id="days">
+          <li v-for="item in this.campaign.messagesListLinkedin" :key="item.id">
+            Day {{ item.id }}:
+            Subject: {{ item.subject }}
+            Interval: {{ item.interval }}
+          </li>
+        </ul>
+      </card>
+    </div>
     <card>
       <h4 class="text-center">Step 3</h4>
       <div class="typo-line">
@@ -102,9 +106,9 @@
 <script>
 import { mapFields } from "vee-validate";
 import { Table, TableColumn, Select, Option } from "element-ui";
-import axios from 'axios'
+import axios from "axios";
 
-const CAMPAIGN_API_CREATE = 'http://127.0.0.1:5000/campaign/create';
+const CAMPAIGN_API_CREATE = "http://127.0.0.1:5000/campaign/create";
 
 export default {
   components: {
@@ -115,25 +119,25 @@ export default {
   },
   props: {
     campaign: {
-        name: String,
-        funnel: String,
-        account: String,
-        prospectsList: String,
-        messagesListEmail: Array,
-        messagesListLinkedin: Array,
-        timeTable: {
-          from: String,
-          till: String,
-          timezone: String,
-          days: Array,
-        },
-    },
+      name: String,
+      funnel: String,
+      account: String,
+      prospectsList: String,
+      messagesListEmail: Array,
+      messagesListLinkedin: Array,
+      timeTable: {
+        from: String,
+        till: String,
+        timezone: String,
+        days: Array
+      }
+    }
   },
   data() {
     return {
-      funnel_email: 'Email campaign',
-      funnel_linkedin: 'LinkedIn campaign',
-      funnel_email_linkedin: 'Email & LinkedIn campaign',
+      funnel_email: "Email campaign",
+      funnel_linkedin: "LinkedIn campaign",
+      funnel_email_linkedin: "Email & LinkedIn campaign"
     };
   },
   methods: {
@@ -173,6 +177,11 @@ export default {
         return res;
       });
     }
+  },
+  mounted() {
+    this.$nextTick(function() {
+      //this.timeTable = this.campaign.timeTable;
+    });
   }
 };
 </script>

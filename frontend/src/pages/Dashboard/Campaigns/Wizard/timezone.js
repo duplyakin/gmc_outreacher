@@ -1,5 +1,10 @@
 export default [
     {
+        label: "",
+        value: "",
+        offset: 0
+    },
+    {
         label: "(GMT-11:00) Niue Time",
         value: "Pacific/Niue",
         offset: -660

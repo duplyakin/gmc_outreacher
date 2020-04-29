@@ -68,7 +68,7 @@
     <div class="row">
       <div class="row table-full-width">
         <div class="col-12">
-          <el-table class="table-striped" :data="tableData">
+          <el-table class="table-striped" :data="model.timeTable.days">
             <el-table-column type="index"></el-table-column>
             <el-table-column prop="day"></el-table-column>
             <el-table-column label="Day">
@@ -109,15 +109,48 @@ export default {
     return {
       model: {
         timeTable: {
-          from: this.campaign.timeTable.from,
-          till: this.campaign.timeTable.till,
-          timezone: this.campaign.timeTable.timezone,
-          days: this.campaign.timeTable.days,
+          //from: this.campaign.timeTable.from,
+          //till: this.campaign.timeTable.till,
+          //timezone: this.campaign.timeTable.timezone,
+          //days: this.campaign.timeTable.days,
+          from: '',
+          till: '',
+          timezone: '',
+          days: [
+        {
+          day: "Sun",
+          active: false
+        },
+        {
+          day: "Mon",
+          active: true
+        },
+        {
+          day: "Tue",
+          active: true
+        },
+        {
+          day: "Wed",
+          active: true
+        },
+        {
+          day: "Thu",
+          active: true
+        },
+        {
+          day: "Fri",
+          active: true
+        },
+        {
+          day: "Sat",
+          active: false
+        }
+      ],
         },
       },
       selects: {
-        simple: timezones.find(x => x.value === this.campaign.timeTable.timezone).label,
-        //simple: '',
+        //simple: timezones.find(x => x.value === this.campaign.timeTable.timezone).label,
+        simple: '',
         types: timezones,
         multiple: "ARS"
       },
@@ -132,7 +165,7 @@ export default {
           required: true
         }
       },
-      tableData: this.campaign.timeTable.days,
+
     };
   },
   methods: {
@@ -143,13 +176,20 @@ export default {
       return this.$validator.validateAll().then(res => {
           if(res) {
             this.model.timeTable.timezone = this.selects.simple,
-            this.model.timeTable.days = this.tableData,
             this.$emit("on-validated", 'step_3', res, this.model);
           };
           return res;
         });
     }
-  }
+  },
+  mounted () {
+      this.$nextTick(function () {
+        this.model.timeTable.from = this.campaign.timeTable.from;
+        this.model.timeTable.till = this.campaign.timeTable.till;
+        this.selects.simple = timezones.find(x => x.value === this.campaign.timeTable.timezone).label;
+        this.model.timeTable.days = this.campaign.timeTable.days;
+      })
+    },
 };
 </script>
 <style>

@@ -85,6 +85,7 @@ import ThirdStep from "./Wizard/ThirdStep.vue";
 import LastStep from "./Wizard/LastStep.vue";
 import swal from "sweetalert2";
 import CAMPAIGN_API_LIST from "./dummy_campaigns";
+import emptyCampaign from "./emptyCampaign";
 
 export default {
   data() {
@@ -92,7 +93,7 @@ export default {
       funnel_email: 'Email campaign',
       funnel_linkedin: 'LinkedIn campaign',
       funnel_email_linkedin: 'Email & LinkedIn campaign',
-      campaign: CAMPAIGN_API_LIST.find(x => x.id === this.$route.query.id),
+      campaign: {},
       wizardModel: {
         stepsData: {}
       }
@@ -109,13 +110,22 @@ export default {
     LastStep
   },
   methods: {
-    initCampaign(id){
+    initCampaign(){
         let campaignsList = CAMPAIGN_API_LIST;
-        //console.log('campaignsList: ', campaignsList);
+        let id = this.$route.query.id;
+        //console.log('id: ', id);
+        let type = this.$route.query.type;
+        //console.log('type: ', type);
 
-        // TODO: async axios to server
-        this.campaign = campaignsList.find(x => x.id === id);
-        console.log('11campaign: ', this.campaign);
+        if(type == 'edit'){
+          // TODO: async axios to server
+          this.campaign = campaignsList.find(x => x.id === id);
+        }; 
+        if(type == 'add'){
+          this.campaign = emptyCampaign;
+        };
+
+        console.log('initCampaign: ', this.campaign);
     },
     validateStep(ref) {
       return this.$refs[ref].validate();
@@ -150,13 +160,7 @@ export default {
     }
   },
   mounted() {
-    let id = this.$route.query.id;
-    //console.log('id: ', id);
-    //check don't working!
-    if(id !== undefined || id !== null){
-      this.initCampaign(id);
-      //console.log('hi: ', id);
-    }
+    this.initCampaign();
   }
 };
 </script>

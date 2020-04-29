@@ -129,8 +129,8 @@
         ],
 
           //messages : get_messages,
-          messages : this.campaign.messagesListLinkedin,
-          //messages : [],
+          //messages : this.campaign.messagesListLinkedin,
+          messages : [],
 
           pagination : {
             perPage : 0,
@@ -231,7 +231,9 @@
     }
     },
     mounted () {
-      //this.fuseSearch = new Fuse(this.tableData, {keys: ['name', 'email']});
+      this.$nextTick(function () {
+        this.messages_data.messages = this.campaign.messagesListLinkedin;
+      })
     },
   }
 </script>

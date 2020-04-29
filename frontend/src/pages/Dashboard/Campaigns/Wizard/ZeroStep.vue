@@ -64,12 +64,12 @@ export default {
   data() {
     return {
       model: {
-        campaignName: this.campaign.name,
+        campaignName: '',
         campaignType: '',
       },
       selects: {
-        simple: this.campaign.funnel,
-        //simple: '',
+        //simple: this.campaign.funnel,
+        simple: '',
         types: [
           { value: "Email campaign", label: "Email campaign" },
           { value: "LinkedIn campaign", label: "LinkedIn campaign" },
@@ -95,13 +95,6 @@ export default {
       return this.errors.first(fieldName);
     },
     validate() {
-      let data = {
-        name: this.campaignName,
-        funnel: this.selects.simple,
-      };
-      //console.log(this.campaignName);
-      //this.$store.commit("step_0", data);
-
       return this.$validator.validateAll().then(res => {
         if(res) {
           this.model.campaignType = this.selects.simple;
@@ -112,9 +105,12 @@ export default {
     }
   },
   mounted() {
-    console.log("campaign: ", this.campaign);
-    //this.campaignName = this.campaign.name;
-    console.log("campaignName: ", this.campaignName);
+    this.$nextTick(function () {
+      //console.log("zero step campaign: ", this.campaign);
+      this.model.campaignName = this.campaign.name;
+      this.selects.simple = this.campaign.funnel;
+      //console.log("zero step campaignName: ", this.campaignName);
+    })
   }
 };
 </script>
