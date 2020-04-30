@@ -204,7 +204,7 @@ export default {
       });
     }
   },
-  mounted() {
+  created() {
     this.initCampaigns();
   }
 };

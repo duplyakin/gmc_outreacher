@@ -1,8 +1,8 @@
 <template>
-  <div>
+  <div class="test-modal">
     <card title="Message create">
-      <form @submit.prevent="submitMessageData">
-        <card>
+      <form v-if="template" @submit.prevent="submitData">
+        <card v-if="template_type === 'email'">
           <div class="col-12">
             <fg-input label="Subject" :error="getError('Subject')">
               <textarea
@@ -10,7 +10,7 @@
                 placeholder="Enter Subject"
                 rows="1"
                 name="Subject"
-                v-model="message_data.subject"
+                v-model="template.subject"
                 v-validate="modelValidations.subject"
               ></textarea>
             </fg-input>
@@ -18,34 +18,44 @@
               <editor
                 name="body text"
                 output-format="html"
-                v-model="message_data.body"
+                v-model="template.body"
                 api-key="o5wuoncsvrewlx7zeflsjb4wo2a252lvnrnlslv30ohh31ex"
-                :init="{
-         height: 200,
-         menubar: false,
-         plugins: [
-           'advlist autolink lists link image charmap print preview anchor',
-           'searchreplace visualblocks code fullscreen',
-           'insertdatetime media table paste code help wordcount'
-         ],
-         toolbar:
-           'undo redo | formatselect | bold italic backcolor | \
-           alignleft aligncenter alignright alignjustify | \
-           bullist numlist outdent indent | removeformat | help \
-           image | link | autolink'
-       }"
+                :init="editorSettings"
               />
             </fg-input>
           </div>
           <div class="col-3">
             <fg-input label="Interval">
               <el-input-number
-                v-model="message_data.interval"
+                v-model="template.interval"
                 placeholder="ex: 1.00"
               ></el-input-number>
             </fg-input>
           </div>
         </card>
+
+        <card v-if="template_type === 'linkedin'">
+          <div class="col-12">
+            <fg-input :error="getError('body text')">
+              <editor
+                name="body text"
+                output-format="html"
+                v-model="template.message"
+                api-key="o5wuoncsvrewlx7zeflsjb4wo2a252lvnrnlslv30ohh31ex"
+                :init="editorSettings"
+              />
+            </fg-input>
+          </div>
+          <div class="col-3">
+            <fg-input label="Interval">
+              <el-input-number
+                v-model="template.interval"
+                placeholder="ex: 1.00"
+              ></el-input-number>
+            </fg-input>
+          </div>
+      </card>
+
         <div class="row">
           <div class="col-12 d-flex flex-row-reverse">
             <button type="submit" class="btn btn-outline btn-wd btn-success mx-1">Save</button>
@@ -59,7 +69,6 @@
 
 <script>
 import { Select, Option } from "element-ui";
-import axios from "axios";
 import Editor from "@tinymce/tinymce-vue";
 
 export default {
@@ -69,18 +78,27 @@ export default {
     editor: Editor
   },
   props: {
-    messageObj: Object,
-    valueUpdated: Function,
+    template_type: String,
+    templateObj: Object,
+    valueUpdated: Function
   },
   data() {
     return {
-      message_data: {
-        subject: '',
-        body: '',
-        //body_plain: '',
-        //body_html: '',
-        interval: ''
-      },
+      template : null,
+      editorSettings: {
+         height: 200,
+         menubar: false,
+         plugins: [
+           'advlist autolink lists link image charmap print preview anchor',
+           'searchreplace visualblocks code fullscreen',
+           'insertdatetime media table paste code help wordcount'
+         ],
+         toolbar:
+           'undo redo | formatselect | bold italic backcolor | \
+           alignleft aligncenter alignright alignjustify | \
+           bullist numlist outdent indent | removeformat | help \
+           image | link | autolink'
+       },
       modelValidations: {
         message_data: {
           required: true
@@ -95,12 +113,6 @@ export default {
     getError(fieldName) {
       return this.errors.first(fieldName);
     },
-    validate() {
-      return this.$validator.validateAll().then(res => {
-        this.$emit("step-2-validated", res, this.model);
-        return res;
-      });
-    },
     convertToPlainText(htmlText){
       let res = htmlText.replace(/<style([\s\S]*?)<\/style>/gi, '');
       res = res.replace(/<script([\s\S]*?)<\/script>/gi, '');
@@ -114,23 +126,50 @@ export default {
 
       return res;
     },
-    submitMessageData() {
-        if (confirm("Are you sure?")) {
-          // variant 1
-          //this.message_data.body_plain = this.message_data.body.replace(/<(style|script|iframe)[^>]*?>[\s\S]+?<\/\1\s*>/gi,'').replace(/<[^>]+?>/g,'').replace(/\s+/g,' ').replace(/ /g,' ').replace(/>/g,' '); 
-          // variant 2
-          //this.message_data.body_plain = this.convertToPlainText(this.message_data.body);
-          this.$emit('close');
-          this.valueUpdated(this.message_data);
-          console.log('TEXT: ', this.message_data);
+    submitData() {
+      if (!this.template){
+        alert("Template can't be empty")
+        return false;
+      }
+      if (confirm("Are you sure?")) {
+        // variant 1
+        //this.message_data.body_plain = this.message_data.body.replace(/<(style|script|iframe)[^>]*?>[\s\S]+?<\/\1\s*>/gi,'').replace(/<[^>]+?>/g,'').replace(/\s+/g,' ').replace(/ /g,' ').replace(/>/g,' '); 
+        // variant 2
+        //this.message_data.body_plain = this.convertToPlainText(this.message_data.body);
+        this.$emit('close');
+        this.valueUpdated(this.template);
+        console.log('template: ', this.template);
         }
     },
     discardEdit() {
       this.$emit("close");
     }
   },
-  mounted() {
-    this.message_data = JSON.parse(JSON.stringify(this.messageObj));
+  created() {
+    if (Object.keys(this.templateObj).length != 0){
+            this.template =  JSON.parse(JSON.stringify(this.templateObj));
+            
+            /* If we create the new object we don't have properties */
+            if (this.template_type === 'email'){
+                if (!this.template.hasOwnProperty('subject')){
+                    this.template['subject'] = '';
+                }
+                if (!this.template.hasOwnProperty('body')){
+                    this.template['body'] = '';
+                }
+                if (!this.template.hasOwnProperty('interval')){
+                    this.template['interval'] = '';
+                }
+            }else if(this.template_type === 'linkedin'){
+                if (!this.template.hasOwnProperty('message')){
+                    this.template['message'] = '';
+                }
+                if (!this.template.hasOwnProperty('interval')){
+                    this.template['interval'] = '';
+                }
+            }
+            console.log(this.template);
+        }
   }
 };
 </script>

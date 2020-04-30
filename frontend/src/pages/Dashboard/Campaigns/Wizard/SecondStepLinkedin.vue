@@ -230,10 +230,8 @@
         });
     }
     },
-    mounted () {
-      this.$nextTick(function () {
-        this.messages_data.messages = this.campaign.messagesListLinkedin;
-      })
+    created () {
+      this.messages_data.messages = this.campaign.messagesListLinkedin;
     },
   }
 </script>

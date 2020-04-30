@@ -6,7 +6,7 @@
       <div class="typo-line">
         <h5>
           <p class="category">Campaign name:</p>
-          {{this.campaign.name}}
+          {{this.campaign.title}}
         </h5>
       </div>
       <div class="typo-line">
@@ -21,7 +21,7 @@
       <div class="typo-line">
         <h5>
           <p class="category">Campaign account:</p>
-          {{this.campaign.account}}
+          {{this.campaign.credentials}}
         </h5>
       </div>
       <div class="typo-line">
@@ -32,7 +32,7 @@
       </div>
     </card>
     <div
-      v-if="this.campaign.funnel === this.funnel_email || this.campaign.funnel === this.funnel_email_linkedin"
+      v-if="email_data.templates.length != 0"
     >
       <card>
         <h4 class="text-center">Step 2 Email</h4>
@@ -42,8 +42,7 @@
           </h5>
         </div>
         <ul id="days">
-          <li v-for="item in this.campaign.messagesListEmail" :key="item.id">
-            Day {{ item.id }}:
+          <li v-for="item in email_data.templates" :key="item.id">
             Subject: {{ item.subject }}
             Interval: {{ item.interval }}
           </li>
@@ -51,7 +50,7 @@
       </card>
     </div>
     <div
-      v-if="this.campaign.funnel === this.funnel_linkedin || this.campaign.funnel === this.funnel_email_linkedin"
+      v-if="linkedin_data.templates.length != 0"
     >
       <card>
         <h4 class="text-center">Step 2 Linkedin</h4>
@@ -61,9 +60,8 @@
           </h5>
         </div>
         <ul id="days">
-          <li v-for="item in this.campaign.messagesListLinkedin" :key="item.id">
-            Day {{ item.id }}:
-            Subject: {{ item.subject }}
+          <li v-for="item in linkedin_data.templates" :key="item.id">
+            Message: {{ item.message }}
             Interval: {{ item.interval }}
           </li>
         </ul>
@@ -74,25 +72,25 @@
       <div class="typo-line">
         <h5>
           <p class="category">From:</p>
-          {{this.campaign.timeTable.from}}
+          {{this.campaign.timeTable.from_hour}}
         </h5>
       </div>
       <div class="typo-line">
         <h5>
           <p class="category">Till:</p>
-          {{this.campaign.timeTable.till}}
+          {{this.campaign.timeTable.to_hour}}
         </h5>
       </div>
       <div class="typo-line">
         <h5>
           <p class="category">Timezone:</p>
-          {{this.campaign.timeTable.timezone}}
+          {{this.campaign.timeTable.time_zone}}
         </h5>
       </div>
       <div class="typo-line">
         <h5>
           <p class="category">Delivery days:</p>
-          {{this.campaign.timeTable.days}}
+          {{this.campaign.timeTable.sending_days}}
         </h5>
       </div>
     </card>
@@ -113,26 +111,13 @@ export default {
     [TableColumn.name]: TableColumn
   },
   props: {
-    campaign: {
-      name: String,
-      funnel: String,
-      account: String,
-      prospectsList: String,
-      messagesListEmail: Array,
-      messagesListLinkedin: Array,
-      timeTable: {
-        from: String,
-        till: String,
-        timezone: String,
-        days: Array
-      }
-    }
+    campaign: Object,
+    email_data: Object,
+    linkedin_data: Object
   },
   data() {
     return {
-      funnel_email: "Email campaign",
-      funnel_linkedin: "LinkedIn campaign",
-      funnel_email_linkedin: "Email & LinkedIn campaign"
+
     };
   },
   methods: {
@@ -173,11 +158,6 @@ export default {
       });
     }
   },
-  mounted() {
-    this.$nextTick(function() {
-      //this.timeTable = this.campaign.timeTable;
-    });
-  }
 };
 </script>
 <style>

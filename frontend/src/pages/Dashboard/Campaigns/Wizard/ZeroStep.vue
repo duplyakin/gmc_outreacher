@@ -4,34 +4,35 @@
     <div class="row">
       <div class="col-6">
         <fg-input
-          label="Campaign name"
-          name="Campaign name"
-          v-validate="modelValidations.campaignName"
-          v-model="model.campaignName"
-          :error="getError('Campaign name')"
+          label="Campaign title"
+          name="Campaign title"
+          v-validate="modelValidations.campaignTitle"
+          v-model="model.campaignTitle"
+          :error="getError('Campaign title')"
           placeholder="ex: My email campaign"
         ></fg-input>
       </div>
     </div>
     <div class="row">
       <div class="col-6">
-        <fg-input label="Campaign type" :error="getError('Campaign type')">
+        <fg-input label="Campaign funnel" :error="getError('Campaign funnel')">
           <el-select
-            class="select-primary"
-            name="Campaign type"
-            size="large"
-            placeholder="Select campaign type"
-            v-model="selects.simple"
-            v-validate="modelValidations.campaignType"
-          >
-            <el-option
-              v-for="option in selects.types"
-              class="select-primary"
-              :value="option.value"
-              :label="option.label"
-              :key="option.label"
-            ></el-option>
-          </el-select>
+                    class="select-default mb-3"
+                    name="Campaign funnel"
+                    v-on:change="onChangeFunnel"
+                    style="width: 100%;"
+                    placeholder="Select funnel"
+                    v-model="model.funnel_selected"
+                    v-validate="modelValidations.campaignFunnel"
+                    value-key="title">
+                      <el-option
+                      class="select-default"
+                      v-for="(funnel,index) in list_data.funnels"
+                      :key="funnel._id.$oid"
+                      :label="funnel.title"
+                      :value="funnel">
+                      </el-option>
+                  </el-select>
         </fg-input>
       </div>
     </div>
@@ -50,9 +51,14 @@ import {
 export default {
   props: {
     campaign: {
-        name: String,
-        funnel: String,
+        title: String,
+        funnel: Object,
     },
+    list_data: {
+      funnels: Array,
+    },
+    email_data: Object,
+    linkedin_data: Object,
   },
   components: {
     [Input.name]: Input,
@@ -64,54 +70,88 @@ export default {
   data() {
     return {
       model: {
-        campaignName: '',
-        campaignType: '',
+        campaignTitle: '',
+        funnel_selected: {},
+        email_templates: [],
+        linkedin_templates: [],
       },
-      selects: {
-        //simple: this.campaign.funnel,
-        simple: '',
-        types: [
-          { value: "Email campaign", label: "Email campaign" },
-          { value: "LinkedIn campaign", label: "LinkedIn campaign" },
-          { value: "Email & LinkedIn campaign", label: "Email & LinkedIn campaign" }
-        ],
-        multiple: "ARS"
-      },
-      //campaignName: this.campaign.name,
-      //campaignType: this.campaign.funnel,
+
+      
+      funnels: [],
+
       modelValidations: {
-        campaignName: {
+        campaignTitle: {
           required: true,
           min: 5
         },
-        campaignType: {
+        campaignFunnel: {
           required: true
         }
       }
     };
   },
   methods: {
+    onChangeFunnel(){
+      /* update tempaltes based on selected funnel */
+
+      /* clear all data first */
+      this.email_data.templates = [];
+      this.linkedin_data.templates = [];
+            
+      var templates_required = this.model.funnel_selected.templates_required || null;
+      if (templates_required){
+        var email = templates_required.email || null;
+        if (email){
+          this.email_data.templates = Object.values(email);
+
+          /*sort by order field*/
+          this.email_data.templates.sort(function(first, second) {
+            return first['order'] - second['order'];
+          });
+
+
+        }
+        var linkedin = templates_required.linkedin || null;
+        if (linkedin){
+          this.linkedin_data.templates = Object.values(linkedin);
+          
+          /*sort by order field*/
+          this.linkedin_data.templates.sort(function(first, second) {
+            return first['order'] - second['order'];
+          });
+
+        }
+      }
+
+      console.log("new onchangefunnel");
+      console.log(this.funnel_selected);
+      console.log(this.email_data.templates);
+      console.log(this.linkedin_data.templates);
+
+    },
     getError(fieldName) {
       return this.errors.first(fieldName);
     },
     validate() {
       return this.$validator.validateAll().then(res => {
         if(res) {
-          this.model.campaignType = this.selects.simple;
+          //this.model.campaignFunnel = this.funnel_selected;
+          this.model.email_templates = this.email_data.templates;
+          this.model.linkedin_templates = this.linkedin_data.templates;
+
+          //console.log('funnel: ', this.model.campaignFunnel);
           this.$emit('on-validated', 'step_0', res, this.model);
         };
         return res;
       });
     }
   },
-  mounted() {
-    this.$nextTick(function () {
-      //console.log("zero step campaign: ", this.campaign);
-      this.model.campaignName = this.campaign.name;
-      this.selects.simple = this.campaign.funnel;
-      //console.log("zero step campaignName: ", this.campaignName);
-    })
-  }
+  created() {
+      this.model.campaignTitle = this.campaign.title;
+      this.model.funnel_selected = this.campaign.funnel;
+      this.funnels = this.list_data.funnels;
+      //console.log('list_data: ', this.list_data);
+  },
 };
 </script>
 <style>

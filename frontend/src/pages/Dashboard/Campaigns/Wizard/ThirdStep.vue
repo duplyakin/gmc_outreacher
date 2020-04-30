@@ -10,7 +10,7 @@
               <fg-input :error="getError('From time')">
                 <el-time-select
                   name="From time"
-                  v-model="from"
+                  v-model="model.timeTable.from"
                   v-validate="modelValidations.timePickerFrom"
                   :picker-options="{
                   start: '00:00',
@@ -26,7 +26,7 @@
               <fg-input :error="getError('Till time has to be after FROM time')">
                 <el-time-select
                   name="Till time has to be after FROM time"
-                  v-model="till"
+                  v-model="model.timeTable.till"
                   v-validate="modelValidations.timePickerTill"
                   :picker-options="{
                   start: '00:00',
@@ -92,7 +92,7 @@ export default {
         timeTable: {
           from: Number,
           till: Number,
-          timezone: String,
+          time_zone: String,
           days: Object,
         },
     },
@@ -107,8 +107,6 @@ export default {
   },
   data() {
     return {
-      from: '',
-      till: '',
       model: {
         timeTable: {
           from: 0,
@@ -163,8 +161,8 @@ export default {
     validate() {
       return this.$validator.validateAll().then(res => {
           if(res) {
-            this.model.timeTable.from = parseInt(this.from, 10);
-            this.model.timeTable.till = parseInt(this.till, 10);
+            this.model.timeTable.from = parseInt(this.model.timeTable.from, 10);
+            this.model.timeTable.till = parseInt(this.model.timeTable.till, 10);
             this.model.timeTable.timezone = this.selects.simple;
             this.$emit("on-validated", 'step_3', res, this.model);
           };
@@ -172,13 +170,11 @@ export default {
         });
     }
   },
-  mounted () {
-      this.$nextTick(function () {
-        this.from = this.campaign.timeTable.from.toString();
-        this.till = this.campaign.timeTable.till.toString();
-        this.selects.simple = timezones.find(x => x.value === this.campaign.timeTable.timezone).label;
-        this.model.timeTable.days_selected = this.campaign.timeTable.days;
-      })
+  created () {
+      this.model.timeTable.from = this.campaign.timeTable.from_hour.toString();
+      this.model.timeTable.till = this.campaign.timeTable.to_hour.toString();
+      this.selects.simple = timezones.find(x => x.value === this.campaign.timeTable.time_zone).label;
+      this.model.timeTable.days_selected = this.campaign.timeTable.sending_days;
     },
 };
 </script>
