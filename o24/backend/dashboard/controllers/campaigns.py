@@ -83,7 +83,8 @@ def list_campaigns():
     try:
         if request.method == 'POST':
             is_init = int(request.form.get('_init', 0))
-            if is_init:
+            is_create = int(request.form.get('_create', 0))
+            if is_init or is_create:
                 prospect_lists = ProspectsList.async_lists(owner=current_user.id)
                 if prospect_lists:
                     result['prospect_lists'] = prospect_lists.to_json()
@@ -96,18 +97,18 @@ def list_campaigns():
                 if credentials:
                     result['credentials'] = credentials.to_json()
 
+            if not is_create:
+                page = int(request.form.get('_page',1))
 
-            page = int(request.form.get('_page',1))
-
-            total, campaigns = Campaign.async_campaigns(owner=current_user.id,
-                                                page=page)    
-            if campaigns:
-                result['campaigns'] = campaigns.to_json()
-                result['pagination'] = json.dumps({
-                    'perPage' : per_page,
-                    'currentPage' : page,
-                    'total' : total
-                })
+                total, campaigns = Campaign.async_campaigns(owner=current_user.id,
+                                                    page=page)    
+                if campaigns:
+                    result['campaigns'] = campaigns.to_json()
+                    result['pagination'] = json.dumps({
+                        'perPage' : per_page,
+                        'currentPage' : page,
+                        'total' : total
+                    })
 
             result['code'] = 1
             result['msg'] = 'Success'
