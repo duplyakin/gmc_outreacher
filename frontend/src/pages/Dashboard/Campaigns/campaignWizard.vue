@@ -349,7 +349,10 @@ export default {
           this.linkedin_data.templates = model.linkedin_templates;
           break;
         case 'step_3':
-          this.campaign.timeTable = model.timeTable;
+          this.campaign.timeTable.from_hour = model.timeTable.from;
+          this.campaign.timeTable.to_hour = model.timeTable.till;
+          this.campaign.timeTable.time_zone = model.timeTable.timezone;
+          this.campaign.timeTable.days_selected = model.timeTable.days_selected;
           break;
       }
     },
