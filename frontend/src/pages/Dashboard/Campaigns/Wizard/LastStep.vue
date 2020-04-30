@@ -124,34 +124,7 @@ export default {
     getError(fieldName) {
       return this.errors.first(fieldName);
     },
-    sendData(campaign) {
-      const path = this.CAMPAIGN_API_CREATE;
-
-      if (confirm("Are you sure?")) {
-        var campaignData = new FormData();
-        campaignData.append("_campaign", JSON.stringify(campaign));
-
-        axios
-          .post(path, campaignData)
-          .then(res => {
-            var result = res.data;
-            if (result.code > 0) {
-              var updated_campaign = JSON.parse(result.updated);
-              this.$emit("close");
-              this.valueUpdated(updated_campaign);
-            } else {
-              var msg = "Error editing campaign " + result.msg;
-              alert(msg);
-            }
-          })
-          .catch(error => {
-            var msg = "Error editing campaign " + error;
-            alert(msg);
-          });
-      }
-    },
     validate() {
-      this.sendData(this.campaign);
       return this.$validator.validateAll().then(res => {
         this.$emit("on-validated", res, this.model);
         return res;

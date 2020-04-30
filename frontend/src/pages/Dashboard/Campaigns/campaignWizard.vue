@@ -76,6 +76,8 @@ import swal from "sweetalert2";
 import axios from 'axios'
 
 const CAMPAIGNS_API_LIST = 'http://127.0.0.1:5000/campaigns';
+const CAMPAIGNS_API_CREATE = 'http://127.0.0.1:5000/campaigns/create';
+
 
 export default {
   data() {
@@ -270,6 +272,51 @@ export default {
         this.list_data.pagination = JSON.parse(newJson.pagination);
         console.log('load from server: ', this.list_data);
     },
+    createCampaign(){
+        const path = CAMPAIGNS_API_CREATE;
+        var credentials = [];
+
+        if (this.email_data.email_account_selected.length != 0){
+          console.log('email account');
+          console.log(this.email_data.email_account_selected);
+
+          credentials.push(this.email_data.email_account_selected);
+        }
+
+        if (this.linkedin_data.linkedin_account_selected.length != 0){
+          console.log('linkedin account');
+          console.log(this.linkedin_data.linkedin_account_selected);
+
+          credentials.push(this.linkedin_data.linkedin_account_selected);
+        }
+
+        this.campaign.templates.email = this.email_data.templates;
+        this.campaign.templates.linkedin = this.linkedin_data.templates;
+        this.campaign.funnel = this.campaign.funnel._id.$oid;
+        this.campaign.credentials = credentials;
+        console.log('RESALT CAMPAIGN: ');
+        console.log(this.campaign);
+
+        var createData = new FormData();
+        createData.append('_add_campaign', JSON.stringify(this.campaign));
+        
+        console.log(createData);
+        this.request_json = this._formdata_to_json(createData);
+        axios.post(path, createData)
+          .then((res) => {
+            var r = res.data;
+            this.response_json = r;
+            if (r.code <= 0){
+              var msg = "Error creating campaign " + r.msg;
+              alert(msg);
+            }else{                
+            }
+          })
+          .catch((error) => {
+            var msg = "Error creating campaign " + error;
+            alert(msg);
+          });
+    },
     _formdata_to_json(form_data){
       var object = {};
       form_data.forEach(function(value, key){
@@ -286,11 +333,11 @@ export default {
       switch(step) {
         case 'step_0': 
           //console.log('step_0: ', model);
-          this.campaign.timeTable = model.campaignName;
+          this.campaign.title = model.campaignTitle;
           this.campaign.funnel = model.funnel_selected;
           this.email_data.templates = model.email_templates;
           this.linkedin_data.templates = model.linkedin_templates;
-          //console.log('step_0: ', this.linkedin_data.templates)
+          //console.log('step_0: ', this.campaign.title)
           break;
         case 'step_1':
           this.email_data.email_account_selected = model.account_email;
@@ -307,8 +354,8 @@ export default {
       }
     },
     wizardComplete() {
-      //TODO: create camp here
-      swal("Good job!", "You clicked the finish button!", "success");
+      this.createCampaign();
+      swal("Good job!", "Campaign created!", "success");
     }
   },
   created() {
