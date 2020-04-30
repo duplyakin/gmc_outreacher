@@ -92,14 +92,9 @@
       <div class="typo-line">
         <h5>
           <p class="category">Delivery days:</p>
+          {{this.campaign.timeTable.days}}
         </h5>
       </div>
-      <ul id="days">
-        <li
-          v-for="item in this.campaign.timeTable.days"
-          :key="item.day"
-        >{{ item.day }} : {{ item.active }}</li>
-      </ul>
     </card>
   </div>
 </template>

@@ -10,11 +10,11 @@
               <fg-input :error="getError('From time')">
                 <el-time-select
                   name="From time"
-                  v-model="model.timeTable.from"
+                  v-model="from"
                   v-validate="modelValidations.timePickerFrom"
                   :picker-options="{
                   start: '00:00',
-                  step: '00:15',
+                  step: '01:00',
                   end: '23:59'
                 }"
                   placeholder="Select time"
@@ -26,11 +26,11 @@
               <fg-input :error="getError('Till time has to be after FROM time')">
                 <el-time-select
                   name="Till time has to be after FROM time"
-                  v-model="model.timeTable.till"
+                  v-model="till"
                   v-validate="modelValidations.timePickerTill"
                   :picker-options="{
                   start: '00:00',
-                  step: '00:15',
+                  step: '01:00',
                   end: '23:59'
                 }"
                   placeholder="Select time"
@@ -66,19 +66,19 @@
     </div>
     <h4 class="title">Days Preference</h4>
     <div class="row">
-      <div class="row table-full-width">
         <div class="col-12">
-          <el-table class="table-striped" :data="model.timeTable.days">
-            <el-table-column type="index"></el-table-column>
-            <el-table-column prop="day"></el-table-column>
-            <el-table-column label="Day">
-              <template slot-scope="props">
-                <l-switch v-model="props.row.active"></l-switch>
-              </template>
-            </el-table-column>
-          </el-table>
+          <card title="Select sending days">
+            <div class="btn-group">
+              <button type="button" ref='day_0' @click="toggleDay('day_0')" v-bind:class="{ 'btn btn-default' : true, 'btn-success': model.timeTable.days_selected['0'] }">Mon</button>
+              <button type="button" ref='day_1' @click="toggleDay('day_1')" v-bind:class="{ 'btn btn-default' : true, 'btn-success': model.timeTable.days_selected['1'] }">Tue</button>
+              <button type="button" ref='day_2' @click="toggleDay('day_2')" v-bind:class="{ 'btn btn-default' : true, 'btn-success': model.timeTable.days_selected['2'] }">Wed</button>
+              <button type="button" ref='day_3' @click="toggleDay('day_3')" v-bind:class="{ 'btn btn-default' : true, 'btn-success': model.timeTable.days_selected['3'] }">Thu</button>
+              <button type="button" ref='day_4' @click="toggleDay('day_4')" v-bind:class="{ 'btn btn-default' : true, 'btn-success': model.timeTable.days_selected['4'] }">Fri</button>
+              <button type="button" ref='day_5' @click="toggleDay('day_5')" v-bind:class="{ 'btn btn-default' : true, 'btn-success': model.timeTable.days_selected['5'] }">Sat</button>
+              <button type="button" ref='day_6' @click="toggleDay('day_6')" v-bind:class="{ 'btn btn-default' : true, 'btn-success': model.timeTable.days_selected['6'] }">Sun</button>
+            </div>
+          </card>
         </div>
-      </div>
     </div>
   </div>
 </template>
@@ -90,10 +90,10 @@ export default {
   props: {
     campaign: {
         timeTable: {
-          from: String,
-          till: String,
+          from: Number,
+          till: Number,
           timezone: String,
-          days: Array,
+          days: Object,
         },
     },
   },
@@ -107,45 +107,22 @@ export default {
   },
   data() {
     return {
+      from: '',
+      till: '',
       model: {
         timeTable: {
-          //from: this.campaign.timeTable.from,
-          //till: this.campaign.timeTable.till,
-          //timezone: this.campaign.timeTable.timezone,
-          //days: this.campaign.timeTable.days,
-          from: '',
-          till: '',
+          from: 0,
+          till: 0,
           timezone: '',
-          days: [
-        {
-          day: "Sun",
-          active: false
-        },
-        {
-          day: "Mon",
-          active: true
-        },
-        {
-          day: "Tue",
-          active: true
-        },
-        {
-          day: "Wed",
-          active: true
-        },
-        {
-          day: "Thu",
-          active: true
-        },
-        {
-          day: "Fri",
-          active: true
-        },
-        {
-          day: "Sat",
-          active: false
-        }
-      ],
+          days_selected: {
+          '0' : true,
+          '1' : true,
+          '2' : true, 
+          '3' : true,
+          '4' : true,
+          '5' : false,
+          '6' : false
+          },
         },
       },
       selects: {
@@ -169,13 +146,26 @@ export default {
     };
   },
   methods: {
+    toggleDay(ref){
+    var btn = this.$refs[ref];
+    if (!btn){
+      return false;
+    }
+    
+    var index = ref.split('_')[1];
+    
+    this.model.timeTable.days_selected[index] = !this.model.timeTable.days_selected[index];    
+    return true;
+  },
     getError(fieldName) {
       return this.errors.first(fieldName);
     },
     validate() {
       return this.$validator.validateAll().then(res => {
           if(res) {
-            this.model.timeTable.timezone = this.selects.simple,
+            this.model.timeTable.from = parseInt(this.from, 10);
+            this.model.timeTable.till = parseInt(this.till, 10);
+            this.model.timeTable.timezone = this.selects.simple;
             this.$emit("on-validated", 'step_3', res, this.model);
           };
           return res;
@@ -184,10 +174,10 @@ export default {
   },
   mounted () {
       this.$nextTick(function () {
-        this.model.timeTable.from = this.campaign.timeTable.from;
-        this.model.timeTable.till = this.campaign.timeTable.till;
+        this.from = this.campaign.timeTable.from.toString();
+        this.till = this.campaign.timeTable.till.toString();
         this.selects.simple = timezones.find(x => x.value === this.campaign.timeTable.timezone).label;
-        this.model.timeTable.days = this.campaign.timeTable.days;
+        this.model.timeTable.days_selected = this.campaign.timeTable.days;
       })
     },
 };

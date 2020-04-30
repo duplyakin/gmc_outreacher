@@ -1,6 +1,6 @@
 export default 
 {
-    'id': 0,
+    '_id': {"$oid": "5ea9c80c5f31a7e88c03950b"},
     'name': '',
     'funnel': '',
     'account': '',
@@ -8,38 +8,17 @@ export default
     'messagesListEmail': [],
     'messagesListLinkedin': [],
     'timeTable': {
-      'from': '',
-      'till': '',
+      'from': 0,
+      'till': 0,
       'timezone': '',
-      'days': [
-        {
-          day: "Sun",
-          active: false
+      'days': {
+        '0' : true,
+        '1' : true,
+        '2' : true, 
+        '3' : true,
+        '4' : true,
+        '5' : false,
+        '6' : false
         },
-        {
-          day: "Mon",
-          active: true
-        },
-        {
-          day: "Tue",
-          active: true
-        },
-        {
-          day: "Wed",
-          active: true
-        },
-        {
-          day: "Thu",
-          active: true
-        },
-        {
-          day: "Fri",
-          active: true
-        },
-        {
-          day: "Sat",
-          active: false
-        }
-      ],
     },
   }
