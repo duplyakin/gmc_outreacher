@@ -17,9 +17,12 @@ import o24.config as config
 from passlib.context import CryptContext
 
 import o24.backend.models.shared as shared
+import o24.backend.scheduler.scheduler as scheduler
+
 from bson import ObjectId
 from o24.backend.utils.filter_data import *
 from o24.backend.utils.helpers import template_key_dict 
+from o24.backend.dashboard.serializers import JSCampaignData
 
 
 class User(db.Document, UserMixin):
@@ -97,7 +100,7 @@ user_manager = CustomUserManager(app, db, User)
 #### Menu: Outreach Accounts ####
 #### Store data to access external accounts
 class Credentials(db.Document):
-    owner = db.ReferenceField(User)
+    owner = db.ReferenceField(User, reverse_delete_rule=1)
     status = db.BooleanField(default=False)
     
     medium = db.StringField()
@@ -240,10 +243,10 @@ class Credentials(db.Document):
 #### Menu: Teams ####
 #### Manage teams
 class Team(db.Document):
-    admin = db.ReferenceField(User)
+    admin = db.ReferenceField(User, reverse_delete_rule=1)
     
     title = db.StringField()
-    members = db.ListField(db.ReferenceField(User))
+    members = db.ListField(db.ReferenceField(User, reverse_delete_rule=1))
 
     @classmethod
     def create_team(cls, data):
@@ -261,34 +264,51 @@ class Team(db.Document):
         self.save()
 
 class Campaign(db.Document):
-    owner = db.ReferenceField(User)
-    title = db.StringField()
-    credentials = db.ListField(db.ReferenceField(Credentials))
-    prospects_list = db.ReferenceField('ProspectsList')
+    RESTRICTED_SET_FIELDS = [
+        'owner',
+        'id',
+        '_id',
+        'status',
+        'last_action',
+        'next_action',
+        'data',
+        'created'
+    ]
 
+    @classmethod
+    def get_create_fields(cls):
+        return cls._fields.keys()
+
+    owner = db.ReferenceField(User, reverse_delete_rule=1, required=True)
     # 0 - created
     # 1 - in progress
     # 2 - paused
     # 11 - archived (deleted)
     status = db.IntField(default=0)
 
-    funnel = db.ReferenceField(shared.Funnel)
+    title = db.StringField(required=True)
+
+    credentials = db.ListField(db.ReferenceField(Credentials, reverse_delete_rule=1))
+
+    prospects_list = db.ReferenceField('ProspectsList')
+
+    funnel = db.ReferenceField(shared.Funnel, reverse_delete_rule=1)
     
     #get from timeTable
     sending_days = db.DictField(default=DEFAULT_SENDING_DAYS)
     from_hour = db.IntField(default=DEFAULT_FROM_HOUR)
+    from_minutes = db.IntField(default=0)
     to_hour = db.IntField(default=DEFAULT_TO_HOUR)
+    to_minutes = db.IntField(default=0)
     time_zone = db.StringField(default='')
+
+    
+    templates = db.DictField()
+
+    data = db.DictField()
 
     last_action = db.DateTimeField(default=datetime.now())
     next_action = db.DateTimeField(default=datetime.now())
-
-    data = db.DictField()
-    
-    #not used now
-    priorities = db.IntField(default=0)
-
-    templates = db.DictField()
 
     created = db.DateTimeField( default=datetime.now() )
 
@@ -316,6 +336,10 @@ class Campaign(db.Document):
             results = db_query.order_by('-created').all()
         
         return (total, results)
+
+    @classmethod
+    def get_campaign_for_list(cls, owner_id, list_id):
+        return cls.objects(owner=owner_id, prospects_list=list_id).first()
 
     @classmethod
     def get_campaign(cls, owner=None, id=None, title=None):
@@ -381,7 +405,23 @@ class Campaign(db.Document):
 
         for c in campaigns:
             c.save()
-   
+
+    def valid_funnel(self):
+        if self.funnel == None:
+            return False
+        
+        return True
+
+    def valid_prospects_list(self):
+        if self.prospects_list == None:
+            return False
+        
+        count = Prospects.count_prospects_in_a_list(list_id=self.prospects_list)
+        if count <= 0:
+            return False
+
+        return True
+
     def get_node_template(self, template_key, medium):
         if not template_key:
             return ''
@@ -426,36 +466,110 @@ class Campaign(db.Document):
 
         return delta
 
+    def _safe_pause(self):
+        self.update_status(status=PAUSED)
+
+    def _safe_start(self):
+        if self.inprogress():
+            raise Exception("Starting error: campaign already in progress")
+
+        if not self.prospects_list:
+            raise Exception("Starting error: there is not assigned prospects for campaign_id:{0}".format(self.id))
+        
+        if not self.funnel:
+            raise Exception("Starting error: there is not selected funnel for campaign_id:{0}".format(self.id))
+        
+        has_prospects = Prospects.get_prospects(campaign_id=self.id)
+        if not has_prospects:
+            raise Exception("Starting error: There is no assigned prospects for this campaign")
+
+        self.update_status(status=IN_PROGRESS)
+
     #can delete only if:
     # not in progress
     # no prospects assigned
     def safe_delete(self):
-        if self.status == IN_PROGRESS:
+        if self.inprogress():
             raise Exception("DELETE ERROR: campaign in progress, stop it first")
-    
-    def async_edit(self, data):
-        new_title = data.get('title', '')
-        if new_title:
-            self.title = new_title
         
-        new_templates = data.get('templates', '')
-        if new_templates:
-            mapped_templates = template_key_dict(new_templates)
-            if not mapped_templates:
-                raise Exception("Wrong templates format")
-
-            self.templates = mapped_templates
+        assigned_prospects = Prospects.get_prospects(campaign_id=self.id)
+        if assigned_prospects:
+            raise Exception("DELETE ERROR: campaign has prospects, unassign all prospects before delete")
         
-        if data.get('time_table', ''):
-            timeTable = data.get('time_table')
-            self.sending_days = timeTable.get('sending_days')
-            self.from_hour = timeTable.get('from_hour')
-            self.to_hour = timeTable.get('to_hour')
-            self.time_zone = timeTable.get('time_zone')
+        shared.TaskQueue.safe_delete_campaign(campaign_id=self.id)
+
+        return True
+
+    def _validate_campaign_data(self, owner, campaign_data, changed_fields):
+
+        if 'title' in changed_fields:
+            title = campaign_data.title()
+            if not title:
+                raise Exception("Title can't be empty")
+            
+            exist = Campaign.objects(owner=owner, title=title).first()
+            if exist:
+                raise Exception("Campaign with this title already exist")
 
 
+        if 'prospects_list' in changed_fields:
+            prospects_list = campaign_data.prospects_list()
+            if not prospects_list:
+                raise Exception("Prospects list can't be empty")
+
+            exist = Campaign.objects(owner=owner, prospects_list=prospects_list).first()
+            if exist:
+                if self.prospects_list != exist.id:
+                    raise Exception("Another campaign use this Prospect list")
+
+    def _async_set_field(self, field_name, val):
+        if field_name == 'title':
+            if not val:
+                raise Exception("Campaign title can't be empty")
+
+            self.title = val
+        else:
+            setattr(self, field_name, val)
+
+    def async_edit(self, owner, campaign_data, edit_fields, restricted_fields=None):
+        if not restricted_fields:
+            restricted_fields = self.RESTRICTED_SET_FIELDS
+
+        self._validate_campaign_data(owner=owner, campaign_data=campaign_data, changed_fields=edit_fields)
+
+        for field in edit_fields:
+            if field in restricted_fields:
+                continue
+
+            val = campaign_data.get_field(field)
+            if val:
+                self._async_set_field(field_name=field, val=val)
+
+        
         self._commit()
         return True
+
+    @classmethod
+    def async_create(cls, owner, campaign_data, create_fields, restricted_fields=None):
+        if not restricted_fields:
+            restricted_fields = cls.RESTRICTED_SET_FIELDS
+
+        new_campaign = cls()
+        new_campaign.owner = owner
+
+        new_campaign._validate_campaign_data(owner=owner, campaign_data=campaign_data, changed_fields=create_fields)
+
+        for field in create_fields:
+            if field in restricted_fields:
+                continue
+    
+            val = campaign_data.get_field(field)
+            if val:
+                new_campaign._async_set_field(field_name=field, val=val)
+
+        new_campaign._commit()
+        return new_campaign
+
 
     def inprogress(self):
         if self.status == 1:
@@ -471,8 +585,10 @@ class Campaign(db.Document):
         self.save()
 
 
+
+
 class ProspectsList(db.Document):
-    owner = db.ReferenceField(User)
+    owner = db.ReferenceField(User, reverse_delete_rule=1)
     
     title = db.StringField()
 
@@ -511,12 +627,12 @@ class ProspectsList(db.Document):
 
 
 class Prospects(db.Document):
-    owner = db.ReferenceField(User)
+    owner = db.ReferenceField(User, reverse_delete_rule=1)
     
-    team = db.ListField(db.ReferenceField(Team))
+    team = db.ListField(db.ReferenceField(Team, reverse_delete_rule=1))
     data = db.DictField()
 
-    assign_to = db.ReferenceField(Campaign)
+    assign_to = db.ReferenceField(Campaign, reverse_delete_rule=1)
     
     # 0 - just created
     # 1 - in progress
@@ -524,8 +640,14 @@ class Prospects(db.Document):
     # 3 - finished
     status = db.IntField(default=0)
     
-    tags = db.ListField(db.StringField())
-    lists = db.ListField(db.ReferenceField(ProspectsList))
+    tags = db.ListField(db.StringField(default=''))
+
+    # DO_NOTHING (0) - don’t do anything (default).
+    # NULLIFY (1) - Updates the reference to null.
+    # CASCADE (2) - Deletes the documents associated with the reference.
+    # DENY (3) - Prevent the deletion of the reference object.
+    # PULL (4) - Pull the reference from a ListField of references
+    assign_to_list = db.ReferenceField('ProspectsList')
 
     created = db.DateTimeField( default=datetime.now() )
 
@@ -539,22 +661,23 @@ class Prospects(db.Document):
         if campaign_id:
             new_prospect.assign_to = campaign_id
 
-        if lists:
-            new_prospect.lists = lists
+        if data.get('prospects_list', None):
+            new_prospect.assign_to_list = data.get('prospects_list')
 
         if commit:
             new_prospect._commit()
 
         return new_prospect
 
-
     @classmethod
-    def delete_prospects(cls, owner_id, prospects_ids):
+    def safe_delete_prospects(cls, owner_id, prospects_ids):
         if not prospects_ids:
             return 0
 
-        return Prospects.objects(owner=owner_id, id__in=prospects_ids).delete()
+        Prospects.safe_unassign_prospects(owner_id=owner_id, prospects_ids=prospects_ids)
 
+        return Prospects.objects(owner=owner_id, id__in=prospects_ids).delete()
+    
     @classmethod
     def upload(cls, owner_id, csv_with_header, map_to, add_to_list):
 
@@ -591,19 +714,66 @@ class Prospects(db.Document):
         return len(ids)
 
     @classmethod
-    def assign_prospects(cls, owner_id, prospects_ids, campaign_id):
-        if not prospects_ids or not campaign_id:
+    def count_prospects_in_a_list(cls, list_id):
+        return Prospects.objects(assign_to_list=list_id).count()
+
+    @classmethod
+    def not_in_a_list(cls, ids):
+        return Prospects.objects(id__in=ids, assign_to_list='').all()
+
+    @classmethod
+    def safe_add_to_list(cls, owner_id, prospects_ids, list_id):
+        if not prospects_ids or not list_id:
             return 0
         
-        return Prospects.objects(owner=owner_id, id__in=prospects_ids).update(data__assign_to=campaign_id)
+        list_exist = ProspectsList.objects(id=list_id).first()
+        if not list_exist:
+            raise Exception("List doesn't exist")
+        
+        prospects_exist = Prospects.not_in_a_list(ids=prospects_ids)
+        if not prospects_exist:
+            raise Exception("Prospects don't exist or assigned to other lists: unassign from list first")
+
+
+        ids = [p.id for p in prospects_exist]
+        if not ids:
+            raise Exception("Prospects add to list ERROR: something went wrong, contact support")
+
+        res = 0
+        #has campaign (then we need to assign to list and to campaign)
+        campaign = Campaign.get_campaign_for_list(owner_id=owner_id, list_id=list_id)
+        if campaign:
+            res = Prospects.objects(owner=owner_id, id__in=ids).update(assign_to=campaign.id, assign_to_list=list_id)
+
+            if campaign.inprogress():
+                scheduler.Scheduler.safe_add_prospects(campaign=campaign, prospects=prospects_exist)
+        else:
+            res = Prospects.objects(owner=owner_id, id__in=ids).update(assign_to_list=list_id)
+
+        return res
 
 
     @classmethod
-    def unassign_prospects(cls, owner_id, prospects_ids):
+    def safe_unassign_prospects(cls, owner_id, prospects_ids):
         if not prospects_ids:
             return 0
         
-        return Prospects.objects(owner=owner_id, id__in=prospects_ids).update(data__assign_to='')
+        prospects = Prospects.objects(owner=owner_id, id__in=prospects_ids).all()
+        if not prospects:
+            raise Exception("No such prospects")
+
+        campaigns = [p.assign_to for p in prospects]
+        if not campaigns:
+            raise Exception("Prospects are not assigned to any campaign")
+        
+        #pause all campaigns before unassign
+        for campaign in campaigns:
+            campaign.safe_pause()
+
+        shared.TaskQueue.safe_unassign_prospects(prospects_ids=prospects_ids)
+
+        return Prospects.objects(owner=owner_id, id__in=prospects_ids).update(data={}, assign_to='', assign_to_list='', status=NEW)
+
 
     @classmethod
     def async_prospects(cls, owner, list_filter, page, per_page=config.PROSPECTS_PER_PAGE):
@@ -636,8 +806,15 @@ class Prospects(db.Document):
         return (total, results)
 
     @classmethod
-    def get_prospects(cls, status, campaign_id):
-        return cls.objects(Q(status=status) & Q(assign_to=campaign_id)).order_by('-created').all()
+    def get_prospects(cls, status=None, campaign_id=None):
+        if status is None and campaign_id is None:
+            raise Exception("Status and campaign_id can't be None")
+        
+        if status and campaign_id:
+            return cls.objects(Q(status=status) & Q(assign_to=campaign_id)).order_by('-created').all()
+        elif campaign_id:
+            return cls.objects(assign_to=campaign_id).all()
+
 
     @classmethod
     def update_prospects(cls, ids, status):
@@ -678,3 +855,9 @@ class Templates(db.Document):
 class MergeTags(db.Document):
     tag_name = db.StringField()
     tag_value = db.DictField()
+
+
+#Register delete rules for '' ReferenceFields as described here: https://github.com/MongoEngine/mongoengine/issues/1707
+
+Campaign.register_delete_rule(ProspectsList, "prospects_list", 1)
+Prospects.register_delete_rule(ProspectsList, "assign_to_list", 1)

@@ -1,6 +1,7 @@
 
 #HOW to launch server to test frontend
 
+
 0. Запускаем монгу (на винде):
 идем сюда: C:\Program Files\MongoDB\Server\4.2\bin
 в командной строке: ./mongod -f ./mongod.cfg
@@ -27,6 +28,9 @@ npm run dev
 Если не установлен модуль для питона, то в корне: mc_outreacher\ 
 6. pip install <module_name>
 
+7. Запускаем все production tests
+
+python -m unittest discover -s .\o24\tests\production_tests\
 
 #unittest docs:
 https://realpython.com/python-testing/

@@ -152,6 +152,21 @@ def send_via_api(gmail_controller,
     return result_data
 
 
+def smtp_response_check(gmail_controller, 
+                    task, 
+                    propspect_id,
+                    campaign_id,
+                    parent_mailbox):
+    pass
+
+def api_response_check(gmail_controller,
+                    task, 
+                    propspect_id,
+                    campaign_id,
+                    parent_mailbox):
+    pass
+
+
 @celery.task
 def gmail_send_message(task_id):
     
@@ -190,19 +205,32 @@ def gmail_send_message(task_id):
         'if_true' : False,
         'error' : 'Unknown Error'
     }
+    response = None
     try:
         if smtp:
-            result_data = send_via_smtp(gmail_controller, 
+            response = smtp_response_check(gmail_controller, 
                                         task, 
                                         propspect_id=propspect_id, 
                                         campaign_id=campaign_id, 
                                         parent_mailbox=parent_mailbox)
+            if not response:
+                result_data = send_via_smtp(gmail_controller, 
+                                            task, 
+                                            propspect_id=propspect_id, 
+                                            campaign_id=campaign_id, 
+                                            parent_mailbox=parent_mailbox)
         else:
-            result_data = send_via_api(gmail_controller, 
+            response = api_response_check(gmail_controller, 
                                         task,
                                         propspect_id=propspect_id,
                                         campaign_id=campaign_id, 
                                         parent_mailbox=parent_mailbox)
+            if not response:
+                result_data = send_via_api(gmail_controller, 
+                                            task,
+                                            propspect_id=propspect_id,
+                                            campaign_id=campaign_id, 
+                                            parent_mailbox=parent_mailbox)
 
     except Exception as e:
         result_data = {
@@ -213,11 +241,13 @@ def gmail_send_message(task_id):
         task.update_status(status=FAILED)
         return 
     
-    
-    task.set_result(result_data)
-    if result_data.get('if_true', False):
-        task.update_status(status=READY)
+    if not response:
+        task.set_result(result_data)
+        if result_data.get('if_true', False):
+            task.update_status(status=READY)
+        else:
+            task.update_status(status=FAILED)
     else:
-        task.update_status(status=FAILED)
-
+        #TODO: set task as FINISHED success
+        pass
     return
