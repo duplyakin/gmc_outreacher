@@ -6,7 +6,8 @@ import uuid
 from mongoengine.queryset.visitor import Q
 import json
 import traceback
-from o24.backend.dashboard.models import Credentials, Campaign
+import o24.backend.dashboard.models as models
+
 from pymongo.errors import DuplicateKeyError
 from o24.backend.models.shared import TaskQueue
 

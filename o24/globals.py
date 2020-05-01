@@ -39,3 +39,4 @@ DEFAULT_SENDING_DAYS={
 #MEDIUMS
 GMAIL_TYPE = 'gmail'
 
+NON_3RD_PARTY_ACTION_KEYS = ['email-send-message', 'delay-email', 'finished', 'success', 'email-check-reply']

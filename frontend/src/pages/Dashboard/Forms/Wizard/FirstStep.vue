@@ -37,8 +37,16 @@
 </template>
 <script>
   export default {
+    mounted() {
+      console.log('Mounted first step here');
+    },
+    created() {
+      console.log('created first step here');
+
+    },
     data () {
       return {
+        test_1 : true,
         model: {
           firstName: '',
           lastName: '',

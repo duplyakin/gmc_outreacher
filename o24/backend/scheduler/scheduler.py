@@ -1,7 +1,8 @@
 from o24.backend import db
 from o24.backend import app
-from o24.backend.dashboard.models import Campaign, Prospects, Credentials
-from o24.backend.models.shared import TaskQueue, Funnel, Action
+import o24.backend.dashboard.models as models
+
+from o24.backend.models.shared import TaskQueue, Funnel, Action, AsyncTaskQueue
 from o24.globals import *
 from .models import Priority, TaskLog
 import o24.backend.handlers.jobs_map as jobs_map
@@ -98,12 +99,13 @@ class Scheduler():
     
         #TODO: for each task based on type create job and send it to the queue
         for task in tasks:
-            handler = jobs_map.JOBS_MAP.get(task.action_key, None)
-            if not handler:
-                raise Exception("There is no handler for key:{0}".format(task.action_key))
-            
-            job = handler.s(str(task.id))
-            jobs.append(job)
+            if task.action_key in NON_3RD_PARTY_ACTION_KEYS:
+                handler = jobs_map.JOBS_MAP.get(task.action_key, None)
+                if not handler:
+                    raise Exception("There is no handler for key:{0}".format(task.action_key))
+                
+                job = handler.s(str(task.id))
+                jobs.append(job)
     
             task.status = IN_PROGRESS
             task_update.append(task)
@@ -121,7 +123,7 @@ class Scheduler():
     #Inc counters for each credential (It will change next_action)
     #Refresh next_action for campaigns
     def refresh_limits(self, credential_ids):
-        credentials = Credentials.list_credentials(credential_ids)
+        credentials = models.Credentials.list_credentials(credential_ids)
         now = datetime.datetime.now()
 
         updated = []
@@ -129,7 +131,7 @@ class Scheduler():
             c.change_limits(now)
             updated.append(c)
 
-        Credentials.update_credentials(updated)
+        models.Credentials.update_credentials(updated)
 
         campaigns = Campaign.objects(status=IN_PROGRESS).all()
         campaigns_updated = []
@@ -137,7 +139,7 @@ class Scheduler():
             campaign.change_limits(now)
             campaigns_updated.append(campaign)
         
-        Campaign.update_campaigns(campaigns_updated)
+        models.Campaign.update_campaigns(campaigns_updated)
 
     def _switch(self, task):
         if task.status != READY:
@@ -152,12 +154,16 @@ class Scheduler():
         return log
     ###################################### CAMPAIGN START/PAUSE/RESUME ##################################
     #####################################################################################################
-    def start_campaign(self, campaign):
+    def start_campaign(self, campaign, input_data=None):
         if campaign.status != NEW:
             raise ErrorCodeException(START_CAMPAIGN_ERROR, "You can start only NEW campaign, title={0} status={1}".format(campaign.title, campaign.status))
 
-        prospects = Prospects.get_prospects(status=NEW, campaign_id=campaign.id)
-        
+        prospects = models.Prospects.get_prospects(status=NEW, campaign_id=campaign.id)
+        if not prospects:
+            raise Exception("There is no prospects assigned to campaign")
+
+        campaign._safe_start()
+
         prospect_ids = self._load_prospects(campaign, prospects)
         if not prospect_ids:
             raise Exception("Can't load_prospects campaign_title={0} prospect_ids={1}".format(campaign.title, prospect_ids))
@@ -166,7 +172,9 @@ class Scheduler():
         
         self._setup_scheduler_data(campaign)
 
-        campaign.update_status(status=IN_PROGRESS)
+        #campaign.update_status(status=IN_PROGRESS)
+        #create async action for campaign
+        AsyncTaskQueue.create_async_task(campaign_id=campaign.id, input_data=input_data)
 
     def pause_campaign(self, campaign):
         if not campaign.inprogress():
@@ -174,7 +182,8 @@ class Scheduler():
 
         # TaskQueue.pause_tasks(campaign_id=campaign.id)
 
-        campaign.update_status(status=PAUSED)
+        campaign._safe_pause()
+        #campaign.update_status(status=PAUSED)
 
     def resume_campaign(self, campaign):
         if campaign.inprogress():
@@ -184,19 +193,43 @@ class Scheduler():
 
         self._check_new_prospects(campaign)
 
-        campaign.update_status(status=IN_PROGRESS)
+        campaign.safe_start()
 
+        #campaign.update_status(status=IN_PROGRESS)
+
+    @classmethod
+    def safe_start_campaign(cls, campaign):
+        if not campaign:
+            raise Exception("No such campaign")
+
+        scheduler = cls()
+        scheduler.start_campaign(campaign=campaign)
+
+    @classmethod
+    def safe_pause_campaign(cls, campaign):
+        if not campaign:
+            raise Exception("No such campaign")
+
+        scheduler = cls()
+        scheduler.pause_campaign(campaign=campaign)
+
+
+    @classmethod
+    def safe_add_prospects(cls, campaign, prospects):
+        scheduler = cls()
+
+        scheduler.add_prospects(campaign=campaign, prospects=prospects)
 
     def add_prospects(self, campaign, prospects):
         ids = self._load_prospects(campaign, prospects)
         if not ids:
             raise Exception("Can't load_prospects campaign_title={0} ids={1}".format(campaign.title, ids))
-
+        
         self._update_prospects(ids, status=IN_PROGRESS)
 
 
     def _check_new_prospects(self, campaign):
-        prospects = Prospects.get_prospects(status=NEW, campaign_id=campaign.id)
+        prospects = models.Prospects.get_prospects(status=NEW, campaign_id=campaign.id)
         if prospects:
             self.add_prospects(campaign, prospects)
 
@@ -213,7 +246,7 @@ class Scheduler():
         return prospect_ids
 
     def _update_prospects(self, ids, status):
-        Prospects.update_prospects(ids, status)
+        models.Prospects.update_prospects(ids, status)
 
     def _setup_scheduler_data(self, campaign):
         Priority.get_priority()

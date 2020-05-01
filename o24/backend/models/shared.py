@@ -43,7 +43,7 @@ class Action(db.Document):
 
 
 class Funnel(db.Document):
-    action = db.ReferenceField(Action)
+    action = db.ReferenceField(Action, reverse_delete_rule=1)
     paramters = db.DictField()
 
     title = db.StringField()
@@ -151,7 +151,7 @@ class Funnel(db.Document):
 # When the new task created status = NEW
 # When the task added to job queue status = IN_PROGRESS
 class TaskQueue(db.Document):
-    current_node = db.ReferenceField(Funnel)
+    current_node = db.ReferenceField(Funnel, reverse_delete_rule=1)
     action_key = db.StringField()
 
     status = db.IntField(default=NEW)
@@ -291,6 +291,15 @@ class TaskQueue(db.Document):
         #TaskQueue.objects(Q(campaign_id=campaign_id) & Q(status__in=TASKS_CAN_BE_RESUMED)).update(status=NEW)
 
     @classmethod
+    def safe_unassign_prospects(cls, prospects_ids):
+        return cls.objects(prospect_id__in=prospects_ids).delete()
+
+
+    @classmethod
+    def safe_delete_campaign(cls, campaign_id):
+        return cls.objects(campaign_id=campaign_id).delete()
+
+    @classmethod
     def create_task(cls, campaign, prospect, test_crededentials_dict=None):
         new_task = cls()
         new_task.current_node = campaign.funnel
@@ -330,8 +339,43 @@ class TaskQueue(db.Document):
     def _commit(self):
         self.save()
 
+#We put async tasks here. 
+class AsyncTaskQueue(db.Document):
+    campaign_id = db.ObjectIdField(unique=True)
 
-class AsyncActions(db.Document):
+    input_data = db.DictField()
+    result_data = db.DictField()
+
+    def put_result_data(self, result_data):
+        self.result_data = result_data
+        self._commit()
+
+    @classmethod
+    def get_async_task(cls, campaign_id):
+        return cls.objects(campaign_id=campaign_id).first()
+
+    @classmethod
+    def create_async_task(cls, campaign_id, input_data=None):
+        if not campaign_id:
+            raise Exception("Can't create async task for campaign_id:{0}".format(campaign_id))
+
+        exist = cls.objects(campaign_id=campaign_id).first()
+        if exist:
+            return exist
+
+        new_task = cls()
+        if input_data:
+            new_task.input_data = input_data
+        
+        new_task.campaign_id = campaign_id
+        
+        new_task.save()
+        return new_task
+
+    def _commit(self):
+        self.save()
+
+class OpenTracker(db.Document):
     #open, reply
     action_type = db.IntField()
     

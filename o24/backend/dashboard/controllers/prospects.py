@@ -159,9 +159,8 @@ def remove_prospect():
 
             ids = [x["_id"]["$oid"] for x in js_data]
 
-            res = Prospects.delete_prospects(owner_id=current_user.id,
+            res = Prospects.safe_delete_prospects(owner_id=current_user.id,
                                             prospects_ids=ids)
-            print(res)
 
             result['code'] = 1
             result['deleted'] = res
@@ -175,9 +174,9 @@ def remove_prospect():
 
     return jsonify(result)
 
-@bp_dashboard.route('/prospects/assign', methods=['POST'])
+@bp_dashboard.route('/prospects/list/add', methods=['POST'])
 #@login_required
-def assign_prospect():
+def add_prospect_to_list():
     current_user = get_current_user()
 
     result = {
@@ -188,15 +187,15 @@ def assign_prospect():
     if request.method == 'POST':
         try:
             raw_data = request.form['_prospects']
-            _campaign_id = request.form['_campaign_id']
+            _list_id = request.form['_list_id']
 
             js_data = json.loads(raw_data)
 
             ids = [x["_id"]["$oid"] for x in js_data]
 
-            res = Prospects.assign_prospects(owner_id=current_user.id,
+            res = Prospects.safe_add_to_list(owner_id=current_user.id,
                                             prospects_ids=ids,
-                                            campaign_id=_campaign_id)
+                                            list_id=_list_id)
 
             result['code'] = 1
             result['assigned'] = res
@@ -230,7 +229,7 @@ def unassign_prospect():
 
             ids = [x["_id"]["$oid"] for x in js_data]
 
-            res = Prospects.unassign_prospects(owner_id=current_user.id,
+            res = Prospects.safe_unassign_prospects(owner_id=current_user.id,
                                             prospects_ids=ids)
 
             result['code'] = 1

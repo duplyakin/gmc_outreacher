@@ -10,11 +10,14 @@ from o24.globals import *
 from flask_cors import CORS
 import o24.config as config
 from o24.backend.utils.serialize import JSONEncoder
-from o24.backend.utils.helpers import template_key_dict 
+from o24.backend.utils.helpers import template_key_dict, to_json_deep_dereference
 import json
 import traceback
 
 import o24.backend.models.shared as shared
+from o24.backend.dashboard.serializers import JSCampaignData
+import o24.backend.scheduler.scheduler as scheduler
+
 
 COLUMNS = [
     {
@@ -44,6 +47,24 @@ COLUMNS = [
     }
 ]
 
+modified_fields_on_create = {
+    'title' : True,
+    'funnel' : True,
+    'credentials' : True,
+    'templates' : True,
+    'time_table' : True,
+    'prospects_list' : True
+}
+
+modified_fields_on_edit = {
+    'title' : True,
+    'templates' : True,
+    'time_table' : True,
+
+    'funnel' : False,
+    'credentials' : False,
+    'prospects_list' : False
+}
 
 CORS(app, resources={r'/*': {'origins': '*'}})
 
@@ -54,7 +75,49 @@ def get_current_user():
     
     return user
 
-@bp_dashboard.route('/campaigns', methods=['POST'])
+@bp_dashboard.route('/campaigns/data', methods=['POST'])
+#@login_required
+def data_campaigns():
+    current_user = get_current_user()
+
+    result = {
+        'code' : -1,
+        'msg' : '',
+        'prospects_list' : '',
+        'funnels' : '',
+        'credentials' : '',
+        'modified_fields' : json.dumps(modified_fields_on_create),
+        'columns' : json.dumps(COLUMNS)
+    }
+
+    try:
+        if request.method == 'POST':
+            prospects_list = ProspectsList.async_lists(owner=current_user.id)
+            if prospects_list:
+                result['prospects_list'] = prospects_list.to_json()
+            
+            funnels = shared.Funnel.async_funnels(owner=current_user.id)
+            if funnels:
+                result['funnels'] = funnels.to_json()
+            
+            total, credentials = Credentials.async_credentials(owner=current_user.id)
+            if credentials:
+                result['credentials'] = credentials.to_json()
+
+            result['code'] = 1
+            result['msg'] = 'Success'
+    except Exception as e:
+        #TODO: change to loggin
+        print(e)
+        traceback.print_exc()
+
+        result['code'] = -1
+        result['msg'] = str(e)
+
+    return jsonify(result)
+
+
+@bp_dashboard.route('/campaigns/list', methods=['POST'])
 #@login_required
 def list_campaigns():
 
@@ -73,9 +136,10 @@ def list_campaigns():
         'code' : -1,
         'msg' : '',
         'campaigns' : '',
-        'prospect_lists' : '',
+        'prospects_list' : '',
         'funnels' : '',
         'credentials' : '',
+        'modified_fields' : json.dumps(modified_fields_on_create),
         'columns' : json.dumps(COLUMNS),
         'pagination' : json.dumps(pagination),
     }
@@ -83,11 +147,10 @@ def list_campaigns():
     try:
         if request.method == 'POST':
             is_init = int(request.form.get('_init', 0))
-            is_create = int(request.form.get('_create', 0))
-            if is_init or is_create:
-                prospect_lists = ProspectsList.async_lists(owner=current_user.id)
-                if prospect_lists:
-                    result['prospect_lists'] = prospect_lists.to_json()
+            if is_init:
+                prospects_list = ProspectsList.async_lists(owner=current_user.id)
+                if prospects_list:
+                    result['prospects_list'] = prospects_list.to_json()
                 
                 funnels = shared.Funnel.async_funnels(owner=current_user.id)
                 if funnels:
@@ -97,18 +160,17 @@ def list_campaigns():
                 if credentials:
                     result['credentials'] = credentials.to_json()
 
-            if not is_create:
-                page = int(request.form.get('_page',1))
+            page = int(request.form.get('_page',1))
 
-                total, campaigns = Campaign.async_campaigns(owner=current_user.id,
-                                                    page=page)    
-                if campaigns:
-                    result['campaigns'] = campaigns.to_json()
-                    result['pagination'] = json.dumps({
-                        'perPage' : per_page,
-                        'currentPage' : page,
-                        'total' : total
-                    })
+            total, campaigns = Campaign.async_campaigns(owner=current_user.id,
+                                                page=page)    
+            if campaigns:
+                result['campaigns'] = campaigns.to_json()
+                result['pagination'] = json.dumps({
+                    'perPage' : per_page,
+                    'currentPage' : page,
+                    'total' : total
+                })
 
             result['code'] = 1
             result['msg'] = 'Success'
@@ -121,6 +183,56 @@ def list_campaigns():
         result['msg'] = str(e)
 
     return jsonify(result)
+
+
+@bp_dashboard.route('/campaigns/get', methods=['POST'])
+#@login_required
+def get_campaign_by_id():
+    current_user = get_current_user()
+
+    result = {
+        'code' : 1,
+        'msg' : '',
+        'campaign' : '',
+        'modified_fields': json.dumps(modified_fields_on_edit)
+    }
+
+    try:
+        if request.method == 'POST':
+            campaign_id = request.form.get('_campaign_id','')
+            if not campaign_id:
+                raise Exception("Bad campaign_id")
+
+            campaign = Campaign.objects(owner=current_user.id, id=campaign_id).first()
+            if not campaign:
+                raise Exception("No such campaign")
+
+
+            if not campaign.valid_funnel():
+                modified_fields_on_edit['funnel'] = True
+                modified_fields_on_edit['credentials'] = True
+
+            if not campaign.valid_prospects_list():
+                modified_fields_on_edit['prospects_list'] = True
+
+            #check that the list has prospects and funnel exists
+            
+            campaign_dict = to_json_deep_dereference(campaign)
+
+            result['code'] = 1
+            result['msg'] = 'Success'
+            result['campaign'] = json.dumps(campaign_dict)
+            result['modified_fields'] = json.dumps(modified_fields_on_edit)
+    except Exception as e:
+        #TODO: change to loggin
+        print(e)
+        traceback.print_exc()
+
+        result['code'] = -1
+        result['msg'] = str(e)
+
+    return jsonify(result)
+
 
 
 @bp_dashboard.route('/campaigns/create', methods=['POST'])
@@ -131,77 +243,40 @@ def create_campaign():
     result = {
         'code' : -1,
         'msg' : '',
-        'added' : 0
+        'added' : ''
     }
     if request.method == 'POST':
         try:
             raw_data = request.form['_add_campaign']
             
-            js_data = json.loads(raw_data)
-            
-            from_title = js_data['title']
-            if not from_title:
-                raise Exception("Campaign title can't be empty")
+            campaign_data = JSCampaignData(raw_data=raw_data)
 
-            from_time_table = js_data['timeTable']
-            if not from_time_table:
-                raise Exception("Time sending parameters can't be empty")
-
-            from_funnel = js_data['funnel']
-            from_credentials = js_data['credentials']
-            from_prospect_list = js_data['prospectsList']
-            
-            from_templates = js_data['templates']
-            if not from_templates:
-                raise Exception("Can't create campaign with empty templates")
-            
-            mapped_templates = template_key_dict(from_templates)
-            if not mapped_templates:
-                raise Exception("Wrong templates format")
-
-
-
-            funnel = shared.Funnel.objects(id=from_funnel).first()
+            funnel_id = campaign_data.funnel()
+            funnel = shared.Funnel.objects(id=funnel_id).first()
             if not funnel:
                 raise Exception("No such funnel")
-            
-            credentials = []
-            account = ''
-            for cr in from_credentials:
-                n_cr = Credentials.objects(owner=current_user.id, id=cr).first()
-                if not n_cr:
-                    raise Exception("Wrong credentials: account data")
-                credentials.append(n_cr.id)
-                if not account:
-                    account = n_cr.get_account()
 
+            credentials = campaign_data.credentials()
             if not credentials:
-                raise Exception("Can't create campaign with empty accounts")
+                raise Exception("Credentials can't be empty")
+        
+            prospects_list = ProspectsList.objects(owner=current_user.id, id=campaign_data.prospects_list()).first()
+            if not prospects_list:
+                raise Exception("There is no such prospects list")
             
-            prospect_list = ProspectsList.objects(owner=current_user.id, id=from_prospect_list).first()
-            if not prospect_list:
-                raise Exception("There is not such prospects list")
-
-            data = {
-                'title' : from_title,
-                'funnel' : funnel.id,
-                'credentials' : credentials,
-                'templates' : mapped_templates,
-                'time_table' : from_time_table,
-                'prospects_list' : prospect_list.id,
-                'data' : {
-                    'funnel_title' : funnel.title,
-                    'prospects_list' : prospect_list.title,
-                    'account' : account
-                }
-            }
-            
-            new_campaign = Campaign.create_campaign(owner=current_user.id, data=data)
+            create_fields = Campaign.get_create_fields()
+            new_campaign = Campaign.async_create(owner=current_user.id, 
+                                                campaign_data=campaign_data,
+                                                create_fields=create_fields)
             if not new_campaign:
                 raise Exception("Something went wrong contact support.")
-        
+
+            #ALWAYS need this: as we create objecId from Json, need mongo to update it with object
+            new_campaign.reload()
+            campaign_dict = to_json_deep_dereference(new_campaign)
+
             result['code'] = 1
-            result['added'] = new_campaign.to_json()
+            result['added'] = json.dumps(campaign_dict)
         except Exception as e:
             #TODO: change to loggin
             print(e)
@@ -211,42 +286,6 @@ def create_campaign():
             result['msg'] = 'SERVER ERROR: ' + str(e)
 
     return jsonify(result)
-
-@bp_dashboard.route('/campaigns/get', methods=['POST'])
-#@login_required
-def get_campaign_by_id():
-    current_user = get_current_user()
-
-    result = {
-        'code' : 1,
-        'msg' : '',
-        'campaign' : ''
-    }
-
-    try:
-        if request.method == 'POST':
-            campaign_id = request.form.get('_campaign_id','')
-            if not campaign_id:
-                raise Exception("Bad campaign_di")
-
-            campaign = Campaign.objects(owner=current_user.id, id=campaign_id).first()
-            if not campaign:
-                raise Exception("No such campaign")
-
-            result['code'] = 1
-            result['msg'] = 'Success'
-            result['campaign'] = campaign.to_json()
-    except Exception as e:
-        #TODO: change to loggin
-        print(e)
-        traceback.print_exc()
-
-        result['code'] = -1
-        result['msg'] = str(e)
-
-    return jsonify(result)
-
-
 
 @bp_dashboard.route('/campaigns/edit', methods=['POST'])
 #@login_required
@@ -261,7 +300,7 @@ def edit_campaign():
 
     try:
         if request.method == 'POST':
-            campaign_id = request.form.get('_campaign_id','')
+            campaign_id = request.form.get('_campaign_id','')            
             if not campaign_id:
                 raise Exception("Bad campaign_di")
 
@@ -269,16 +308,135 @@ def edit_campaign():
             if not campaign:
                 raise Exception("No such campaign")
 
+            if campaign.inprogress():
+                raise Exception("Campaign in progress: stop progress first")
+
+            modified_fields = json.loads(request.form['_modified_fields'])
+            if not modified_fields:
+                raise Exception("_modified_fields missed: don't know what to modify")
+
             raw_data = request.form['_edit_campaign_data']
+            campaign_data = JSCampaignData(raw_data=raw_data)
 
-            js_data = json.loads(raw_data)
+            edit_fields = [k for k, v in modified_fields.items() if v]
+            if not edit_fields:
+                raise Exception("edit_fields can't be empty")  
 
-            campaign.async_edit(data=js_data)
+            campaign.async_edit(owner=current_user.id, campaign_data=campaign_data, edit_fields=edit_fields)
             campaign.reload()
+
+            campaign_dict = to_json_deep_dereference(campaign)
 
             result['code'] = 1
             result['msg'] = 'Success'
-            result['updated'] = campaign.to_json()
+            result['updated'] = json.dumps(campaign_dict)
+    except Exception as e:
+        #TODO: change to loggin
+        print(e)
+        traceback.print_exc()
+
+        result['code'] = -1
+        result['msg'] = str(e)
+
+    return jsonify(result)
+
+
+@bp_dashboard.route('/campaigns/delete', methods=['POST'])
+#@login_required
+def delete_campaign():
+    current_user = get_current_user()
+
+    result = {
+        'code' : 1,
+        'msg' : ''
+    }
+
+    try:
+        if request.method == 'POST':
+            campaign_id = request.form.get('_campaign_id','')            
+            if not campaign_id:
+                raise Exception("Bad campaign_id")
+
+            campaign = Campaign.objects(owner=current_user.id, id=campaign_id).first()
+            if not campaign:
+                raise Exception("No such campaign")
+
+            campaign.safe_delete()
+
+            result['code'] = 1
+            result['msg'] = 'Success'
+    except Exception as e:
+        #TODO: change to loggin
+        print(e)
+        traceback.print_exc()
+
+        result['code'] = -1
+        result['msg'] = str(e)
+
+    return jsonify(result)
+
+
+@bp_dashboard.route('/campaigns/start', methods=['POST'])
+#@login_required
+def start_campaign():
+    current_user = get_current_user()
+
+    result = {
+        'code' : 1,
+        'msg' : ''
+    }
+
+    try:
+        if request.method == 'POST':
+            campaign_id = request.form.get('_campaign_id','')            
+            if not campaign_id:
+                raise Exception("Bad campaign_id")
+
+            campaign = Campaign.objects(owner=current_user.id, id=campaign_id).first()
+            if not campaign:
+                raise Exception("No such campaign")
+
+            
+            scheduler.Scheduler.safe_start_campaign(campaign=campaign)
+
+            result['code'] = 1
+            result['msg'] = 'Success'
+    except Exception as e:
+        #TODO: change to loggin
+        print(e)
+        traceback.print_exc()
+
+        result['code'] = -1
+        result['msg'] = str(e)
+
+    return jsonify(result)
+
+
+@bp_dashboard.route('/campaigns/pause', methods=['POST'])
+#@login_required
+def pause_campaign():
+    current_user = get_current_user()
+
+    result = {
+        'code' : 1,
+        'msg' : ''
+    }
+
+    try:
+        if request.method == 'POST':
+            campaign_id = request.form.get('_campaign_id','')            
+            if not campaign_id:
+                raise Exception("Bad campaign_id")
+
+            campaign = Campaign.objects(owner=current_user.id, id=campaign_id).first()
+            if not campaign:
+                raise Exception("No such campaign")
+
+            
+            scheduler.Scheduler.safe_pause_campaign(campaign=campaign)
+
+            result['code'] = 1
+            result['msg'] = 'Success'
     except Exception as e:
         #TODO: change to loggin
         print(e)
