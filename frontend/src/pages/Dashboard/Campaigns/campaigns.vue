@@ -26,26 +26,22 @@
           stripe
           ref="campaigns_data_table"
           style="width: 100%;"
-          :data="campaigns_data.campaigns"
+          :data="list_data.campaigns"
           max-height="500"
           border
         >
           <el-table-column
-            v-for="column in campaigns_data.columns"
+            v-for="column in list_data.columns"
             :key="column.label"
             :prop="column.prop"
             :label="column.label"
-            :fixed="column.label === 'Campaign name' ? true : false"
+            :fixed="column.label === 'title' ? true : false"
             show-overflow-tooltip
           >
             <template slot-scope="scope">
-              <a
-                @click.prevent="editCampaign(scope.row)"
-                href="#"
-                v-if="column.label === 'Campaign name'"
-              >{{ scope.row[column.prop] }}</a>
-              <template v-else>{{ scope.row[column.prop] }}</template>
-            </template>
+                <a @click.prevent="editCampaign(scope.row, scope.$index)" href="#"  v-if="column.prop === 'title'">{{ scope.row[column.prop] }}</a>
+                <template v-else> {{ column.data ? scope.row.data[column.prop] : scope.row[column.prop] }} </template>
+            </template> 
           </el-table-column>
           <el-table-column :min-width="50" fixed="right" label="Spam test">
             <template slot-scope="props">
@@ -81,10 +77,15 @@ import { Pagination as LPagination } from "src/components/index";
 import get_campaigns from "./dummy_campaigns";
 import Fuse from "fuse.js";
 import CampaignWizard from "./campaignWizard.vue";
+import Campaign from "./campaign.vue";
 import NotificationMessage from "./Wizard/notification.vue";
+import axios from "axios";
+
+const CAMPAIGNS_API_LIST = 'http://127.0.0.1:5000/campaigns';
 
 export default {
   components: {
+    Campaign,
     CampaignWizard,
     LPagination,
     [Select.name]: Select,
@@ -93,116 +94,93 @@ export default {
     [TableColumn.name]: TableColumn
   },
   computed: {
-    pagedData() {
-      return this.campaigns_data.campaigns.slice(this.from, this.to);
-    },
-    /***
-     * Searches through table data and returns a paginated array.
-     * Note that this should not be used for table with a lot of data as it might be slow!
-     * Do the search and the pagination on the server and display the data retrieved from server instead.
-     * @returns {computed.pagedData}
-     */
-    queriedData() {
-      let result = this.campaigns_data.campaigns;
-      if (this.searchQuery !== "") {
-        result = this.fuseSearch.search(this.searchQuery);
-        this.pagination.total = result.length;
-      }
-      return result.slice(this.from, this.to);
-    },
-    to() {
-      let highBound = this.from + this.pagination.perPage;
-      if (this.total < highBound) {
-        highBound = this.total;
-      }
-      return highBound;
-    },
-    from() {
-      return this.pagination.perPage * (this.pagination.currentPage - 1);
-    },
-    total() {
-      this.pagination.total = this.campaigns_data.campaigns.length;
-      return this.campaigns_data.campaigns.length;
-    }
   },
   data() {
     return {
-      pagination: {
-        perPage: 5,
-        currentPage: 1,
-        perPageOptions: [5, 10, 25, 50],
-        total: 0
-      },
-      searchQuery: "",
+        list_data : {
+            campaigns : [],
+            credentials: [],
+            prospect_lists : [],
+            funnels : [],
+            columns : [],
 
-      campaigns_data: {
-        columns: [
-          {
-            prop: "name",
-            label: "Campaign name",
-            minWidth: 300
-          },
-          {
-            prop: "funnel",
-            label: "Type",
-            minWidth: 100
-          },
-          {
-            prop: "account",
-            label: "From account",
-            minWidth: 100
-          },
-          {
-            prop: "prospectsList",
-            label: "Prospects list",
-            minWidth: 100
+            pagination : {
+                perPage : 0,
+                currentPage : 1,
+                perPageOptions: [5, 10, 25, 50],
+                total : 0
           }
-        ],
+        },
 
-        campaigns: [],
-
-        pagination: {
-          perPage: 0,
-          currentPage: 1,
-          total: 0
-        }
-      },
+      searchQuery: "",
     };
   },
   methods: {
-    initCampaigns(){
-      //TODO: connect server
-      this.campaigns_data.campaigns = get_campaigns;
-    },
     handleTest(index, row) {
       alert(`Your want to like ${row.name}`);
     },
     handleDelete(index, row) {
-      let indexToDelete = this.campaigns_data.campaigns.findIndex(
+      let indexToDelete = this.list_data.campaigns.findIndex(
         tableRow => tableRow.id === row.id
       );
       if (indexToDelete >= 0) {
-        this.campaigns_data.campaigns.splice(indexToDelete, 1);
+        this.list_data.campaigns.splice(indexToDelete, 1);
       }
     },
-    async addCampaign() {
-      await this.$router.push({ path: "CampaignWizard", query: { type: 'add' } }).catch(err => {
-        console.log(err);
-      });
+    initCampaigns(){
+      this.listData(1,1);
     },
-    async editCampaign(msg_dict) {
-      await this.$router.push({ path: "CampaignWizard", query: { type: 'edit', id: msg_dict.id } }).catch(err => {
-        console.log(err);
-      });
-    },
-    validate() {
-      //this.$store.commit("step_2_email", this.campaigns_data.campaigns);
+    listData(page=1, init=0){
+        const path = CAMPAIGNS_API_LIST;
+        
+        var data = new FormData();
+        if (init == 1){
+            data.append('_init', 1);
+        }
+        data.append('_page', page);
+        
+        //console.log(data);
+        axios.post(path, data)
+          .then((res) => {
+            var r = res.data;
+            if (r.code <= 0){
+              var msg = "Error loading campaigns " + r.msg;
+              alert(msg);
+            }else{                
+              this.update_data(r, init);
+            }
+          })
+          .catch((error) => {
+            var msg = "Error loading campaigns " + error;
+            alert(msg);
+          });
 
-      return this.$validator.validateAll().then(res => {
-        this.$emit("on-validated", 1, res, this.model);
-        return res;
+    },
+    update_data(newJson, init){
+        if (init == 1){
+          this.list_data.prospect_lists = JSON.parse(newJson.prospect_lists);
+          this.list_data.columns = JSON.parse(newJson.columns);
+          this.list_data.funnels = JSON.parse(newJson.funnels);
+          this.list_data.credentials = JSON.parse(newJson.credentials);
+        }
+
+        /* This will help to prevent: JSON parse error in console */
+        if (newJson.campaigns){
+          this.list_data.campaigns = JSON.parse(newJson.campaigns);
+        }
+        this.list_data.pagination = JSON.parse(newJson.pagination);
+        console.log('load from server: ', this.list_data);
+    },
+    async addCampaign() {
+      await this.$router.push({ path: "Campaign", query: { type: 'add' } }).catch(err => {
+        console.log(err);
       });
-    }
+    },
+    async editCampaign(msg_dict, smth) {
+      await this.$router.push({ path: "Campaign", query: { type: 'edit', id: msg_dict._id.$oid } }).catch(err => {
+        console.log(err);
+      });
+    },
   },
   created() {
     this.initCampaigns();

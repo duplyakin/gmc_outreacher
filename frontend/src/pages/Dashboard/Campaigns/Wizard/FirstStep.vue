@@ -78,15 +78,8 @@ import {
 } from "src/components/index";
 export default {
   props: {
-    campaign: {
-        funnel: Object,
-        credentials: Array,
-        prospectsList: String,
-    },
-    list_data: {
-      credentials: Array,
-      prospect_lists: Array,
-    },
+    campaign: Object,
+    list_data: Object,
     email_data: Object,
     linkedin_data: Object,
   },

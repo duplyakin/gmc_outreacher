@@ -187,9 +187,6 @@ export default {
         MessageEdit,
         {
           messageObj: msg_dict,
-          //api_url : 'PROSPECTS_API_EDIT',
-          //action: 'edit',
-          //modalTitle: "Message edit",
           valueUpdated: newValue => {
             this.$set(this.messages_data.messages, current_index, newValue);
             _table.$forceUpdate();

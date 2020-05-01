@@ -88,14 +88,7 @@ import LSwitch from "src/components/Switch.vue";
 import timezones from "./timezone";
 export default {
   props: {
-    campaign: {
-        timeTable: {
-          from: Number,
-          till: Number,
-          time_zone: String,
-          days: Object,
-        },
-    },
+    campaign: Object,
   },
   components: {
     LSwitch,

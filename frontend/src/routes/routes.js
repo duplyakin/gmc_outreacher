@@ -45,6 +45,7 @@ const Charts = () => import('src/pages/Dashboard/Charts.vue')
 //CUSTOM components created by me
 const Prospects = () => import('src/pages/Dashboard/Prospects/prospects.vue')
 const CampaignWizard = () => import('src/pages/Dashboard/Campaigns/campaignWizard.vue')
+const Campaign = () => import('src/pages/Dashboard/Campaigns/campaign.vue')
 const Campaigns = () => import('src/pages/Dashboard/Campaigns/campaigns.vue')
 const Accounts = () => import('src/pages/Dashboard/Accounts/accounts.vue')
 const Team = () => import('src/pages/Dashboard/Team/team.vue')
@@ -282,6 +283,11 @@ const routes = [
         path: 'campaigns',
         name: 'Campaigns',
         component: Campaigns
+      },
+      {
+        path: 'campaign',
+        name: 'Campaign',
+        component: Campaign
       },
       {
         path: 'campaigns_test_json',

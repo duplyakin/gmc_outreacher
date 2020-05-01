@@ -50,15 +50,8 @@ import {
 
 export default {
   props: {
-    campaign: {
-        title: String,
-        funnel: Object,
-    },
-    list_data: {
-      funnels: Array,
-    },
-    email_data: Object,
-    linkedin_data: Object,
+    campaign: Object,
+    list_data: Object,
   },
   components: {
     [Input.name]: Input,
@@ -76,9 +69,6 @@ export default {
         linkedin_templates: [],
       },
 
-      
-      funnels: [],
-
       modelValidations: {
         campaignTitle: {
           required: true,
@@ -93,30 +83,26 @@ export default {
   methods: {
     onChangeFunnel(){
       /* update tempaltes based on selected funnel */
-
-      /* clear all data first */
-      this.email_data.templates = [];
-      this.linkedin_data.templates = [];
             
       var templates_required = this.model.funnel_selected.templates_required || null;
       if (templates_required){
+        
         var email = templates_required.email || null;
         if (email){
-          this.email_data.templates = Object.values(email);
+          this.model.email_templates = Object.values(email);
 
           /*sort by order field*/
-          this.email_data.templates.sort(function(first, second) {
+          this.model.email_templates.sort(function(first, second) {
             return first['order'] - second['order'];
           });
-
-
         }
+
         var linkedin = templates_required.linkedin || null;
         if (linkedin){
-          this.linkedin_data.templates = Object.values(linkedin);
+          this.model.linkedin_templates = Object.values(linkedin);
           
           /*sort by order field*/
-          this.linkedin_data.templates.sort(function(first, second) {
+          this.model.linkedin_templates.sort(function(first, second) {
             return first['order'] - second['order'];
           });
 
@@ -125,8 +111,8 @@ export default {
 
       console.log("new onchangefunnel");
       console.log(this.funnel_selected);
-      console.log(this.email_data.templates);
-      console.log(this.linkedin_data.templates);
+      console.log(this.model.email_templates);
+      console.log(this.model.linkedin_templates);
 
     },
     getError(fieldName) {
@@ -135,11 +121,6 @@ export default {
     validate() {
       return this.$validator.validateAll().then(res => {
         if(res) {
-          //this.model.campaignFunnel = this.funnel_selected;
-          this.model.email_templates = this.email_data.templates;
-          this.model.linkedin_templates = this.linkedin_data.templates;
-
-          //console.log('funnel: ', this.model.campaignFunnel);
           this.$emit('on-validated', 'step_0', res, this.model);
         };
         return res;
@@ -149,7 +130,6 @@ export default {
   created() {
       this.model.campaignTitle = this.campaign.title;
       this.model.funnel_selected = this.campaign.funnel;
-      this.funnels = this.list_data.funnels;
       //console.log('list_data: ', this.list_data);
   },
 };

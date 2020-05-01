@@ -1,6 +1,6 @@
 export default [
     {
-        label: "",
+        label: "- time zone -",
         value: "",
         offset: 0
     },

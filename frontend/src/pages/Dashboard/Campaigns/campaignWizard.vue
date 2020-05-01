@@ -15,7 +15,7 @@
               :before-change="() => validateStep('zeroStep')"
               icon="nc-icon nc-badge"
             >
-              <zero-step ref="zeroStep" :campaign="campaign" :list_data="list_data" :email_data="email_data" :linkedin_data="linkedin_data" @on-validated="onStepValidated"></zero-step>
+              <zero-step ref="zeroStep" :campaign="campaign" :list_data="list_data" @on-validated="onStepValidated"></zero-step>
             </tab-content>
 
             <tab-content
@@ -82,9 +82,6 @@ const CAMPAIGNS_API_CREATE = 'http://127.0.0.1:5000/campaigns/create';
 export default {
   data() {
     return {
-      response_json : '',
-      request_json: '',
-
       campaign: {},
 
       wizardModel: {
@@ -207,11 +204,9 @@ export default {
         get_data.append('_campaign_id', campaign_id);
         
         console.log(get_data);
-        this.request_json = this._formdata_to_json(get_data);
         await axios.post(path, get_data)
           .then((res) => {
             var r = res.data;
-            this.response_json = r;
             if (r.code <= 0){
               var msg = "Error getting campaign " + r.msg;
               alert(msg);
@@ -236,11 +231,9 @@ export default {
         data.append('_page', page);
         
         console.log(data);
-        this.request_json = this._formdata_to_json(data);
         await axios.post(path, data)
           .then((res) => {
             var r = res.data;
-            this.response_json = r;
             if (r.code <= 0){
               var msg = "Error loading campaigns " + r.msg;
               alert(msg);
@@ -265,9 +258,6 @@ export default {
         /* This will help to prevent: JSON parse error in console */
         if (newJson.campaigns){
           this.list_data.campaigns = JSON.parse(newJson.campaigns);
-
-          /* FOR TEST ONLY - to show response in textarea. NO NEED in production */
-          this.response_json = newJson;
         }
         this.list_data.pagination = JSON.parse(newJson.pagination);
         console.log('load from server: ', this.list_data);
@@ -301,11 +291,9 @@ export default {
         createData.append('_add_campaign', JSON.stringify(this.campaign));
         
         console.log(createData);
-        this.request_json = this._formdata_to_json(createData);
         axios.post(path, createData)
           .then((res) => {
             var r = res.data;
-            this.response_json = r;
             if (r.code <= 0){
               var msg = "Error creating campaign " + r.msg;
               alert(msg);
