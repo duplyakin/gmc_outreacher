@@ -294,9 +294,8 @@ class TaskQueue(db.Document):
     def safe_unassign_prospects(cls, prospects_ids):
         return cls.objects(prospect_id__in=prospects_ids).delete()
 
-
     @classmethod
-    def safe_delete_campaign(cls, campaign_id):
+    def delete_campaign(cls, campaign_id):
         return cls.objects(campaign_id=campaign_id).delete()
 
     @classmethod

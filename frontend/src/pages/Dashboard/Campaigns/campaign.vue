@@ -19,11 +19,7 @@
       <card>
         <div class="row">
           <div class="col-6">
-            <fg-input
-              label="Campaign funnel"
-              :error="getError('Campaign funnel')"
-              :disabled="!list_data.modified_fields['funnel']"
-            >
+            <p>Campaign funnel</p>
               <el-select
                 class="select-default mb-3"
                 name="Campaign funnel"
@@ -32,8 +28,7 @@
                 placeholder="Select funnel"
                 v-model="campaign.funnel"
                 v-validate="modelValidations.campaignFunnel"
-                value-key="title"
-              >
+                value-key="title">
                 <el-option
                   class="select-default"
                   v-for="(funnel,index) in list_data.funnels"
