@@ -639,7 +639,8 @@ export default {
             },
             {
               width: "720",
-              height: "auto"
+              height: "auto",
+              scrollable: true
             }
           );
         }
@@ -677,7 +678,8 @@ export default {
         },
         {
           width: "720",
-          height: "auto"
+          height: "auto",
+          scrollable: true
         }
       );
     },
