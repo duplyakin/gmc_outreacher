@@ -54,11 +54,10 @@ class ProdTestCampaigns(unittest.TestCase):
         print(random_prospects)
 
     def test_1_create_campaign(self):
-        return
         print("....Testing campaigns creation")
         create_data = CREATE_CAMPAIGN
         create_data['title'] = '--test title new campaign ' + ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(20))
-
+        create_data['title'] = '11111111111111111111111'
 
         client = app.test_client()    
         with app.test_request_context():            
@@ -92,7 +91,7 @@ class ProdTestCampaigns(unittest.TestCase):
 
             #select prospects_list 
             json_prospects_list = json.loads(json_data['prospects_list'])
-            prospects_list = json_prospects_list[1]
+            prospects_list = json_prospects_list[0]
 
             #construct templates
             email_templates = funnel_obj['templates_required']['email']
@@ -207,6 +206,7 @@ class ProdTestCampaigns(unittest.TestCase):
 
 
     def test_5_start_pause_campaign(self):
+        return
         print("....Testing campaigns start and pause")
         
         cm = Campaign.objects(id="5eac9d618c7bdc3f8fe96969").first()

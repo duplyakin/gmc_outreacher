@@ -109,11 +109,8 @@ def create_models():
         email_domain = prospect.get('email_domain')
         email = email_name + email_domain
         
-        lists = []
-        for l in prospect.get('lists', []):
-            next_list = ProspectsList.get_lists(owner=owner.id, title=l)
-            assert next_list, "No such next_list"
-            lists.append(next_list.id)
+        l = prospect.get('prospects_list', '')
+        prospects_list = ProspectsList.objects(owner=owner.id, title=l).first()
 
 
         count = 1
@@ -122,13 +119,13 @@ def create_models():
             data = {
                 'email' : email,
                 'assign_to' : campaign.title,
-                'lists' : lists,
                 'linkedin' : linkedin
             }
+            if prospects_list:
+                data['prospects_list'] = prospects_list.id
             new_prospect = Prospects.create_prospect(owner_id=owner.id,
                                                     campaign_id=campaign.id,
-                                                    data=data,
-                                                    lists=lists)
+                                                    data=data)
             assert new_prospect is not None, "Can't create prospect"
 
             email = email_name + '+' + str(count) + email_domain
