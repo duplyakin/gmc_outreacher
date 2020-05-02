@@ -117,7 +117,7 @@
                 v-model="prospect_list_selected">
                   <el-option
                   class="select-default"
-                  v-for="(list,index) in list_campaigns.prospect_lists"
+                  v-for="(list,index) in list_campaigns.prospects_list"
                   :key="list._id.$oid"
                   :label="list.title"
                   :value="list._id.$oid">
@@ -232,7 +232,7 @@ import axios from 'axios'
 import { Table, TableColumn, Select, Option } from 'element-ui'
 import TemplateEdit from './test_create_templates.vue'
 
-const CAMPAIGNS_API_LIST = 'http://127.0.0.1:5000/campaigns';
+const CAMPAIGNS_API_LIST = 'http://127.0.0.1:5000/campaigns/list';
 const CAMPAIGNS_API_GET_BY_ID = 'http://127.0.0.1:5000/campaigns/get';
 const CAMPAIGNS_API_CREATE = 'http://127.0.0.1:5000/campaigns/create';
 const CAMPAIGNS_API_EDIT = 'http://127.0.0.1:5000/campaigns/edit';
@@ -303,7 +303,7 @@ data() {
         list_campaigns : {
             campaigns : [],
             credentials: [],
-            prospect_lists : [],
+            prospects_list : [],
             funnels : [],
             columns : [],
 
@@ -520,7 +520,7 @@ methods: {
     },
     update_campaigns(newJson, init){
         if (init == 1){
-          this.list_campaigns.prospect_lists = JSON.parse(newJson.prospect_lists);
+          this.list_campaigns.prospects_list = JSON.parse(newJson.prospects_list);
           this.list_campaigns.columns = JSON.parse(newJson.columns);
           this.list_campaigns.funnels = JSON.parse(newJson.funnels);
           this.list_campaigns.credentials = JSON.parse(newJson.credentials);

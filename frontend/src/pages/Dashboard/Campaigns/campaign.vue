@@ -1,11 +1,11 @@
 <template>
   <div>
-    <card>
       <card>
         <h5 class="text-center">Let's create campaign!</h5>
         <div class="row">
           <div class="col-6">
             <fg-input
+              :disabled="!list_data.modified_fields['title']"
               label="Campaign title"
               name="Campaign title"
               v-validate="modelValidations.campaignTitle"
@@ -19,7 +19,11 @@
       <card>
         <div class="row">
           <div class="col-6">
-            <fg-input label="Campaign funnel" :error="getError('Campaign funnel')">
+            <fg-input
+              label="Campaign funnel"
+              :error="getError('Campaign funnel')"
+              :disabled="!list_data.modified_fields['funnel']"
+            >
               <el-select
                 class="select-default mb-3"
                 name="Campaign funnel"
@@ -54,7 +58,9 @@
                   style="width: 100%;"
                   placeholder="Select email account"
                   v-model="email_data.email_account_selected"
+                  value-key="data.account"
                   v-validate="modelValidations.account"
+                  :disabled="!list_data.modified_fields['credentials']"
                 >
                   <el-option
                     class="select-default"
@@ -62,7 +68,7 @@
                     v-if="account.medium == 'email'"
                     :key="account._id.$oid"
                     :label="account.data.account"
-                    :value="account._id.$oid"
+                    :value="account"
                   ></el-option>
                 </el-select>
               </div>
@@ -73,7 +79,9 @@
                   style="width: 100%;"
                   placeholder="Select linkedin account"
                   v-model="linkedin_data.linkedin_account_selected"
+                  value-key="data.account"
                   v-validate="modelValidations.account"
+                  :disabled="!list_data.modified_fields['credentials']"
                 >
                   <el-option
                     class="select-default"
@@ -81,7 +89,7 @@
                     v-if="account.medium == 'linkedin'"
                     :key="account._id.$oid"
                     :label="account.data.account"
-                    :value="account._id.$oid"
+                    :value="account"
                   ></el-option>
                 </el-select>
               </div>
@@ -98,14 +106,16 @@
                 class="select-default mb-3"
                 style="width: 100%;"
                 placeholder="Select prospects list"
-                v-model="campaign.prospectsList"
+                v-model="campaign.prospects_list"
+                value-key="campaign.prospects_list"
+                :disabled="!list_data.modified_fields['prospects_list']"
               >
                 <el-option
                   class="select-default"
-                  v-for="(list,index) in list_data.prospect_lists"
+                  v-for="(list,index) in list_data.prospects_list"
                   :key="list._id.$oid"
                   :label="list.title"
-                  :value="list._id.$oid"
+                  :value="list"
                 ></el-option>
               </el-select>
             </card>
@@ -113,8 +123,8 @@
         </div>
       </card>
 
-      <card>
-        <div v-if="email_data.templates.length != 0" class="row">
+      <card v-if="list_data.modified_fields['templates'] && email_data.templates.length != 0">
+        <div class="row">
           <div class="col-12">
             <card title="Email templates required">
               <el-table
@@ -147,8 +157,8 @@
         </div>
       </card>
 
-      <card>
-        <div v-if="linkedin_data.templates.length != 0" class="row">
+      <card v-if="list_data.modified_fields['templates'] && linkedin_data.templates.length != 0">
+        <div class="row">
           <div class="col-12">
             <card title="Linkedin templates required">
               <el-table
@@ -194,6 +204,7 @@
                       name="From time"
                       v-model="campaign.from_hour"
                       v-validate="modelValidations.timePickerFrom"
+                      :disabled="!list_data.modified_fields['time_table']"
                       :picker-options="{
                   start: '00:00',
                   step: '00:15',
@@ -210,6 +221,7 @@
                       name="Till time has to be after FROM time"
                       v-model="campaign.to_hour"
                       v-validate="modelValidations.timePickerTill"
+                      :disabled="!list_data.modified_fields['time_table']"
                       :picker-options="{
                   start: '00:00',
                   step: '00:15',
@@ -232,6 +244,7 @@
                     placeholder="Fallback Time Zone"
                     v-model="timezones_selected"
                     v-validate="modelValidations.timeZone"
+                    :disabled="!list_data.modified_fields['time_table']"
                   >
                     <el-option
                       v-for="option in timezones_selects"
@@ -255,42 +268,49 @@
                   type="button"
                   ref="day_0"
                   @click="toggleDay('day_0')"
+                  :disabled="!list_data.modified_fields['time_table']"
                   v-bind:class="{ 'btn btn-default' : true, 'btn-success': campaign.sending_days['0'] }"
                 >Mon</button>
                 <button
                   type="button"
                   ref="day_1"
                   @click="toggleDay('day_1')"
+                  :disabled="!list_data.modified_fields['time_table']"
                   v-bind:class="{ 'btn btn-default' : true, 'btn-success': campaign.sending_days['1'] }"
                 >Tue</button>
                 <button
                   type="button"
                   ref="day_2"
                   @click="toggleDay('day_2')"
+                  :disabled="!list_data.modified_fields['time_table']"
                   v-bind:class="{ 'btn btn-default' : true, 'btn-success': campaign.sending_days['2'] }"
                 >Wed</button>
                 <button
                   type="button"
                   ref="day_3"
                   @click="toggleDay('day_3')"
+                  :disabled="!list_data.modified_fields['time_table']"
                   v-bind:class="{ 'btn btn-default' : true, 'btn-success': campaign.sending_days['3'] }"
                 >Thu</button>
                 <button
                   type="button"
                   ref="day_4"
                   @click="toggleDay('day_4')"
+                  :disabled="!list_data.modified_fields['time_table']"
                   v-bind:class="{ 'btn btn-default' : true, 'btn-success': campaign.sending_days['4'] }"
                 >Fri</button>
                 <button
                   type="button"
                   ref="day_5"
                   @click="toggleDay('day_5')"
+                  :disabled="!list_data.modified_fields['time_table']"
                   v-bind:class="{ 'btn btn-default' : true, 'btn-success': campaign.sending_days['5'] }"
                 >Sat</button>
                 <button
                   type="button"
                   ref="day_6"
                   @click="toggleDay('day_6')"
+                  :disabled="!list_data.modified_fields['time_table']"
                   v-bind:class="{ 'btn btn-default' : true, 'btn-success': campaign.sending_days['6'] }"
                 >Sun</button>
               </div>
@@ -308,7 +328,7 @@
           >Submit</button>
         </div>
       </div>
-    </card>
+
   </div>
 </template>
 <script>
@@ -327,7 +347,7 @@ import MessageEdit from "./Wizard/messageEdit.vue";
 import Preview from "./Preview.vue";
 import timezones from "./Wizard/timezone";
 
-const CAMPAIGNS_API_LIST = "http://127.0.0.1:5000/campaigns";
+const CAMPAIGNS_API_DATA = "http://127.0.0.1:5000/campaigns/data";
 const CAMPAIGNS_API_CREATE = "http://127.0.0.1:5000/campaigns/create";
 const CAMPAIGNS_API_GET_BY_ID = "http://127.0.0.1:5000/campaigns/get";
 
@@ -344,23 +364,18 @@ export default {
   },
   data() {
     return {
-      action_type: "", // 'edit' or 'add'
+      action_type: '', // 'edit' or 'add'
+      campaign_id: '',
 
       timezones_selects: timezones,
       timezones_selected: "",
 
       list_data: {
-        //campaigns : [],
         credentials: [],
-        prospect_lists: [],
+        prospects_list: [],
         funnels: [],
         columns: [],
-
-        pagination: {
-          perPage: 0,
-          currentPage: 1,
-          total: 0
-        }
+        modified_fields: {},
       },
 
       email_data: {
@@ -406,7 +421,7 @@ export default {
         title: "",
         funnel: {},
         credentials: [],
-        prospectsList: "",
+        prospects_list: {},
         templates: {
           email: [],
           linkedin: []
@@ -424,7 +439,6 @@ export default {
           "6": false
         }
       },
-
       modelValidations: {
         campaignTitle: {
           required: true,
@@ -494,6 +508,8 @@ export default {
       /* clear all data first */
       this.email_data.templates = [];
       this.linkedin_data.templates = [];
+      this.email_data.email_account_selected = '';
+      this.linkedin_data.linkedin_account_selected = '';
 
       var templates_required = this.campaign.funnel.templates_required || null;
       if (templates_required) {
@@ -528,16 +544,15 @@ export default {
       //console.log('type: ', type);
 
       if (this.action_type == "edit") {
-        let id = this.$route.query.id;
+        this.campaign_id = this.$route.query.id;
         //console.log('id: ', id);
 
-        // TODO: editing, test this shit
-        this.get_campaign_by_id(id);
-        console.log('campaign: ', this.campaign)
-        this.timezones_selected = timezones.find(x => x.value === this.campaign.timeTable.time_zone).label || '';
+        this.get_campaign_by_id(this.campaign_id);
+        console.log("campaign: ", this.campaign);
+        this.timezones_selected = timezones.find(x => x.value === this.campaign.time_zone).label || "";
         this.email_data.templates = this.campaign.templates.email;
         this.linkedin_data.templates = this.campaign.templates.linkedin;
-        console.log('email_data: ', this.email_data.templates)
+        console.log("email_data: ", this.email_data.templates);
       }
       if (this.action_type == "add") {
         this.newCampaign(1);
@@ -551,7 +566,6 @@ export default {
       var get_data = new FormData();
       get_data.append("_campaign_id", id);
 
-      console.log('get_data: ', get_data);
       await axios
         .post(path, get_data)
         .then(res => {
@@ -562,7 +576,9 @@ export default {
           } else {
             var updated = r.updated;
             this.campaign = JSON.parse(r.campaign);
-            console.log('res: ', this.campaign);
+            this.list_data.modified_fields = JSON.parse(r.modified_fields);
+            console.log("res: ", this.campaign);
+            console.log("modified_fields: ", this.list_data.modified_fields);
           }
         })
         .catch(error => {
@@ -571,14 +587,14 @@ export default {
         });
     },
     async newCampaign(page = 1) {
-      const path = CAMPAIGNS_API_LIST;
+      const path = CAMPAIGNS_API_DATA;
 
       var data = new FormData();
-      data.append("_create", 1);
+      //data.append("_create", 1);
       //?
       data.append("_page", page);
 
-      console.log(data);
+      //console.log(data);
       await axios
         .post(path, data)
         .then(res => {
@@ -596,33 +612,39 @@ export default {
         });
     },
     update_data(newJson) {
-      this.list_data.prospect_lists = JSON.parse(newJson.prospect_lists);
+      this.list_data.prospects_list = JSON.parse(newJson.prospects_list);
       this.list_data.columns = JSON.parse(newJson.columns);
       this.list_data.funnels = JSON.parse(newJson.funnels);
       this.list_data.credentials = JSON.parse(newJson.credentials);
+      this.list_data.modified_fields = JSON.parse(newJson.modified_fields);
 
       /* This will help to prevent: JSON parse error in console */
       if (newJson.campaigns) {
         this.list_data.campaigns = JSON.parse(newJson.campaigns);
       }
-      this.list_data.pagination = JSON.parse(newJson.pagination);
       console.log("load from server: ", this.list_data);
     },
     preview() {
       this.campaign.time_zone = this.timezones_selected;
-
-      this.$modal.show(
-        Preview,
-        {
-          campaign: this.campaign,
-          email_data: this.email_data,
-          linkedin_data: this.linkedin_data
-        },
-        {
-          width: "720",
-          height: "auto"
+      this.$validator.validateAll().then(res => {
+        if (res) {
+          this.$modal.show(Preview,
+            {
+              modified_fields: this.list_data.modified_fields,
+              campaign_id: this.campaign_id,
+              action_type: this.action_type,
+              campaign: this.campaign,
+              email_data: this.email_data,
+              linkedin_data: this.linkedin_data
+            },
+            {
+              width: "720",
+              height: "auto"
+            }
+          );
         }
-      );
+        return res;
+      });
     },
     editLinkedinTemplate(teamplateObj, row_index) {
       var table = this.$refs["linkedin_templates_data_table"];
@@ -675,7 +697,7 @@ export default {
     },
     getError(fieldName) {
       return this.errors.first(fieldName);
-    }
+    },
   },
   created() {
     this.initCampaign();

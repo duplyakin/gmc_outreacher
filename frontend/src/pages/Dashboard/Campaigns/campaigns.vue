@@ -59,7 +59,7 @@
               <a
                 v-tooltip.top-center="'Delete'"
                 class="btn-danger btn-simple btn-link"
-                @click="handleDelete(props.$index, props.row)"
+                @click="handleDelete(props.row)"
               >
                 <i class="fa fa-times"></i>
               </a>
@@ -81,7 +81,8 @@ import Campaign from "./campaign.vue";
 import NotificationMessage from "./Wizard/notification.vue";
 import axios from "axios";
 
-const CAMPAIGNS_API_LIST = 'http://127.0.0.1:5000/campaigns';
+const CAMPAIGNS_API_LIST = 'http://127.0.0.1:5000/campaigns/list';
+const CAMPAIGNS_API_DELETE = 'http://127.0.0.1:5000/campaigns/delete';
 
 export default {
   components: {
@@ -100,7 +101,7 @@ export default {
         list_data : {
             campaigns : [],
             credentials: [],
-            prospect_lists : [],
+            prospects_list : [],
             funnels : [],
             columns : [],
 
@@ -117,15 +118,42 @@ export default {
   },
   methods: {
     handleTest(index, row) {
-      alert(`Your want to like ${row.name}`);
+      alert(`Your want to test ${row.name}`);
     },
-    handleDelete(index, row) {
-      let indexToDelete = this.list_data.campaigns.findIndex(
-        tableRow => tableRow.id === row.id
-      );
+    handleDelete(row) {
+      let indexToDelete = this.list_data.campaigns.findIndex( tableRow => tableRow.id === row.id);
+      console.log("indexToDelete: ", indexToDelete);
       if (indexToDelete >= 0) {
-        this.list_data.campaigns.splice(indexToDelete, 1);
+        //this.list_data.campaigns.splice(indexToDelete, 1);
+        if (confirm("Are you sure?")) {
+          console.log('delete: ', row._id.$oid);
+          this.deleteCampaign(row._id.$oid);
+        }
       }
+    },
+    deleteCampaign(id){
+      const path = CAMPAIGNS_API_DELETE;
+
+      var data = new FormData();
+      data.append("_campaign_id", id);
+
+      //console.log(data);
+      axios
+        .post(path, data)
+        .then(res => {
+          var r = res.data;
+          if (r.code <= 0) {
+            var msg = "Error deleting campaign " + r.msg;
+            alert(msg);
+          } else {
+            console.log('deleted!');
+            this.listData();
+          }
+        })
+        .catch(error => {
+          var msg = "Error deleting campaign " + error;
+          alert(msg);
+        });
     },
     initCampaigns(){
       this.listData(1,1);
@@ -146,7 +174,8 @@ export default {
             if (r.code <= 0){
               var msg = "Error loading campaigns " + r.msg;
               alert(msg);
-            }else{                
+            }else{  
+              //console.log('res: ', r);
               this.update_data(r, init);
             }
           })
@@ -158,7 +187,7 @@ export default {
     },
     update_data(newJson, init){
         if (init == 1){
-          this.list_data.prospect_lists = JSON.parse(newJson.prospect_lists);
+          this.list_data.prospects_list = JSON.parse(newJson.prospects_list);
           this.list_data.columns = JSON.parse(newJson.columns);
           this.list_data.funnels = JSON.parse(newJson.funnels);
           this.list_data.credentials = JSON.parse(newJson.credentials);
@@ -168,7 +197,7 @@ export default {
         if (newJson.campaigns){
           this.list_data.campaigns = JSON.parse(newJson.campaigns);
         }
-        this.list_data.pagination = JSON.parse(newJson.pagination);
+        this.list_data.pagination = newJson.pagination;
         console.log('load from server: ', this.list_data);
     },
     async addCampaign() {

@@ -305,14 +305,6 @@ export default {
             alert(msg);
           });
     },
-    _formdata_to_json(form_data){
-      var object = {};
-      form_data.forEach(function(value, key){
-        object[key] = value;
-      });
-      var json = JSON.stringify(object);
-      return json;
-    },
     validateStep(ref) {
       return this.$refs[ref].validate();
     },

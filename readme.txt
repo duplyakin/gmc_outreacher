@@ -11,7 +11,7 @@ python 3.7, pip 19.2.3
 Все шаги делаем из корня: mc_outreacher\
 1. Устанвливаем тестовую переменную окружения (!!!)
 $env:APP_ENV="Test"
-SET APP_ENV="Test"
+SET APP_ENV=Test
 
 2. Создаем базу с тестоваыми данными:
 python -m unittest discover -s .\o24\tests\ -p "*db_entities.py"
