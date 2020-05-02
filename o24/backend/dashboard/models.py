@@ -485,20 +485,6 @@ class Campaign(db.Document):
 
         self.update_status(status=IN_PROGRESS)
 
-    #can delete only if:
-    # not in progress
-    # no prospects assigned
-    def safe_delete(self):
-        if self.inprogress():
-            raise Exception("DELETE ERROR: campaign in progress, stop it first")
-        
-        assigned_prospects = Prospects.get_prospects(campaign_id=self.id)
-        if assigned_prospects:
-            raise Exception("DELETE ERROR: campaign has prospects, unassign all prospects before delete")
-        
-        shared.TaskQueue.safe_delete_campaign(campaign_id=self.id)
-
-        return True
 
     def _validate_campaign_data(self, owner, campaign_data, changed_fields):
 
@@ -859,5 +845,5 @@ class MergeTags(db.Document):
 
 #Register delete rules for '' ReferenceFields as described here: https://github.com/MongoEngine/mongoengine/issues/1707
 
-Campaign.register_delete_rule(ProspectsList, "prospects_list", 1)
-Prospects.register_delete_rule(ProspectsList, "assign_to_list", 1)
+ProspectsList.register_delete_rule(Campaign, "prospects_list", 1)
+ProspectsList.register_delete_rule(Prospects, "assign_to_list", 1)

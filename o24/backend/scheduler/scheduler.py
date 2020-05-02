@@ -220,6 +220,23 @@ class Scheduler():
 
         scheduler.add_prospects(campaign=campaign, prospects=prospects)
 
+    @classmethod
+    def safe_delete_campaign(cls, campaign):
+        if not campaign:
+            raise Exception("DELETE ERROR: No such campaign")
+
+        if campaign.inprogress():
+            raise Exception("DELETE ERROR: campaign in progress, stop it first")
+        
+        assigned_prospects = models.Prospects.get_prospects(campaign_id=campaign.id)
+        if assigned_prospects:
+            raise Exception("DELETE ERROR: campaign has prospects, unassign all prospects before delete")
+        
+        TaskQueue.delete_campaign(campaign_id=campaign.id)
+
+        return campaign.delete()
+
+
     def add_prospects(self, campaign, prospects):
         ids = self._load_prospects(campaign, prospects)
         if not ids:

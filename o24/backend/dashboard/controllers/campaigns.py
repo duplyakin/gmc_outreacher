@@ -361,7 +361,7 @@ def delete_campaign():
             if not campaign:
                 raise Exception("No such campaign")
 
-            campaign.safe_delete()
+            scheduler.Scheduler.safe_delete_campaign(campaign=campaign)
 
             result['code'] = 1
             result['msg'] = 'Success'
