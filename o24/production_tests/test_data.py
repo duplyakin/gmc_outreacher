@@ -689,7 +689,7 @@ PROSPECTS = [
         'assign_to' : 'campaign-1',
         'email_name' : 'ksshilov',
         'email_domain' : '@yandex.ru',
-        'lists' : ['List-1 1@email.com']
+        'prospects_list' : 'List-1 1@email.com'
     },
     {
         'owner' : '1@email.com',
@@ -697,7 +697,7 @@ PROSPECTS = [
         'assign_to' : 'campaign-11',
         'email_name' : 'ks.shilov',
         'email_domain' : '@gmail.ru',
-        'lists' : ['List-2 1@email.com', 'List-3 1@email.com']
+        'prospects_list' : 'List-2 1@email.com',
     },
     {
         'owner' : '3@email.com',
@@ -708,6 +708,7 @@ PROSPECTS = [
         'lists' : []
     },
 ]
+
 
 
 GOOGLE_APP_SETTINGS = [{

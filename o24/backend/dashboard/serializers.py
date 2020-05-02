@@ -7,6 +7,8 @@ class JSCampaignData():
     ATTR_PREFIX = '_js_'
     RAW_ATTR_PREFIX = '_raw_'
 
+    STR_FIELDS = ['title']
+
     def __init__(self, raw_data):
         try:
             self.raw_data = raw_data
@@ -23,7 +25,7 @@ class JSCampaignData():
                     des_value = value
 
                     #trying to parse json
-                    if isinstance(des_value, str):
+                    if key not in self.STR_FIELDS and isinstance(des_value, str):
                         try:
                             des_value = json.loads(value)
                         except:
