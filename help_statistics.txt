@@ -1,0 +1,109 @@
+ВКЛАДКА СТАТИСТИКА
+1. /statistics/list
+- POST
+- {
+    '_page' : 1
+}
+
+Вывод в таблице колонки:
+- Campaign title (при нажатии переходишь на статистику для это кампании то есть /statistics/campaign/campaign_id=1324321)
+- funnel title 
+- Prospects list title 
+- prospects_contacted_total (Кол-во уникальных проспектов с которыми я сделал действие (email, linkedin request, linkedin message))
+- prospects_email_opens_total (Кол-во уникальных проспектов которые открыли емайл)
+- email_bounced_total (Сколько испорченных email'ов)
+- linkedin_accounts_404 (Не существующие linkedin аккаунты)
+- linkedin_messages_failed (Сколько linkedin сообщений не удалось отправить)
+- prospects_accepted_linkedin_total (Уникальное число проспектов, которые приняли мой linkedin request)
+- replied_total (Уникальное число ответов. Ответ на email и linkedin от одного и того же проспекта считается как 1)
+
+Ответ получаешь:
+- {
+    statistics : [
+        {
+            campaign : {
+                title : "Campaign -1 "
+                id : 2341234231,
+                credentials : [{acount:"ks.shilov@gmail.com"}],
+                funnel : 'funnel title'
+                prospects_list : {
+                    title : 'It outsource CEO and CMO"
+                    id : ID
+                }
+            },
+            aggregated : {
+                prospects_contacted_total : 100,
+                prospects_email_opens_total : 90
+                linkedin_accounts_404 : 20
+                email_bounced_total : 10
+                linkedin_messages_failed_total : 20
+                prospects_accepted_linkedin_total : 20
+                replied_total : 34
+            }
+        },
+        ....
+        {
+            campaign : {
+                title : "Campaign - Ni"
+                id : ...NX
+            },
+            aggregated : {
+
+            }
+        },
+
+    ]
+}
+
+Страница статистики по кампании 
+2. /statistics/campaign/
+- POST
+- {
+    '_campaign_id' : ...
+}
+
+Фильтр по medium: email | linkedin
+- Общая полоска метрик (наводишь меняется на %)
+- Далее таблицу по дням за 2 недели (14 дней) как у smartreach
+    * Колонка день
+    * Далее колонки метрики  
+- ЕСЛИ успеешь то Гистограма (высота колокни = prospects_contacted, и далее при наведении на колонку показывает другие метрики для этого дня) 
+
+Ответ вот такой:
+{
+    campaign : {
+        title : "Campaign -1 "
+        id : 2341234231,
+        credentials : [{acount:"ks.shilov@gmail.com"}],
+        funnel : 'funnel title'
+    },
+    statistics : {
+        email : [
+            {
+                date : 1212
+                prospects_email_contacted_total : 100
+                emails_sent : 300
+                emails_bounced : 20
+                emails_opened : 40
+                emails_replies_total : 10
+            },
+            {
+                date : 1213
+                ....
+            }
+            ],
+        linkedin :[
+            {
+                date :1111
+                prospects_linkedin_contacted_total : 200
+                connect_request_total : 50
+                connect_request_approved_total : 20 
+                linkedin_messages_sent_total : 12
+                linkedin_replies_received : 4
+            },
+            {
+                date : 1213
+            }
+        ]
+    }
+}

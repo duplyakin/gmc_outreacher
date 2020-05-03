@@ -584,6 +584,8 @@ export default {
         serialize_campaign(){
 
             /*If need any modifications then do it here*/
+
+
             return JSON.stringify(this.campaign_data);
         },
         send_campaign_data(){
@@ -594,15 +596,14 @@ export default {
                 var data = new FormData();
 
                 var serialized_campaign_data = this.serialize_campaign();
+                data.append('_add_campaign', serialized_campaign_data);
 
                 if (this.action_type == 'edit'){
                     path = CAMPAIGNS_API_EDIT;
                     data.append('_campaign_id', this.campaign_id)
                     data.append('_modified_fields', JSON.stringify(this.modified_fields))
-                    data.append('_edit_campaign_data', serialized_campaign_data);
-                }else{
-                    data.append('_add_campaign', serialized_campaign_data);
                 }
+                
 
                 axios
                 .post(path, data)
