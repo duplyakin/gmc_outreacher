@@ -30,14 +30,6 @@
             max-height="500"
             border
             >
-            <el-table-column type="expand">
-                <template slot-scope="props">
-                    <p>Emails opened: {{ props.row.aggregated.prospects_email_opens_total }}</p>
-                    <p>LinkedIn 404 acconts: {{ props.row.aggregated.linkedin_accounts_404 }}</p>
-                    <p>Bounced emails: {{ props.row.aggregated.email_bounced_total }}</p>
-                    <p>LinkedIn messages failed: {{ props.row.aggregated.linkedin_messages_failed_total }}</p>
-                </template>
-            </el-table-column>
             <el-table-column
                 v-for="(column,index) in columns"
                 :key="index"
@@ -47,7 +39,7 @@
                 show-overflow-tooltip>
                 <template slot-scope="scope">
                     <a @click.prevent="detalization(scope.row)" href="#" v-if="column.prop === 'title'">{{ scope.row.campaign[column.prop] }}</a>
-                    <template v-else> {{ column.campaign ? (column.prop === 'prospects_list' ? scope.row.campaign[column.prop].title : scope.row.campaign[column.prop]) : scope.row.aggregated[column.prop] }} </template>
+                    <template v-else> {{ column.campaign ? (column.object ? scope.row.campaign[column.prop][column.sub_prop] : scope.row.campaign[column.prop]) : scope.row.aggregated[column.prop] }} </template>
                 </template> 
             </el-table-column>
             
@@ -87,13 +79,17 @@ data() {
             },
             {
                 prop: "funnel",
+                sub_prop: 'title',
                 label: "Funnel",
                 campaign: true,
+                object: true,
                 minWidth: 100
             },
             {
                 prop: "prospects_list",
+                sub_prop: 'title',
                 label: "Prospects list",
+                object: true,
                 campaign: true,
                 minWidth: 100
             },
@@ -102,7 +98,26 @@ data() {
                 label: "Prospects contacted",
                 minWidth: 50
             },
-
+            {
+                prop: "prospects_email_opens_total",
+                label: "Emails opened",
+                minWidth: 50
+            },
+            {
+                prop: "linkedin_accounts_404",
+                label: "Linkedin 404",
+                minWidth: 50
+            },
+            {
+                prop: "email_bounced_total",
+                label: "Emails bounced",
+                minWidth: 50
+            },
+            {
+                prop: "linkedin_messages_failed_total",
+                label: "Linkedin messages failed",
+                minWidth: 50
+            },
             {
                 prop: "prospects_accepted_linkedin_total",
                 label: "LinkedIn accepts",

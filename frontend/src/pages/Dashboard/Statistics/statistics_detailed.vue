@@ -1,170 +1,85 @@
 <template>
   <div>
     <card>
-      <div class="row">
-        <div class="col-12 d-flex align-self-center">
-          <h3>
-            <i class="nc-icon nc-badge"></i> Campaign Detalization
-          </h3>
+      <card>
+        <div class="row">
+          <div class="col-12 d-flex align-self-center">
+            <h3>
+              <i class="nc-icon nc-badge"></i> Campaign Detalization
+            </h3>
+          </div>
+          <div class="col-4">
+            <p>Filter by medium</p>
+            <el-select
+              class="select-default mb-3"
+              v-on:change="onChangeMedium"
+              style="width: 100%;"
+              placeholder="Select medium"
+              v-model="filter"
+              value-key="title"
+            >
+              <el-option
+                class="select-default"
+                v-for="filter in filter_data"
+                :key="filter.id"
+                :label="filter.title"
+                :value="filter.title"
+              ></el-option>
+            </el-select>
+          </div>
         </div>
-      </div>
+      </card>
+
+      <card v-if="filter!=''">
+        <h3>{{filter}} Statistics</h3>
+        <div class="container" @mouseover="mouseOver" v-show="mouse_active">
+          <div v-for="obj in medium_data">
+            <div>
+              <div v-bind:class="obj.class">{{obj.value}}</div>
+              <p class="data-caption">{{obj.label}}</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="container" v-show="!mouse_active" @mouseleave="mouseLeave">
+          <div v-for="obj in medium_data">
+            <div>
+              <div
+                v-bind:class="obj.class"
+              >{{obj.relatively !== '' ? calcPercent(obj.value, medium_data[obj.relatively].value)+'%' : obj.value}}</div>
+              <p class="data-caption">{{obj.label}}</p>
+            </div>
+          </div>
+        </div>
+      </card>
+
+       <reactive-bar-chart :chart-data="changeChartData"></reactive-bar-chart>
+
+      <chart-card
+        v-if="filter!=''"
+        :chart-data="changeChartData"
+        :chart-options="barChart.options"
+        :chart-responsive-options="barChart.responsiveOptions"
+        chart-type="Bar"
+      >
+        <template slot="header">
+          <h4 class="card-title">{{filter}} Daily Statistics</h4>
+          <p class="card-category">Statistics for the last days</p>
+        </template>
+        <template slot="footer">
+          <div class="legend container">
+            <div v-for="obj in medium_data">
+              <i v-bind:class="obj.chart_color"></i>
+              {{obj.label}}
+            </div>
+          </div>
+          <hr />
+          <div class="stats">
+            <i class="fa fa-check"></i> Outreacher24
+          </div>
+        </template>
+      </chart-card>
     </card>
-
-    <card>
-      <h3>Email Statistics</h3>
-      <div class="container" @mouseover="mouseOver" v-show="mouse_active">
-        <div>
-          <div class="data-percent grey">{{this.email_data.days}}</div>
-          <p class="data-caption">DAYS</p>
-        </div>
-        <div>
-          <div class="data-percent blue">{{this.email_data.emails_sent}}</div>
-          <p class="data-caption">EMAILS SENDED</p>
-        </div>
-        <div>
-          <div class="data-percent red">{{this.email_data.emails_bounced}}</div>
-          <p class="data-caption">EMAILS BOUNCED</p>
-        </div>
-        <div>
-          <div class="data-percent green">{{this.email_data.emails_opened}}</div>
-          <p class="data-caption">EMAILS OPENED</p>
-        </div>
-        <div>
-          <div class="data-percent yellow">{{this.email_data.emails_replies}}</div>
-          <p class="data-caption">EMAILS REPLIED</p>
-        </div>
-      </div>
-
-      <div class="container" v-show="!mouse_active" @mouseleave="mouseLeave">
-        <div>
-          <div class="data-percent grey">{{this.email_data.days}}</div>
-          <p class="data-caption">DAYS</p>
-        </div>
-        <div>
-          <div class="data-percent blue">{{this.email_data.emails_sent}}</div>
-          <p class="data-caption">EMAILS SENDED</p>
-        </div>
-        <div>
-          <div
-            class="data-percent red"
-          >{{Math.round(this.email_data.emails_sent == 0 ? 0 : this.email_data.emails_bounced / this.email_data.emails_sent * 100)}}%</div>
-          <p class="data-caption">EMAILS BOUNCED</p>
-        </div>
-        <div>
-          <div
-            class="data-percent green"
-          >{{Math.round(this.email_data.emails_sent == 0 ? 0 : this.email_data.emails_opened / this.email_data.emails_sent * 100)}}%</div>
-          <p class="data-caption">EMAILS OPENED</p>
-        </div>
-        <div>
-          <div
-            class="data-percent yellow"
-          >{{Math.round(this.email_data.emails_sent == 0 ? 0 : this.email_data.emails_replies / this.email_data.emails_sent * 100)}}%</div>
-          <p class="data-caption">EMAILS REPLIED</p>
-        </div>
-      </div>
-    </card>
-
-    <card>
-      <h3>LinkedIn Statistics</h3>
-      <div class="container" @mouseover="mouseOver" v-show="mouse_active">
-        <div>
-          <div class="data-percent grey">{{this.linkedin_data.days}}</div>
-          <p class="data-caption">DAYS</p>
-        </div>
-        <div>
-          <div class="data-percent blue">{{this.linkedin_data.connect_request}}</div>
-          <p class="data-caption">CONNECT REQUESTS SENDED</p>
-        </div>
-        <div>
-          <div class="data-percent purple">{{this.linkedin_data.connect_request_approved}}</div>
-          <p class="data-caption">CONNECT REQUESTS APPROVED</p>
-        </div>
-        <div>
-          <div class="data-percent green">{{this.linkedin_data.messages_sent}}</div>
-          <p class="data-caption">MESSAGES SENDED</p>
-        </div>
-        <div>
-          <div class="data-percent yellow">{{this.linkedin_data.replies_received}}</div>
-          <p class="data-caption">REPLIES RECIEVED</p>
-        </div>
-      </div>
-
-      <div class="container" v-show="!mouse_active" @mouseleave="mouseLeave">
-        <div>
-          <div class="data-percent grey">{{this.linkedin_data.days}}</div>
-          <p class="data-caption">DAYS</p>
-        </div>
-        <div>
-          <div class="data-percent blue">{{this.linkedin_data.connect_request}}</div>
-          <p class="data-caption">CONNECT REQUESTS SENDED</p>
-        </div>
-        <div>
-          <div
-            class="data-percent purple"
-          >{{Math.round(this.linkedin_data.connect_request == 0 ? 0 : this.linkedin_data.connect_request_approved / this.linkedin_data.connect_request * 100)}}%</div>
-          <p class="data-caption">CONNECT REQUESTS APPROVED</p>
-        </div>
-        <div>
-          <div class="data-percent green">{{this.linkedin_data.messages_sent}}</div>
-          <p class="data-caption">MESSAGES SENDED</p>
-        </div>
-        <div>
-          <div
-            class="data-percent yellow"
-          >{{Math.round(this.linkedin_data.messages_sent == 0 ? 0 : this.linkedin_data.replies_received / this.linkedin_data.messages_sent * 100)}}%</div>
-          <p class="data-caption">REPLIES RECIEVED</p>
-        </div>
-      </div>
-    </card>
-
-    <chart-card
-      :chart-data="barChart.data_email"
-      :chart-options="barChart.options"
-      :chart-responsive-options="barChart.responsiveOptions"
-      chart-type="Bar"
-    >
-      <template slot="header">
-        <h4 class="card-title">Email Daily Statistics</h4>
-        <p class="card-category">Statistics for the last 15 days</p>
-      </template>
-      <template slot="footer">
-        <div class="legend">
-          <i class="fa fa-circle text-info"></i> Connect requests sended
-          <i class="fa fa-circle text-danger"></i> Connect requests approved
-          <i class="fa fa-circle text-warning"></i> Messages sended
-          <i class="fa fa-circle text-primary"></i> Replies recieved
-        </div>
-        <hr />
-        <div class="stats">
-          <i class="fa fa-check"></i> Outreacher24
-        </div>
-      </template>
-    </chart-card>
-
-    <chart-card
-      :chart-data="barChart.data_linkedin"
-      :chart-options="barChart.options"
-      :chart-responsive-options="barChart.responsiveOptions"
-      chart-type="Bar"
-    >
-      <template slot="header">
-        <h4 class="card-title">Linkedin Daily Statistics</h4>
-        <p class="card-category">Statistics for the last 15 days</p>
-      </template>
-      <template slot="footer">
-        <div class="legend">
-          <i class="fa fa-circle text-info"></i> Connect requests sended
-          <i class="fa fa-circle text-danger"></i> Connect requests approved
-          <i class="fa fa-circle text-warning"></i> Messages sended
-          <i class="fa fa-circle text-primary"></i> Replies recieved
-        </div>
-        <hr />
-        <div class="stats">
-          <i class="fa fa-check"></i> Outreacher24
-        </div>
-      </template>
-    </chart-card>
   </div>
 </template>
 <script>
@@ -185,27 +100,116 @@ export default {
     [Table.name]: Table,
     [TableColumn.name]: TableColumn
   },
-  computed: {},
+  computed: {
+    changeChartData(){
+      return this.barChart.data;
+      //this.$set(this.barChart, 'data', {});
+    }
+  },
   data() {
     return {
+      filter: "",
+      filter_data: [{ title: "Email" }, { title: "Linkedin" }],
+
       mouse_active: true,
       campaign_id: "",
+
+      medium_data: {},
       email_data: {
-        days: 0,
+        days: {
+          class: "data-percent grey",
+          relatively: "",
+          label: "Days",
+          chart: false,
+          value: 0
+        },
         //prospects_contacted: 0,
-        emails_sent: 0,
-        emails_bounced: 0,
-        emails_opened: 0,
-        emails_replies: 0
+        emails_sent: {
+          class: "data-percent blue",
+          relatively: "",
+          label: "Emails sended",
+          chart: true,
+          chart_color: "fa fa-circle text-info",
+          value: 0
+        },
+        emails_bounced: {
+          class: "data-percent red",
+          relatively: "emails_sent",
+          label: "Emails bounced",
+          chart: true,
+          chart_color: "fa fa-circle text-danger",
+          value: 0
+        },
+        emails_opened: {
+          class: "data-percent green",
+          relatively: "emails_sent",
+          label: "Emails opened",
+          chart: true,
+          chart_color: "fa fa-circle text-warning",
+          value: 0
+        },
+        emails_replies: {
+          class: "data-percent yellow",
+          relatively: "emails_sent",
+          label: "Emails replied",
+          chart: true,
+          chart_color: "fa fa-circle text-primary",
+          value: 0
+        }
       },
+
       linkedin_data: {
-        days: 0,
+        days: {
+          class: "data-percent grey",
+          relatively: "",
+          label: "Days",
+          chart: false,
+          value: 0
+        },
         //prospects_contacted: 0,
-        connect_request: 0,
-        connect_request_approved: 0,
-        messages_sent: 0,
-        replies_received: 0
+        connect_request: {
+          class: "data-percent blue",
+          relatively: "",
+          label: "Connect request sended",
+          chart: true,
+          chart_color: "fa fa-circle text-info",
+          value: 0
+        },
+        connect_request_approved: {
+          class: "data-percent purple",
+          relatively: "connect_request",
+          label: "Connect request approved",
+          chart: true,
+          chart_color: "fa fa-circle text-danger",
+          value: 0
+        },
+        messages_sent: {
+          class: "data-percent green",
+          relatively: "",
+          label: "Messages sended",
+          chart: true,
+          chart_color: "fa fa-circle text-warning",
+          value: 0
+        },
+        replies_received: {
+          class: "data-percent yellow",
+          relatively: "messages_sent",
+          label: "Replies resieved",
+          chart: true,
+          chart_color: "fa fa-circle text-primary",
+          value: 0
+        }
       },
+
+      email_chart: {
+        labels: [],
+        series: []
+      },
+      linkedin_chart: {
+        labels: [],
+        series: []
+      },
+
       list_data: {
         campaign: {},
         statistics: {
@@ -213,15 +217,11 @@ export default {
           linkedin: []
         }
       },
-      labels: ["1","2","3","4","5","6","7","8","9","10","11","12","13","14","15"],
+
       barChart: {
-        data_email: {
-            labels: [],
-            series: [],
-        },
-        data_linkedin: {
-            labels: [],
-            series: [],
+        data: {
+          labels: [],
+          series: []
         },
         options: {
           seriesBarDistance: 10,
@@ -247,6 +247,24 @@ export default {
     };
   },
   methods: {
+    calcPercent(value, abs_value) {
+      return Math.round(abs_value == 0 ? 0 : (value / abs_value) * 100);
+    },
+    onChangeMedium() {
+      //console.log('filter: ', this.filter)
+      this.$set(this, "medium_data", []);
+      this.$set(this.barChart, 'data', {});
+
+      if (this.filter == "Email") {
+        this.$set(this, "medium_data", this.email_data);
+        this.$set(this.barChart, 'data', this.email_chart);
+        console.log('this.barChart: ', this.barChart)
+      }
+      if (this.filter == "Linkedin") {
+        this.$set(this, "medium_data", this.linkedin_data);
+        this.$set(this.barChart, 'data', this.linkedin_chart);
+      }
+    },
     mouseOver: function() {
       this.mouse_active = false;
     },
@@ -255,72 +273,87 @@ export default {
     },
     calculate() {
       // email
-      let email_obj = {
-        days: 0,
-        emails_sent: 0,
-        emails_bounced: 0,
-        emails_opened: 0,
-        emails_replies: 0
-      };
+      let days = 0;
+      let emails_sent = 0;
+      let emails_bounced = 0;
+      let emails_opened = 0;
+      let emails_replies = 0;
 
       // email chart-bar !
+      let days_arr = [];
       let emails_sent_arr = [];
       let emails_bounced_arr = [];
       let emails_opened_arr = [];
       let emails_replies_arr = [];
 
       this.list_data.statistics.email.forEach(function(item) {
-        email_obj.days++;
-        email_obj.emails_sent += item.emails_sent;
-        email_obj.emails_bounced += item.emails_bounced;
-        email_obj.emails_opened += item.emails_opened;
-        email_obj.emails_replies += item.emails_replies_total;
+        days++;
+        emails_sent += item.emails_sent;
+        emails_bounced += item.emails_bounced;
+        emails_opened += item.emails_opened;
+        emails_replies += item.emails_replies_total;
 
+        days_arr.push(item.date);
         emails_sent_arr.push(item.emails_sent);
         emails_bounced_arr.push(item.emails_bounced);
         emails_opened_arr.push(item.emails_opened);
         emails_replies_arr.push(item.emails_replies_total);
       });
-      //this.$set(this, "barChart.data_email", {labels: this.labels, series: [emails_sent_arr, emails_bounced_arr, emails_opened_arr, emails_replies_arr]});
-      this.$set(this.barChart.data_email.series, 0, emails_sent_arr);
-      this.$set(this.barChart.data_email.series, 1, emails_bounced_arr);
-      this.$set(this.barChart.data_email.series, 2, emails_opened_arr);
-      this.$set(this.barChart.data_email.series, 3, emails_replies_arr);
+      //this.$set(this, "barChart.data", {labels: this.labels, series: [emails_sent_arr, emails_bounced_arr, emails_opened_arr, emails_replies_arr]});
+      this.$set(this.email_chart.labels, 0, days_arr);
+      this.$set(this.email_chart.series, 0, emails_sent_arr);
+      this.$set(this.email_chart.series, 1, emails_bounced_arr);
+      this.$set(this.email_chart.series, 2, emails_opened_arr);
+      this.$set(this.email_chart.series, 3, emails_replies_arr);
+      //console.log('arr: ', this.barChart.data.labels);
 
-      this.$set(this, "email_data", email_obj);
+      this.email_data.days.value = days;
+      this.email_data.emails_sent.value = emails_sent;
+      this.email_data.emails_bounced.value = emails_bounced;
+      this.email_data.emails_opened.value = emails_opened;
+      this.email_data.emails_replies.value = emails_replies;
+
+      //this.$set(this, "email_data", email_obj);
 
       // linkedin
-      let linkedin_obj = {
-        days: 0,
-        connect_request: 0,
-        connect_request_approved: 0,
-        messages_sent: 0,
-        replies_received: 0
-      };
+      days = 0;
+      let connect_request = 0;
+      let connect_request_approved = 0;
+      let messages_sent = 0;
+      let replies_received = 0;
 
       // linkedin chart-bar !
+      days_arr = [];
       let connect_request_arr = [];
       let connect_request_approved_arr = [];
       let messages_sent_arr = [];
       let replies_received_arr = [];
-      this.list_data.statistics.linkedin.forEach(function(item) {
-        linkedin_obj.days++;
-        linkedin_obj.connect_request += item.connect_request_total;
-        linkedin_obj.connect_request_approved += item.connect_request_approved_total;
-        linkedin_obj.messages_sent += item.linkedin_messages_sent_total;
-        linkedin_obj.replies_received += item.linkedin_replies_received;
 
+      this.list_data.statistics.linkedin.forEach(function(item) {
+        days++;
+        connect_request += item.connect_request_total;
+        connect_request_approved += item.connect_request_approved_total;
+        messages_sent += item.linkedin_messages_sent_total;
+        replies_received += item.linkedin_replies_received;
+
+        days_arr.push(item.date);
         connect_request_arr.push(item.connect_request_total);
         connect_request_approved_arr.push(item.connect_request_approved_total);
         messages_sent_arr.push(item.linkedin_messages_sent_total);
         replies_received_arr.push(item.linkedin_replies_received);
       });
-      this.$set(this.barChart.data_linkedin.series, 0, connect_request_arr);
-      this.$set(this.barChart.data_linkedin.series, 1, connect_request_approved_arr);
-      this.$set(this.barChart.data_linkedin.series, 2, messages_sent_arr);
-      this.$set(this.barChart.data_linkedin.series, 3, replies_received_arr);
+      this.$set(this.linkedin_chart.labels, 0, days_arr);
+      this.$set(this.linkedin_chart.series, 0, connect_request_arr);
+      this.$set(this.linkedin_chart.series, 1, connect_request_approved_arr);
+      this.$set(this.linkedin_chart.series, 2, messages_sent_arr);
+      this.$set(this.linkedin_chart.series, 3, replies_received_arr);
 
-      this.$set(this, "linkedin_data", linkedin_obj);
+      //this.$set(this, "linkedin_data", linkedin_obj);
+      this.linkedin_data.days.value = days;
+      this.linkedin_data.connect_request.value = connect_request;
+      this.linkedin_data.connect_request_approved.value = connect_request_approved;
+      this.linkedin_data.messages_sent.value = messages_sent;
+      this.linkedin_data.replies_received.value = replies_received;
     },
     load_data_1() {
       const path = STATISTICS_API_DETALIZATION;

@@ -6,7 +6,10 @@ export default
                     title : "Campaign -1",
                     id : 2341234231,
                     credentials : [{acount:"ks.shilov@gmail.com"}],
-                    funnel : 'funnel title',
+                    funnel : {
+                        title: 'funnel title',
+                        id: 321,
+                    },
                     prospects_list : {
                         title : 'It outsource CEO and CMO',
                         id : 432,
@@ -28,7 +31,10 @@ export default
                     title : "Campaign - 2",
                     id : 2342342342,
                     credentials : [{acount:"shilov@rambler.ru"}],
-                    funnel : 'funnel title - popop',
+                    funnel : {
+                        title: 'funnel title 2',
+                        id: 3221,
+                    },
                     prospects_list : {
                         title : 'It CMO',
                         id : 321,
@@ -50,7 +56,10 @@ export default
                     title : "Campaign - 3",
                     id : 342342342232,
                     credentials : [{acount:"test-shilov@mail.ru"}],
-                    funnel : 'funnel title - 3',
+                    funnel : {
+                        title: 'funnel title 3',
+                        id: 3251,
+                    },
                     prospects_list : {
                         title : 'It CEO',
                         id : 123,
