@@ -109,7 +109,7 @@ def create_models():
         email_domain = prospect.get('email_domain')
         email = email_name + email_domain
         
-        l = prospect.get('prospects_list', '')
+        l = prospect.get('assign_to_list', '')
         prospects_list = ProspectsList.objects(owner=owner.id, title=l).first()
 
 
@@ -118,7 +118,6 @@ def create_models():
             linkedin = 'http://linkedin.com/u'+ email_name + str(count)
             data = {
                 'email' : email,
-                'assign_to' : campaign.title,
                 'linkedin' : linkedin
             }
             if prospects_list:

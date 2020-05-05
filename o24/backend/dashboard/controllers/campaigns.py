@@ -136,30 +136,12 @@ def list_campaigns():
         'code' : -1,
         'msg' : '',
         'campaigns' : '',
-        'prospects_list' : '',
-        'funnels' : '',
-        'credentials' : '',
         'modified_fields' : json.dumps(modified_fields_on_create),
-        'columns' : json.dumps(COLUMNS),
         'pagination' : json.dumps(pagination),
     }
 
     try:
         if request.method == 'POST':
-            is_init = int(request.form.get('_init', 0))
-            if is_init:
-                prospects_list = ProspectsList.async_lists(owner=current_user.id)
-                if prospects_list:
-                    result['prospects_list'] = prospects_list.to_json()
-                
-                funnels = shared.Funnel.async_funnels(owner=current_user.id)
-                if funnels:
-                    result['funnels'] = funnels.to_json()
-                
-                total, credentials = Credentials.async_credentials(owner=current_user.id)
-                if credentials:
-                    result['credentials'] = credentials.to_json()
-
             page = int(request.form.get('_page',1))
 
             total, campaigns = Campaign.async_campaigns(owner=current_user.id,

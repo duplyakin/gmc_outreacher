@@ -11,6 +11,11 @@ from mongoengine.queryset.visitor import Q
 from pprint import pprint
 import datetime
 from datetime import timedelta
+import json
+from bson.json_util import dumps as bson_dumps
+
+from bson.json_util import CANONICAL_JSON_OPTIONS, RELAXED_JSON_OPTIONS
+from o24.backend.utils.filter_data import *
 
 CAMPAIGNS = [
     {
@@ -128,6 +133,14 @@ TASKS = [
 
 TITLES = ['IN_PROGRESS-1', 'IN_PROGRESS-2', 'PAUSED']
 
+def get_current_user():
+    user = User.objects(email='1@email.com').first()
+    if not user:
+        raise Exception('No such user')
+    
+    return user
+
+
 class TestLookupQuery(unittest.TestCase):
     def test_1_create_fake_data(self):
         return
@@ -212,6 +225,7 @@ class TestLookupQuery(unittest.TestCase):
 
 
     def test_2_lookup_3_tables(self):
+        return
         do_next = 1
         followup_level = 1
         
@@ -262,6 +276,105 @@ class TestLookupQuery(unittest.TestCase):
         pprint(tasks)
         print(tasks_ids)
         print(final_tasks)
+
+    def test_3_dereference(self):
+        current_user = get_current_user()
+        page = 3
+        per_page = 1
+
+        #total, prospects = Prospects.async_prospects(owner=current_user.id,
+        #                                            list_filter=list_filter,
+        #                                            page=page)   
+        filter_fields = ['assign_to', 'assign_to_list', 'column', 'contains']     
+        list_filter = {
+            'column' : 'email',
+            'contains' : 'shilov'
+        }
+
+        query = {
+            'owner' : current_user.id
+        }
+
+        q = construct_prospect_filter(filter_data=list_filter, 
+                                        filter_fields=filter_fields)
+        if q:
+            query.update(q)
+
+
+        pipeline = [
+            {"$lookup" : {
+                "from" : "campaign",
+                "localField" : "assign_to",
+                "foreignField" : "_id",
+                "as" : "assign_to"
+            }},
+            { "$unwind" : "$assign_to" },
+            {"$lookup" : {
+                "from" : "prospects_list",
+                "localField" : "assign_to_list",
+                "foreignField" : "_id",
+                "as" : "assign_to_list"
+            }},
+            { "$unwind" : "$assign_to_list" }
+        ]
+        
+
+        db_query = Prospects.objects(__raw__=query). \
+                    only('id', 'data', 'assign_to', 'status', 'assign_to_list'). \
+                    skip(per_page * (page-1)).limit(per_page).order_by('-created')
+        
+        prospects = db_query.aggregate(*pipeline)
+
+        #o_id = prospects[0]['_id']
+        print(bson_dumps(prospects, json_options=CANONICAL_JSON_OPTIONS))
+
+        #pprint(json.dumps(prospects))
+        #print(len(prospects))
+
+    def test_4_campaign_dereference(self):
+        return 
+        current_user = get_current_user()
+        list_filter = {}
+        page = 3
+        per_page = 1
+
+        query = {"$match": {"owner" : {"$eq" : current_user.id} }}
+
+        pipeline = [
+            {"$lookup" : {
+                "from" : "credentials",
+                "localField" : "credentials",
+                "foreignField" : "_id",
+                "as" : "credentials"
+            }},
+            {"$lookup" : {
+                "from" : "funnel",
+                "localField" : "funnel",
+                "foreignField" : "_id",
+                "as" : "funnel"
+            }},
+            { "$unwind" : "$funnel" },
+            {"$lookup" : {
+                "from" : "action",
+                "localField" : "funnel.action",
+                "foreignField" : "_id",
+                "as" : "funnel.action"
+            }},
+            { "$unwind" : "$funnel.action" },
+        ]       
+        
+
+        db_query = Campaign.objects(title="campaign-2").only('credentials', 'funnel')
+        
+        campaigns = db_query.aggregate(*pipeline)
+
+        j = dumps(campaigns)
+
+        #o_id = prospects[0]['_id']
+
+        o = json.loads(j)
+        pprint(o)
+
 
 def setUpModule():
     env = os.environ.get('APP_ENV', None)

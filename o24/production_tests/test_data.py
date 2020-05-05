@@ -689,7 +689,7 @@ PROSPECTS = [
         'assign_to' : 'campaign-1',
         'email_name' : 'ksshilov',
         'email_domain' : '@yandex.ru',
-        'prospects_list' : 'List-1 1@email.com'
+        'assign_to_list' : 'List-1 1@email.com'
     },
     {
         'owner' : '1@email.com',
@@ -697,7 +697,14 @@ PROSPECTS = [
         'assign_to' : 'campaign-11',
         'email_name' : 'ks.shilov',
         'email_domain' : '@gmail.ru',
-        'prospects_list' : 'List-2 1@email.com',
+        'assign_to_list' : 'List-2 1@email.com',
+    },
+    {
+        'owner' : '1@email.com',
+        'amount' : 10,
+        'assign_to' : 'campaign-111',
+        'email_name' : 'ks_shilov',
+        'email_domain' : '@gmail.com',
     },
     {
         'owner' : '3@email.com',
@@ -705,8 +712,7 @@ PROSPECTS = [
         'assign_to' : 'campaign-2',
         'email_name' : 'yana.shilov',
         'email_domain' : '@gmail.ru',
-        'lists' : []
-    },
+    }
 ]
 
 

@@ -281,16 +281,6 @@ class TaskQueue(db.Document):
 
 
     @classmethod
-    def pause_tasks(cls, campaign_id):
-        return
-        #TaskQueue.objects(Q(campaign_id=campaign_id) & Q(status__in=TASKS_CAN_BE_PAUSED)).update(status=PAUSED)
-
-    @classmethod
-    def resume_tasks(cls, campaign_id):
-        return
-        #TaskQueue.objects(Q(campaign_id=campaign_id) & Q(status__in=TASKS_CAN_BE_RESUMED)).update(status=NEW)
-
-    @classmethod
     def safe_unassign_prospects(cls, prospects_ids):
         return cls.objects(prospect_id__in=prospects_ids).delete()
 
