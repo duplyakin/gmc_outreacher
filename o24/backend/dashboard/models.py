@@ -20,6 +20,7 @@ import o24.backend.models.shared as shared
 import o24.backend.scheduler.scheduler as scheduler
 
 from bson import ObjectId
+from bson.json_util import dumps as bson_dumps
 from o24.backend.utils.filter_data import *
 from o24.backend.utils.helpers import template_key_dict 
 from o24.backend.dashboard.serializers import JSCampaignData
@@ -290,8 +291,6 @@ class Campaign(db.Document):
 
     credentials = db.ListField(db.ReferenceField(Credentials, reverse_delete_rule=1))
 
-    prospects_list = db.ReferenceField('ProspectsList')
-
     funnel = db.ReferenceField(shared.Funnel, reverse_delete_rule=1)
     
     #get from timeTable
@@ -302,7 +301,6 @@ class Campaign(db.Document):
     to_minutes = db.IntField(default=0)
     time_zone = db.StringField(default='')
 
-    
     templates = db.DictField()
 
     data = db.DictField()
@@ -312,29 +310,34 @@ class Campaign(db.Document):
 
     created = db.DateTimeField( default=datetime.now() )
 
-    @classmethod
-    def list_campaigns(cls, owner):
-        return cls.objects(owner=owner).all()
 
     @classmethod
-    def async_campaigns(cls, owner, page=None, per_page=config.CAMPAIGNS_PER_PAGE):
+    def async_campaigns_list(cls, owner, page=None, per_page=config.CAMPAIGNS_PER_PAGE):
         if page and page <= 1:
             page = 1
 
-        query = {
-            'owner' : owner
-        }
-
-        db_query = cls.objects(__raw__=query)
+        db_query = cls.objects(__raw__=query). \
+                    only('id', 
+                            'status', 
+                            'title', 
+                            'data', 
+                            'sending_days',
+                            'from_hour'
+                            'from_minutes'
+                            'to_hour'
+                            'to_minutes'
+                            'time_zone')
         
         total = db_query.count()
-        results = []
 
+        campaigns = None
         if page:
-            results = db_query.skip(per_page * (page-1)).limit(per_page).order_by('-created').all()
+            campaigns = db_query.skip(per_page * (page-1)).limit(per_page).order_by('-created').all()
         else:
-            results = db_query.order_by('-created').all()
-        
+            campaigns = db_query.order_by('-created').all()
+
+        results = campaigns.to_json()
+
         return (total, results)
 
     @classmethod
@@ -587,7 +590,14 @@ class ProspectsList(db.Document):
 
     @classmethod
     def async_lists(cls, owner):
-        return cls.objects(owner=owner).only('id', 'title').all()
+        db_query = cls.objects(owner=owner). \
+                    only('id', 'title')
+        
+        total = db_query.count()
+        prospects_list = db_query.order_by('-created').all()
+
+        results = lists.to_json()
+        return (total, results)
 
     @classmethod
     def get_lists(cls, owner, title=None, id=None):
@@ -613,9 +623,23 @@ class ProspectsList(db.Document):
 
 
 class Prospects(db.Document):
+    RESTRICTED_SET_FIELDS = [
+        'owner',
+        'id',
+        '_id',
+        'status',
+        'created',
+        'assign_to'
+    ]
+    
+    @classmethod
+    def get_create_fields(cls):
+        return cls._fields.keys()
+
     owner = db.ReferenceField(User, reverse_delete_rule=1)
     
     team = db.ListField(db.ReferenceField(Team, reverse_delete_rule=1))
+    
     data = db.DictField()
 
     assign_to = db.ReferenceField(Campaign, reverse_delete_rule=1)
@@ -626,8 +650,6 @@ class Prospects(db.Document):
     # 3 - finished
     status = db.IntField(default=0)
     
-    tags = db.ListField(db.StringField(default=''))
-
     # DO_NOTHING (0) - don’t do anything (default).
     # NULLIFY (1) - Updates the reference to null.
     # CASCADE (2) - Deletes the documents associated with the reference.
@@ -637,6 +659,95 @@ class Prospects(db.Document):
 
     created = db.DateTimeField( default=datetime.now() )
 
+    def serialize(self):
+        #we use it for join and showing objects as it is
+        pipeline = [
+            {"$lookup" : {
+                "from" : "campaign",
+                "localField" : "assign_to",
+                "foreignField" : "_id",
+                "as" : "assign_to"
+            }},
+            { "$unwind" : "$assign_to" },
+            {"$lookup" : {
+                "from" : "prospects_list",
+                "localField" : "assign_to_list",
+                "foreignField" : "_id",
+                "as" : "assign_to_list"
+            }},
+            { "$unwind" : "$assign_to_list" }
+        ]
+
+        prospect = list(Prospects.objects(id=self.id).aggregate(*pipeline))
+
+        if len(prospect) > 0:
+            prospect = prospect[0]
+
+        sz = bson_dumps(prospect)
+
+        return sz
+
+    def _async_set_field(self, field_name, val):
+        setattr(self, field_name, val)
+
+    def _validate_prospect_data(self, owner_id, prospect_data):
+        
+        assign_to_list = prospect_data.assign_to_list()
+        if assign_to_list:
+            exist = ProspectsList.objects(owner=owner_id, id=assign_to_list).first()
+            if not exist:
+                raise Exception("Prospect List doesn't exist")
+        
+        #check for email duplicate
+        data = prospect_data.data()
+        if data:
+            query = {
+                'owner' : owner_id
+            }
+
+            check_duplicate = False
+        
+            email = data.get('email','')
+            if email:
+                query['email'] = email
+                check_duplicate = True
+
+            linkedin = data.get('linkedin','')
+            if linkedin:
+                query['linkedin'] = linkedin
+                check_duplicate = True
+
+            if check_duplicate:
+                duplicate = Prospects.objects(__raw__=query).first()
+                if duplicate:
+                    error = "Duplicate found ERROR: email:{0} or linkedin:{1} exists".format(email, linkedin)
+                    raise Exception(error)
+
+        return True
+
+    @classmethod
+    def async_create(cls, owner_id, prospect_data, create_fields, restricted_fields=None):
+        if not restricted_fields:
+            restricted_fields = cls.RESTRICTED_SET_FIELDS
+
+        new_prospect = cls()
+        new_prospect.owner = owner_id
+
+        new_prospect._validate_prospect_data(owner_id=owner_id, prospect_data=prospect_data)
+
+        for field in create_fields:
+            if field in restricted_fields:
+                continue
+    
+            val = prospect_data.get_field(field)
+            if val:
+                new_prospect._async_set_field(field_name=field, val=val)
+
+        new_prospect._commit()
+        return new_prospect
+
+
+    #we use this for test only
     @classmethod
     def create_prospect(cls, owner_id, campaign_id=None, data={}, lists=[], commit=True):
         new_prospect = cls()
@@ -656,13 +767,24 @@ class Prospects(db.Document):
         return new_prospect
 
     @classmethod
-    def safe_delete_prospects(cls, owner_id, prospects_ids):
+    def filter_no_campaign(cls, owner_id, prospects_ids):
+        return Prospects.objects(owner=owner_id, id__in=prospects_ids, assign_to=None).all()
+
+    @classmethod
+    def _unassign_campaign(cls, owner_id, prospects_ids):
         if not prospects_ids:
             return 0
 
-        Prospects.safe_unassign_prospects(owner_id=owner_id, prospects_ids=prospects_ids)
+        return Prospects.objects(owner=owner_id, 
+                                id__in=prospects_ids).update(assign_to=None, status=NEW)
 
-        return Prospects.objects(owner=owner_id, id__in=prospects_ids).delete()
+    #Only prospects that are not assigned to any campaign will be remove
+    @classmethod
+    def delete_prospects(cls, owner_id, prospects_ids):
+        if not prospects_ids:
+            return 0
+
+        return Prospects.objects(owner=owner_id, id__in=prospects_ids, assign_to=None).delete()
     
     @classmethod
     def upload(cls, owner_id, csv_with_header, map_to, add_to_list):
@@ -704,11 +826,7 @@ class Prospects(db.Document):
         return Prospects.objects(assign_to_list=list_id).count()
 
     @classmethod
-    def not_in_a_list(cls, ids):
-        return Prospects.objects(id__in=ids, assign_to_list='').all()
-
-    @classmethod
-    def safe_add_to_list(cls, owner_id, prospects_ids, list_id):
+    def add_to_list(cls, owner_id, prospects_ids, list_id):
         if not prospects_ids or not list_id:
             return 0
         
@@ -716,57 +834,30 @@ class Prospects(db.Document):
         if not list_exist:
             raise Exception("List doesn't exist")
         
-        prospects_exist = Prospects.not_in_a_list(ids=prospects_ids)
-        if not prospects_exist:
-            raise Exception("Prospects don't exist or assigned to other lists: unassign from list first")
+        res = Prospects.objects(owner=owner_id, id__in=prospects_ids).update(assign_to_list=list_id)
 
-
-        ids = [p.id for p in prospects_exist]
-        if not ids:
-            raise Exception("Prospects add to list ERROR: something went wrong, contact support")
-
-        res = 0
-        #has campaign (then we need to assign to list and to campaign)
-        campaign = Campaign.get_campaign_for_list(owner_id=owner_id, list_id=list_id)
-        if campaign:
-            res = Prospects.objects(owner=owner_id, id__in=ids).update(assign_to=campaign.id, assign_to_list=list_id)
-
-            if campaign.inprogress():
-                scheduler.Scheduler.safe_add_prospects(campaign=campaign, prospects=prospects_exist)
-        else:
-            res = Prospects.objects(owner=owner_id, id__in=ids).update(assign_to_list=list_id)
+        return res
+    
+    @classmethod
+    def remove_from_list(cls, owner_id, prospects_ids, list_id):
+        if not prospects_ids or not list_id:
+            return 0
+        
+        list_exist = ProspectsList.objects(id=list_id).first()
+        if not list_exist:
+            raise Exception("List doesn't exist")
+        
+        res = Prospects.objects(owner=owner_id, id__in=prospects_ids, assign_to_list=list_id).update(assign_to_list=None)
 
         return res
 
 
     @classmethod
-    def safe_unassign_prospects(cls, owner_id, prospects_ids):
-        if not prospects_ids:
-            return 0
-        
-        prospects = Prospects.objects(owner=owner_id, id__in=prospects_ids).all()
-        if not prospects:
-            raise Exception("No such prospects")
-
-        campaigns = [p.assign_to for p in prospects]
-        if not campaigns:
-            raise Exception("Prospects are not assigned to any campaign")
-        
-        #pause all campaigns before unassign
-        for campaign in campaigns:
-            campaign.safe_pause()
-
-        shared.TaskQueue.safe_unassign_prospects(prospects_ids=prospects_ids)
-
-        return Prospects.objects(owner=owner_id, id__in=prospects_ids).update(data={}, assign_to='', assign_to_list='', status=NEW)
-
-
-    @classmethod
-    def async_prospects(cls, owner, list_filter, page, per_page=config.PROSPECTS_PER_PAGE):
+    def async_prospects_list(cls, owner, list_filter, page, per_page=config.PROSPECTS_PER_PAGE):
         if page <= 1:
             page = 1
 
-        filter_fields = ['assign_to', 'list', 'column', 'contains']     
+        filter_fields = ['assign_to', 'assign_to_list', 'column', 'contains']     
 
         #remove denied values
         list_filter.pop('owner', '')
@@ -784,10 +875,31 @@ class Prospects(db.Document):
             query.update(q)
 
         db_query = cls.objects(__raw__=query). \
-                    only('id', 'data', 'assign_to', 'status', 'lists')
+                    only('id', 'team','data', 'assign_to', 'status', 'assign_to_list')
         
         total = db_query.count()
-        results = db_query.skip(per_page * (page-1)).limit(per_page).order_by('-created').all()
+
+        #we use it for join and showing objects as it is
+        pipeline = [
+            {"$lookup" : {
+                "from" : "campaign",
+                "localField" : "assign_to",
+                "foreignField" : "_id",
+                "as" : "assign_to"
+            }},
+            { "$unwind" : "$assign_to" },
+            {"$lookup" : {
+                "from" : "prospects_list",
+                "localField" : "assign_to_list",
+                "foreignField" : "_id",
+                "as" : "assign_to_list"
+            }},
+            { "$unwind" : "$assign_to_list" }
+        ]
+
+        prospects = db_query.skip(per_page * (page-1)).limit(per_page).order_by('-created').aggregate(*pipeline)
+
+        results = bson_dumps(prospects)
 
         return (total, results)
 
@@ -810,8 +922,6 @@ class Prospects(db.Document):
         return self.data.get('email', '')
 
     def update_data(self, data):
-        #TEST ONLY:
-        data['lists'] = 'Updated list - FIX IT'
         self.data = data
         self._commit()
 

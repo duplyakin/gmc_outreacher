@@ -164,9 +164,7 @@ class Scheduler():
 
         campaign._safe_start()
 
-        prospect_ids = self._load_prospects(campaign, prospects)
-        if not prospect_ids:
-            raise Exception("Can't load_prospects campaign_title={0} prospect_ids={1}".format(campaign.title, prospect_ids))
+        prospect_ids = self. ={0} prospect_ids={1}".format(campaign.title, prospect_ids))
 
         self._update_prospects(prospect_ids, status=IN_PROGRESS)    
         
@@ -196,6 +194,43 @@ class Scheduler():
         campaign.safe_start()
 
         #campaign.update_status(status=IN_PROGRESS)
+    @classmethod
+    def safe_unassign_prospects(cls, owner_id, prospects_ids):
+        if not owner_id or not prospects_ids:
+            return 0
+
+        scheduler = cls()
+        #To unassign we need:
+        # 1. Pause all campaigns prospects belongs to
+        # 2. Remove all tasks from task_queue
+        # 3. Update prospects assign_to=None
+        campaigns = models.Campaign.objects(owner=owner_id, id__in=prospects_ids).all()
+        for campaign in campaigns:
+            scheduler.pause_campaign(campaign)
+        
+        tasks_deleted = TaskQueue.safe_unassign_prospects(prospects_ids=prospects_ids)
+
+        prospects_unassigned = models.Prospects._unassign_campaign(owner_id=owner_id, prospects_ids=prospects_ids)    
+
+        return prospects_unassigned
+
+    @classmethod
+    def safe_assign_prospects(cls, owner_id, campaign, prospects_ids):
+        if not campaign or not prospects_ids:
+            return 0
+
+        prospects_without_campaign = Prospects.filter_no_campaign(owner_id=owner_id, prospects_ids=prospects_ids)
+        if not prospects_without_campaign:
+            return 0
+        
+        scheduler = cls()
+
+        res = scheduler.add_prospects(campaign=campaign, prospects=prospects_without_campaign)
+
+        if type(res) != list:
+            return 0
+            
+        return len(res)
 
     @classmethod
     def safe_start_campaign(cls, campaign):
@@ -213,12 +248,6 @@ class Scheduler():
         scheduler = cls()
         scheduler.pause_campaign(campaign=campaign)
 
-
-    @classmethod
-    def safe_add_prospects(cls, campaign, prospects):
-        scheduler = cls()
-
-        scheduler.add_prospects(campaign=campaign, prospects=prospects)
 
     @classmethod
     def safe_delete_campaign(cls, campaign):
@@ -243,6 +272,8 @@ class Scheduler():
             raise Exception("Can't load_prospects campaign_title={0} ids={1}".format(campaign.title, ids))
         
         self._update_prospects(ids, status=IN_PROGRESS)
+
+        return ids
 
 
     def _check_new_prospects(self, campaign):

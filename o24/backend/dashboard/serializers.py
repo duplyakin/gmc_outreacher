@@ -2,13 +2,96 @@ import json
 from o24.backend.utils.helpers import template_key_dict 
 from bson.objectid import ObjectId
 
-class JSCampaignData():
-
+class JSObject():
     ATTR_PREFIX = '_js_'
     RAW_ATTR_PREFIX = '_raw_'
-
+    
     STR_FIELDS = ['title']
 
+    def _custom_attr(self, attr, default=None, raw=False):
+        attr_name = self.ATTR_PREFIX + attr
+        if raw:
+            attr_name = self.RAW_ATTR_PREFIX + attr
+
+        if not hasattr(self, attr_name):
+            return default
+
+        val = getattr(self, attr_name)
+        if not val:
+            return default
+
+        return val
+
+    def get_field(self, field, default=None):
+        return self._custom_attr(attr=field, default=default)
+
+
+class JSProspectData(JSObject):
+    def __init__(self, raw_data):
+        try:
+            self.raw_data = raw_data
+
+            self.data_dict = json.loads(raw_data)
+            if not self.data_dict:
+                raise Exception("Prospect Data can't be empty")
+
+            for key, value in self.data_dict.items():
+                if value:
+                    attr_name = self.ATTR_PREFIX + key
+                    attr_name_raw = self.RAW_ATTR_PREFIX + key
+
+                    des_value = value
+
+                    #trying to parse json
+                    if key not in self.STR_FIELDS and isinstance(des_value, str):
+                        try:
+                            des_value = json.loads(value)
+                        except:
+                            des_value = value
+                    
+                    setattr(self, attr_name_raw, des_value)
+                    if isinstance(des_value, list):
+                        # is that a dict of objectIDs - check first ellement
+                        if len(des_value) > 0:
+                            el_0 = des_value[0]
+                            if isinstance(el_0, dict) and el_0.get('_id', None):
+                                lst = []
+                                for v in des_value:
+                                    get_id = v['_id']['$oid']
+                                    if not get_id:
+                                        raise Exception("Id can't be empty for field:{0}".format(key))
+
+                                    o_id = ObjectId(get_id)
+                                    lst.append(o_id)
+                                setattr(self, attr_name, lst)
+                            else:
+                                setattr(self, attr_name, des_value)
+                        else:
+                            setattr(self, attr_name, des_value)
+                    elif isinstance(des_value, dict):
+                        if des_value.get('_id', None):
+                            get_id = des_value['_id']['$oid']
+                            if not get_id:
+                                raise Exception("Id can't be empty for field:{0}".format(key))
+                            
+                            o_id = ObjectId(get_id)
+                            setattr(self, attr_name, o_id)
+                        else:
+                            setattr(self, attr_name, des_value)
+                    else:
+                        setattr(self, attr_name, des_value)
+
+        except Exception as e:
+            error_message = "Prospect Data serialization error: {0}".format(str(e))
+            raise Exception(error_message)
+
+    def assign_to_list(self):
+        return self._custom_attr(attr='assign_to_list', default=None)
+
+    def data(self):
+        return self._custom_attr(attr='data', default={})
+  
+class JSCampaignData(JSObject):
     def __init__(self, raw_data):
         try:
             self.raw_data = raw_data
@@ -100,23 +183,6 @@ class JSCampaignData():
             error_message = "Campaign Data serialization error: {0}".format(str(e))
             raise Exception(error_message)
     
-    def _custom_attr(self, attr, default=None, raw=False):
-        attr_name = self.ATTR_PREFIX + attr
-        if raw:
-            attr_name = self.RAW_ATTR_PREFIX + attr
-
-        if not hasattr(self, attr_name):
-            return default
-
-        val = getattr(self, attr_name)
-        if not val:
-            return default
-
-        return val
-
-    def get_field(self, field, default=None):
-        return self._custom_attr(attr=field, default=default)
-
     def title(self):
         return self._custom_attr(attr='title', default='')
     
