@@ -1,4 +1,12 @@
 ВКЛАДКА СТАТИСТИКА
+0. /statistics/data
+- POST
+
+Ответ:
+{
+    'columns' : []
+}
+
 1. /statistics/list
 - POST
 - {
@@ -19,6 +27,7 @@
 
 Ответ получаешь:
 - {
+    pagination : {},
     statistics : [
         {
             campaign : {

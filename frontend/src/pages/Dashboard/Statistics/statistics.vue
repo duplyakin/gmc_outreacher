@@ -40,13 +40,13 @@
                 <template slot-scope="scope">
                     <a @click.prevent="detalization(scope.row)" href="#" v-if="column.prop === 'title'">{{ scope.row.campaign[column.prop] }}</a>
                     <template v-else> {{ column.campaign ? (column.object ? scope.row.campaign[column.prop][column.sub_prop] : scope.row.campaign[column.prop]) : scope.row.aggregated[column.prop] }} </template>
-                </template> 
+                </template>
             </el-table-column>
-            
+
             </el-table>
         </div>
-    
-        </card>          
+
+        </card>
 </div>
 </template>
 <script>
@@ -208,6 +208,10 @@ methods: {
                     this.$set(this.columns, key, parsed_data);
                 }
         }
+        /*
+        var pagination_dict = JSON.parse(new_data.pagination);
+        this.$set(this, 'pagination', pagination_dict);
+        */
         console.log(this.list_data)
 
     },
