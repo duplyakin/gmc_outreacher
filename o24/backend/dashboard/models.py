@@ -316,16 +316,16 @@ class Campaign(db.Document):
         if page and page <= 1:
             page = 1
 
-        db_query = cls.objects(__raw__=query). \
+        db_query = cls.objects(owner=owner). \
                     only('id', 
                             'status', 
                             'title', 
                             'data', 
                             'sending_days',
-                            'from_hour'
-                            'from_minutes'
-                            'to_hour'
-                            'to_minutes'
+                            'from_hour',
+                            'from_minutes',
+                            'to_hour',
+                            'to_minutes',
                             'time_zone')
         
         total = db_query.count()
@@ -579,7 +579,7 @@ class Campaign(db.Document):
 class ProspectsList(db.Document):
     owner = db.ReferenceField(User, reverse_delete_rule=1)
     
-    title = db.StringField()
+    title = db.StringField(unique=True)
 
     created = db.DateTimeField( default=datetime.now() )
     
@@ -589,14 +589,14 @@ class ProspectsList(db.Document):
     # 3 - finished
 
     @classmethod
-    def async_lists(cls, owner):
-        db_query = cls.objects(owner=owner). \
+    def async_lists(cls, owner_id, page=1):
+        db_query = cls.objects(owner=owner_id). \
                     only('id', 'title')
         
         total = db_query.count()
         prospects_list = db_query.order_by('-created').all()
 
-        results = lists.to_json()
+        results = prospects_list.to_json()
         return (total, results)
 
     @classmethod
@@ -617,6 +617,17 @@ class ProspectsList(db.Document):
 
         new_list._commit()
         return new_list
+    
+    def serialize(self):
+        return 0
+
+    def update_data(self, title=None):
+        if title:
+            self.title = title
+            self._commit()
+
+    def safe_delete(self):
+        return self.delete()
 
     def _commit(self):
         self.save()
@@ -631,6 +642,8 @@ class Prospects(db.Document):
         'created',
         'assign_to'
     ]
+
+    MEDIUM = ['email', 'linkedin', 'Email', 'Linkedin']
     
     @classmethod
     def get_create_fields(cls):
@@ -668,14 +681,15 @@ class Prospects(db.Document):
                 "foreignField" : "_id",
                 "as" : "assign_to"
             }},
-            { "$unwind" : "$assign_to" },
+            { "$unwind" : { "path" : "$assign_to", "preserveNullAndEmptyArrays": True }},
+
             {"$lookup" : {
                 "from" : "prospects_list",
                 "localField" : "assign_to_list",
                 "foreignField" : "_id",
                 "as" : "assign_to_list"
             }},
-            { "$unwind" : "$assign_to_list" }
+            { "$unwind" : { "path" : "$assign_to_list", "preserveNullAndEmptyArrays": True }}
         ]
 
         prospect = list(Prospects.objects(id=self.id).aggregate(*pipeline))
@@ -690,6 +704,44 @@ class Prospects(db.Document):
     def _async_set_field(self, field_name, val):
         setattr(self, field_name, val)
 
+    def _chek_for_duplicates(self, owner_id, data):
+        if not data:
+            return False
+        
+        query = {
+            'owner' : owner_id,
+            '_id' : { '$ne' : self.id }
+        }
+
+        check_duplicate = False
+        or_array = []
+
+        email = data.get('email','')
+        if email:
+            or_array.append(
+                {
+                    'data.email' : email
+                }
+            )
+            check_duplicate = True
+
+        linkedin = data.get('linkedin','')
+        if linkedin:
+            or_array.append(
+                {
+                    'data.linkedin' : linkedin
+                }
+            )
+            check_duplicate = True
+
+        if check_duplicate:
+            query['$or'] = or_array
+            duplicates = Prospects.objects(__raw__=query).all()
+            if duplicates:
+                error = "Duplicate found ERROR: email:{0} or linkedin:{1} exists".format(email, linkedin)
+                raise Exception(error)
+
+
     def _validate_prospect_data(self, owner_id, prospect_data):
         
         assign_to_list = prospect_data.assign_to_list()
@@ -700,28 +752,7 @@ class Prospects(db.Document):
         
         #check for email duplicate
         data = prospect_data.data()
-        if data:
-            query = {
-                'owner' : owner_id
-            }
-
-            check_duplicate = False
-        
-            email = data.get('email','')
-            if email:
-                query['email'] = email
-                check_duplicate = True
-
-            linkedin = data.get('linkedin','')
-            if linkedin:
-                query['linkedin'] = linkedin
-                check_duplicate = True
-
-            if check_duplicate:
-                duplicate = Prospects.objects(__raw__=query).first()
-                if duplicate:
-                    error = "Duplicate found ERROR: email:{0} or linkedin:{1} exists".format(email, linkedin)
-                    raise Exception(error)
+        self._chek_for_duplicates(owner_id=owner_id, data=data)
 
         return True
 
@@ -747,19 +778,37 @@ class Prospects(db.Document):
         return new_prospect
 
 
+
     #we use this for test only
     @classmethod
-    def create_prospect(cls, owner_id, campaign_id=None, data={}, lists=[], commit=True):
+    def create_prospect(cls, owner_id, data={}, list_id=None, campaign_id=None, commit=True):
         new_prospect = cls()
 
         new_prospect.owner = owner_id
-        new_prospect.data = data
 
+        if data:
+            new_prospect.data = data
+
+        if list_id:
+            new_prospect.assign_to_list = list_id
+
+        obj_fields = cls.get_create_fields()
+
+        prod_data = {}
+        for key, val in data.items():
+            if not data[key]:
+                continue
+
+            if key in obj_fields:
+                setattr(new_prospect, key, data[key])
+            else:
+                prod_data[key] = val
+        
+        new_prospect.data = prod_data
+
+        #DEPRECATED FIELDS USED BY TEST - need to remove
         if campaign_id:
             new_prospect.assign_to = campaign_id
-
-        if data.get('prospects_list', None):
-            new_prospect.assign_to_list = data.get('prospects_list')
 
         if commit:
             new_prospect._commit()
@@ -778,6 +827,15 @@ class Prospects(db.Document):
         return Prospects.objects(owner=owner_id, 
                                 id__in=prospects_ids).update(assign_to=None, status=NEW)
 
+    @classmethod
+    def _assign_campaign(cls, owner_id, prospects_ids, campaign_id):
+        if not prospects_ids or not campaign_id:
+            return 0
+
+        return Prospects.objects(owner=owner_id, 
+                                id__in=prospects_ids).update(assign_to=campaign_id)
+
+
     #Only prospects that are not assigned to any campaign will be remove
     @classmethod
     def delete_prospects(cls, owner_id, prospects_ids):
@@ -787,10 +845,81 @@ class Prospects(db.Document):
         return Prospects.objects(owner=owner_id, id__in=prospects_ids, assign_to=None).delete()
     
     @classmethod
-    def upload(cls, owner_id, csv_with_header, map_to, add_to_list):
+    def duplicates(cls, owner_id):
+        def split_helper(obj, duplicates_dict):
+            if not obj:
+                return
+
+            element = obj.get('_id', '')
+            if not element:
+                return 
+            
+            email = element.get('email','')
+            if email:
+                duplicates_dict['email'].append(email)
+
+            linkedin = element.get('linkedin', '')
+            if linkedin:
+                duplicates_dict['linkedin'].append(linkedin)
+        
+            prospect_id = obj.get('prospect_id', '')
+            if prospect_id:
+                duplicates_dict['ids'].append(prospect_id)
+
+        pipeline = [
+            {"$group" : {
+                "_id" : {
+                    'email' : '$data.email',
+                    'linkedin' : '$data.linkedin' 
+                },
+                "prospect_id" : {"$first" : { "$toString" : "$_id" }}
+            }}        
+        ]
+
+        prospects = list(Prospects.objects(owner=owner_id).aggregate(*pipeline))
+
+        duplicates = {
+            'email' : [],
+            'linkedin' : [],
+            'ids' : []
+        }
+
+        q = [split_helper(p, duplicates) for p in prospects]
+
+        return duplicates
+
+    @classmethod
+    def update_duplicates(cls, owner_id, new_data, values=[], list_id=None):
+        duplicates = Prospects.objects(Q(owner=owner_id) & (Q(data__email__in=values) | Q(data__linkedin__in=values))).all()
+        if not duplicates:
+            return
+
+        for prospect in duplicates:
+            email = prospect.data.get('email', '')
+            linkedin = prospect.data.get('linkedin', '')
+            for data in new_data:
+                if (data.get('email', '') and email == data['email']) or (data.get('linkedin', '') and linkedin == data['linkedin']):
+                    prospect.data = data
+                    if list_id:
+                        prospect.assign_to_list = list_id
+                    prospect.save()
+                    prospect.reload()
+                    del data
+                    break
+
+    @classmethod
+    def upload(cls, owner_id, csv_with_header, map_to, list_id, update_existing=0):
 
         prospects_list = []
-        
+        need_update = []
+        duplicate_values = []
+
+        #dict with
+        # 'email' : [] (All current emails)
+        # 'linkedin' : [] (All current linkedins)
+        # 'ids' : [] (All ids)
+        duplicates = cls.duplicates(owner_id=owner_id)
+
         i = 0
         for row in csv_with_header:
             i = i + 1
@@ -800,25 +929,44 @@ class Prospects(db.Document):
                 continue
 
             data = {}
-            if add_to_list:
-                data['lists'] = [add_to_list.title]
-
+            found_duplicate = False
+            just_pass = False
             for m_t in map_to.keys():
                 row_data = row[m_t]
                 field_name = map_to[m_t]
 
                 data[field_name] = row_data
+                if field_name in cls.MEDIUM:
+                    #check if it exists in database
+                    if row_data in duplicates['email'] or row_data in duplicates['linkedin']:
+                        #check if we already seen this one (there could be duplicates in the CSV too)
+                        if row_data not in duplicate_values:
+                            found_duplicate = True
+                            duplicate_values.append(row_data)
+                        else:
+                            just_pass = True
+                            break
 
-            next_prospect = cls.create_prospect(owner_id=owner_id,
-                                                data=data, 
-                                                lists=add_to_list, 
-                                                commit=False)
-            prospects_list.append(next_prospect)
+            if just_pass:
+                continue
+            elif found_duplicate:
+                need_update.append(data)
+            else:
+                next_prospect = cls.create_prospect(owner_id=owner_id,
+                                                    data=data, 
+                                                    list_id=list_id, 
+                                                    commit=False)
+                prospects_list.append(next_prospect)
 
-        if not prospects_list:
-            return 0
+        # create the new prospects first
+        ids = []
+        if prospects_list:
+            ids = cls.objects.insert(prospects_list, load_bulk=False)
+        
+        #then update existing ones
+        if update_existing:
+            cls.update_duplicates(owner_id=owner_id, new_data=need_update, values=duplicate_values, list_id=list_id)
 
-        ids = cls.objects.insert(prospects_list, load_bulk=False)
         return len(ids)
 
     @classmethod
@@ -839,15 +987,11 @@ class Prospects(db.Document):
         return res
     
     @classmethod
-    def remove_from_list(cls, owner_id, prospects_ids, list_id):
-        if not prospects_ids or not list_id:
+    def remove_from_list(cls, owner_id, prospects_ids):
+        if not owner_id or not prospects_ids:
             return 0
         
-        list_exist = ProspectsList.objects(id=list_id).first()
-        if not list_exist:
-            raise Exception("List doesn't exist")
-        
-        res = Prospects.objects(owner=owner_id, id__in=prospects_ids, assign_to_list=list_id).update(assign_to_list=None)
+        res = Prospects.objects(owner=owner_id, id__in=prospects_ids).update(assign_to_list=None)
 
         return res
 
@@ -868,14 +1012,14 @@ class Prospects(db.Document):
         query = {
             'owner' : owner
         }
-
-        q = construct_prospect_filter(filter_data=list_filter, 
+        without_prefix = cls.get_create_fields()
+        q = construct_prospect_filter(filter_data=list_filter,
+                                        without_prefix = without_prefix,
                                         filter_fields=filter_fields)
         if q:
             query.update(q)
 
-        db_query = cls.objects(__raw__=query). \
-                    only('id', 'team','data', 'assign_to', 'status', 'assign_to_list')
+        db_query = cls.objects(**query)
         
         total = db_query.count()
 
@@ -887,14 +1031,21 @@ class Prospects(db.Document):
                 "foreignField" : "_id",
                 "as" : "assign_to"
             }},
-            { "$unwind" : "$assign_to" },
+            { "$unwind" : { "path" : "$assign_to", "preserveNullAndEmptyArrays": True }},
             {"$lookup" : {
                 "from" : "prospects_list",
                 "localField" : "assign_to_list",
                 "foreignField" : "_id",
                 "as" : "assign_to_list"
             }},
-            { "$unwind" : "$assign_to_list" }
+            { "$unwind" : { "path" : "$assign_to_list", "preserveNullAndEmptyArrays": True }},
+            { "$project" : { 
+                "team" : 1,
+                "data" : 1,
+                "assign_to" : 1,
+                "status" : 1,
+                "assign_to_list" : 1
+            }}
         ]
 
         prospects = db_query.skip(per_page * (page-1)).limit(per_page).order_by('-created').aggregate(*pipeline)
@@ -922,6 +1073,8 @@ class Prospects(db.Document):
         return self.data.get('email', '')
 
     def update_data(self, data):
+        self._chek_for_duplicates(owner_id=self.owner.id, data=data)
+
         self.data = data
         self._commit()
 

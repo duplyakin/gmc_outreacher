@@ -45,7 +45,7 @@ class BaseConfig():
     PER_PAGE = 10
     USER_PASSLIB_CRYPTCONTEXT_SCHEMES = ["pbkdf2_sha256"]
 
-    PROSPECTS_PER_PAGE = 500
+    PROSPECTS_PER_PAGE = 100
     CREDENTIALS_PER_PAGE = 20
     CAMPAIGNS_PER_PAGE = 100
     #Flask-User customization

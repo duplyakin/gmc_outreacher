@@ -10,11 +10,83 @@ from o24.globals import *
 from mongoengine.queryset.visitor import Q
 from pprint import pprint
 
+def get_current_user():
+    user = User.objects(email='1@email.com').first()
+    if not user:
+        raise Exception('No such user')
+    
+    return user
+
+
 class TestFilter(unittest.TestCase):
     def test_1_bulk_update(self):
+        return
         follow_ups = TaskQueue.objects(record_type=FOLLOWUP)
 
+    def test_2_distinct(self):
+        return 
+        pipeline = [
+            {"$group" : {
+                "_id" : {
+                    'email' : '$data.email',
+                    'linkedin' : '$data.linkedin' 
+                },
+                "prospect_id" : {"$first" : { "$toString" : "$_id" }}
+            }}        
+        ]
 
+        prospects = list(Prospects.objects().aggregate(*pipeline))
+
+        duplicates = {
+            'email' : [],
+            'linkedin' : [],
+            'ids' : []
+        }
+
+        def spl(val, dp):
+            element = val.get('_id', '')
+            if not element:
+                return 
+            
+            if not val:
+                return
+
+            email = element.get('email','')
+            if email:
+                dp['email'].append(email)
+
+            linkedin = element.get('linkedin', '')
+            if linkedin:
+                dp['linkedin'].append(linkedin)
+        
+            prospect_id = val.get('prospect_id', '')
+            if prospect_id:
+                dp['ids'].append(prospect_id)
+
+        q = [spl(p, duplicates) for p in prospects]
+
+        print(duplicates)
+        print(prospects)
+
+    def test_3_or_query(self):
+        current_user = get_current_user()
+        p = Prospects.objects(id='5eb2b667fa795f404d2b9ce0').first()
+
+        print(p.id)
+
+        query = {
+            'owner' : current_user.id,
+            '_id' : {'$ne' : p.id}
+        }
+
+        or_array = []
+        or_array.append({
+            'data.email' : 'helghardt@rehive.com'
+        })
+
+        query['$or'] = or_array
+        prospects = Prospects.objects(__raw__=query).first()
+        pprint(prospects.id)
 
 def setUpModule():
     env = os.environ.get('APP_ENV', None)

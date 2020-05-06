@@ -647,7 +647,11 @@ CAMPAIGNS = [
         'owner' : '1@email.com',
         'medium' : ['linkedin', 'email', 'special-medium']
     },
-
+    {
+        'title' : 'campaign-111',
+        'owner' : '1@email.com',
+        'medium' : ['linkedin', 'email', 'special-medium']
+    },
     {
         'title' : 'campaign-2',
         'owner' : '3@email.com',

@@ -14,6 +14,7 @@ import json
 import traceback
 import o24.backend.scheduler.scheduler as scheduler
 from o24.backend.dashboard.serializers import JSProspectData
+from bson.objectid import ObjectId
 
 
 PROSPECTS = [
@@ -97,7 +98,7 @@ def data_prospects():
 
     try:
         if request.method == 'POST':
-            total, lists = ProspectsList.async_lists(owner=current_user.id)
+            total, lists = ProspectsList.async_lists(owner_id=current_user.id)
             if lists:
                 result['lists'] = lists
 
@@ -224,6 +225,8 @@ def add_prospect_to_list():
             raw_data = request.form['_prospects']
             _list_id = request.form['_list_id']
 
+            _list_id = ObjectId(_list_id)
+
             js_data = json.loads(raw_data)
             if type(js_data) != list:
                 js_data = [js_data]
@@ -249,18 +252,17 @@ def add_prospect_to_list():
 
 @bp_dashboard.route('/prospects/list/remove', methods=['POST'])
 #@login_required
-def add_prospect_to_list():
+def remove_prospect_from_list():
     current_user = get_current_user()
 
     result = {
         'code' : -1,
         'msg' : '',
-        'removed' : 0
+        'deleted' : 0
     }
     if request.method == 'POST':
         try:
             raw_data = request.form['_prospects']
-            _list_id = request.form['_list_id']
 
             js_data = json.loads(raw_data)
             if type(js_data) != list:
@@ -269,11 +271,10 @@ def add_prospect_to_list():
             ids = [x["_id"]["$oid"] for x in js_data]
 
             res = Prospects.remove_from_list(owner_id=current_user.id,
-                                            prospects_ids=ids,
-                                            list_id=_list_id)
+                                            prospects_ids=ids)
 
             result['code'] = 1
-            result['removed'] = res
+            result['deleted'] = res
         except Exception as e:
             #TODO: change to loggin
             print(e)
@@ -324,7 +325,7 @@ def unassign_prospect():
 
 @bp_dashboard.route('/prospects/campaign/assign', methods=['POST'])
 #@login_required
-def unassign_prospect():
+def assign_prospect():
     current_user = get_current_user()
 
     result = {
@@ -371,7 +372,7 @@ def unassign_prospect():
 #@login_required
 def edit_prospect():
     current_user = get_current_user()
-
+    
     result = {
         'code' : -1,
         'msg' : '',
@@ -423,10 +424,11 @@ def create_prospect():
             raw_data = request.form['_prospect']
             
             prospect_data = JSProspectData(raw_data=raw_data)
-        
-            assign_to_list = ProspectsList.objects(owner=current_user.id, id=prospect_data.assign_to_list()).first()
-            if not assign_to_list:
-                raise Exception("There is no such prospects list")
+
+            if prospect_data.assign_to_list():
+                assign_to_list = ProspectsList.objects(owner=current_user.id, id=prospect_data.assign_to_list()).first()
+                if not assign_to_list:
+                    raise Exception("There is no such prospects list")
             
             create_fields = Prospects.get_create_fields()
             new_prospect = Prospects.async_create(owner_id=current_user.id,
@@ -439,7 +441,7 @@ def create_prospect():
             new_prospect.reload()
 
             result['code'] = 1
-            result['added'] = new_prospect.serialize()
+            result['updated'] = new_prospect.serialize()
 
         except Exception as e:
             #TODO: change to loggin
@@ -468,11 +470,14 @@ def upload_prospects ():
             js_data = json.loads(raw_data)
 
             #headers as the first row
+            _update_existing = int(js_data['fields_mapped'].get('_update_existing', 0))
             _csv_array = js_data['fields_mapped']['_csv']
             _csv_header = js_data['fields_mapped']['_csv'][0]
 
             _columns_checked = js_data['fields_mapped']['columnsChecked']
 
+            #we receive csv_header and need to upload only fields that are checked by user
+            # index_map_to_fields - will contain indexes of headers that we need to upload
             index_map_to_fields = {}
             for ch in _columns_checked:
                 header = ch.get('header','')
@@ -488,9 +493,9 @@ def upload_prospects ():
                 _add_to_list = js_data['list_selected']['list']['list_new_label']
                 _add_to_list = ProspectsList.create_list(owner_id=current_user.id, title=_add_to_list)
                 if not _add_to_list:
-                    raise Exception('Error creatin the list')
+                    raise Exception('Error creating the list')
             else:
-                _add_to_list = ProspectsList.get_lists(owner=current_user.id, id=_add_to_list)
+                _add_to_list = ProspectsList.objects(owner=current_user.id, id=_add_to_list).first()
                 if not _add_to_list:
                     raise Exception('List not found')
 
@@ -498,10 +503,8 @@ def upload_prospects ():
             res = Prospects.upload(owner_id=current_user.id,
                                     csv_with_header=_csv_array,
                                     map_to=index_map_to_fields,
-                                    add_to_list=_add_to_list)
-
-            if not res:
-                raise Exception('Prospects creation error - 0 prospects created')
+                                    list_id=_add_to_list.id,
+                                    update_existing=_update_existing)
 
             result['code'] = 1
             result['uploaded'] = res

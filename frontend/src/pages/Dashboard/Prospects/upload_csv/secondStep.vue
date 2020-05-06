@@ -5,6 +5,16 @@
             {{ error_message }}
     </div>
     <card>
+    <div class="row text-center">
+        <div class="col-12">
+        <label for="update_existing_checkbox" class="form-check-label">
+            <input :value="model._update_existing" @change="toggleUpdateExisting" id="update_existing_checkbox" type="checkbox" class="form-check-input">
+                <span class="form-check-sign"></span>Update existing if duplicates found
+        </label>
+        <br>
+    </div>
+    </div>
+                
     <div class="row">
     <div class="col-12">
             <el-table stripe
@@ -73,6 +83,7 @@ export default {
     data () {
     return {
         model:{
+            _update_existing : 0,
             _csv: null,
             columnsChecked : []
         },
@@ -102,6 +113,10 @@ export default {
         }
     },
     methods: {
+        toggleUpdateExisting() {
+                this.model._update_existing = !this.model._update_existing;
+        },
+
         clearState(){
             this.model._csv = null;
 

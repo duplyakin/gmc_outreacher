@@ -1,4 +1,4 @@
-def construct_prospect_filter(filter_data, filter_fields, regex_fields={'column' : 'contains'}, prefix='data.'):
+def construct_prospect_filter(filter_data, filter_fields, without_prefix=[], regex_fields={'column' : 'contains'}, prefix='data__'):
     res = {}
 
     for k, v in filter_data.items():
@@ -12,12 +12,17 @@ def construct_prospect_filter(filter_data, filter_fields, regex_fields={'column'
 
             # just pass empty filter
             if v:
-                key = prefix + str(k)
+                key = str(k)
+                if key not in without_prefix:
+                    key = prefix + str(k)
 
                 #is it regexp field?
                 if k in regex_fields.keys():
                     # the value of the key is the column that we need to regex for
-                    key = prefix + str(v)
+                    key = str(v)
+                    if key not in without_prefix:
+                        key = prefix + str(v)
+
 
                     #get value to regex
                     search_field = regex_fields[k]

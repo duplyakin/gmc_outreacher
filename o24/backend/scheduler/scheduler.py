@@ -164,7 +164,10 @@ class Scheduler():
 
         campaign._safe_start()
 
-        prospect_ids = self. ={0} prospect_ids={1}".format(campaign.title, prospect_ids))
+        prospect_ids = self._load_prospects(campaign, prospects)
+        if not prospect_ids:
+            campaign._safe_pause()
+            raise Exception("Can't load_prospects campaign_title={0} prospect_ids={1}".format(campaign.title, prospect_ids))
 
         self._update_prospects(prospect_ids, status=IN_PROGRESS)    
         
@@ -183,13 +186,13 @@ class Scheduler():
         campaign._safe_pause()
         #campaign.update_status(status=PAUSED)
 
-    def resume_campaign(self, campaign):
+    def resume_campaign(self, owner, campaign):
         if campaign.inprogress():
             raise Exception("Campaign already resumed, title={0}".format(campaign.title))
 
         # TaskQueue.resume_tasks(campaign_id=campaign.id)
 
-        self._check_new_prospects(campaign)
+        self._check_new_prospects(owner=owner, campaign=campaign)
 
         campaign.safe_start()
 
@@ -219,17 +222,17 @@ class Scheduler():
         if not campaign or not prospects_ids:
             return 0
 
-        prospects_without_campaign = Prospects.filter_no_campaign(owner_id=owner_id, prospects_ids=prospects_ids)
+        prospects_without_campaign = models.Prospects.filter_no_campaign(owner_id=owner_id, prospects_ids=prospects_ids)
         if not prospects_without_campaign:
             return 0
         
         scheduler = cls()
 
-        res = scheduler.add_prospects(campaign=campaign, prospects=prospects_without_campaign)
+        res = scheduler.add_prospects(owner=owner_id, campaign=campaign, prospects=prospects_without_campaign)
 
         if type(res) != list:
             return 0
-            
+
         return len(res)
 
     @classmethod
@@ -266,20 +269,22 @@ class Scheduler():
         return campaign.delete()
 
 
-    def add_prospects(self, campaign, prospects):
+    def add_prospects(self, owner, campaign, prospects):
         ids = self._load_prospects(campaign, prospects)
         if not ids:
             raise Exception("Can't load_prospects campaign_title={0} ids={1}".format(campaign.title, ids))
         
         self._update_prospects(ids, status=IN_PROGRESS)
 
+        models.Prospects._assign_campaign(owner_id=owner, prospects_ids=ids, campaign_id=campaign.id)
+
         return ids
 
 
-    def _check_new_prospects(self, campaign):
+    def _check_new_prospects(self, owner, campaign):
         prospects = models.Prospects.get_prospects(status=NEW, campaign_id=campaign.id)
         if prospects:
-            self.add_prospects(campaign, prospects)
+            self.add_prospects(owner=owner, campaign=campaign, prospects=prospects)
 
     def _load_prospects(self, campaign, prospects):
         tasks = []
