@@ -87,6 +87,8 @@ export default {
   data() {
     return {
       datacollection: {},
+      datacollectionEmail: {},
+      datacollectionLinkedin: {},
       filter: "",
       filter_data: [{ title: "Email" }, { title: "Linkedin" }],
 
@@ -101,7 +103,6 @@ export default {
           label: "Days",
           chart: false,
           value: 0,
-          data: []
         },
         //prospects_contacted: 0,
         emails_sent: {
@@ -111,7 +112,6 @@ export default {
           chart: true,
           chart_color: "rgb(85, 153, 199)",
           value: 0,
-          data: []
         },
         emails_bounced: {
           class: "data-percent red",
@@ -120,7 +120,6 @@ export default {
           chart: true,
           chart_color: "rgb(204, 0, 0)",
           value: 0,
-          data: []
         },
         emails_opened: {
           class: "data-percent green",
@@ -129,7 +128,6 @@ export default {
           chart: true,
           chart_color: "rgb(97, 184, 97)",
           value: 0,
-          data: []
         },
         emails_replies: {
           class: "data-percent yellow",
@@ -138,7 +136,6 @@ export default {
           chart: true,
           chart_color: "rgb(255, 158, 74)",
           value: 0,
-          data: []
         }
       },
 
@@ -149,7 +146,6 @@ export default {
           label: "Days",
           chart: false,
           value: 0,
-          data: []
         },
         //prospects_contacted: 0,
         connect_request: {
@@ -159,7 +155,6 @@ export default {
           chart: true,
           chart_color: "rgb(85, 153, 199)",
           value: 0,
-          data: []
         },
         connect_request_approved: {
           class: "data-percent purple",
@@ -168,7 +163,6 @@ export default {
           chart: true,
           chart_color: "rgb(121, 88, 148)",
           value: 0,
-          data: []
         },
         messages_sent: {
           class: "data-percent green",
@@ -177,7 +171,6 @@ export default {
           chart: true,
           chart_color: "rgb(97, 184, 97)",
           value: 0,
-          data: []
         },
         replies_received: {
           class: "data-percent yellow",
@@ -186,7 +179,6 @@ export default {
           chart: true,
           chart_color: "rgb(255, 158, 74)",
           value: 0,
-          data: []
         }
       },
 
@@ -200,63 +192,6 @@ export default {
     };
   },
   methods: {
-    fillChartData() {
-      if (this.filter == "Email") {
-        this.datacollection = {
-          labels: this.email_data.days.data,
-          datasets: [
-            {
-              label: this.email_data.emails_sent.label,
-              backgroundColor: this.email_data.emails_sent.chart_color,
-              data: this.email_data.emails_sent.data
-            },
-            {
-              label: this.email_data.emails_bounced.label,
-              backgroundColor: this.email_data.emails_bounced.chart_color,
-              data: this.email_data.emails_bounced.data
-            },
-            {
-              label: this.email_data.emails_opened.label,
-              backgroundColor: this.email_data.emails_opened.chart_color,
-              data: this.email_data.emails_opened.data
-            },
-            {
-              label: this.email_data.emails_replies.label,
-              backgroundColor: this.email_data.emails_replies.chart_color,
-              data: this.email_data.emails_replies.data
-            }
-          ]
-        };
-      }
-      if (this.filter == "Linkedin") {
-        this.datacollection = {
-          labels: this.linkedin_data.days.data,
-          datasets: [
-            {
-              label: this.linkedin_data.connect_request.label,
-              backgroundColor: this.linkedin_data.connect_request.chart_color,
-              data: this.linkedin_data.connect_request.data
-            },
-            {
-              label: this.linkedin_data.connect_request_approved.label,
-              backgroundColor: this.linkedin_data.connect_request_approved
-                .chart_color,
-              data: this.linkedin_data.connect_request_approved.data
-            },
-            {
-              label: this.linkedin_data.messages_sent.label,
-              backgroundColor: this.linkedin_data.messages_sent.chart_color,
-              data: this.linkedin_data.messages_sent.data
-            },
-            {
-              label: this.linkedin_data.replies_received.label,
-              backgroundColor: this.linkedin_data.replies_received.chart_color,
-              data: this.linkedin_data.replies_received.data
-            }
-          ]
-        };
-      }
-    },
     getRandomInt() {
       return Math.floor(Math.random() * (50 - 5 + 1)) + 5;
     },
@@ -269,13 +204,12 @@ export default {
 
       if (this.filter == "Email") {
         this.$set(this, "medium_data", this.email_data);
+        this.datacollection = this.datacollectionEmail;
       }
       if (this.filter == "Linkedin") {
         this.$set(this, "medium_data", this.linkedin_data);
+        this.datacollection = this.datacollectionLinkedin;
       }
-
-      // update chart
-      this.fillChartData();
     },
     mouseOver: function() {
       this.mouse_active = false;
@@ -312,11 +246,31 @@ export default {
         emails_replies_arr.push(item.emails_replies_total);
       });
       // email chart
-      this.email_data.days.data = days_arr;
-      this.email_data.emails_sent.data = emails_sent_arr;
-      this.email_data.emails_bounced.data = emails_bounced_arr;
-      this.email_data.emails_opened.data = emails_opened_arr;
-      this.email_data.emails_replies.data = emails_replies_arr;
+      this.datacollectionEmail = {
+          labels: days_arr,
+          datasets: [
+            {
+              label: this.email_data.emails_sent.label,
+              backgroundColor: this.email_data.emails_sent.chart_color,
+              data: emails_sent_arr
+            },
+            {
+              label: this.email_data.emails_bounced.label,
+              backgroundColor: this.email_data.emails_bounced.chart_color,
+              data: emails_bounced_arr
+            },
+            {
+              label: this.email_data.emails_opened.label,
+              backgroundColor: this.email_data.emails_opened.chart_color,
+              data: emails_opened_arr
+            },
+            {
+              label: this.email_data.emails_replies.label,
+              backgroundColor: this.email_data.emails_replies.chart_color,
+              data: emails_replies_arr
+            }
+          ]
+        };
 
       // email data
       this.email_data.days.value = days;
@@ -353,11 +307,31 @@ export default {
         replies_received_arr.push(item.linkedin_replies_received);
       });
       // linkedin chart
-      this.linkedin_data.days.data = days_arr;
-      this.linkedin_data.connect_request.data = connect_request_arr;
-      this.linkedin_data.connect_request_approved.data = connect_request_approved_arr;
-      this.linkedin_data.messages_sent.data = messages_sent_arr;
-      this.linkedin_data.replies_received.data = replies_received_arr;
+      this.datacollectionLinkedin = {
+          labels: days_arr,
+          datasets: [
+            {
+              label: this.linkedin_data.connect_request.label,
+              backgroundColor: this.linkedin_data.connect_request.chart_color,
+              data: connect_request_arr
+            },
+            {
+              label: this.linkedin_data.connect_request_approved.label,
+              backgroundColor: this.linkedin_data.connect_request_approved.chart_color,
+              data: connect_request_approved_arr
+            },
+            {
+              label: this.linkedin_data.messages_sent.label,
+              backgroundColor: this.linkedin_data.messages_sent.chart_color,
+              data: messages_sent_arr
+            },
+            {
+              label: this.linkedin_data.replies_received.label,
+              backgroundColor: this.linkedin_data.replies_received.chart_color,
+              data: replies_received_arr
+            }
+          ]
+        };
 
       // linkedin data
       this.linkedin_data.days.value = days;
