@@ -56,7 +56,7 @@
       <div class="small" v-if="filter!=''">
         <h4 class="card-title">{{filter}} Daily Statistics</h4>
         <p class="card-category">Statistics for the last days</p>
-        <line-chart :chart-data="datacollection"></line-chart>
+        <line-chart  :chart-data="datacollection"></line-chart>
         <div class="stats">
           <i class="fa fa-check"></i> Outreacher24
         </div>

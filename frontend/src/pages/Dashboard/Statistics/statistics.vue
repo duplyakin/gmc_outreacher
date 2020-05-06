@@ -132,6 +132,22 @@ data() {
         list_data : {
             statistics : [],
         },
+
+        /*
+        pagination : {
+            perPage : 0,
+            currentPage : 1,
+            total : 0
+        },
+
+        list_data : {
+            columns : []
+        },
+
+        statistics_data : {
+            statistics : []
+        }
+        */
     };
 },
 methods: {
@@ -175,12 +191,21 @@ methods: {
                     this.$set(this.list_data, key, parsed_data);
                 }
         }
+        /*
+        var pagination_dict = JSON.parse(new_data.pagination);
+        this.$set(this, 'pagination', pagination_dict);
+        */
         console.log(this.list_data)
 
     },
 },
-mounted() {
-    this.load_data();
+async mounted() {
+    /*load columns and other working data*/
+    await this.load_data();
+
+    /*
+    await this.load_statistics();
+    */
 }
 };
 </script>
