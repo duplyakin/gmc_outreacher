@@ -50,6 +50,8 @@ const Campaigns = () => import('src/pages/Dashboard/Campaigns/campaigns.vue')
 
 const CampaignsList = () => import('src/pages/Dashboard/CampaignsList/campaigns.vue')
 const CampaignForm = () => import('src/pages/Dashboard/CampaignsList/campaign_form.vue')
+const Statistics = () => import('src/pages/Dashboard/Statistics/statistics.vue')
+const Statistics_detailed = () => import('src/pages/Dashboard/Statistics/statistics_detailed.vue')
 
 
 const Accounts = () => import('src/pages/Dashboard/Accounts/accounts.vue')
@@ -324,6 +326,16 @@ const routes = [
         path: 'actions',
         name: 'Actions',
         component: Actions
+      },
+      {
+        path: 'statistics',
+        name: 'Statistics',
+        component: Statistics
+      },
+      {
+        path: 'statistics_detailed',
+        name: 'Statistics_detailed',
+        component: Statistics_detailed
       }
     ]
   },
