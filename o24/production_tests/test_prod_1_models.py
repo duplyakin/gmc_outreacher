@@ -107,33 +107,32 @@ class TestUsersCampaignsProspects(unittest.TestCase):
             self.assertTrue(owner is not None, "No such user")
 
             campaign = Campaign.get_campaign(title=prospect.get('assign_to'))
-            self.assertTrue(campaign is not None, "No such campaign")
+            self.assertTrue(campaign is not None, "No such campaign title: {0}".format(prospect.get('assign_to')))
 
             amount = prospect.get('amount')
             email_name = prospect.get('email_name')
             email_domain = prospect.get('email_domain')
             email = email_name + email_domain
             
-            lists = []
-            for l in prospect.get('lists', []):
-                next_list = ProspectsList.get_lists(owner=owner.id, title=l)
-                self.assertTrue(next_list, "No such next_list")
-                lists.append(next_list.id)
-    
+            l = prospect.get('assign_to_list', '')
+            prospects_list = ProspectsList.objects(owner=owner.id, title=l).first()
 
+
+            list_id = None
+            if prospects_list:
+                list_id = prospects_list.id
             count = 1
             for i in range(amount):
                 linkedin = 'http://linkedin.com/u'+ email_name + str(count)
                 data = {
                     'email' : email,
-                    'assign_to' : campaign.title,
-                    'lists' : lists,
                     'linkedin' : linkedin
                 }
+                
                 new_prospect = Prospects.create_prospect(owner_id=owner.id,
                                                         campaign_id=campaign.id,
-                                                        data=data,
-                                                        lists=lists)
+                                                        list_id=list_id,
+                                                        data=data)
                 self.assertTrue(new_prospect is not None, "Can't create prospect")
 
                 email = email_name + '+' + str(count) + email_domain

@@ -33,7 +33,7 @@
             class="select-default"
             v-for="(list,index) in lists"
             :key="index"
-            :label="list.label"
+            :label="list.title"
             :value="list._id.$oid">
             </el-option>
         </el-select>

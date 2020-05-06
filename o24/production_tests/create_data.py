@@ -112,7 +112,9 @@ def create_models():
         l = prospect.get('assign_to_list', '')
         prospects_list = ProspectsList.objects(owner=owner.id, title=l).first()
 
-
+        list_id = None
+        if prospects_list:
+            list_id = prospects_list.id
         count = 1
         for i in range(amount):
             linkedin = 'http://linkedin.com/u'+ email_name + str(count)
@@ -120,10 +122,10 @@ def create_models():
                 'email' : email,
                 'linkedin' : linkedin
             }
-            if prospects_list:
-                data['prospects_list'] = prospects_list.id
+            
             new_prospect = Prospects.create_prospect(owner_id=owner.id,
                                                     campaign_id=campaign.id,
+                                                    list_id=list_id,
                                                     data=data)
             assert new_prospect is not None, "Can't create prospect"
 

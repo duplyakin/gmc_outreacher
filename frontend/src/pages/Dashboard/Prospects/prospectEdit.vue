@@ -96,27 +96,33 @@ export default {
                 alert("Email can't be empty");
                 return false;
             }
+            
+            console.log(this.prospect_data.data.email)
 
            if (confirm("Are you sure?")){
-
                 var prospectData = new FormData();
-                prospectData.append("_prospect", JSON.stringify(this.prospect_data))
+                var _prospect = JSON.stringify(this.prospect_data);
+                prospectData.append("_prospect", _prospect);
 
                 axios
                 .post(path, prospectData)
                 .then((res) => {
                     var result = res.data;
                     if (result.code > 0){
-                        var updated_prospect = JSON.parse(result.updated);
+                        var updated_prospect = null;
+                        if (result.updated){
+                            updated_prospect = JSON.parse(result.updated);
+                        }
+
                         this.$emit('close');
                         this.valueUpdated(updated_prospect);
                     }else{
-                        var msg = 'Error editing prospect ' + result.msg;
+                        var msg = 'Answer Error editing prospect ' + result.msg;
                         alert(msg)
                     }
                 })
                 .catch((error) => {
-                    var msg = 'Error editing prospect ' + error;
+                    var msg = 'Answer Error editing prospect ' + error;
                     alert(msg);
                 });
            };

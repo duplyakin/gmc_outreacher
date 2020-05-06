@@ -16,501 +16,172 @@ import o24.backend.scheduler.scheduler as scheduler
 from o24.backend.dashboard.serializers import JSProspectData
 
 
-PROSPECTS = [
-{
-    'id' : 1,
-    'email' : 'ks.shilov@gmail.com',
-    'name' : 'Kirill1'
-},
-{
-    'id' : 2,
-    'email' : 'ksshilov@yandex.ru',
-    'name' : 'Kirill2'
-},
-{
-    'id' : 3,
-    'email' : 'ks.shilov+1@gmail.com',
-    'name' : 'Kirill3'
-},
-{
-    'id' : 4,
-    'email' : 'ks.shilov+2@gmail.com',
-    'name' : 'Kirill4'
-},
-
-]
-
 COLUMNS = [
-{
-    'label' : 'Email',
-    'prop' : 'email',
-    'data' : True
-},
-{
-    'label' : 'Linkedin',
-    'prop' : 'linkedin',
-    'data' : True
-},
-{
-    'label' : 'First Name',
-    'prop' : 'first_name',
-    'data' : True
-},
-{
-    'label' : 'Last name',
-    'prop' : 'last_name',
-    'data' : True
-},
-{
-    'label' : 'Campaign',
-    'prop' : 'assign_to',
-    'field' : 'title'
-},
-{
-    'label' : 'Prospects List',
-    'prop' : 'assign_to_list',
-    'field' : 'title'
-}
+    {
+        'label' : 'List title',
+        'prop' : 'title',
+    },
+    {
+        'label' : 'Number of prospects',
+        'prop' : 'prospects_num'
+    },
 ]
 
 CORS(app, resources={r'/*': {'origins': '*'}})
 
 def get_current_user():
-user = User.objects(email='1@email.com').first()
-if not user:
-    raise Exception('No such user')
+    user = User.objects(email='1@email.com').first()
+    if not user:
+        raise Exception('No such user')
 
-return user
+    return user
 
-@bp_dashboard.route('/prospects/data', methods=['POST'])
+@bp_dashboard.route('/lists/list', methods=['POST'])
 #@login_required
-def data_prospects():
-current_user = get_current_user()
+def list_lists():
 
-result = {
-    'code' : -1,
-    'msg' : 'Unknown request',
-    'lists' : '',
-    'campaigns' : '',
-    'columns' : json.dumps(COLUMNS)
-}
+    current_user = get_current_user()
 
-try:
+    per_page = config.PROSPECTS_PER_PAGE
+    page = 1
+
+    pagination = {
+            'perPage' : per_page,
+            'currentPage' : page,
+            'total' : 0
+    }
+
+    result = {
+        'code' : -1,
+        'msg' : 'Unknown request',
+        'lists' : '',
+        'pagination' : json.dumps(pagination),
+        'columns' : json.dumps(COLUMNS)
+    }
+
+    try:
+        if request.method == 'POST':
+            page = int(request.form.get('_page',1))
+
+            total, lists = ProspectsLists.async_lists(owner_id=current_user.id,
+                                                page=page)    
+            if lists:
+                result['lists'] = lists
+                result['pagination'] = json.dumps({
+                    'perPage' : per_page,
+                    'currentPage' : page,
+                    'total' : total
+                })
+
+            result['code'] = 1
+            result['msg'] = 'Success'
+    except Exception as e:
+        #TODO: change to loggin
+        print(e)
+        traceback.print_exc()
+
+        result['code'] = -1
+        result['msg'] = str(e)
+
+    return jsonify(result)
+
+@bp_dashboard.route('/lists/remove', methods=['POST'])
+#@login_required
+def remove_lists():
+    current_user = get_current_user()
+
+    result = {
+        'code' : -1,
+        'msg' : '',
+        'deleted' : 0
+    }
     if request.method == 'POST':
-        total, lists = ProspectsList.async_lists(owner=current_user.id)
-        if lists:
-            result['lists'] = lists
+        try:
+            list_id = request.form['_list_id']
 
-        total, campaigns = Campaign.async_campaigns_list(owner=current_user.id)
-        if campaigns:
-            result['campaigns'] = campaigns
+            prospect_list = ProspectsList.objects(owner=current_user.id, id=list_id).first()
+            if not prospect_list:
+                raise Exception("There is no such list")
 
+            res = prospect_list.safe_delete()
 
-        result['code'] = 1
-        result['msg'] = 'Success'
-except Exception as e:
-    #TODO: change to loggin
-    print(e)
-    traceback.print_exc()
+            result['code'] = 1
+            result['deleted'] = res
+        except Exception as e:
+            #TODO: change to loggin
+            print(e)
+            traceback.print_exc()
 
-    result['code'] = -1
-    result['msg'] = str(e)
+            result['code'] = -1
+            result['msg'] = 'SERVER ERROR: ' + str(e)
 
-return jsonify(result)
+    return jsonify(result)
 
-
-
-@bp_dashboard.route('/prospects/list', methods=['POST'])
+@bp_dashboard.route('/lists/add', methods=['POST'])
 #@login_required
-def list_prospects():
+def add_list():
+    current_user = get_current_user()
 
-current_user = get_current_user()
-
-per_page = config.PROSPECTS_PER_PAGE
-page = 1
-
-pagination = {
-        'perPage' : per_page,
-        'currentPage' : page,
-        'total' : 0
-}
-
-result = {
-    'code' : -1,
-    'msg' : 'Unknown request',
-    'prospects' : '',
-    'pagination' : json.dumps(pagination)
-}
-list_filter = {}
-
-try:
+    result = {
+        'code' : -1,
+        'msg' : '',
+        'added' : 0
+    }
     if request.method == 'POST':
-        page = int(request.form.get('_page',1))
-        raw_data = request.form.get('_filters', {})
-        if raw_data:
-            list_filter = json.loads(raw_data)
+        try:
+            raw_data = request.form['_list']
 
+            js_data = json.loads(raw_data)
 
-        total, prospects = Prospects.async_prospects_list(owner=current_user.id,
-                                            list_filter=list_filter,
-                                            page=page)    
-        if prospects:
-            result['prospects'] = prospects
-            result['pagination'] = json.dumps({
-                'perPage' : per_page,
-                'currentPage' : page,
-                'total' : total
-            })
+            res = ProspectsList.create_list(owner_id=current_user.id,
+                                            title=js_data['title'])
 
-        result['code'] = 1
-        result['msg'] = 'Success'
-except Exception as e:
-    #TODO: change to loggin
-    print(e)
-    traceback.print_exc()
+            result['code'] = 1
+            result['added'] = res
+        except Exception as e:
+            #TODO: change to loggin
+            print(e)
+            traceback.print_exc()
 
-    result['code'] = -1
-    result['msg'] = str(e)
+            result['code'] = -1
+            result['msg'] = 'SERVER ERROR: ' + str(e)
 
-return jsonify(result)
-
-@bp_dashboard.route('/prospects/remove', methods=['POST'])
-#@login_required
-def remove_prospect():
-current_user = get_current_user()
-
-result = {
-    'code' : -1,
-    'msg' : '',
-    'deleted' : 0
-}
-if request.method == 'POST':
-    try:
-        raw_data = request.form['_delete']
-
-        js_data = json.loads(raw_data)
-        if type(js_data) != list:
-            js_data = [js_data]
-
-        ids = [x["_id"]["$oid"] for x in js_data]
-
-        res = Prospects.delete_prospects(owner_id=current_user.id,
-                                        prospects_ids=ids)
-
-        result['code'] = 1
-        result['deleted'] = res
-    except Exception as e:
-        #TODO: change to loggin
-        print(e)
-        traceback.print_exc()
-
-        result['code'] = -1
-        result['msg'] = 'SERVER ERROR: ' + str(e)
-
-return jsonify(result)
-
-@bp_dashboard.route('/prospects/list/add', methods=['POST'])
-#@login_required
-def add_prospect_to_list():
-current_user = get_current_user()
-
-result = {
-    'code' : -1,
-    'msg' : '',
-    'added' : 0
-}
-if request.method == 'POST':
-    try:
-        raw_data = request.form['_prospects']
-        _list_id = request.form['_list_id']
-
-        js_data = json.loads(raw_data)
-        if type(js_data) != list:
-            js_data = [js_data]
-
-        ids = [x["_id"]["$oid"] for x in js_data]
-
-        res = Prospects.add_to_list(owner_id=current_user.id,
-                                        prospects_ids=ids,
-                                        list_id=_list_id)
-
-        result['code'] = 1
-        result['added'] = res
-    except Exception as e:
-        #TODO: change to loggin
-        print(e)
-        traceback.print_exc()
-
-        result['code'] = -1
-        result['msg'] = 'SERVER ERROR: ' + str(e)
-
-return jsonify(result)
-
-
-@bp_dashboard.route('/prospects/list/remove', methods=['POST'])
-#@login_required
-def add_prospect_to_list():
-current_user = get_current_user()
-
-result = {
-    'code' : -1,
-    'msg' : '',
-    'removed' : 0
-}
-if request.method == 'POST':
-    try:
-        raw_data = request.form['_prospects']
-        _list_id = request.form['_list_id']
-
-        js_data = json.loads(raw_data)
-        if type(js_data) != list:
-            js_data = [js_data]
-
-        ids = [x["_id"]["$oid"] for x in js_data]
-
-        res = Prospects.remove_from_list(owner_id=current_user.id,
-                                        prospects_ids=ids,
-                                        list_id=_list_id)
-
-        result['code'] = 1
-        result['removed'] = res
-    except Exception as e:
-        #TODO: change to loggin
-        print(e)
-        traceback.print_exc()
-
-        result['code'] = -1
-        result['msg'] = 'SERVER ERROR: ' + str(e)
-
-return jsonify(result)
-
-
-
-@bp_dashboard.route('/prospects/campaign/unassign', methods=['POST'])
-#@login_required
-def unassign_prospect():
-current_user = get_current_user()
-
-result = {
-    'code' : -1,
-    'msg' : '',
-    'unassigned' : 0
-}
-if request.method == 'POST':
-    try:
-        raw_data = request.form['_unassign']
-
-        js_data = json.loads(raw_data)
-        if type(js_data) != list:
-            js_data = [js_data]
-
-        ids = [x["_id"]["$oid"] for x in js_data]
-
-        res = scheduler.Scheduler.safe_unassign_prospects(owner_id=current_user.id,
-                                                        prospects_ids=ids)
-
-        result['code'] = 1
-        result['unassigned'] = res
-    except Exception as e:
-        #TODO: change to loggin
-        print(e)
-        traceback.print_exc()
-
-        result['code'] = -1
-        result['msg'] = 'SERVER ERROR: ' + str(e)
-
-return jsonify(result)
-
-
-@bp_dashboard.route('/prospects/campaign/assign', methods=['POST'])
-#@login_required
-def unassign_prospect():
-current_user = get_current_user()
-
-result = {
-    'code' : -1,
-    'msg' : '',
-    'assigned' : 0
-}
-if request.method == 'POST':
-    try:
-        raw_data = request.form['_prospects']
-        campaign_id = request.form.get('_campaign_id','')
-        if not campaign_id:
-            raise Exception("Bad campaign_id")
-
-        campaign = Campaign.objects(owner=current_user.id, id=campaign_id).first()
-        if not campaign:
-            raise Exception("No such campaign")
-
-        js_data = json.loads(raw_data)
-        if type(js_data) != list:
-            js_data = [js_data]
-
-        ids = [x["_id"]["$oid"] for x in js_data]
-
-        res = scheduler.Scheduler.safe_assign_prospects(owner_id=current_user.id,
-                                                        campaign=campaign,
-                                                        prospects_ids=ids)
-
-        result['code'] = 1
-        result['assigned'] = res
-    except Exception as e:
-        #TODO: change to loggin
-        print(e)
-        traceback.print_exc()
-
-        result['code'] = -1
-        result['msg'] = 'SERVER ERROR: ' + str(e)
-
-return jsonify(result)
+    return jsonify(result)
 
 
 #only data field can be edited
-@bp_dashboard.route('/prospects/edit', methods=['POST'])
+@bp_dashboard.route('/lists/edit', methods=['POST'])
 #@login_required
-def edit_prospect():
-current_user = get_current_user()
+def edit_list():
+    current_user = get_current_user()
 
-result = {
-    'code' : -1,
-    'msg' : '',
-    'updated' : ''
-}
-if request.method == 'POST':
-    try:
-        raw_data = request.form['_prospect']
+    result = {
+        'code' : -1,
+        'msg' : '',
+        'updated' : ''
+    }
+    if request.method == 'POST':
+        try:
+            list_id = request.form['_list_id']
 
-        js_data = json.loads(raw_data)
+            prospect_list = ProspectsList.objects(owner=current_user.id, id=list_id).first()
+            if not prospect_list:
+                raise Exception("There is no such list")
 
-        data = js_data['data']
-        if not data:
-            raise Exception('Error: prospect data can not be empty')
+            title = request.form.get('title', '')
+            if not title:
+                raise Exception("Title can't be empty")
 
-        prospect_id = js_data['_id']['$oid']
-        
-        exist = Prospects.objects(owner=current_user.id, id=prospect_id).first()
-        if not exist:
-            raise Exception('Prospect does not exist')
+            prospect_list.update_data(title=title)
+            prospect_list.reload()
 
-        exist.update_data(data=data)
-        exist.reload()
+            result['code'] = 1
+            result['updated'] = prospect_list.serialize()
+        except Exception as e:
+            #TODO: change to loggin
+            print(e)
+            traceback.print_exc()
 
-        result['code'] = 1
-        result['updated'] = exist.to_json()
-    except Exception as e:
-        #TODO: change to loggin
-        print(e)
-        traceback.print_exc()
+            result['msg'] = 'EDIT SERVER ERROR: ' + str(e)
 
-        result['msg'] = 'EDIT SERVER ERROR: ' + str(e)
-
-return jsonify(result)
-
-
-@bp_dashboard.route('/prospects/create', methods=['POST'])
-#@login_required
-def create_prospect():
-current_user = get_current_user()
-
-result = {
-    'code' : -1,
-    'msg' : '',
-    'updated' : ''
-}
-if request.method == 'POST':
-    try:
-        raw_data = request.form['_prospect']
-        
-        prospect_data = JSProspectData(raw_data=raw_data)
-    
-        assign_to_list = ProspectsList.objects(owner=current_user.id, id=prospect_data.assign_to_list()).first()
-        if not assign_to_list:
-            raise Exception("There is no such prospects list")
-        
-        create_fields = Prospects.get_create_fields()
-        new_prospect = Prospects.async_create(owner_id=current_user.id,
-                                            create_fields=create_fields,
-                                            prospect_data=prospect_data)
-        if not new_prospect:
-            raise Exception("Something went wrong contact support.")
-
-        #ALWAYS need this: as we create objecId from Json, need mongo to update it with object
-        new_prospect.reload()
-
-        result['code'] = 1
-        result['added'] = new_prospect.serialize()
-
-    except Exception as e:
-        #TODO: change to loggin
-        print(e)
-        traceback.print_exc()
-
-        result['msg'] = 'SERVER ERROR: ' + str(e)
-
-return jsonify(result)
-
-@bp_dashboard.route('/prospects/upload', methods=['POST'])
-#@login_required
-def upload_prospects ():
-current_user = get_current_user()
-
-result = {
-    'code' : -1,
-    'msg' : '',
-    'uploaded' : 0
-}
-
-if request.method == 'POST':
-    try:
-        raw_data = request.form['_upload_data']
-
-        js_data = json.loads(raw_data)
-
-        #headers as the first row
-        _csv_array = js_data['fields_mapped']['_csv']
-        _csv_header = js_data['fields_mapped']['_csv'][0]
-
-        _columns_checked = js_data['fields_mapped']['columnsChecked']
-
-        index_map_to_fields = {}
-        for ch in _columns_checked:
-            header = ch.get('header','')
-            map_selected = ch.get('map_selected', '')
-
-            if header and map_selected:
-                index = _csv_header.index(header)
-                index_map_to_fields[index] = map_selected
-        
-        _add_to_list = js_data['list_selected']['list']['list_selected_id']
-        _create_new = js_data['list_selected']['createNew']
-        if _create_new:
-            _add_to_list = js_data['list_selected']['list']['list_new_label']
-            _add_to_list = ProspectsList.create_list(owner_id=current_user.id, title=_add_to_list)
-            if not _add_to_list:
-                raise Exception('Error creatin the list')
-        else:
-            _add_to_list = ProspectsList.get_lists(owner=current_user.id, id=_add_to_list)
-            if not _add_to_list:
-                raise Exception('List not found')
-
-
-        res = Prospects.upload(owner_id=current_user.id,
-                                csv_with_header=_csv_array,
-                                map_to=index_map_to_fields,
-                                add_to_list=_add_to_list)
-
-        if not res:
-            raise Exception('Prospects creation error - 0 prospects created')
-
-        result['code'] = 1
-        result['uploaded'] = res
-    except Exception as e:
-        #TODO: change to loggin
-        print(e)
-        traceback.print_exc()
-
-        result['code'] = -1
-        result['msg'] = 'SERVER ERROR: ' + str(e)
-
-return jsonify(result)
+    return jsonify(result)
