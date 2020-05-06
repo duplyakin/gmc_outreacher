@@ -101,7 +101,6 @@ export default {
           class: "data-percent grey",
           relatively: "",
           label: "Days",
-          chart: false,
           value: 0,
         },
         //prospects_contacted: 0,
@@ -109,7 +108,6 @@ export default {
           class: "data-percent blue",
           relatively: "",
           label: "Emails sended",
-          chart: true,
           chart_color: "rgb(85, 153, 199)",
           value: 0,
         },
@@ -117,7 +115,6 @@ export default {
           class: "data-percent red",
           relatively: "emails_sent",
           label: "Emails bounced",
-          chart: true,
           chart_color: "rgb(204, 0, 0)",
           value: 0,
         },
@@ -125,7 +122,6 @@ export default {
           class: "data-percent green",
           relatively: "emails_sent",
           label: "Emails opened",
-          chart: true,
           chart_color: "rgb(97, 184, 97)",
           value: 0,
         },
@@ -133,7 +129,6 @@ export default {
           class: "data-percent yellow",
           relatively: "emails_sent",
           label: "Emails replied",
-          chart: true,
           chart_color: "rgb(255, 158, 74)",
           value: 0,
         }
@@ -144,7 +139,6 @@ export default {
           class: "data-percent grey",
           relatively: "",
           label: "Days",
-          chart: false,
           value: 0,
         },
         //prospects_contacted: 0,
@@ -152,7 +146,6 @@ export default {
           class: "data-percent blue",
           relatively: "",
           label: "Connect request sended",
-          chart: true,
           chart_color: "rgb(85, 153, 199)",
           value: 0,
         },
@@ -160,7 +153,6 @@ export default {
           class: "data-percent purple",
           relatively: "connect_request",
           label: "Connect request approved",
-          chart: true,
           chart_color: "rgb(121, 88, 148)",
           value: 0,
         },
@@ -168,7 +160,6 @@ export default {
           class: "data-percent green",
           relatively: "",
           label: "Messages sended",
-          chart: true,
           chart_color: "rgb(97, 184, 97)",
           value: 0,
         },
@@ -176,7 +167,6 @@ export default {
           class: "data-percent yellow",
           relatively: "messages_sent",
           label: "Replies resieved",
-          chart: true,
           chart_color: "rgb(255, 158, 74)",
           value: 0,
         }
@@ -278,6 +268,15 @@ export default {
       this.email_data.emails_bounced.value = emails_bounced;
       this.email_data.emails_opened.value = emails_opened;
       this.email_data.emails_replies.value = emails_replies;
+
+      //for(var obj in this.email_data) {
+       // let data_obj = {
+         // label: obj.label,
+         // backgroundColor: obj.chart_color,
+         // data: 
+        //}
+        //this.datacollectionEmail.datasets.push(data_obj);
+      //}
 
       // linkedin
       days = 0;
@@ -386,8 +385,8 @@ export default {
 <style lang="scss">
 .small {
   max-width: 600px;
-  //max-height: 600px;
-  margin: 150px auto;
+  //max-height: 300px;
+  //margin: 150px auto;
 }
 .container {
   display: flex;
