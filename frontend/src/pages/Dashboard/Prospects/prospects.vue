@@ -224,7 +224,7 @@ computed: {
 },
 data () {     
     return {
-        test : true,
+        test : false,
         
         list_data : {
             columns : [],
