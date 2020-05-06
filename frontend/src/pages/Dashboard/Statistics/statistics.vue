@@ -57,6 +57,7 @@ import axios from "axios";
 import dummy_statistics from "./dummy_statistics"; // test data
 
 const STATISTICS_API_LIST = 'http://127.0.0.1:5000/statistics/list';
+const STATISTICS_API_DATA = 'http://127.0.0.1:5000/statistics/data';
 
 export default {
 components: {
@@ -143,6 +144,27 @@ methods: {
         this.load_data(page, 0);
     },
     load_data_1(){
+        const path = STATISTICS_API_DATA;
+
+        var data = new FormData();
+
+        axios
+            .post(path, data)
+            .then(res => {
+            var r = res.data;
+            if (r.code <= 0) {
+                var msg = "Error loading data statistics " + r.msg;
+                alert(msg);
+            } else {
+                this.deserialize_data(r, init);
+            }
+            })
+            .catch(error => {
+                var msg = "Error loading data statistics " + error;
+                alert(msg);
+            });
+    },
+    load_campaigns(){
         const path = STATISTICS_API_LIST;
 
         var data = new FormData();
@@ -156,7 +178,7 @@ methods: {
                 var msg = "Error loading campaigns statistics " + r.msg;
                 alert(msg);
             } else {
-                this.deserialize_data(r, init);
+                this.deserialize_campaigns(r, init);
             }
             })
             .catch(error => {
@@ -165,9 +187,9 @@ methods: {
             });
     },
     load_data(){
-        this.deserialize_data(dummy_statistics);
+        this.deserialize_campaigns(dummy_statistics);
     },
-    deserialize_data(new_data){
+    deserialize_campaigns(new_data){
         for (var key in new_data){
                 if (this.list_data.hasOwnProperty(key) && new_data[key]){
                     //var parsed_data = JSON.parse(new_data[key]);
@@ -178,9 +200,21 @@ methods: {
         console.log(this.list_data)
 
     },
+    deserialize_data(new_data){
+        for (var key in new_data){
+                if (this.list_data.hasOwnProperty(key) && new_data[key]){
+                    //var parsed_data = JSON.parse(new_data[key]);
+                    var parsed_data = new_data[key];
+                    this.$set(this.columns, key, parsed_data);
+                }
+        }
+        console.log(this.list_data)
+
+    },
 },
 mounted() {
     this.load_data();
+    //this.load_campaigns();
 }
 };
 </script>
