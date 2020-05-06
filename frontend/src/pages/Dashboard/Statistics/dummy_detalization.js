@@ -9,7 +9,7 @@ export default
         statistics : {
             email : [
                 {
-                    date : 1211,
+                    date : '1211',
                     prospects_email_contacted_total : 10,
                     emails_sent : 30,
                     emails_bounced : 2,
@@ -17,7 +17,7 @@ export default
                     emails_replies_total : 1,
                 },
                 {
-                    date : 1212,
+                    date : '1212',
                     prospects_email_contacted_total : 100,
                     emails_sent : 300,
                     emails_bounced : 20,
@@ -25,7 +25,7 @@ export default
                     emails_replies_total : 10,
                 },
                 {
-                    date : 1214,
+                    date : '1214',
                     prospects_email_contacted_total : 1000,
                     emails_sent : 3000,
                     emails_bounced : 200,
@@ -33,7 +33,7 @@ export default
                     emails_replies_total : 100,
                 },
                 {
-                    date : 1215,
+                    date : '1215',
                     prospects_email_contacted_total : 7000,
                     emails_sent : 2000,
                     emails_bounced : 500,
@@ -43,7 +43,7 @@ export default
                 ],
             linkedin :[
                 {
-                    date : 1111,
+                    date : '1111',
                     prospects_linkedin_contacted_total : 200,
                     connect_request_total : 50,
                     connect_request_approved_total : 20,
@@ -51,7 +51,7 @@ export default
                     linkedin_replies_received : 4,
                 },
                 {
-                    date : 1213,
+                    date : '1213',
                     prospects_linkedin_contacted_total : 200,
                     connect_request_total : 50,
                     connect_request_approved_total : 20,

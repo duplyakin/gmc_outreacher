@@ -53,38 +53,21 @@
         </div>
       </card>
 
-       <reactive-bar-chart :chart-data="changeChartData"></reactive-bar-chart>
-
-      <chart-card
-        v-if="filter!=''"
-        :chart-data="changeChartData"
-        :chart-options="barChart.options"
-        :chart-responsive-options="barChart.responsiveOptions"
-        chart-type="Bar"
-      >
-        <template slot="header">
-          <h4 class="card-title">{{filter}} Daily Statistics</h4>
-          <p class="card-category">Statistics for the last days</p>
-        </template>
-        <template slot="footer">
-          <div class="legend container">
-            <div v-for="obj in medium_data">
-              <i v-bind:class="obj.chart_color"></i>
-              {{obj.label}}
-            </div>
-          </div>
-          <hr />
-          <div class="stats">
-            <i class="fa fa-check"></i> Outreacher24
-          </div>
-        </template>
-      </chart-card>
+      <div class="small" v-if="filter!=''">
+        <h4 class="card-title">{{filter}} Daily Statistics</h4>
+        <p class="card-category">Statistics for the last days</p>
+        <line-chart :chart-data="datacollection"></line-chart>
+        <div class="stats">
+          <i class="fa fa-check"></i> Outreacher24
+        </div>
+      </div>
     </card>
   </div>
 </template>
 <script>
 import { Table, TableColumn, Select, Option } from "element-ui";
-import { ChartCard, Pagination as LPagination } from "src/components/index";
+import { Pagination as LPagination } from "src/components/index";
+import LineChart from "./LineChart.js";
 
 import axios from "axios";
 import dummy_detalization from "./dummy_detalization"; // test data
@@ -93,21 +76,17 @@ const STATISTICS_API_DETALIZATION = "http://127.0.0.1:5000/statistics/campaign";
 
 export default {
   components: {
-    ChartCard,
+    LineChart,
     LPagination,
     [Select.name]: Select,
     [Option.name]: Option,
     [Table.name]: Table,
     [TableColumn.name]: TableColumn
   },
-  computed: {
-    changeChartData(){
-      return this.barChart.data;
-      //this.$set(this.barChart, 'data', {});
-    }
-  },
+  computed: {},
   data() {
     return {
+      datacollection: {},
       filter: "",
       filter_data: [{ title: "Email" }, { title: "Linkedin" }],
 
@@ -121,7 +100,8 @@ export default {
           relatively: "",
           label: "Days",
           chart: false,
-          value: 0
+          value: 0,
+          data: []
         },
         //prospects_contacted: 0,
         emails_sent: {
@@ -129,32 +109,36 @@ export default {
           relatively: "",
           label: "Emails sended",
           chart: true,
-          chart_color: "fa fa-circle text-info",
-          value: 0
+          chart_color: "rgb(85, 153, 199)",
+          value: 0,
+          data: []
         },
         emails_bounced: {
           class: "data-percent red",
           relatively: "emails_sent",
           label: "Emails bounced",
           chart: true,
-          chart_color: "fa fa-circle text-danger",
-          value: 0
+          chart_color: "rgb(204, 0, 0)",
+          value: 0,
+          data: []
         },
         emails_opened: {
           class: "data-percent green",
           relatively: "emails_sent",
           label: "Emails opened",
           chart: true,
-          chart_color: "fa fa-circle text-warning",
-          value: 0
+          chart_color: "rgb(97, 184, 97)",
+          value: 0,
+          data: []
         },
         emails_replies: {
           class: "data-percent yellow",
           relatively: "emails_sent",
           label: "Emails replied",
           chart: true,
-          chart_color: "fa fa-circle text-primary",
-          value: 0
+          chart_color: "rgb(255, 158, 74)",
+          value: 0,
+          data: []
         }
       },
 
@@ -164,7 +148,8 @@ export default {
           relatively: "",
           label: "Days",
           chart: false,
-          value: 0
+          value: 0,
+          data: []
         },
         //prospects_contacted: 0,
         connect_request: {
@@ -172,42 +157,37 @@ export default {
           relatively: "",
           label: "Connect request sended",
           chart: true,
-          chart_color: "fa fa-circle text-info",
-          value: 0
+          chart_color: "rgb(85, 153, 199)",
+          value: 0,
+          data: []
         },
         connect_request_approved: {
           class: "data-percent purple",
           relatively: "connect_request",
           label: "Connect request approved",
           chart: true,
-          chart_color: "fa fa-circle text-danger",
-          value: 0
+          chart_color: "rgb(121, 88, 148)",
+          value: 0,
+          data: []
         },
         messages_sent: {
           class: "data-percent green",
           relatively: "",
           label: "Messages sended",
           chart: true,
-          chart_color: "fa fa-circle text-warning",
-          value: 0
+          chart_color: "rgb(97, 184, 97)",
+          value: 0,
+          data: []
         },
         replies_received: {
           class: "data-percent yellow",
           relatively: "messages_sent",
           label: "Replies resieved",
           chart: true,
-          chart_color: "fa fa-circle text-primary",
-          value: 0
+          chart_color: "rgb(255, 158, 74)",
+          value: 0,
+          data: []
         }
-      },
-
-      email_chart: {
-        labels: [],
-        series: []
-      },
-      linkedin_chart: {
-        labels: [],
-        series: []
       },
 
       list_data: {
@@ -216,54 +196,86 @@ export default {
           email: [],
           linkedin: []
         }
-      },
-
-      barChart: {
-        data: {
-          labels: [],
-          series: []
-        },
-        options: {
-          seriesBarDistance: 10,
-          axisX: {
-            showGrid: false
-          },
-          height: "245px"
-        },
-        responsiveOptions: [
-          [
-            "screen and (max-width: 640px)",
-            {
-              seriesBarDistance: 5,
-              axisX: {
-                labelInterpolationFnc(value) {
-                  return value[0];
-                }
-              }
-            }
-          ]
-        ]
       }
     };
   },
   methods: {
+    fillChartData() {
+      if (this.filter == "Email") {
+        this.datacollection = {
+          labels: this.email_data.days.data,
+          datasets: [
+            {
+              label: this.email_data.emails_sent.label,
+              backgroundColor: this.email_data.emails_sent.chart_color,
+              data: this.email_data.emails_sent.data
+            },
+            {
+              label: this.email_data.emails_bounced.label,
+              backgroundColor: this.email_data.emails_bounced.chart_color,
+              data: this.email_data.emails_bounced.data
+            },
+            {
+              label: this.email_data.emails_opened.label,
+              backgroundColor: this.email_data.emails_opened.chart_color,
+              data: this.email_data.emails_opened.data
+            },
+            {
+              label: this.email_data.emails_replies.label,
+              backgroundColor: this.email_data.emails_replies.chart_color,
+              data: this.email_data.emails_replies.data
+            }
+          ]
+        };
+      }
+      if (this.filter == "Linkedin") {
+        this.datacollection = {
+          labels: this.linkedin_data.days.data,
+          datasets: [
+            {
+              label: this.linkedin_data.connect_request.label,
+              backgroundColor: this.linkedin_data.connect_request.chart_color,
+              data: this.linkedin_data.connect_request.data
+            },
+            {
+              label: this.linkedin_data.connect_request_approved.label,
+              backgroundColor: this.linkedin_data.connect_request_approved
+                .chart_color,
+              data: this.linkedin_data.connect_request_approved.data
+            },
+            {
+              label: this.linkedin_data.messages_sent.label,
+              backgroundColor: this.linkedin_data.messages_sent.chart_color,
+              data: this.linkedin_data.messages_sent.data
+            },
+            {
+              label: this.linkedin_data.replies_received.label,
+              backgroundColor: this.linkedin_data.replies_received.chart_color,
+              data: this.linkedin_data.replies_received.data
+            }
+          ]
+        };
+      }
+    },
+    getRandomInt() {
+      return Math.floor(Math.random() * (50 - 5 + 1)) + 5;
+    },
     calcPercent(value, abs_value) {
       return Math.round(abs_value == 0 ? 0 : (value / abs_value) * 100);
     },
     onChangeMedium() {
       //console.log('filter: ', this.filter)
       this.$set(this, "medium_data", []);
-      this.$set(this.barChart, 'data', {});
 
       if (this.filter == "Email") {
         this.$set(this, "medium_data", this.email_data);
-        this.$set(this.barChart, 'data', this.email_chart);
-        console.log('this.barChart: ', this.barChart)
       }
       if (this.filter == "Linkedin") {
         this.$set(this, "medium_data", this.linkedin_data);
-        this.$set(this.barChart, 'data', this.linkedin_chart);
       }
+
+      // update chart
+      this.fillChartData();
     },
     mouseOver: function() {
       this.mouse_active = false;
@@ -299,21 +311,19 @@ export default {
         emails_opened_arr.push(item.emails_opened);
         emails_replies_arr.push(item.emails_replies_total);
       });
-      //this.$set(this, "barChart.data", {labels: this.labels, series: [emails_sent_arr, emails_bounced_arr, emails_opened_arr, emails_replies_arr]});
-      this.$set(this.email_chart.labels, 0, days_arr);
-      this.$set(this.email_chart.series, 0, emails_sent_arr);
-      this.$set(this.email_chart.series, 1, emails_bounced_arr);
-      this.$set(this.email_chart.series, 2, emails_opened_arr);
-      this.$set(this.email_chart.series, 3, emails_replies_arr);
-      //console.log('arr: ', this.barChart.data.labels);
+      // email chart
+      this.email_data.days.data = days_arr;
+      this.email_data.emails_sent.data = emails_sent_arr;
+      this.email_data.emails_bounced.data = emails_bounced_arr;
+      this.email_data.emails_opened.data = emails_opened_arr;
+      this.email_data.emails_replies.data = emails_replies_arr;
 
+      // email data
       this.email_data.days.value = days;
       this.email_data.emails_sent.value = emails_sent;
       this.email_data.emails_bounced.value = emails_bounced;
       this.email_data.emails_opened.value = emails_opened;
       this.email_data.emails_replies.value = emails_replies;
-
-      //this.$set(this, "email_data", email_obj);
 
       // linkedin
       days = 0;
@@ -342,13 +352,14 @@ export default {
         messages_sent_arr.push(item.linkedin_messages_sent_total);
         replies_received_arr.push(item.linkedin_replies_received);
       });
-      this.$set(this.linkedin_chart.labels, 0, days_arr);
-      this.$set(this.linkedin_chart.series, 0, connect_request_arr);
-      this.$set(this.linkedin_chart.series, 1, connect_request_approved_arr);
-      this.$set(this.linkedin_chart.series, 2, messages_sent_arr);
-      this.$set(this.linkedin_chart.series, 3, replies_received_arr);
+      // linkedin chart
+      this.linkedin_data.days.data = days_arr;
+      this.linkedin_data.connect_request.data = connect_request_arr;
+      this.linkedin_data.connect_request_approved.data = connect_request_approved_arr;
+      this.linkedin_data.messages_sent.data = messages_sent_arr;
+      this.linkedin_data.replies_received.data = replies_received_arr;
 
-      //this.$set(this, "linkedin_data", linkedin_obj);
+      // linkedin data
       this.linkedin_data.days.value = days;
       this.linkedin_data.connect_request.value = connect_request;
       this.linkedin_data.connect_request_approved.value = connect_request_approved;
@@ -399,6 +410,11 @@ export default {
 };
 </script>
 <style lang="scss">
+.small {
+  max-width: 600px;
+  //max-height: 600px;
+  margin: 150px auto;
+}
 .container {
   display: flex;
   justify-content: space-around;
