@@ -316,27 +316,41 @@ class Campaign(db.Document):
         if page and page <= 1:
             page = 1
 
-        db_query = cls.objects(owner=owner). \
-                    only('id', 
-                            'status', 
-                            'title', 
-                            'data', 
-                            'sending_days',
-                            'from_hour',
-                            'from_minutes',
-                            'to_hour',
-                            'to_minutes',
-                            'time_zone')
-        
+        db_query = cls.objects(owner=owner)
+                
         total = db_query.count()
 
-        campaigns = None
-        if page:
-            campaigns = db_query.skip(per_page * (page-1)).limit(per_page).order_by('-created').all()
-        else:
-            campaigns = db_query.order_by('-created').all()
+        #we use it for join and showing objects as it is
+        pipeline = [
+            {"$lookup" : {
+                "from" : "credentials",
+                "localField" : "credentials",
+                "foreignField" : "_id",
+                "as" : "credentials"
+            }},
+            {"$lookup" : {
+                "from" : "funnel",
+                "localField" : "funnel",
+                "foreignField" : "_id",
+                "as" : "funnel"
+            }},
+            { "$unwind" : { "path" : "$funnel", "preserveNullAndEmptyArrays": True }},
+            { "$project" : { 
+                'status' : 1,
+                'data' : 1,
+                'title' : 1,
+                'credentials' : 1,
+                'funnel' : 1
+            }}
+        ]
 
-        results = campaigns.to_json()
+        campaigns = []
+        if page:
+            campaigns = list(db_query.skip(per_page * (page-1)).limit(per_page).order_by('-created').aggregate(*pipeline))
+        else:
+            campaigns = list(db_query.order_by('-created').aggregate(*pipeline))
+
+        results = bson_dumps(campaigns)
 
         return (total, results)
 
@@ -475,9 +489,6 @@ class Campaign(db.Document):
     def _safe_start(self):
         if self.inprogress():
             raise Exception("Starting error: campaign already in progress")
-
-        if not self.prospects_list:
-            raise Exception("Starting error: there is not assigned prospects for campaign_id:{0}".format(self.id))
         
         if not self.funnel:
             raise Exception("Starting error: there is not selected funnel for campaign_id:{0}".format(self.id))

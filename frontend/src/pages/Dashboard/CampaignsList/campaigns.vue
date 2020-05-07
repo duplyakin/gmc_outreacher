@@ -10,15 +10,15 @@
     <div class="col-8 d-flex flex-row-reverse align-self-center">
     <div>
         <button
-            @click.prevent="addCampaign()"
+            @click.prevent="addCampaign"
             type="button"
             class="btn btn-default btn-success mx-1"
         >Add Campaign</button>
         <button
-            @click.prevent="load_data(1,1)"
+            @click.prevent="load_data"
             type="button"
             class="btn btn-default btn-success mx-1"
-        >Reload table</button>
+        >Reload campaigns</button>
 
     </div>
     </div>
@@ -31,7 +31,7 @@
             stripe
             ref="campaigns_data_table"
             style="width: 100%;"
-            :data="list_data.campaigns"
+            :data="campaigns_data.campaigns"
             max-height="500"
             border
             >
@@ -44,15 +44,27 @@
                 show-overflow-tooltip>
                 <template slot-scope="scope">
                     <a @click.prevent="editCampaign(scope.row, scope.$index)" href="#"  v-if="column.prop === 'title'">{{ scope.row[column.prop] }}</a>
-                    <template v-else> {{ column.data ? scope.row.data[column.prop] : scope.row[column.prop] }} </template>
+                    <template v-else-if="column.prop === 'status'">{{  status[scope.row[column.prop]] }}</template>
+                    <template v-else> {{ show_data(scope.row, column) }} </template>
                 </template> 
+            </el-table-column>
+            <el-table-column :min-width="50" fixed="right" label="Action">
+                <template slot-scope="props">
+                <a
+                    class="btn-simple btn-link"
+                    @click.prevent="make_action(props.row, props.$index)"
+                    href="#"
+                >
+                    {{ props.row.status == 1 ? 'Pause' : 'Start' }}
+                </a>
+                </template>
             </el-table-column>
             <el-table-column :min-width="50" fixed="right" label="Delete">
                 <template slot-scope="props">
                 <a
                     v-tooltip.top-center="'Delete'"
                     class="btn-danger btn-simple btn-link"
-                    @click="delete_campaign(props.row._id.$oid, props.$index)"
+                    @click.prevent="delete_campaign(props.row._id.$oid, props.$index)"
                 >
                     <i class="fa fa-times"></i>
                 </a>
@@ -71,6 +83,7 @@ import { Pagination as LPagination } from "src/components/index";
 import CampaignForm from "./campaign_form.vue";
 import axios from "axios";
 
+const CAMPAIGNS_API_DATA = 'http://127.0.0.1:5000/campaigns/data'
 const CAMPAIGNS_API_LIST = 'http://127.0.0.1:5000/campaigns/list';
 
 const CAMPAIGNS_API_DELETE = 'http://127.0.0.1:5000/campaigns/delete';
@@ -90,23 +103,69 @@ computed: {
 },
 data() {
     return {
-        list_data : {
-            campaigns : [],
-            credentials: [],
-            prospects_list : [],
-            funnels : [],
-            columns : [],
-
-            pagination : {
+        status : {
+            0 : 'New',
+            1 : 'In progress',
+            2 : 'Pause',
+           '-1' : 'Failed'
+        },
+        pagination : {
                 perPage : 0,
                 currentPage : 1,
                 perPageOptions: [5, 10, 25, 50],
                 total : 0
-        }
         },
+        list_data : {
+            columns : [],
+        },
+        campaigns_data : {
+            campaigns : []
+        }
     };
 },
 methods: {
+    make_action(campaign, index){
+        var path = CAMPAIGNS_API_START;
+        if (campaign.status == 1){
+            path = CAMPAIGNS_API_PAUSE;
+        }
+        if (confirm("Are you sure?")) {
+            var data = new FormData();
+            data.append("_campaign_id", campaign._id.$oid);
+            
+            const row_index = index;
+            axios
+                .post(path, data)
+                .then(res => {
+                var r = res.data;
+                if (r.code <= 0) {
+                    var msg = "Action error " + r.msg;
+                    alert(msg);
+                } else {
+                    this.load_campaigns();
+                }
+                })
+                .catch(error => {
+                    var msg = "Action error " + error;
+                    alert(msg);
+                });
+        }
+    },
+    show_data(scope_row, column){
+        var data = column.data || '';
+        if (data){
+            return scope_row.data[column.prop] || '';
+        }else{
+            var field = column.field || '';
+            if (field){
+                return scope_row[column.prop][field] || '';
+            }else{
+                return scope_row[column.prop] || '';
+            }
+        }
+
+        return '';
+    },
     delete_campaign(campaign_id, row_index){
         if (confirm("Are you sure?")) {
             const path = CAMPAIGNS_API_DELETE;
@@ -123,7 +182,7 @@ methods: {
                     var msg = "Error deleting campaign " + r.msg;
                     alert(msg);
                 } else {
-                    this.campaigns.splice(index, 1);
+                    this.load_campaigns();
                 }
                 })
                 .catch(error => {
@@ -142,44 +201,70 @@ methods: {
         var page = 2;
         this.load_data(page,0);
     },
-    load_data(page=1, init=0){
+    load_campaigns(page=1){
         const path = CAMPAIGNS_API_LIST;
+    
+        var data = new FormData();
+        data.append('_page', page);
+
+        axios.post(path, data)
+        .then((res) => {
+            var r = res.data;
+            if (r.code <= 0){
+                var msg = "Error loading campaigns." + r.msg;
+                alert(msg);
+            }else{
+                this.deserialize_campaigns(r);
+            }
+            })
+            .catch((error) => {
+                var msg = "Error loading campaigns. ERROR: " + error;
+                alert(msg);
+            });
+
+    },
+    load_data(){
+        const path = CAMPAIGNS_API_DATA;
 
         var data = new FormData();
-        data.append("_init", init);
-        data.append("_page", page);
-
         axios
             .post(path, data)
             .then(res => {
             var r = res.data;
             if (r.code <= 0) {
-                var msg = "Error loading campaigns " + r.msg;
+                var msg = "Error loading data " + r.msg;
                 alert(msg);
             } else {
-                this.update_data(r,init);
+                this.deserialize_data(r);
             }
             })
             .catch(error => {
-                var msg = "Error loading campaigns " + error;
+                var msg = "Error loading data " + error;
                 alert(msg);
             });
     },
-    update_data(new_data, init){
-        if (init == 1){
-            this.list_data.prospects_list = JSON.parse(new_data.prospects_list);
-            this.list_data.columns = JSON.parse(new_data.columns);
-            this.list_data.funnels = JSON.parse(new_data.funnels);
-            this.list_data.credentials = JSON.parse(new_data.credentials);
-        }
-
-        if (new_data.campaigns){
-            this.list_data.campaigns = JSON.parse(new_data.campaigns);
+    deserialize_data(from_data){            
+        for (var key in from_data){
+            if (this.list_data.hasOwnProperty(key) && from_data[key]){
+                var parsed_data = JSON.parse(from_data[key])
+                this.$set(this.list_data, key, parsed_data);
+            }
         }
     },
+    deserialize_campaigns(from_data){
+        var pagination_dict = JSON.parse(from_data.pagination);
+        this.$set(this, 'pagination', pagination_dict);
+
+        if (from_data.campaigns){
+            var campaigns = JSON.parse(from_data.campaigns)
+            this.$set(this.campaigns_data, 'campaigns', campaigns);
+        }
+    },
+
 },
-mounted() {
-    this.load_data(1,1);
+async mounted() {
+    await this.load_data();
+    await this.load_campaigns();
 }
 };
 </script>
