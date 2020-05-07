@@ -21,27 +21,27 @@ import o24.backend.scheduler.scheduler as scheduler
 
 COLUMNS = [
     {
-        'label' : 'Campaign title',
+        'label' : 'Title',
         'prop' : 'title'
     },
     {
-        'label' : 'From account',
-        'prop' : 'account',
+        'label' : 'Status',
+        'prop' : 'status'
+    },
+    {
+        'label' : 'Funnel',
+        'prop' : 'funnel',
+        'field' : 'title',   
+    },
+    {
+        'label' : 'Email',
+        'prop' : 'email',
         'data' : True
    
     },
     {
-        'label' : 'status',
-        'prop' : 'status'
-    },
-    {
-        'label' : 'Prospects list',
-        'prop' : 'prospects_list',
-        'data' : True
-    },
-    {
-        'label' : 'Funnel title',
-        'prop' : 'funnel_title',
+        'label' : 'Linkedin',
+        'prop' : 'linkedin',
         'data' : True
    
     }
@@ -83,27 +83,12 @@ def data_campaigns():
     result = {
         'code' : -1,
         'msg' : '',
-        'prospects_list' : '',
-        'funnels' : '',
-        'credentials' : '',
         'modified_fields' : json.dumps(modified_fields_on_create),
         'columns' : json.dumps(COLUMNS)
     }
 
     try:
         if request.method == 'POST':
-            prospects_list = ProspectsList.async_lists(owner=current_user.id)
-            if prospects_list:
-                result['prospects_list'] = prospects_list.to_json()
-            
-            funnels = shared.Funnel.async_funnels(owner=current_user.id)
-            if funnels:
-                result['funnels'] = funnels.to_json()
-            
-            total, credentials = Credentials.async_credentials(owner=current_user.id)
-            if credentials:
-                result['credentials'] = credentials.to_json()
-
             result['code'] = 1
             result['msg'] = 'Success'
     except Exception as e:
@@ -144,10 +129,10 @@ def list_campaigns():
         if request.method == 'POST':
             page = int(request.form.get('_page',1))
 
-            total, campaigns = Campaign.async_campaigns(owner=current_user.id,
+            total, campaigns = Campaign.async_campaigns_list(owner=current_user.id,
                                                 page=page)    
             if campaigns:
-                result['campaigns'] = campaigns.to_json()
+                result['campaigns'] = campaigns
                 result['pagination'] = json.dumps({
                     'perPage' : per_page,
                     'currentPage' : page,

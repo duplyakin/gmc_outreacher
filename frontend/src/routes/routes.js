@@ -32,13 +32,9 @@ const Wizard = () => import('src/pages/Dashboard/Forms/Wizard.vue')
 const RegularTables = () => import('src/pages/Dashboard/Tables/RegularTables.vue')
 const ExtendedTables = () => import('src/pages/Dashboard/Tables/ExtendedTables.vue')
 const PaginatedTables = () => import('src/pages/Dashboard/Tables/PaginatedTables.vue')
-// Maps pages
-const GoogleMaps = () => import('src/pages/Dashboard/Maps/GoogleMaps.vue')
-const FullScreenMap = () => import('src/pages/Dashboard/Maps/FullScreenMap.vue')
-const VectorMaps = () => import('src/pages/Dashboard/Maps/VectorMapsPage.vue')
 
-// Calendar
-const Calendar = () => import('src/pages/Dashboard/Calendar/CalendarRoute.vue')
+
+
 // Charts
 const Charts = () => import('src/pages/Dashboard/Charts.vue')
 
@@ -177,28 +173,6 @@ let tablesMenu = {
     }]
 }
 
-let mapsMenu = {
-  path: '/maps',
-  component: DashboardLayout,
-  redirect: '/maps/google',
-  children: [
-    {
-      path: 'google',
-      name: 'Google Maps',
-      component: GoogleMaps
-    },
-    {
-      path: 'full-screen',
-      name: 'Full Screen Map',
-      component: FullScreenMap
-    },
-    {
-      path: 'vector-map',
-      name: 'Vector Map',
-      component: VectorMaps
-    }
-  ]
-}
 
 let pagesMenu = {
   path: '/pages',
@@ -246,7 +220,6 @@ const routes = [
   testComponents,
   formsMenu,
   tablesMenu,
-  mapsMenu,
   pagesMenu,
   loginPage,
   registerPage,
@@ -265,11 +238,6 @@ const routes = [
         path: 'stats',
         name: 'Stats',
         component: Stats
-      },
-      {
-        path: 'calendar',
-        name: 'Calendar',
-        component: Calendar
       },
       {
         path: 'charts',
