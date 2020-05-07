@@ -30,12 +30,12 @@ let funnelSchema = new Schema({
 
     if_true : {
       type: Number,
-      default: None,
+      default: null,
     },
 
     if_false : {
       type: Number,
-      default: None,
+      default: null,
     },
 
     template : Object,

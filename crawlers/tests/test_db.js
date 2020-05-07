@@ -3,6 +3,7 @@ const workers = require(__dirname + '/../linkedin/workers/workers.js');
 
 const SEARCH_URL = "https://www.linkedin.com/search/results/people/?keywords=marketer&origin=GLOBAL_SEARCH_HEADER";
 const CONNECT_URL = "https://www.linkedin.com/in/kirill-shilov-25aa8630/";
+const MY_URL = "https://www.linkedin.com/in/grigoriy-polyanitsin/";
 
 // test running
 
@@ -14,7 +15,7 @@ const CONNECT_URL = "https://www.linkedin.com/in/kirill-shilov-25aa8630/";
     password: "linked123",
     url: CONNECT_URL,
     pageNum: 9,
-    text: 'hi! test',
+    text: 'test',
     connectName: 'Kirill Shilov',
   };
 

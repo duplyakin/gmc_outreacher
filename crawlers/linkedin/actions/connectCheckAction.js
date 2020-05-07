@@ -3,6 +3,8 @@ const selectors = require(__dirname + "/.././selectors");
 const links = require(__dirname + "/.././links");
 const LoginAction = require(__dirname + '/loginAction.js');
 
+const MyExceptions = require(__dirname + '/../.././exceptions/exceptions.js');
+
 class ConnectCheckAction {
   constructor(email, password, cookies, connectName) {
     this.email = email;
@@ -16,11 +18,11 @@ class ConnectCheckAction {
   async gotoChecker(url) {
     await this.page.goto(url);
     let current_url = await this.page.url();
-    if(current_url.includes('login') || current_url.includes('signup')) {
+    if (current_url.includes('login') || current_url.includes('signup')) {
       let loginAction = new LoginAction.LoginAction(this.email, this.password, this.cookies);
       await loginAction.setContext(this.context);
       let result = await loginAction.login();
-      if(!result) {
+      if (!result) {
         // TODO: throw exception
         return false;
       } else {
@@ -46,33 +48,39 @@ class ConnectCheckAction {
 
   async connectCheck() {
     await this.gotoChecker(links.CONNECTS_LINK);
-    await this.page.waitForSelector(selectors.SEARCH_CONNECTS_SELECTOR);
 
-    await this.page.click(selectors.SEARCH_CONNECTS_SELECTOR);
-    await this.page.keyboard.type(this.connectName);
+    try {
+      await this.page.waitForSelector(selectors.SEARCH_CONNECTS_SELECTOR);
 
-    await this.page.waitForSelector(selectors.CONNECTOR_SELECTOR);
-    await this.page.waitFor(1000);  // wait linkedIn loading process
+      await this.page.click(selectors.SEARCH_CONNECTS_SELECTOR);
+      await this.page.keyboard.type(this.connectName);
 
-    let selector = selectors.CONNECTOR_SELECTOR;
-    let connect = await this.page.evaluate((selector) => {
-      let a = document.querySelector(selector);
-      if(a !== null) {
-        a = a.innerText;
-      };
-      return a;
-    }, selector);
+      await this.page.waitForSelector(selectors.CONNECTOR_SELECTOR);
+      await this.page.waitFor(1000);  // wait linkedIn loading process
 
-   if(connect === this.connectName) {
-     console.log("..... connect found - success: .....", connect)
-     return true;
-   }
+      let selector = selectors.CONNECTOR_SELECTOR;
+      let connect = await this.page.evaluate((selector) => {
+        let a = document.querySelector(selector);
+        if (a !== null) {
+          a = a.innerText;
+        };
+        return a;
+      }, selector);
 
-    console.log("..... connect NOT found: .....", connect)
-    return false;
+      if (connect === this.connectName) {
+        console.log("..... connect found - success: .....", connect)
+        return true;
+      }
+
+      console.log("..... connect NOT found: .....", connect)
+      return false;
+
+    } catch (err) {
+      throw MyExceptions.MessageCheckActionError(err);
+    }
   }
 }
 
 module.exports = {
-    ConnectCheckAction: ConnectCheckAction
+  ConnectCheckAction: ConnectCheckAction
 }

@@ -2,6 +2,8 @@ const puppeteer = require(__dirname + "/./../../node_modules/puppeteer");
 const selectors = require(__dirname + "/.././selectors");
 const LoginAction = require(__dirname + '/loginAction.js');
 
+const MyExceptions = require(__dirname + '/../.././exceptions/exceptions.js');
+
 class MessageAction {
   constructor(email, password, cookies, profileUrl, text) {
     this.email = email;
@@ -16,11 +18,11 @@ class MessageAction {
   async gotoChecker(url) {
     await this.page.goto(url);
     let current_url = await this.page.url();
-    if(current_url.includes('login') || current_url.includes('signup')) {
+    if (current_url.includes('login') || current_url.includes('signup')) {
       let loginAction = new LoginAction.LoginAction(this.email, this.password, this.cookies);
       await loginAction.setContext(this.context);
       let result = await loginAction.login();
-      if(!result) {
+      if (!result) {
         // TODO: throw exception
         return false;
       } else {
@@ -47,24 +49,34 @@ class MessageAction {
   async message() {
     await this.gotoChecker(this.profileUrl);
 
-    const page = await this.context.newPage();  // feature
-    await page.goto(this.profileUrl);
+    try {
+      const page = await this.context.newPage();  // feature
+      await page.goto(this.profileUrl);
+      //TODO: add logic for 'closed' for message accounts
 
-    await page.click(selectors.WRITE_MSG_BTN_SELECTOR);
+      // close messages box !!! (not critical here, but XZ ETOT LINKED)
+      await page.waitFor(1000);  // wait linkedIn loading process
+      await page.click(selectors.CLOSE_MSG_BOX_SELECTOR);
+      await page.waitFor(1000);  // wait linkedIn loading process
 
-    await page.waitForSelector(selectors.MSG_BOX_SELECTOR);
-    await page.click(selectors.MSG_BOX_SELECTOR);
+      await page.click(selectors.WRITE_MSG_BTN_SELECTOR);
 
-    await page.keyboard.type(this.text);
-    await page.waitForSelector(selectors.SEND_MSG_BTN_SELECTOR);
-    await page.waitFor(1000); // wait untill SEND button become active
-    await page.click(selectors.SEND_MSG_BTN_SELECTOR);
-    //await page.waitFor(100000); // to see result
+      await page.waitForSelector(selectors.MSG_BOX_SELECTOR);
+      await page.click(selectors.MSG_BOX_SELECTOR);
 
-    return true;
+      await page.keyboard.type(this.text);
+      await page.waitForSelector(selectors.SEND_MSG_BTN_SELECTOR);
+      await page.waitFor(1000); // wait untill SEND button become active
+      await page.click(selectors.SEND_MSG_BTN_SELECTOR);
+      //await page.waitFor(100000); // to see result
+
+      return true;
+    } catch (err) {
+      throw MyExceptions.MessageActionError(err);
+    }
   }
 }
 
 module.exports = {
-    MessageAction: MessageAction
+  MessageAction: MessageAction
 }
