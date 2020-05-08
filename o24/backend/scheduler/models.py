@@ -39,6 +39,7 @@ class Priority(db.Document):
 
     def _commit(self):
         self.save()
+        self.reload()
 
 class TaskLog(db.Document):
     prospect_id = db.ObjectIdField()
@@ -73,6 +74,10 @@ class TaskLog(db.Document):
             return None
 
         for log in logs:
-            log.save()
+            log._commit()
             
         #TaskLog.objects.update(logs, multi=True)
+
+    def _commit(self):
+        self.save()
+        self.reload()

@@ -350,7 +350,6 @@ FUNNELS = [
         'success' : {
             'key' : 'success'
         }
-
     },
 
     {

@@ -149,7 +149,7 @@ def create_models():
 
         s.active = setting.get('active')
 
-        s.save()
+        s._commit()
 
 
 

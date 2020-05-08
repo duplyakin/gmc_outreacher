@@ -73,7 +73,18 @@
             </el-table>
         </div>
     
-        </card>          
+        </card>     
+
+        <div v-if="test" class="row">
+            <div class="col-12">
+                <pre>{{ this.campaigns_data}}</pre>
+            </div>
+            
+            <div class="col-12">
+                {{ this.list_data }}
+            </div>
+        </div>
+         
 </div>
 </template>
 <script>
@@ -103,10 +114,11 @@ computed: {
 },
 data() {
     return {
+        test : false,
         status : {
             0 : 'New',
             1 : 'In progress',
-            2 : 'Pause',
+            2 : 'On Pause',
            '-1' : 'Failed'
         },
         pagination : {
@@ -195,7 +207,13 @@ methods: {
         this.$router.push({ path: "campaign_form", query: { action_type: 'add' } })
     },
     editCampaign(msg_dict, index) {
-        this.$router.push({ path: "campaign_form", query: { action_type: 'edit', campaign_id: msg_dict._id.$oid } })
+        var status = msg_dict['status'] || -2;
+        if (status == -2 || status != 2){
+            alert("Pause campaign for edit");
+            return false;
+        }
+
+        this.$router.push({ path: "campaign_edit_form", query: { campaign_id: msg_dict._id.$oid } })
     },
     next_page(){
         var page = 2;
@@ -255,6 +273,9 @@ methods: {
         var pagination_dict = JSON.parse(from_data.pagination);
         this.$set(this, 'pagination', pagination_dict);
 
+        var columns = JSON.parse(from_data.columns);
+        this.$set(this.list_data, 'columns', columns);
+
         if (from_data.campaigns){
             var campaigns = JSON.parse(from_data.campaigns)
             this.$set(this.campaigns_data, 'campaigns', campaigns);
@@ -263,7 +284,7 @@ methods: {
 
 },
 async mounted() {
-    await this.load_data();
+    //await this.load_data();
     await this.load_campaigns();
 }
 };

@@ -32,14 +32,14 @@ class Scheduler():
         if follow_ups.count() <= 0:
             print("follow_ups.count() <= 0")
             current_priority.do_next = INTRO
-            current_priority.save()
+            current_priority._commit()
             return
 
         #switch to INTRO if we did followups on the last round
         if current_priority.do_next == FOLLOWUP:
             print("current_priority.do_next == FOLLOWUP")
             current_priority.do_next = INTRO
-            current_priority.save()
+            current_priority._commit()
             return
 
         #switch to followup if we did INTRO on the last round
@@ -52,15 +52,15 @@ class Scheduler():
                 print("current_priority.followup_level == 0")
                 follow_ups.update(followup_level=FOLLOWUP)
                 current_priority.followup_level = 1
-                current_priority.save()
+                current_priority._commit()
                 return
 
             if follow_ups.filter(followup_level=FOLLOWUP).count() <= 0:
                 print("follow_ups.filter(followup_level=FOLLOWUP).count() <= 0")
                 current_priority.followup_level = 0
-                current_priority.save()
+                current_priority._commit()
                 return
-            current_priority.save()
+            current_priority._commit()
             return    
     
     def plan(self):
@@ -133,7 +133,7 @@ class Scheduler():
 
         models.Credentials.update_credentials(updated)
 
-        campaigns = Campaign.objects(status=IN_PROGRESS).all()
+        campaigns = Campaign.objects(status=IN_PROGRESS)
         campaigns_updated = []
         for campaign in campaigns:
             campaign.change_limits(now)
@@ -154,9 +154,9 @@ class Scheduler():
         return log
     ###################################### CAMPAIGN START/PAUSE/RESUME ##################################
     #####################################################################################################
-    def start_campaign(self, campaign, input_data=None):
+    def start_campaign(self, owner, campaign, input_data=None):
         if campaign.status != NEW:
-            raise ErrorCodeException(START_CAMPAIGN_ERROR, "You can start only NEW campaign, title={0} status={1}".format(campaign.title, campaign.status))
+            return self.resume_campaign(owner=owner, campaign=campaign)
 
         prospects = models.Prospects.get_prospects(status=NEW, campaign_id=campaign.id)
         if not prospects:
@@ -179,8 +179,8 @@ class Scheduler():
 
     def pause_campaign(self, campaign):
         if not campaign.inprogress():
-            raise Exception("Campaign already paused, title={0}".format(campaign.title))
-
+            return 
+            
         # TaskQueue.pause_tasks(campaign_id=campaign.id)
 
         campaign._safe_pause()
@@ -194,7 +194,7 @@ class Scheduler():
 
         self._check_new_prospects(owner=owner, campaign=campaign)
 
-        campaign.safe_start()
+        campaign._safe_start()
 
         #campaign.update_status(status=IN_PROGRESS)
     @classmethod
@@ -207,9 +207,13 @@ class Scheduler():
         # 1. Pause all campaigns prospects belongs to
         # 2. Remove all tasks from task_queue
         # 3. Update prospects assign_to=None
-        campaigns = models.Campaign.objects(owner=owner_id, id__in=prospects_ids).all()
-        for campaign in campaigns:
-            scheduler.pause_campaign(campaign)
+
+        campaigns_refs = models.Prospects.objects(owner=owner_id, id__in=prospects_ids).distinct('assign_to')
+        if campaigns_refs:
+            campaigns_ids = [c.id for c in campaigns_refs]
+            campaigns = models.Campaign.objects(owner=owner_id, id__in=campaigns_ids)
+            for campaign in campaigns:
+                scheduler.pause_campaign(campaign)
         
         tasks_deleted = TaskQueue.safe_unassign_prospects(prospects_ids=prospects_ids)
 
@@ -236,12 +240,12 @@ class Scheduler():
         return len(res)
 
     @classmethod
-    def safe_start_campaign(cls, campaign):
+    def safe_start_campaign(cls, owner, campaign):
         if not campaign:
             raise Exception("No such campaign")
 
         scheduler = cls()
-        scheduler.start_campaign(campaign=campaign)
+        scheduler.start_campaign(owner=owner, campaign=campaign)
 
     @classmethod
     def safe_pause_campaign(cls, campaign):
@@ -274,7 +278,7 @@ class Scheduler():
         if not ids:
             raise Exception("Can't load_prospects campaign_title={0} ids={1}".format(campaign.title, ids))
         
-        self._update_prospects(ids, status=IN_PROGRESS)
+        self._update_prospects(ids=ids, status=IN_PROGRESS)
 
         models.Prospects._assign_campaign(owner_id=owner, prospects_ids=ids, campaign_id=campaign.id)
 

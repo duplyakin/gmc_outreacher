@@ -381,7 +381,7 @@ class TestGmailHandlers(unittest.TestCase):
 
             s.active = setting.get('active')
 
-            s.save()
+            s._commit()
 
         print("STEP 2: ......Testing data created success")
 

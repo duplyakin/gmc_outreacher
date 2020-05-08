@@ -16,13 +16,13 @@ class TestBulkUpdates(unittest.TestCase):
 
         Prospects.objects().update(status=NEW)
 
-        new = Prospects.objects(status=NEW).all()
+        new = Prospects.objects(status=NEW)
         print("*** Before update:{0}".format(len(new)))
 
         ids = Prospects.objects(status=NEW).update(status=IN_PROGRESS, full_result=True)
         print(dir(ids))
         print(ids.upserted_id)
-        new = Prospects.objects(status=NEW).all()
+        new = Prospects.objects(status=NEW)
         print("*** After update:{0} ids:{1}".format(len(new), ids))
 
     def test_2_unique_index(self):

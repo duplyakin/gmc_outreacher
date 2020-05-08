@@ -33,6 +33,7 @@ class Action(db.Document):
 
     def _commit(self):
         self.save()
+        self.reload()
     
     def is_true(self, result):
         if self.action_type == ACTION_NONE:
@@ -59,9 +60,13 @@ class Funnel(db.Document):
 
     @classmethod
     def async_funnels(cls, owner=None):
-        return cls.objects(root=True).\
-                only('id', 'title', 'templates_required', 'root').\
-                all()
+        results = cls.objects(root=True).\
+                only('id', 'title', 'template_key','templates_required', 'root')
+        
+        if results:
+            return results.to_json()
+        
+        return []
 
     @classmethod
     def next_node(cls, current_node, result):
@@ -146,6 +151,7 @@ class Funnel(db.Document):
 
     def _commit(self):
         self.save()
+        self.reload()
 
 # How TaskQueue works
 # When the new task created status = NEW
@@ -160,6 +166,7 @@ class TaskQueue(db.Document):
     credentials_dict = db.DictField()
     credentials_id = db.ObjectIdField()
 
+    input_data = db.DictField()
     result_data = db.DictField()
 
     prospect_id = db.ObjectIdField(unique=True)
@@ -226,7 +233,7 @@ class TaskQueue(db.Document):
 
     @classmethod
     def get_ready(cls):
-        return TaskQueue.objects(status=READY).all()
+        return TaskQueue.objects(status=READY)
 
     @classmethod
     def get_execute_tasks(cls, do_next, followup_level, now):
@@ -276,7 +283,7 @@ class TaskQueue(db.Document):
         new_tasks = list(TaskQueue.objects(status=NEW).aggregate(*pipeline))
         tasks_ids = [x.get('task_id') for x in new_tasks]
 
-        execute_tasks = TaskQueue.objects(Q(id__in=tasks_ids)).all()
+        execute_tasks = TaskQueue.objects(Q(id__in=tasks_ids))
         return execute_tasks
 
 
@@ -314,7 +321,7 @@ class TaskQueue(db.Document):
             return None
         
         for task in tasks:
-            task.save()
+            task._commit()
 
         #TaskQueue.objects.update(tasks, multi=True)
 
@@ -327,6 +334,7 @@ class TaskQueue(db.Document):
 
     def _commit(self):
         self.save()
+        self.reload()
 
 #We put async tasks here. 
 class AsyncTaskQueue(db.Document):
@@ -358,11 +366,12 @@ class AsyncTaskQueue(db.Document):
         
         new_task.campaign_id = campaign_id
         
-        new_task.save()
+        new_task._commit()
         return new_task
 
     def _commit(self):
         self.save()
+        self.reload()
 
 class OpenTracker(db.Document):
     #open, reply

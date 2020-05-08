@@ -154,3 +154,4 @@ class MailBox(db.Document):
 
     def _commit(self):
         self.save()
+        self.reload()

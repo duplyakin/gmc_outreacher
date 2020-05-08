@@ -29,8 +29,7 @@ class TestReferenceField(unittest.TestCase):
         prospect = Prospects.objects().first()
 
         prospect.assign_to_list = lst.id
-        prospect.save()
-        prospect.reload()
+        prospect._commit()
 
         print(prospect.id)
         print(prospect.assign_to_list)

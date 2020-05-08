@@ -73,6 +73,7 @@ class User(db.Document, UserMixin):
 
     def _commit(self):
         self.save()
+        self.reload()
 
     def __repr__(self):
         return '<User %r>' % (self.email)
@@ -182,17 +183,20 @@ class Credentials(db.Document):
         
         total = db_query.count()
         results = []
-        if page:
-            results = db_query.skip(per_page * (page-1)).limit(per_page).order_by('status').all()
+        if page is not None:
+            results = db_query.skip(per_page * (page-1)).limit(per_page).order_by('status')
         else:
-            results = db_query.order_by('status').all()
-            
+            results = db_query.order_by('status')
+        
+        if results:
+            results = results.to_json()
+
         return (total, results)
 
 
     @classmethod
     def list_credentials(cls, credential_ids):
-        return cls.objects(Q(id__in=credential_ids)).all()
+        return cls.objects(Q(id__in=credential_ids))
 
     @classmethod
     def update_credentials(cls, arr):
@@ -200,7 +204,7 @@ class Credentials(db.Document):
             return None
 
         for e in arr:
-            e.save()
+            e._commit()
         #cls.objects.update(arr)
 
     def get_account(self):
@@ -240,6 +244,7 @@ class Credentials(db.Document):
 
     def _commit(self):
         self.save()
+        self.reload()
 
 #### Menu: Teams ####
 #### Manage teams
@@ -263,6 +268,7 @@ class Team(db.Document):
 
     def _commit(self):
         self.save()
+        self.reload()
 
 class Campaign(db.Document):
     RESTRICTED_SET_FIELDS = [
@@ -275,6 +281,8 @@ class Campaign(db.Document):
         'data',
         'created'
     ]
+
+    CAN_BE_NULL = ['from_hour', 'to_hour', 'from_minutes', 'to_minutes', 'status']
 
     @classmethod
     def get_create_fields(cls):
@@ -345,7 +353,7 @@ class Campaign(db.Document):
         ]
 
         campaigns = []
-        if page:
+        if page is not None:
             campaigns = list(db_query.skip(per_page * (page-1)).limit(per_page).order_by('-created').aggregate(*pipeline))
         else:
             campaigns = list(db_query.order_by('-created').aggregate(*pipeline))
@@ -421,22 +429,12 @@ class Campaign(db.Document):
             return None
 
         for c in campaigns:
-            c.save()
+            c._commit()
 
     def valid_funnel(self):
         if self.funnel == None:
             return False
         
-        return True
-
-    def valid_prospects_list(self):
-        if self.prospects_list == None:
-            return False
-        
-        count = Prospects.count_prospects_in_a_list(list_id=self.prospects_list)
-        if count <= 0:
-            return False
-
         return True
 
     def get_node_template(self, template_key, medium):
@@ -507,20 +505,10 @@ class Campaign(db.Document):
             if not title:
                 raise Exception("Title can't be empty")
             
-            exist = Campaign.objects(owner=owner, title=title).first()
+            exist = Campaign.objects(owner=owner, id__ne=self.id, title=title).first()
             if exist:
                 raise Exception("Campaign with this title already exist")
 
-
-        if 'prospects_list' in changed_fields:
-            prospects_list = campaign_data.prospects_list()
-            if not prospects_list:
-                raise Exception("Prospects list can't be empty")
-
-            exist = Campaign.objects(owner=owner, prospects_list=prospects_list).first()
-            if exist:
-                if self.prospects_list != exist.id:
-                    raise Exception("Another campaign use this Prospect list")
 
     def _async_set_field(self, field_name, val):
         if field_name == 'title':
@@ -544,7 +532,8 @@ class Campaign(db.Document):
             val = campaign_data.get_field(field)
             if val:
                 self._async_set_field(field_name=field, val=val)
-
+            elif field in self.CAN_BE_NULL:
+                self._async_set_field(field_name=field, val=val)
         
         self._commit()
         return True
@@ -566,6 +555,8 @@ class Campaign(db.Document):
             val = campaign_data.get_field(field)
             if val:
                 new_campaign._async_set_field(field_name=field, val=val)
+            elif field in cls.CAN_BE_NULL:
+                new_campaign._async_set_field(field_name=field, val=val)
 
         new_campaign._commit()
         return new_campaign
@@ -583,6 +574,7 @@ class Campaign(db.Document):
 
     def _commit(self):
         self.save()
+        self.reload()
 
 
 
@@ -590,7 +582,7 @@ class Campaign(db.Document):
 class ProspectsList(db.Document):
     owner = db.ReferenceField(User, reverse_delete_rule=1)
     
-    title = db.StringField(unique=True)
+    title = db.StringField()
 
     created = db.DateTimeField( default=datetime.now() )
     
@@ -605,7 +597,7 @@ class ProspectsList(db.Document):
                     only('id', 'title')
         
         total = db_query.count()
-        prospects_list = db_query.order_by('-created').all()
+        prospects_list = db_query.order_by('-created')
 
         results = prospects_list.to_json()
         return (total, results)
@@ -614,10 +606,10 @@ class ProspectsList(db.Document):
     def get_lists(cls, owner, title=None, id=None):
         if title:
             return cls.objects(owner=owner, title=title).first()
-        elif id:
+        elif id is not None:
             return cls.objects(owner=owner, id=id).first()
         else:
-            return cls.objects(owner=owner).all()
+            return cls.objects(owner=owner)
 
     @classmethod
     def create_list(cls, owner_id, title):
@@ -642,6 +634,7 @@ class ProspectsList(db.Document):
 
     def _commit(self):
         self.save()
+        self.reload()
 
 
 class Prospects(db.Document):
@@ -747,7 +740,7 @@ class Prospects(db.Document):
 
         if check_duplicate:
             query['$or'] = or_array
-            duplicates = Prospects.objects(__raw__=query).all()
+            duplicates = Prospects.objects(__raw__=query)
             if duplicates:
                 error = "Duplicate found ERROR: email:{0} or linkedin:{1} exists".format(email, linkedin)
                 raise Exception(error)
@@ -828,7 +821,7 @@ class Prospects(db.Document):
 
     @classmethod
     def filter_no_campaign(cls, owner_id, prospects_ids):
-        return Prospects.objects(owner=owner_id, id__in=prospects_ids, assign_to=None).all()
+        return Prospects.objects(owner=owner_id, id__in=prospects_ids, assign_to=None)
 
     @classmethod
     def _unassign_campaign(cls, owner_id, prospects_ids):
@@ -837,6 +830,16 @@ class Prospects(db.Document):
 
         return Prospects.objects(owner=owner_id, 
                                 id__in=prospects_ids).update(assign_to=None, status=NEW)
+
+    @classmethod
+    def _assign_campaign_on_create(cls, owner_id, campaign_id, prospects_ids):
+        if not prospects_ids or not campaign_id:
+            return 0
+
+        return Prospects.objects(owner=owner_id,
+                                assign_to=None, 
+                                id__in=prospects_ids).update(status=NEW, assign_to=campaign_id)
+
 
     @classmethod
     def _assign_campaign(cls, owner_id, prospects_ids, campaign_id):
@@ -901,7 +904,7 @@ class Prospects(db.Document):
 
     @classmethod
     def update_duplicates(cls, owner_id, new_data, values=[], list_id=None):
-        duplicates = Prospects.objects(Q(owner=owner_id) & (Q(data__email__in=values) | Q(data__linkedin__in=values))).all()
+        duplicates = Prospects.objects(Q(owner=owner_id) & (Q(data__email__in=values) | Q(data__linkedin__in=values)))
         if not duplicates:
             return
 
@@ -913,8 +916,7 @@ class Prospects(db.Document):
                     prospect.data = data
                     if list_id:
                         prospect.assign_to_list = list_id
-                    prospect.save()
-                    prospect.reload()
+                    prospect._commit()
                     del data
                     break
 
@@ -1070,15 +1072,15 @@ class Prospects(db.Document):
         if status is None and campaign_id is None:
             raise Exception("Status and campaign_id can't be None")
         
-        if status and campaign_id:
-            return cls.objects(Q(status=status) & Q(assign_to=campaign_id)).order_by('-created').all()
-        elif campaign_id:
-            return cls.objects(assign_to=campaign_id).all()
+        if status is not None:
+            return cls.objects(Q(status=status) & Q(assign_to=campaign_id)).order_by('-created')
+        else:
+            return cls.objects(assign_to=campaign_id)
 
 
     @classmethod
     def update_prospects(cls, ids, status):
-        return cls.objects(Q(id__in=ids)).update(status=status)
+        return cls.objects(id__in=ids).update(status=status)
 
     def get_email(self):
         return self.data.get('email', '')
@@ -1096,6 +1098,7 @@ class Prospects(db.Document):
 
     def _commit(self):
         self.save()
+        self.reload()
 
 
 class MediumSettings(db.Document):

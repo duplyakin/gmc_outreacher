@@ -155,7 +155,7 @@ class TestUsersCampaignsProspects(unittest.TestCase):
 
             s.active = setting.get('active')
 
-            s.save()
+            s._commit()
 
 
 
