@@ -38,7 +38,7 @@
           </div>
           <div>
             <p class="data-caption">Funnel</p>
-            <p class="info">{{list_data.campaign.funnel}}</p>
+            <p class="info">{{list_data.campaign.funnel.title}}</p>
           </div>
           <div>
             <p class="data-caption">Accounts</p>
@@ -107,7 +107,8 @@ export default {
 
         //barThickness: 1,
         //maxBarThickness: 1,
-
+        
+        /*
         scales: {
           xAxes: [
             {
@@ -119,7 +120,7 @@ export default {
               stacked: true
             }
           ]
-        }
+        }*/
       },
 
       datacollection: {},
