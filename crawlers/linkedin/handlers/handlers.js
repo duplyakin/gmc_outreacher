@@ -1,10 +1,9 @@
-const { bull_workers } = require('/./bullWorkersSettings.js');
-let mongoose = require('../mongoose');
-let TaskQueue = require('TaskQueue');
-const workers = require(__dirname + '/workers/workers.js');
-const cron = require('../node-cron');
+const { bull_workers } = require(__dirname + '/./bullWorkersSettings.js');
+const taskModel = require(__dirname + "/../.././models/shared.js");
+const workers = require(__dirname + '/.././workers/workers.js');
+const cron = require(__dirname + '/../node-cron');
 
-const MyExceptions = require('/../.././exceptions/exceptions.js');
+const MyExceptions = require(__dirname + '/../.././exceptions/exceptions.js');
 
 
 async function bullConsumer() {
@@ -58,7 +57,7 @@ async function bullConsumer() {
 async function taskStatusListener() {
   // start cron every minute
   cron.schedule("* * * * *", () => {
-    let tasks = await TaskQueue.find({ status: 1, js_action: true });
+    let tasks = await taskModel.TaskQueue.find({ status: 1, js_action: true });
     if (Array.isArray(tasks) && tasks.length !== 0) {
       tasks.forEach((task) => {
         let data = {
@@ -72,3 +71,9 @@ async function taskStatusListener() {
     }
   });
 }
+
+module.exports = {
+  taskStatusListener: taskStatusListener,
+  bullConsumer: bullConsumer,
+}
+
