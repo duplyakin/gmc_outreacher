@@ -5,13 +5,14 @@ const LoginAction = require(__dirname + '/loginAction.js');
 const MyExceptions = require(__dirname + '/../.././exceptions/exceptions.js');
 
 class MessageAction {
-  constructor(email, password, cookies, profileUrl, text) {
+  constructor(email, password, cookies, url, data, template) {
     this.email = email;
     this.password = password;
     this.cookies = cookies;
 
-    this.profileUrl = profileUrl;
-    this.text = text;
+    this.url = url;
+    this.data = data;
+    this.template = template;
   }
 
   // do 1 trie to connect URL or goto login
@@ -47,33 +48,36 @@ class MessageAction {
   }
 
   async message() {
-    await this.gotoChecker(this.profileUrl);
+    await this.gotoChecker(this.url);
 
-    try {
-      const page = await this.context.newPage();  // feature
-      await page.goto(this.profileUrl);
-      //TODO: add logic for 'closed' for message accounts
+    const page = await this.context.newPage();  // feature (critical)
+    await page.goto(this.url);
+    //TODO: add logic for 'closed' for message accounts
 
-      // close messages box !!! (not critical here, but XZ ETOT LINKED)
-      await page.waitFor(1000);  // wait linkedIn loading process
-      await page.click(selectors.CLOSE_MSG_BOX_SELECTOR);
-      await page.waitFor(1000);  // wait linkedIn loading process
+    // close messages box !!! (not critical here, but XZ ETOT LINKED)
+    await page.waitFor(1000);  // wait linkedIn loading process
+    await page.click(selectors.CLOSE_MSG_BOX_SELECTOR);
+    await page.waitFor(1000);  // wait linkedIn loading process
 
-      await page.click(selectors.WRITE_MSG_BTN_SELECTOR);
+    await page.click(selectors.WRITE_MSG_BTN_SELECTOR);
 
-      await page.waitForSelector(selectors.MSG_BOX_SELECTOR);
-      await page.click(selectors.MSG_BOX_SELECTOR);
+    await page.waitForSelector(selectors.MSG_BOX_SELECTOR);
+    await page.click(selectors.MSG_BOX_SELECTOR);
 
-      await page.keyboard.type(this.text);
-      await page.waitForSelector(selectors.SEND_MSG_BTN_SELECTOR);
-      await page.waitFor(1000); // wait untill SEND button become active
-      await page.click(selectors.SEND_MSG_BTN_SELECTOR);
-      //await page.waitFor(100000); // to see result
+    let text = this.formatMessage();
 
-      return true;
-    } catch (err) {
-      throw MyExceptions.MessageActionError(err);
-    }
+    await page.keyboard.type(text);
+    await page.waitForSelector(selectors.SEND_MSG_BTN_SELECTOR);
+    await page.waitFor(1000); // wait untill SEND button become active
+    await page.click(selectors.SEND_MSG_BTN_SELECTOR);
+    //await page.waitFor(100000); // to see result
+
+    return true;
+  }
+
+  formatMessage() {
+    // format template
+    return this.template;
   }
 }
 

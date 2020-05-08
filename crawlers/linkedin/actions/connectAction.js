@@ -49,23 +49,18 @@ class ConnectAction {
   async connect() {
     await this.gotoChecker(this.connectUrl);
 
-    try {
-      await this.page.click(selectors.CONNECT_SELECTOR);
-      // TODO: add logic for already connected links
+    await this.page.click(selectors.CONNECT_SELECTOR);
 
-      await this.page.waitForSelector(selectors.ADD_MSG_BTN_SELECTOR);
-      await this.page.click(selectors.ADD_MSG_BTN_SELECTOR);
+    await this.page.waitForSelector(selectors.ADD_MSG_BTN_SELECTOR);
+    await this.page.click(selectors.ADD_MSG_BTN_SELECTOR);
 
-      await this.page.waitForSelector(selectors.MSG_SELECTOR);
-      await this.page.click(selectors.MSG_SELECTOR);
+    await this.page.waitForSelector(selectors.MSG_SELECTOR);
+    await this.page.click(selectors.MSG_SELECTOR);
 
-      await this.page.keyboard.type(this.text);
-      await this.page.click(selectors.SEND_INVITE_TEXT_BTN_SELECTOR);
+    await this.page.keyboard.type(this.text);
+    await this.page.click(selectors.SEND_INVITE_TEXT_BTN_SELECTOR);
 
-      return true;
-    } catch (err) {
-      throw MyExceptions.ConnectActionError(err);
-    }
+    return true;
   }
 }
 

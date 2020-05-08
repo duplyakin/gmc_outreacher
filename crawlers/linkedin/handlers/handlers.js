@@ -49,7 +49,16 @@ async function bullConsumer() {
           console.log("..... Incorrect task.action_key .....");
       }
     } catch (err) {
-      throw new MyExceptions.UnknownError('Handler error - something went wrong: ' + err).code;
+      let err_result = {
+        code: MyExceptions.HandlerError().code,
+        if_true: false,
+        raw: MyExceptions.HandlerError("HandlerError error: " + err).error
+      };
+      await taskModel.TaskQueue.updateOne({ id: job.data.task_id }, { status: -1, result_data: err_result }, function (err, res) {
+        if (err) throw MyExceptions.MongoDBError('MongoDB save err: ' + err);
+        // updated!
+        console.log(success_db_save_text);
+      });
     }
   });
 }
@@ -57,7 +66,9 @@ async function bullConsumer() {
 async function taskStatusListener() {
   // start cron every minute
   cron.schedule("* * * * *", () => {
-    let tasks = await taskModel.TaskQueue.find({ status: 1, js_action: true });
+    let tasks = await taskModel.TaskQueue.find({ status: 1, js_action: true }, function (err, res) {
+      if (err) throw MyExceptions.MongoDBError('MongoDB find err: ' + err);
+    });
     if (Array.isArray(tasks) && tasks.length !== 0) {
       tasks.forEach((task) => {
         let data = {
