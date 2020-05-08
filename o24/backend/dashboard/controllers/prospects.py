@@ -395,7 +395,6 @@ def edit_prospect():
                 raise Exception('Prospect does not exist')
 
             exist.update_data(data=data)
-            exist.reload()
 
             result['code'] = 1
             result['updated'] = exist.to_json()
@@ -438,7 +437,7 @@ def create_prospect():
                 raise Exception("Something went wrong contact support.")
 
             #ALWAYS need this: as we create objecId from Json, need mongo to update it with object
-            new_prospect.reload()
+            #new_prospect.reload()
 
             result['code'] = 1
             result['updated'] = new_prospect.serialize()

@@ -162,7 +162,7 @@ class TestLookupQuery(unittest.TestCase):
                 new_cr = Credentials.create_credentials(owner=user, data=data)
                 if 'LIMITED' in cr:
                     new_cr.next_action = datetime.datetime.now() + timedelta(days=1)
-                    new_cr.save()
+                    new_cr._commit()
                 self.assertTrue(new_cr, "credentials")
                 credentials_lst.append(new_cr.id)
 
@@ -176,14 +176,14 @@ class TestLookupQuery(unittest.TestCase):
             self.assertTrue(new_campaign, "campaign")
             if 'PAUSED' in c.get('title'):
                 new_campaign.status = PAUSED
-                new_campaign.save()
+                new_campaign._commit()
             elif 'PROGRESS' in c.get('title'):
                 new_campaign.status = IN_PROGRESS
-                new_campaign.save()
+                new_campaign._commit()
 
             if c.get('next_action') == False:
                 new_campaign.next_action =  datetime.datetime.now() + timedelta(days=1)
-                new_campaign.save()
+                new_campaign._commit()
             
             for i in range(5):
                 new_prospect = Prospects.create_prospect(owner_id=user.id, campaign_id=new_campaign.id)
@@ -210,7 +210,7 @@ class TestLookupQuery(unittest.TestCase):
             }
 
             new_task = TaskQueue.create_task(campaign, next_prospect, test_crededentials_dict)
-            new_task.save()
+            new_task._commit()
             self.assertTrue(new_task, "can't create new_task")
             
             saved_task = TaskQueue.objects(id=new_task.id).first()
@@ -219,7 +219,7 @@ class TestLookupQuery(unittest.TestCase):
             saved_task.status = task.get('status')
             saved_task.record_type = task.get('record_type')
             saved_task.followup_level = task.get('followup_level')
-            saved_task.save()
+            saved_task._commit()
 
 
 
@@ -271,13 +271,14 @@ class TestLookupQuery(unittest.TestCase):
         tasks = list(TaskQueue.objects().aggregate(*pipeline))
         tasks_ids = [x.get('task_id') for x in tasks]
 
-        final_tasks = TaskQueue.objects(Q(id__in=tasks_ids)).all()
+        final_tasks = TaskQueue.objects(Q(id__in=tasks_ids))
         print("****** {0}".format(len(tasks)))
         pprint(tasks)
         print(tasks_ids)
         print(final_tasks)
 
     def test_3_dereference(self):
+        return
         current_user = get_current_user()
         page = 3
         per_page = 1
@@ -375,6 +376,32 @@ class TestLookupQuery(unittest.TestCase):
         o = json.loads(j)
         pprint(o)
 
+    def test_5_update(self):
+        return
+        campaign = Campaign.objects(title='campaign-1').first()
+
+        prospects = Prospects.objects(assign_to=campaign.id).limit(3)
+
+        ids = [p.id for p in prospects]
+        print(ids)
+        status = 0
+        for prospect in prospects:
+            print("id:{0} status:{1}".format(prospect.id, prospect.status)) 
+            status = prospect.status
+        
+        status = not status
+
+        Prospects.objects(id__in=ids).update(status=status)
+
+        for prospect in prospects:
+            print("id:{0} status:{1}".format(prospect.id, prospect.status)) 
+            status = prospect.status
+ 
+    def test_6_d(self):
+        #credentials_ids_in_progress = TaskQueue.objects(status=0).distinct('credentials_id')
+        #print(credentials_ids_in_progress)
+        campaign = Campaign.objects(title='campaign-121')
+        print(campaign)
 
 def setUpModule():
     env = os.environ.get('APP_ENV', None)

@@ -17,7 +17,7 @@ class JSObject():
             return default
 
         val = getattr(self, attr_name)
-        if not val:
+        if val is None:
             return default
 
         return val
@@ -127,7 +127,7 @@ class JSCampaignData(JSObject):
                         #print("...Serialized key:{0} value:{1}".format(attr_name, templates))
                     elif key == 'from_hour':
                         hour, minutes = des_value.split(':')
-                        
+
                         from_minutes = self.ATTR_PREFIX + 'from_minutes'
                         setattr(self, attr_name, int(hour))
                         #print("...Serialized key:{0} value:{1}".format(attr_name, hour))
@@ -135,7 +135,7 @@ class JSCampaignData(JSObject):
                         #print("...Serialized key:{0} value:{1}".format(from_minutes, minutes))
                     elif key == 'to_hour':
                         hour, minutes = des_value.split(':')
-                        
+
                         to_minutes = self.ATTR_PREFIX + 'to_minutes'
                         setattr(self, attr_name, int(hour))
                         #print("...Serialized key:{0} value:{1}".format(attr_name, hour))
@@ -193,7 +193,7 @@ class JSCampaignData(JSObject):
         return self._custom_attr(attr='credentials', default=[])
 
     def prospects_list(self):
-        return self._custom_attr(attr='prospects_list', default=None)
+        return self._custom_attr(attr='list_selected', default=None)
 
     def templates(self):
         return self._custom_attr(attr='templates', default={})

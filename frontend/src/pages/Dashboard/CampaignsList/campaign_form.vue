@@ -15,12 +15,12 @@
         class="select-default mb-3"
         style="width: 100%;"
         placeholder="Select prospects list"
-        v-model="campaign_data.prospects_list"
+        v-model="campaign_data.list_selected"
         value-key="title"
-        :disabled="!modified_fields['prospects_list']">
+        :disabled="!modified_fields['lists']">
         <el-option
             class="select-default"
-            v-for="(list,index) in list_data.prospects_list"
+            v-for="(list,index) in list_data.lists"
             :key="list._id.$oid"
             :label="list.title"
             :value="list"
@@ -263,10 +263,11 @@
     <div class="row">
         <div class="col-12 d-flex flex-row-reverse">
                 <button
+                @click.prevent="save_changes"
                 type="button"
                 class="btn btn-default btn-success mx-1"
-                >Save Campaign</button>
-            <button type="button" class="btn btn-outline btn-wd btn-danger">Discard</button>
+                >Save Changes</button>
+          <!--  <button type="button" class="btn btn-outline btn-wd btn-danger">Discard</button> -->
         </div>
     </div>
 </card>
@@ -315,7 +316,7 @@ export default {
     },
     data() {
         return {
-            test : false,
+            test : true,
 
             action_type : '',
             campaign_id : '',
@@ -362,17 +363,17 @@ export default {
             /* All lists that we need to select */
             list_data : {
                 credentials: [],
-                prospects_list: [],
+                lists: [],
                 funnels: [],
                 columns: []
             },
 
             /*Object data*/
             campaign_data : {
+                list_selected : '',
                 title: "",
                 funnel: {},
                 credentials: [],
-                prospects_list: {},
                 templates: {
                     email: [],
                     linkedin: []
@@ -536,19 +537,20 @@ export default {
                 }
             }
         },
-        deserialize_data(from_data){            
+        deserialize_data(from_data){
+            console.log(from_data);
             for (var key in from_data){
                 if (this.list_data.hasOwnProperty(key) && from_data[key]){
                     var parsed_data = JSON.parse(from_data[key])
                     this.$set(this.list_data, key, parsed_data);
                 }
             }
-
             /*Not sure that we need it - but don't want to deal with concurency*/
             if (from_data.modified_fields  && this.action_type != 'edit'){
                 var modified_fields = JSON.parse(from_data.modified_fields);
                 this.$set(this, 'modified_fields', modified_fields);
             }
+
         },
         deserialize_campaign(campaign_json){
             var campaign_dict = JSON.parse(campaign_json.campaign);
@@ -588,6 +590,48 @@ export default {
 
             return JSON.stringify(this.campaign_data);
         },
+        save_changes(){
+            /*Simple validation */
+            if (this.campaign_data.title == ''){
+                alert("Title can't be empty");
+                return false;
+            }
+
+            if (this.campaign_data.list_selected == ''){
+                alert("You need to select prospect list");
+                return false;
+            }
+
+            var funnel_selected = this.campaign_data.funnel._id || '';
+            if (!funnel_selected){
+                alert("You need to select the funnel");
+                return false;
+            }
+
+            if (this.campaign_data.from_hour == '' ||
+                this.campaign_data.to_hour == '' ||
+                this.timezones_selected == ''){
+                    alert("Please select Delivery time");
+                    return false;
+                }else{
+                    this.campaign_data.time_zone = this.timezones_selected;
+                }
+            
+            var days_selected = false;
+            for (var key in this.campaign_data.sending_days){
+                if (this.campaign_data.sending_days[key] == true){
+                    days_selected = true;
+                    break;
+                }
+            }
+
+            if (!days_selected){
+                alert("Sending days can't be emtpy");
+                return false;
+            }
+
+            this.send_campaign_data();
+        },
         send_campaign_data(){
             /* Add validation here*/
 
@@ -613,7 +657,7 @@ export default {
                         var msg = "Save campaign error: " + r.msg + " code:" + r.code;
                         alert(msg);
                     } else {
-                        /*update here*/
+                        this.$router.push({ path: "campaigns_new"});
                     }
                 })
                 .catch(error => {

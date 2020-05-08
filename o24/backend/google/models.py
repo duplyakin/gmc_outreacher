@@ -36,3 +36,7 @@ class GoogleAppSetting(db.Document):
             'Created at' : self.created,
             'Active' : self.active
         }
+
+    def _commit(self):
+        self.save()
+        self.reload()

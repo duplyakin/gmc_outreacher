@@ -32,18 +32,6 @@ COLUMNS = [
         'label' : 'Funnel',
         'prop' : 'funnel',
         'field' : 'title',   
-    },
-    {
-        'label' : 'Email',
-        'prop' : 'email',
-        'data' : True
-   
-    },
-    {
-        'label' : 'Linkedin',
-        'prop' : 'linkedin',
-        'data' : True
-   
     }
 ]
 
@@ -53,17 +41,21 @@ modified_fields_on_create = {
     'credentials' : True,
     'templates' : True,
     'time_table' : True,
-    'prospects_list' : True
+    'lists' : True
 }
 
 modified_fields_on_edit = {
     'title' : True,
     'templates' : True,
     'time_table' : True,
-
     'funnel' : False,
     'credentials' : False,
-    'prospects_list' : False
+    'lists' : False,
+    'from_hour' : True,
+    'to_hour' : True,
+    'from_minutes' : True,
+    'to_minutes' : True,
+    'sending_days' : True
 }
 
 CORS(app, resources={r'/*': {'origins': '*'}})
@@ -83,12 +75,27 @@ def data_campaigns():
     result = {
         'code' : -1,
         'msg' : '',
+        'lists' : '',
+        'credentials' : '',
+        'funnels' : '',
         'modified_fields' : json.dumps(modified_fields_on_create),
         'columns' : json.dumps(COLUMNS)
     }
 
-    try:
+    try:        
         if request.method == 'POST':
+            lists = ProspectsList.get_lists(owner=current_user.id)
+            if lists:
+                result['lists'] = lists.to_json()
+
+            total, credentials = Credentials.async_credentials(owner=current_user.id)
+            if credentials:
+                result['credentials'] = credentials
+            
+            funnels = shared.Funnel.async_funnels()
+            if funnels:
+                result['funnels'] = funnels
+
             result['code'] = 1
             result['msg'] = 'Success'
     except Exception as e:
@@ -123,6 +130,7 @@ def list_campaigns():
         'campaigns' : '',
         'modified_fields' : json.dumps(modified_fields_on_create),
         'pagination' : json.dumps(pagination),
+        'columns' : json.dumps(COLUMNS)
     }
 
     try:
@@ -179,9 +187,6 @@ def get_campaign_by_id():
                 modified_fields_on_edit['funnel'] = True
                 modified_fields_on_edit['credentials'] = True
 
-            if not campaign.valid_prospects_list():
-                modified_fields_on_edit['prospects_list'] = True
-
             #check that the list has prospects and funnel exists
             
             campaign_dict = to_json_deep_dereference(campaign)
@@ -235,11 +240,19 @@ def create_campaign():
             new_campaign = Campaign.async_create(owner=current_user.id, 
                                                 campaign_data=campaign_data,
                                                 create_fields=create_fields)
-            if not new_campaign:
+            if not new_campaign or not new_campaign.id:
                 raise Exception("Something went wrong contact support.")
 
             #ALWAYS need this: as we create objecId from Json, need mongo to update it with object
-            new_campaign.reload()
+            #new_campaign.reload()
+            
+            #assign prospects
+            prospects = Prospects.objects(owner=current_user.id, assign_to_list=prospects_list.id)
+            if prospects:
+                ids = [p.id for p in prospects]
+                if ids:
+                    Prospects._assign_campaign_on_create(owner_id=current_user.id, campaign_id=new_campaign.id, prospects_ids=ids)
+
             campaign_dict = to_json_deep_dereference(new_campaign)
 
             result['code'] = 1
@@ -364,7 +377,7 @@ def start_campaign():
                 raise Exception("No such campaign")
 
             
-            scheduler.Scheduler.safe_start_campaign(campaign=campaign)
+            scheduler.Scheduler.safe_start_campaign(owner=current_user.id, campaign=campaign)
 
             result['code'] = 1
             result['msg'] = 'Success'
