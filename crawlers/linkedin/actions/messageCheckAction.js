@@ -43,6 +43,7 @@ class MessageCheckAction {
   }
 
   async closeBrowser(browser) {
+    this.browser.disconnect();
     this.browser.close();
   }
 

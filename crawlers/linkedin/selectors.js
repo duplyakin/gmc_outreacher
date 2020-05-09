@@ -20,9 +20,9 @@ module.exports.MORE_BTN_SELECTOR = '.ml2.pv-s-profile-actions__overflow-toggle';
 module.exports.FOLLOW_SELECTOR = '.pv-s-profile-actions.pv-s-profile-actions--follow';
 
 // phone form
-module.exports.SKIP_PHONE_FORM_SELECTOR = '.linkedin_phone_skip_div';
-module.exports.SKIP_PHONE_PAGE_SELECTOR = '.linkedin_phone_url';
-module.exports.SKIP_PHONE_BTN_SELECTOR = '.linkedin_phone_skip_button';
+//module.exports.SKIP_PHONE_FORM_SELECTOR = '.linkedin_phone_skip_div';
+//module.exports.SKIP_PHONE_PAGE_SELECTOR = 'phone';
+module.exports.SKIP_PHONE_BTN_SELECTOR = '.secondary-action';
 
 // message
 module.exports.WRITE_MSG_BTN_SELECTOR = '.message-anywhere-button.pv-s-profile-actions.pv-s-profile-actions--message';

@@ -44,6 +44,7 @@ class MessageAction {
   }
 
   async closeBrowser(browser) {
+    this.browser.disconnect();
     this.browser.close();
   }
 
@@ -77,7 +78,12 @@ class MessageAction {
 
   formatMessage() {
     // format template
-    return this.template;
+    let str = this.template;
+    for (var obj in this.data) {
+      str = str.replace(new RegExp('{' + obj + '}', 'g'), this.data[obj]);
+      //console.log('----------str-----------', str);
+    }
+    return str;
   }
 }
 

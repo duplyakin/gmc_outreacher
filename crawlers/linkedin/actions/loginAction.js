@@ -18,6 +18,7 @@ class LoginAction {
     //this.browser = await puppeteer.launch();
     this.context = await this.browser.createIncognitoBrowserContext();
     this.page = await this.context.newPage();
+
     if (this.cookies != undefined || this.cookies != null) {
       await this.page.setCookie(...this.cookies);
     }
@@ -29,7 +30,8 @@ class LoginAction {
   }
 
   async closeBrowser(browser) {
-    this.browser.close();
+    this.browser.disconnect();
+    this.browser.close(); // create ZOMBIE processes...?
   }
 
   async login() {
@@ -99,14 +101,14 @@ class LoginAction {
   }
 
   async skip_phone(page) {
-    await page.waitForSelector(selectors.SKIP_PHONE_FORM_SELECTOR);
+    await page.waitForSelector(selectors.SKIP_PHONE_BTN_SELECTOR);
     await page.click(selectors.SKIP_PHONE_BTN_SELECTOR);
   }
 
   async check_phone_page(page) {
     let url = await page.url();
 
-    if (url.includes(selectors.SKIP_PHONE_PAGE_SELECTOR)) {
+    if (url.includes('phone')) {
       return true;
     }
 

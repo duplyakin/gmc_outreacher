@@ -16,16 +16,13 @@ const MY_URL = "https://www.linkedin.com/in/grigoriy-polyanitsin/";
     url: CONNECT_URL,
     pageNum: 9,
     data: {
-      first_name: 'Kirill',
+      first_name: 'Justin',
       last_name: 'Shilov',
       company_name: 'howtotoken.com'
     },
-    template: `test 123v {first_name} olololv 132 d ${first_name} oloodv`,
+    template: 'Hi {first_name}, nice to meet you.',
     connectName: 'Kirill Shilov',
   };
-  //var first_name = task.data.first_name;
-  //var my_template = (first_name) => task.template;
-  //console.log('---------------------', my_template(first_name));
 
   //await workers.loginWorker(task);
   //await workers.searchWorker(task);

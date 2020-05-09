@@ -42,6 +42,7 @@ class ScribeWorkAction {
   }
 
   async closeBrowser(browser) {
+    this.browser.disconnect();
     this.browser.close();
   }
 
@@ -85,12 +86,13 @@ class ScribeWorkAction {
     }, selector);
 
     //console.log("..... link: .....", link)
-    if (typeof job_link === undefined || job_link === null) {
+    if (job_link === undefined || job_link === null) {
       console.log("..... job_link not found: .....", job_link)
+      console.log("..... result: .....", result);
       return result;
     }
-    result.company_url = job_linkl
-    console.log("..... result: .....", result)
+    result.company_url = job_link;
+    console.log("..... result: .....", result);
     return result;
   }
 

@@ -7,13 +7,13 @@ const error_db_save_text = "........ERROR MONGODB: update TASK failed: ";
 const success_db_save_text = "........SUCCSESS MONGODB: result_data added........";
 
 
-async function checkCookies(task, cookies) {
+async function checkCookies(task_id, cookies) {
   if (cookies != undefined || cookies != null) {
     if (Date.now() / 1000 > cookies.expires) {
-      loginWorker(task);
+      loginWorker(task_id);
     }
   } else {
-    loginWorker(task);
+    loginWorker(task_id);
   }
 }
 
@@ -46,7 +46,7 @@ async function loginWorker(task_id) {
   } catch (err) {
 
     let err_result = {};
-    if (typeof err.code !== undefined && err.code !== null) {
+    if (err.code !== undefined && err.code !== null) {
       err_result = {
         code: err.code,
         if_true: false,
@@ -56,7 +56,7 @@ async function loginWorker(task_id) {
       err_result = {
         code: MyExceptions.LoginWorkerError().code,
         if_true: false,
-        raw: MyExceptions.LoginWorkerError("searchWorker error: " + err).error
+        raw: MyExceptions.LoginWorkerError("loginWorker error: " + err).error
       };
     }
     console.log("RES: ", err_result);
@@ -84,7 +84,7 @@ async function searchWorker(task_id) {
     let pageNum = task.pageNum;
 
     // check cookies
-    await checkCookies(task, cookies);
+    await checkCookies(task_id, cookies);
 
     // start work
     let searchAction = new modules.searchAction.SearchAction(email, password, cookies.data, searchUrl, pageNum);
@@ -105,7 +105,7 @@ async function searchWorker(task_id) {
   } catch (err) {
 
     let err_result = {};
-    if (typeof err.code !== undefined && err.code !== null) {
+    if (err.code !== undefined && err.code !== null) {
       err_result = {
         code: err.code,
         if_true: false,
@@ -140,12 +140,13 @@ async function connectWorker(task_id) {
     let cookies = await cookieModel.Cookies.findOne({ username: email });
 
     let connecthUrl = task.url;
-    let text = task.text;
+    let template = task.template;
+    let data = task.data;
 
     let connectName = task.connectName;
 
     // check cookies
-    await checkCookies(task, cookies);
+    await checkCookies(task_id, cookies);
 
     // start work
     // check connect
@@ -157,7 +158,7 @@ async function connectWorker(task_id) {
     let res = false;
     if (!resCheck) {
       // connect if not connected
-      let connectAction = new modules.connectAction.ConnectAction(email, password, cookies.data, connecthUrl, text);
+      let connectAction = new modules.connectAction.ConnectAction(email, password, cookies.data, connecthUrl, template, data);
       await connectAction.startBrowser();
       res = await connectAction.connect();
       await connectAction.closeBrowser();
@@ -179,7 +180,7 @@ async function connectWorker(task_id) {
   } catch (err) {
 
     let err_result = {};
-    if (typeof err.code !== undefined && err.code !== null) {
+    if (err.code !== undefined && err.code !== null) {
       err_result = {
         code: err.code,
         if_true: false,
@@ -218,7 +219,7 @@ async function messageWorker(task_id) {
     let template = task.template;
 
     // check cookies
-    await checkCookies(task, cookies);
+    await checkCookies(task_id, cookies);
 
     // start work
     // check reply
@@ -260,7 +261,7 @@ async function messageWorker(task_id) {
   } catch (err) {
 
     let err_result = {};
-    if (typeof err.code !== undefined && err.code !== null) {
+    if (err.code !== undefined && err.code !== null) {
       err_result = {
         code: err.code,
         if_true: false,
@@ -297,7 +298,7 @@ async function scribeWorkWorker(task_id) {
     let url = task.url;
 
     // check cookies
-    await checkCookies(task, cookies);
+    await checkCookies(task_id, cookies);
 
     // start work
     let scribeWorkAction = new modules.scribeWorkAction.ScribeWorkAction(email, password, cookies.data, url);
@@ -320,7 +321,7 @@ async function scribeWorkWorker(task_id) {
   } catch (err) {
 
     let err_result = {};
-    if (typeof err.code !== undefined && err.code !== null) {
+    if (err.code !== undefined && err.code !== null) {
       err_result = {
         code: err.code,
         if_true: false,
@@ -358,7 +359,7 @@ async function messageCheckWorker(task_id) {
     let url = task.url;
 
     // check cookies
-    await checkCookies(task, cookies);
+    await checkCookies(task_id, cookies);
 
     // start work
     let messageCheckAction = new modules.messageCheckAction.MessageCheckAction(email, password, cookies.data, url);
@@ -381,7 +382,7 @@ async function messageCheckWorker(task_id) {
   } catch (err) {
 
     let err_result = {};
-    if (typeof err.code !== undefined && err.code !== null) {
+    if (err.code !== undefined && err.code !== null) {
       err_result = {
         code: err.code,
         if_true: false,
@@ -418,7 +419,7 @@ async function connectCheckWorker(task_id) {
     let connectName = task.connectName;
 
     // check cookies
-    await checkCookies(task, cookies);
+    await checkCookies(task_id, cookies);
 
     // start work
     let connectCheckAction = new modules.connectCheckAction.ConnectCheckAction(email, password, cookies.data, connectName);
@@ -440,7 +441,7 @@ async function connectCheckWorker(task_id) {
   } catch (err) {
 
     let err_result = {};
-    if (typeof err.code !== undefined && err.code !== null) {
+    if (err.code !== undefined && err.code !== null) {
       err_result = {
         code: err.code,
         if_true: false,

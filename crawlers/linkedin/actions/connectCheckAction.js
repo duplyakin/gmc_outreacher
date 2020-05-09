@@ -43,6 +43,7 @@ class ConnectCheckAction {
   }
 
   async closeBrowser(browser) {
+    this.browser.disconnect();
     this.browser.close();
   }
 
