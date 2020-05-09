@@ -592,6 +592,61 @@ class ProspectsList(db.Document):
     # 3 - finished
 
     @classmethod
+    def async_aggreagte_lists(cls, owner_id):
+        pipeline = [
+            {"$lookup" : {
+                "from" : "prospects",
+                "let" : { "list_id": "$_id"},
+                "pipeline" : [
+                        {"$match": { "owner": owner_id } },
+                        {"$group" : {
+                            '_id':"$assign_to_list", 
+                            'count' : {'$sum' : 1},
+                            "owner": { "$first": "$owner"},
+                            }
+                        },
+                        { "$match":
+                            { "$expr":
+                                { "$and":
+                                    [
+                                        { "$ne" :["$_id", None] },
+                                        { "$eq": [ "$_id",  "$$list_id" ] },
+                                    ]
+                                }
+                            }
+                        },
+                ],
+                "as" : "grouped_prospects"
+            }},
+            {
+                "$project" : {
+                    "_id" : 1,
+                    "title" : 1,
+                    "grouped_prospects" : 1,
+                    "total" : {
+                        "$map" : {
+                                "input" : "$grouped_prospects",
+                                "as": "g",
+                                "in" : { "$cond": {
+                                            "if": {"$ne": ["$$g.count", None]},
+                                            "then": "$$g.count",
+                                            "else": 0
+                                                }
+                                        }
+                        }
+                    }
+                }
+            }
+        ]
+
+
+        lists = list(ProspectsList.objects(owner=owner_id).aggregate(*pipeline))
+
+        sz = bson_dumps(lists)
+        return sz
+
+
+    @classmethod
     def async_lists(cls, owner_id, page=1):
         db_query = cls.objects(owner=owner_id). \
                     only('id', 'title')
@@ -630,6 +685,10 @@ class ProspectsList(db.Document):
             self._commit()
 
     def safe_delete(self):
+        has_prospects = Prospects.objects(assign_to_list=self.id).count()
+        if has_prospects > 0:
+            raise Exception("LIST DELETE ERROR: Remove prospects from the list, before delete")
+
         return self.delete()
 
     def _commit(self):
@@ -1122,5 +1181,4 @@ class MergeTags(db.Document):
 
 #Register delete rules for '' ReferenceFields as described here: https://github.com/MongoEngine/mongoengine/issues/1707
 
-ProspectsList.register_delete_rule(Campaign, "prospects_list", 1)
 ProspectsList.register_delete_rule(Prospects, "assign_to_list", 1)

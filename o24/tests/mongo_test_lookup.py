@@ -1,7 +1,7 @@
 import unittest
 import os
 import o24.config as config
-from o24.backend.dashboard.models import User, Team, Credentials, Campaign, Prospects
+from o24.backend.dashboard.models import User, Team, Credentials, Campaign, Prospects, ProspectsList
 from o24.backend import app
 from o24.backend import db
 from o24.backend.models.shared import Action, Funnel, TaskQueue
@@ -369,7 +369,7 @@ class TestLookupQuery(unittest.TestCase):
         
         campaigns = db_query.aggregate(*pipeline)
 
-        j = dumps(campaigns)
+        j = bson_dumps(campaigns)
 
         #o_id = prospects[0]['_id']
 
@@ -398,10 +398,113 @@ class TestLookupQuery(unittest.TestCase):
             status = prospect.status
  
     def test_6_d(self):
+        return
         #credentials_ids_in_progress = TaskQueue.objects(status=0).distinct('credentials_id')
         #print(credentials_ids_in_progress)
-        campaign = Campaign.objects(title='campaign-121')
-        print(campaign)
+        print("test_6_d")
+        current_user = get_current_user()
+        lists = ProspectsList.async_aggreagte_lists(owner_id=current_user.id)
+
+        print(lists)
+
+    def test_7_d(self):
+        return 
+
+        current_user = get_current_user()
+
+        pipeline = [
+            { "$match": { "owner": current_user.id } },
+            {"$group" : {
+                '_id':"$assign_to_list", 
+                'count' : {'$sum' : 1},
+                "owner": { "$first": "$owner"},
+                }
+            },
+         { "$match" : { "_id" : {"$ne" : None} } },
+        ]
+
+        prospects = list(Prospects.objects().aggregate(*pipeline))
+        print(prospects)
+        print(len(prospects))
+
+
+        pipeline = [
+            {"$lookup" : {
+                "from" : "prospects",
+                "pipeline" : [
+                        {"$match": { "owner": current_user.id } },
+                        {"$group" : {
+                            '_id':"$assign_to_list", 
+                            'count' : {'$sum' : 1},
+                            "owner": { "$first": "$owner"},
+                            }
+                        },
+                        { "$match" : { "_id" : {"$ne" : None} } },
+                ],
+                "as" : "grouped_prospects"
+            }},
+        ]
+
+        pipeline1 = [
+            {"$lookup" : {
+                "from" : "prospects",
+                "let" : { "list_id": "$_id"},
+                "pipeline" : [
+                        {"$match": { "owner": current_user.id } },
+                        {"$group" : {
+                            '_id':"$assign_to_list", 
+                            'count' : {'$sum' : 1},
+                            "owner": { "$first": "$owner"},
+                            }
+                        },
+                        { "$match":
+                            { "$expr":
+                                { "$and":
+                                    [
+                                        { "$ne" :["$_id", None] },
+                                        { "$eq": [ "$_id",  "$$list_id" ] },
+                                    ]
+                                }
+                            }
+                        },
+                ],
+                "as" : "grouped_prospects"
+            }},
+            {
+                "$project" : {
+                    "_id" : 1,
+                    "title" : 1,
+                    "grouped_prospects" : 1,
+                    "total" : {
+                        "$map" : {
+                            "input" : "$grouped_prospects",
+                            "as": "g",
+                            "in" : { "$cond": {
+                                        "if": {"$ne": ["$$g.count", None]},
+                                        "then": "$$g.count",
+                                        "else": 0
+                                             }
+                                    }
+                        }
+                    }
+                        
+                }
+            }
+        ]
+
+
+        aggregated_lists = list(ProspectsList.objects(owner=current_user.id).aggregate(*pipeline1))
+        print("******")
+        print(aggregated_lists)
+        print(len(aggregated_lists))
+
+    def test_8_d(self):
+        current_user = get_current_user()
+
+        lists = ProspectsList.async_aggreagte_lists(owner_id=current_user.id)
+        print(lists) 
+
+
 
 def setUpModule():
     env = os.environ.get('APP_ENV', None)
