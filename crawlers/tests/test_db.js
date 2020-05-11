@@ -20,9 +20,11 @@ const MY_URL = "https://www.linkedin.com/in/grigoriy-polyanitsin/";
       last_name: 'Shilov',
       company_name: 'howtotoken.com'
     },
-    template: 'Hi {first_name}, nice to meet you.',
+    template: 'Hi {first_name}, nice to meet you. {first_name} 111 {first{first_name}_name} hi {ololo }',
     connectName: 'Kirill Shilov',
   };
+
+  console.log('-------res:---------- ', formatMessage(task));
 
   //await workers.loginWorker(task);
   //await workers.searchWorker(task);
@@ -33,3 +35,14 @@ const MY_URL = "https://www.linkedin.com/in/grigoriy-polyanitsin/";
   //await workers.connectCheckWorker(task);
 
 })();
+
+function formatMessage(task) {
+  // format template
+  let str = task.template;
+  for (var obj in task.data) {
+    str = str.replace(new RegExp('{' + obj + '}', 'g'), task.data[obj]);
+    //console.log('----------str-----------', str);
+  }
+  str = str.replace(new RegExp('\{(.*?)\}', 'g'), '');
+  return str;
+}

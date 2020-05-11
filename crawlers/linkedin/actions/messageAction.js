@@ -81,8 +81,8 @@ class MessageAction {
     let str = this.template;
     for (var obj in this.data) {
       str = str.replace(new RegExp('{' + obj + '}', 'g'), this.data[obj]);
-      //console.log('----------str-----------', str);
     }
+    str = str.replace(new RegExp('\{(.*?)\}', 'g'), '');
     return str;
   }
 }
