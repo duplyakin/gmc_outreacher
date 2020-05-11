@@ -11,6 +11,7 @@
         <sidebar-item :link="{name: 'Team', icon: 'nc-icon nc-badge', path: '/user/team'}"></sidebar-item>
 
         <sidebar-item :link="{name: 'Prospects', icon: 'nc-icon nc-single-copy-04', path: '/user/prospects'}"></sidebar-item>
+        <sidebar-item :link="{name: 'Prospects List', icon: 'nc-icon nc-single-copy-04', path: '/user/prospects_list'}"></sidebar-item>
 
         <sidebar-item :link="{name: 'Actions', icon: 'nc-icon nc-tag-content', path: '/admin/actions'}"></sidebar-item>
 

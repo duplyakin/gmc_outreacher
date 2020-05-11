@@ -4,7 +4,7 @@
 <div class="row">
     <div class="col-4 d-flex align-self-center">
         <h3>
-        <i class="nc-icon nc-badge"></i> Prospect Lists
+        <i class="nc-icon nc-single-copy-04"></i> Prospect Lists
         </h3>
     </div>
     <div class="col-8 d-flex flex-row-reverse align-self-center">
@@ -77,7 +77,7 @@ name="major_modal">
 </div>
 </template>
 <script>
-import { Table, TableColumn, Select, Option } from "element-ui";
+import { Notification, Table, TableColumn, Select, Option } from "element-ui";
 import NotificationMessage from './notification.vue';
 
 import ListForm from "./list_form.vue";
@@ -138,14 +138,14 @@ methods: {
                 var r = res.data;
                 if (r.code <= 0) {
                     var msg = "Error deleting list " + r.msg;
-                    alert(msg);
+                    Notification.error({title: "Error", message: msg});
                 } else {
                     this.load_lists();
                 }
                 })
                 .catch(error => {
                     var msg = "Error deleting list " + error;
-                    alert(msg);
+                    Notification.error({title: "Error", message: msg});
                 });
         }
     },
@@ -203,14 +203,14 @@ methods: {
             var r = res.data;
             if (r.code <= 0){
                 var msg = "Error loading lists." + r.msg;
-                alert(msg);
+                Notification.error({title: "Error", message: msg});
             }else{
                 this.deserialize_lists(r);
             }
             })
             .catch((error) => {
                 var msg = "Error loading lists. ERROR: " + error;
-                alert(msg);
+                Notification.error({title: "Error", message: msg});
             });
 
     },

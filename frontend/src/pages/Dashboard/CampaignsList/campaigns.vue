@@ -88,7 +88,7 @@
 </div>
 </template>
 <script>
-import { Table, TableColumn, Select, Option } from "element-ui";
+import { Notification, Table, TableColumn, Select, Option } from "element-ui";
 import { Pagination as LPagination } from "src/components/index";
 
 import CampaignForm from "./campaign_form.vue";
@@ -153,14 +153,14 @@ methods: {
                 var r = res.data;
                 if (r.code <= 0) {
                     var msg = "Action error " + r.msg;
-                    alert(msg);
+                    Notification.error({title: "Error", message: msg});
                 } else {
                     this.load_campaigns();
                 }
                 })
                 .catch(error => {
                     var msg = "Action error " + error;
-                    alert(msg);
+                    Notification.error({title: "Error", message: msg});
                 });
         }
     },
@@ -193,14 +193,14 @@ methods: {
                 var r = res.data;
                 if (r.code <= 0) {
                     var msg = "Error deleting campaign " + r.msg;
-                    alert(msg);
+                    Notification.error({title: "Error", message: msg});
                 } else {
                     this.load_campaigns();
                 }
                 })
                 .catch(error => {
                     var msg = "Error deleting campaign " + error;
-                    alert(msg);
+                    Notification.error({title: "Error", message: msg});
                 });
         }
     },
@@ -213,7 +213,7 @@ methods: {
             status = msg_dict['status'];
         }
         if (status == -2 || status == 1){
-            alert("Pause campaign for edit, current status: " + status);
+            Notification.error({title: "Error", message: "Pause campaign for edit, current status: " + status});
             return false;
         }
 
@@ -237,14 +237,14 @@ methods: {
             var r = res.data;
             if (r.code <= 0){
                 var msg = "Error loading campaigns." + r.msg;
-                alert(msg);
+                Notification.error({title: "Error", message: msg});
             }else{
                 this.deserialize_campaigns(r);
             }
             })
             .catch((error) => {
                 var msg = "Error loading campaigns. ERROR: " + error;
-                alert(msg);
+                Notification.error({title: "Error", message: msg});
             });
 
     },
@@ -258,14 +258,14 @@ methods: {
             var r = res.data;
             if (r.code <= 0) {
                 var msg = "Error loading data " + r.msg;
-                alert(msg);
+                Notification.error({title: "Error", message: msg});
             } else {
                 this.deserialize_data(r);
             }
             })
             .catch(error => {
                 var msg = "Error loading data " + error;
-                alert(msg);
+                Notification.error({title: "Error", message: msg});
             });
     },
     deserialize_data(from_data){

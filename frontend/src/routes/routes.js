@@ -233,7 +233,7 @@ const routes = [
       },
       {
         path: 'prospects_list',
-        name: 'ProspectLists',
+        name: 'Prospect Lists',
         component: ProspectLists
       },
       {

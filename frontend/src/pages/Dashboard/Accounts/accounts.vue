@@ -64,7 +64,7 @@
 </div>
 </template>
 <script>
-    import { Table, TableColumn, Select, Option } from 'element-ui'
+    import { Notification, Table, TableColumn, Select, Option } from 'element-ui'
     import O24Pagination from 'src/components/O24Pagination.vue'
     import O24NotificationMessage from 'src/components/O24Notification.vue'
     import AccountEdit from './accountEdit.vue'
@@ -128,12 +128,12 @@
                     this.update_accounts_data(r);
                 }else{
                     var msg = 'Server Error loading credentials ' + r.msg;
-                    alert(msg)
+                    Notification.error({title: "Error", message: msg});
                 }
             })
             .catch((error) => {
                 var msg = 'Error loading credentials ' + error;
-                alert(msg);
+                Notification.error({title: "Error", message: msg});
             });
 
         },
@@ -177,14 +177,14 @@
                     var r = res.data;
                     if (r.code <= 0) {
                         var msg = "Error deleting " + r.msg;
-                        alert(msg);
+                        Notification.error({title: "Error", message: msg});
                     } else {
                         this.loadCredentials();
                     }
                     })
                     .catch(error => {
                         var msg = "Error deleting " + error;
-                        alert(msg);
+                        Notification.error({title: "Error", message: msg});
                     });
             }
         },
