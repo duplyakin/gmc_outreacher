@@ -8,32 +8,13 @@ class JSObject():
     
     STR_FIELDS = ['title']
 
-    def _custom_attr(self, attr, default=None, raw=False):
-        attr_name = self.ATTR_PREFIX + attr
-        if raw:
-            attr_name = self.RAW_ATTR_PREFIX + attr
-
-        if not hasattr(self, attr_name):
-            return default
-
-        val = getattr(self, attr_name)
-        if val is None:
-            return default
-
-        return val
-
-    def get_field(self, field, default=None):
-        return self._custom_attr(attr=field, default=default)
-
-
-class JSProspectData(JSObject):
     def __init__(self, raw_data):
         try:
             self.raw_data = raw_data
 
             self.data_dict = json.loads(raw_data)
             if not self.data_dict:
-                raise Exception("Prospect Data can't be empty")
+                raise Exception("JS Data can't be empty")
 
             for key, value in self.data_dict.items():
                 if value:
@@ -82,8 +63,47 @@ class JSProspectData(JSObject):
                         setattr(self, attr_name, des_value)
 
         except Exception as e:
-            error_message = "Prospect Data serialization error: {0}".format(str(e))
+            error_message = "Data serialization error: {0}".format(str(e))
             raise Exception(error_message)
+
+
+    def _custom_attr(self, attr, default=None, raw=False):
+        attr_name = self.ATTR_PREFIX + attr
+        if raw:
+            attr_name = self.RAW_ATTR_PREFIX + attr
+
+        if not hasattr(self, attr_name):
+            return default
+
+        val = getattr(self, attr_name)
+        if val is None:
+            return default
+
+        return val
+
+    def get_field(self, field, default=None):
+        return self._custom_attr(attr=field, default=default)
+
+class JSCredentialsData(JSObject):
+    def __init__(self, raw_data):
+        super().__init__(raw_data)
+
+    def get_type(self):
+        return self._custom_attr(attr='credentials_type', default='Unknown')
+
+    def get_data(self):
+        return self._custom_attr(attr='data', default={})
+
+    def get_medium(self):
+        return self._custom_attr(attr='medium', default=None)
+
+    def get_limit_per_day(self):
+        return self._custom_attr(attr='limit_per_day', default=None)
+  
+
+class JSProspectData(JSObject):
+    def __init__(self, raw_data):
+        super().__init__(raw_data)
 
     def assign_to_list(self):
         return self._custom_attr(attr='assign_to_list', default=None)

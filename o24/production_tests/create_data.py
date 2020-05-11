@@ -43,8 +43,12 @@ def create_models():
         credentials = user.get('credentials')
         for next_cred in credentials:
             owner = db_user
-
-            new_credentials = Credentials.create_credentials(owner=owner, data=next_cred)
+            
+            medium = next_cred.get('medium')
+            new_data = next_cred.get('data')
+            new_credentials = Credentials.create_credentials(owner=owner,
+                                    medium=medium,
+                                    new_data=new_data)
             assert new_credentials is not None, "new_credentials is None"
 
     actions = ACTIONS

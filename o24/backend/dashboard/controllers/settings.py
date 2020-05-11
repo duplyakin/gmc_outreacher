@@ -70,16 +70,16 @@ def dashboard_oauth_callback():
     if '@gmail.com' in email:
         GMAIL_TYPE = 'smtp'
 
-    data = {}
-    data['medium'] = 'email'
-    data['data'] = {
+    medium = 'email'
+    data = {
         'email' : email,
         'account' : email,
         'credentials' : access_credentials,
         'sender' : GMAIL_TYPE
     }
-    Credentials.create_credentials(owner=current_user.id, 
-                                    data=data)
+    Credentials.create_credentials(owner=current_user.id,
+                                    medium=medium,
+                                    new_data=data)
 
     return '<script type="text/javascript">window.close();</script>'
     #return render_template('dashboard/oauth-callback.html')

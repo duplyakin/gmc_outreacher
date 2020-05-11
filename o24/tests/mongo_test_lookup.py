@@ -155,11 +155,11 @@ class TestLookupQuery(unittest.TestCase):
             
             credentials_lst = []
             for cr in credentials:
-                data = {
-                    'medium' : cr,
-                    'data' : {}
-                }
-                new_cr = Credentials.create_credentials(owner=user, data=data)
+                medium = cr
+                new_data = {}
+                new_cr = Credentials.create_credentials(owner=user,
+                                    medium=medium,
+                                    new_data=new_data)
                 if 'LIMITED' in cr:
                     new_cr.next_action = datetime.datetime.now() + timedelta(days=1)
                     new_cr._commit()

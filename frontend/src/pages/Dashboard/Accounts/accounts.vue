@@ -5,16 +5,9 @@
         <div class="col-4 d-flex align-self-center">
             <span font-><h3><i class="nc-icon nc-badge"></i> Accounts</h3></span>
         </div>
-        <div class="col-8 d-flex flex-row-reverse align-self-center">
-
-            <div v-if="multipleSelection.length > 0">
-            <button @click.prevent="deleteAccounts" type="button" class="btn btn-wd btn-danger mx-1">Delete</button>
-            </div>
-            
-            <div v-if="multipleSelection.length == 0">
+        <div class="col-8 d-flex flex-row-reverse align-self-center">            
             <button @click.prevent="addAccount" type="button" class="btn btn-default btn-success mx-1">Add account</button>
             <button @click.prevent="loadCredentials" type="button" class="btn btn-default btn-success mx-1">Reload</button>
-            </div>
         </div>
 
     </div>
@@ -32,12 +25,6 @@
                         :data="accounts_data.credentials"
                         max-height="500"
                         border>
-                <el-table-column
-                        type="selection"
-                        width="55"
-                        v-if="accounts_data.columns"
-                        fixed>
-                </el-table-column>
                 <el-table-column v-for="column in accounts_data.columns"
                         :key="column.label"
                         :prop="column.prop"
@@ -46,23 +33,25 @@
                         show-overflow-tooltip>
                         <template slot-scope="scope">
                             <a @click.prevent="editAccount(scope.row, scope.$index)" href="#"  v-if="column.prop === 'account'">{{ scope.row.data[column.prop] }}</a>
-                            <template v-else> {{ column.data ? scope.row.data[column.prop] : scope.row[column.prop] }} </template>
+                            <template v-else-if="column.prop === 'status'">{{  status[scope.row[column.prop]] }}</template>
+                            <template v-else> {{ show_data(scope.row, column) }} </template>
                         </template>     
                 </el-table-column>
+                <el-table-column :min-width="50" fixed="right" label="Delete">
+                    <template slot-scope="props">
+                    <a
+                        v-tooltip.top-center="'Delete'"
+                        class="btn-danger btn-simple btn-link"
+                        @click.prevent="delete_credentials(props.row._id.$oid, props.$index)"
+                    >
+                        <i class="fa fa-times"></i>
+                    </a>
+                    </template>
+                </el-table-column>
+    
             </el-table>
             </div>
         </div>
-        <div slot="footer" class="col-12 d-flex justify-content-center justify-content-sm-between flex-wrap">
-            <div class="">
-            <p class="card-category">Showing {{from + 1}} to {{to}} of {{total}} entries</p>
-            </div>
-            <o24-pagination class="pagination-no-border"
-                        v-model="accounts_data.pagination.currentPage"
-                        :per-page="accounts_data.pagination.perPage"
-                        :total="accounts_data.pagination.total"
-                        v-on:switch-page="switchPage">
-            </o24-pagination>
-        </div>      
         </card>
     </div>
     </div>
@@ -83,7 +72,7 @@
 
     import axios from 'axios'
 
-    const CREDENTIALS_API_LIST = 'http://127.0.0.1:5000/credentials';
+    const CREDENTIALS_API_LIST = 'http://127.0.0.1:5000/credentials/list';
     const CREDENTIALS_API_EDIT = 'http://127.0.0.1:5000/credentials/edit';
     const CREDENTIALS_API_DELETE = 'http://127.0.0.1:5000/credentials/delete';
     const CREDENTIALS_API_ADD = 'http://127.0.0.1:5000/credentials/add';
@@ -100,35 +89,18 @@
         [Table.name]: Table,
         [TableColumn.name]: TableColumn
     },
-    computed: {
-        to () {
-        let highBound = this.from + this.accounts_data.pagination.perPage
-        if (this.total < highBound) {
-            highBound = this.total
-        }
-        return highBound
-        },
-        from () {
-        return this.accounts_data.pagination.perPage * (this.accounts_data.pagination.currentPage - 1)
-        },
-        total () {
-        return this.accounts_data.pagination.total;
-        }
-    },
     data () {     
         return {
-        accounts_data: {
-            columns : null,
-
-            credentials : [],
-
-            pagination : {
-                perPage : 0,
-                currentPage : 1,
-                total : 0
-            }
-        },
-        multipleSelection: [],
+            status : {
+                0 : 'Active',
+                1 : 'Changed',
+                '-1' : 'Error',
+                '-2' : 'Unknown'
+            },
+            accounts_data: {
+                columns : null,
+                credentials : [],
+            },
         }
     },
     methods: {
@@ -141,7 +113,6 @@
             if (newData.credentials){
                 this.accounts_data.credentials = JSON.parse(newData.credentials);
             }
-            this.accounts_data.pagination = JSON.parse(newData.pagination);
         },
         loadCredentials(event=null, page=1) {
             var data = new FormData();
@@ -192,39 +163,30 @@
             height: 'auto'
             })
         },
-        handleSelectionChange(val) {
-         this.multipleSelection = val;
-        },
-        deleteAccounts(){
-        if (confirm("Are you sure? This action CAN'T be undone")){
-            const path = CREDENTIALS_API_DELETE;
+        delete_credentials(credentials_id, row_index){
+            if (confirm("Are you sure? This action CAN'T be undone")) {
+                const path = CREDENTIALS_API_DELETE;
 
-            var deleteData = new FormData();
-            deleteData.append('_delete', JSON.stringify(this.multipleSelection));
-
-            axios.post(path, deleteData)
-            .then((res) => {
-                var r = res.data;
-                if (r.code <= 0){
-                    var msg = "Error deleting account " + r.msg;
-                    alert(msg);
-                }else{
-                this.$notify(
-                {
-                    component: O24NotificationMessage,
-                    message: 'Delete success',
-                    icon: 'nc-icon nc-bulb-63',
-                    type: 'success'
-                });
-                this.loadCredentials();
-                }
-            })
-            .catch((error) => {
-                var msg = "Error deleting account " + error;
-                alert(msg);
-            });
-
-        }
+                var data = new FormData();
+                data.append("_credentials_id", credentials_id);
+                
+                const index = row_index;
+                axios
+                    .post(path, data)
+                    .then(res => {
+                    var r = res.data;
+                    if (r.code <= 0) {
+                        var msg = "Error deleting " + r.msg;
+                        alert(msg);
+                    } else {
+                        this.loadCredentials();
+                    }
+                    })
+                    .catch(error => {
+                        var msg = "Error deleting " + error;
+                        alert(msg);
+                    });
+            }
         },
         addAccount(){
             this.$modal.show(AccountAdd, {
@@ -245,6 +207,22 @@
                 height: 'auto'
             })
         },
+        show_data(scope_row, column){
+        var data = column.data || '';
+        if (data){
+            return scope_row.data[column.prop] || '';
+        }else{
+            var field = column.field || '';
+            if (field){
+                return scope_row[column.prop][field] || '';
+            }else{
+                return scope_row[column.prop] || '';
+            }
+        }
+
+        return '';
+    },
+
     },
     mounted () {
         this.loadCredentials();

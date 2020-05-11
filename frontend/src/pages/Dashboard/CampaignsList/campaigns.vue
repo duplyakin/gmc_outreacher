@@ -15,7 +15,7 @@
             class="btn btn-default btn-success mx-1"
         >Add Campaign</button>
         <button
-            @click.prevent="load_data"
+            @click.prevent="reload_campaigns"
             type="button"
             class="btn btn-default btn-success mx-1"
         >Reload campaigns</button>
@@ -119,7 +119,8 @@ data() {
             0 : 'New',
             1 : 'In progress',
             2 : 'On Pause',
-           '-1' : 'Failed'
+           '-1' : 'Failed',
+           '-2' : 'Unknown'
         },
         pagination : {
                 perPage : 0,
@@ -207,9 +208,12 @@ methods: {
         this.$router.push({ path: "campaign_form", query: { action_type: 'add' } })
     },
     editCampaign(msg_dict, index) {
-        var status = msg_dict['status'] || -2;
-        if (status == -2 || status != 2){
-            alert("Pause campaign for edit");
+        var status = -2;
+        if (msg_dict.hasOwnProperty('status')){
+            status = msg_dict['status'];
+        }
+        if (status == -2 || status == 1){
+            alert("Pause campaign for edit, current status: " + status);
             return false;
         }
 
@@ -218,6 +222,9 @@ methods: {
     next_page(){
         var page = 2;
         this.load_data(page,0);
+    },
+    reload_campaigns(event){
+        return this.load_campaigns(1);
     },
     load_campaigns(page=1){
         const path = CAMPAIGNS_API_LIST;

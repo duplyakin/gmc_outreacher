@@ -13,14 +13,21 @@ from o24.backend.utils.serialize import JSONEncoder
 import json
 import traceback
 from o24.backend.google.provider.oauth_provider import GoogleOauthProvider
+from o24.backend.dashboard.serializers import JSCredentialsData
+
 
 COLUMNS = [
     {
         'label' : 'account',
-        'prop' : 'account'
+        'prop' : 'account',
+        'data' : True
     },
     {
-        'label' : 'sender',
+        'label' : 'status',
+        'prop' : 'status'
+    },
+    {
+        'label' : 'Sender',
         'prop' : 'sender',
         'data' : True
     },
@@ -31,12 +38,12 @@ COLUMNS = [
    
     },
     {
-        'label' : 'status',
-        'prop' : 'status'
-    },
-    {
         'label' : 'Limit per day',
         'prop' : 'limit_per_day'
+    },
+    {
+        'label' : 'Actions done today',
+        'prop' : 'current_daily_counter'
     }
 ]
 
@@ -50,42 +57,26 @@ def get_current_user():
     return user
 
 
-@bp_dashboard.route('/credentials', methods=['POST'])
+@bp_dashboard.route('/credentials/list', methods=['POST'])
 #@login_required
 def list_credentials():
-
     current_user = get_current_user()
-
-    per_page = config.CREDENTIALS_PER_PAGE
-    page = 1
-
-    pagination = {
-            'perPage' : per_page,
-            'currentPage' : page,
-            'total' : 0
-    }
 
     result = {
         'code' : -1,
         'msg' : 'Unknown request',
         'credentials' : '',
-        'pagination' : json.dumps(pagination),
         'columns' : json.dumps(COLUMNS)
     }
 
     try:
         if request.method == 'POST':
-            page = int(request.form.get('_page',1))
+            page = int(request.form.get('_page', 1))
 
             total, credentials = Credentials.async_credentials(owner=current_user.id,
                                                 page=page)    
             if credentials:
-                result['credentials'] = credentials.to_json()
-                result['pagination'] = json.dumps({
-                    'perPage' : per_page,
-                    'currentPage' : page,
-                    'total' : total
-                })
+                result['credentials'] = credentials
 
             result['code'] = 1
             result['msg'] = 'Success'
@@ -112,21 +103,24 @@ def edit_credentials():
     }
     if request.method == 'POST':
         try:
-            raw_data = request.form['_credentials']
+            credentials_id = request.form.get('_credentials_id','')            
+            if not credentials_id:
+                raise Exception("Bad credentials_id")
 
-            js_data = json.loads(raw_data)
+            credentials = Credentials.objects(owner=current_user.id, id=credentials_id).first()
+            if not credentials:
+                raise Exception("Credentials don't exist")
 
-            credentials_id = js_data['_id']['$oid']
-            
-            exist = Credentials.objects(owner=current_user.id, id=credentials_id).first()
-            if not exist:
-                raise Exception('Account does not exist')
+            raw_data = request.form.get('_credentials','')
+            if not raw_data:
+                raise Exception("There is no _credentials form parameter")
 
-            exist.update_data(data=js_data)
-            exist.reload()
+            credentials_data = JSCredentialsData(raw_data=raw_data)
+
+            credentials.safe_update_credentials(credentials_data=credentials_data)
 
             result['code'] = 1
-            result['updated'] = exist.to_json()
+            result['updated'] = credentials.to_json()
         except Exception as e:
             #TODO: change to loggin
             print(e)
@@ -149,14 +143,15 @@ def delete_credentials():
     }
     if request.method == 'POST':
         try:
-            raw_data = request.form['_delete']
+            credentials_id = request.form.get('_credentials_id','')            
+            if not credentials_id:
+                raise Exception("Bad credentials_id")
 
-            js_data = json.loads(raw_data)
-
-            ids = [x["_id"]["$oid"] for x in js_data]
-
-            res = Credentials.delete_credentials(owner_id=current_user.id,
-                                                credentials_ids=ids)
+            credentials = Credentials.objects(owner=current_user.id, id=credentials_id).first()
+            if not credentials:
+                raise Exception("Credentials don't exist")
+            
+            res = credentials.safe_delete_credentials()
 
             result['code'] = 1
             result['deleted'] = res
@@ -183,28 +178,24 @@ def add_credentials():
     }
     if request.method == 'POST':
         try:
-            raw_data = request.form['_add_credentials']
-            js_data = json.loads(raw_data)
+            raw_data = request.form.get('_credentials','')
+            if not raw_data:
+                raise Exception("There is no _credentials form parameter")
 
-            credentials_type = js_data['selected_type']
+            credentials_data = JSCredentialsData(raw_data=raw_data)
+
+            credentials_type = credentials_data.get_type()
             if not credentials_type:
-                raise Exception('Wrong account type')
+                raise Exception("Credentials type can't be empty")
             
             new_credentials = None
-            if credentials_type == 'Linkedin':
-                linkedin_data = js_data['linkedin']
-                data = {
-                    'medium' : 'linkedin',
-                    'data' : {
-                        'account' : 'Linkedin: ' + str(linkedin_data.get('login')),
-                        'sender' : 'linkedin',
-                        'login' : linkedin_data.get('login'),
-                        'password' : linkedin_data.get('password')
-                    }
-                }
+            if credentials_type == 'linkedin':
+                medium='linkedin'
                 new_credentials = Credentials.create_credentials(owner=current_user.id, 
-                                                                data=data)
-            elif credentials_type == 'Gmail/Gsuite':
+                                                                new_data=credentials_data.get_data(), 
+                                                                medium=medium, 
+                                                                limit_per_day=credentials_data.get_limit_per_day())
+            elif credentials_type == 'gmail/gsuite':
                 result['code'] = 1
                 result['redirect'] = url_for('dashboard.dashboard_oauth_button')
                 

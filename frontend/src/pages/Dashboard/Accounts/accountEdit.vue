@@ -11,13 +11,43 @@
                 v-model="account_data.limit_per_day"/>
             </div>
         </div>
-        <div v-if="account_data.data.sender === 'linkedin'" class="row">
-                <div class="col-6">
-                <fg-input name="linkedin_cookie (li_at)"
-                    label="li_at cookie value"
-                    class="mb-3"
-                    v-model="account_data.data.li_at"/>
+        <div v-if="account_data.medium === 'linkedin'">
+            <div class="row">
+                <div class="col-12">
+                    <fg-input name="linkedin_account"
+                        label="Linkedin account"
+                        class="mb-3"
+                        v-model="account_data.data.account"
+                        placeholder="example: linkedin.com/your_account"/>
                 </div>
+            </div>
+            <div class="row">
+                <div class="col-12">
+                    <fg-input name="linkedin_login"
+                        label="Linkedin login"
+                        class="mb-3"
+                        v-model="account_data.data.login"/>
+                </div>
+            </div>
+
+                <div class="row">
+                <div class="col-12">
+                    <fg-input name="linkedin_password"
+                        label="Linkedin password"
+                        class="mb-3"
+                        v-model="account_data.data.password"/>
+                </div>
+            </div>
+
+                <div class="row">
+                <div class="col-12">
+                    <fg-input name="linkedin_cookie (li_at)"
+                        label="li_at cookie value"
+                        class="mb-3"
+                        v-model="account_data.data.li_at"/>
+                </div>
+            </div>
+
         </div>
         </card>
         <div class="row">
@@ -50,6 +80,8 @@ export default {
     data() {
         return {
             account_data : {
+                medium : '',
+                limit_per_day : 0,
                 data : {
 
                 }
@@ -68,6 +100,7 @@ export default {
 
                 var accountData = new FormData();
                 accountData.append("_credentials", JSON.stringify(this.account_data))
+                accountData.append("_credentials_id", this.account_data._id.$oid)
 
                 axios
                 .post(path, accountData)

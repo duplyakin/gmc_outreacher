@@ -5,6 +5,7 @@ from o24.globals import *
 import o24.backend.dashboard.models as models 
 from mongoengine.queryset.visitor import Q
 import datetime
+from o24.backend.utils.aes_encode import *
 
 class Action(db.Document):
     #shared field
@@ -177,6 +178,17 @@ class TaskQueue(db.Document):
 
     js_action = db.BooleanField(default=False)
 
+    def decrypt_password(self, credentials_dict):
+        data = credentials_dict.get('data', '')
+        if not data:
+            return
+        
+        password = data.get('password', '')
+        if not password:
+            return
+        
+        credentials_dict['password'] = decode_password(password)
+
     def switch_task(self, next_node):
         
         #init to 0
@@ -190,6 +202,9 @@ class TaskQueue(db.Document):
         self.followup_level = 0
 
         self.credentials_dict = models.Campaign.get_credentials(self.campaign_id, next_node)
+        #if self.credentials_dict:
+        #    self.decrypt_password(self.credentials_dict)
+
         self.credentials_id = self.credentials_dict.get('id', None)
 
         self.action_key = self.current_node.get_action_key()

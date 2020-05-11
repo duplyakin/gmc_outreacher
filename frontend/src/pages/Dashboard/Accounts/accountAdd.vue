@@ -11,7 +11,7 @@
                 <el-select
                 class="select-default mb-3"
                 placeholder="Select type"
-                v-model="model.selected_type">
+                v-model="model.credentials_type">
                     <el-option
                     class="select-default"
                     v-for="(a_type,index) in account_types"
@@ -22,24 +22,37 @@
                 </el-select>
             </div>
         </div>
-        <div v-if="model.selected_type == 'Linkedin'" class="row">
+        <div v-if="model.credentials_type == 'linkedin'" class="row">
+                <div class="col-12">
+                    <fg-input name="linkedin_account"
+                        label="Linkedin account"
+                        class="mb-3"
+                        v-model="model.data.account"
+                        placeholder="example: linkedin.com/your_account"/>
+                </div>
                 <div class="col-12">
                     <fg-input name="linkedin_login"
                         label="Linkedin login"
                         class="mb-3"
-                        v-model="model.linkedin.login"/>
+                        v-model="model.data.login"/>
                 </div>
                 <div class="col-12">
                     <fg-input name="linkedin_password"
                         label="Linkedin password"
                         class="mb-3"
-                        v-model="model.linkedin.password"/>
+                        v-model="model.data.password"/>
+                </div>     
+                <div class="col-12">
+                    <fg-input name="limits_per_day"
+                    label="Limits per day"
+                    class="mb-3"
+                    v-model="model.limit_per_day"/>
                 </div>
         </div>    
         </card>
         <div class="row">
                 <div class="col-12 d-flex flex-row-reverse">
-                    <button v-if="model.selected_type" v-on:click="addAccount"  type="button" class="btn btn-outline btn-wd btn-success mx-1">Add</button>
+                    <button v-if="model.credentials_type" v-on:click="addAccount"  type="button" class="btn btn-outline btn-wd btn-success mx-1">Add</button>
                     <button v-on:click="discard" type="button" class="btn btn-outline btn-wd btn-danger">Close</button>
                 </div>
         </div>
@@ -68,11 +81,13 @@ export default {
         return {
             error_message : '',
             error : false,
-            account_types : ['Gmail/Gsuite', 'Linkedin'],
+            account_types : ['gmail/gsuite', 'linkedin'],
 
             model : {
-                selected_type : '',
-                linkedin :{
+                limit_per_day : 50,
+                credentials_type : '',
+                data :{
+                    account : '',
                     login : '',
                     password : ''
                 }
@@ -82,19 +97,21 @@ export default {
     methods: {
         addAccount(){
             const path = this.api_url;
-            if (this.model.selected_type == '' ){
+            if (this.model.credentials_type == '' ){
                 alert("Select account type");
                 return false;
-            }else if (this.model.selected_type == 'Linkedin'){
-                if ( (this.model.linkedin.login == '') || (this.model.linkedin.password == '')){
-                    alert("Input your linkedin login and password");
+            }else if (this.model.credentials_type == 'linkedin'){
+                if ( (this.model.data.login == '') || 
+                    (this.model.data.password == '') ||
+                    (this.model.data.account == '')){
+                    alert("Input your linkedin account, login and password");
                     return false;
                 }
             }
 
             if (confirm("Are you sure?")){
                 var accountData = new FormData();
-                accountData.append("_add_credentials", JSON.stringify(this.model))
+                accountData.append("_credentials", JSON.stringify(this.model))
 
                 axios
                 .post(path, accountData)
