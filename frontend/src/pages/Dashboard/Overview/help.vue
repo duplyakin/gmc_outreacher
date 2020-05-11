@@ -21,11 +21,11 @@
       <card>
         <h4 class="card_title">Contact information</h4>
         <p class="contacts">E-mail</p>
-        <p>outreacher24@gmail.com</p>
+        <a href="outreacher24@gmail.com">outreacher24@gmail.com</a>
         <p class="contacts">LinkedIn</p>
-        <p>linkedin.com/outreacher24</p>
+        <a href="linkedin.com/outreacher24">linkedin.com/outreacher24</a>
         <p class="contacts">Facebook</p>
-        <p>facebook.com/outreacher24</p>
+        <a href="facebook.com/outreacher24">facebook.com/outreacher24</a>
       </card>
     </card>
   </div>

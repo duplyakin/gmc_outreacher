@@ -94,7 +94,7 @@ export default {
   },
   data() {
     return {
-      interval: "", // feature
+      interval: 1, // feature
       template: null,
       editorSettings: {
         height: 200,

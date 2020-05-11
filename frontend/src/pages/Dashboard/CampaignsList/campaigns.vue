@@ -191,10 +191,7 @@ export default {
             var r = res.data;
             if (r.code <= 0) {
               var msg = "Action error " + r.msg;
-              Notification.error({
-                title: "Error",
-                message: msg
-              });
+              Notification.error({title: "Error", message: msg});
             } else {
               this.load_campaigns();
             }
@@ -254,7 +251,7 @@ export default {
     editCampaign(msg_dict, index) {
       var status = msg_dict["status"] || -2;
       if (status == -2 || status != 2) {
-        Notification.info({ title: "Info", message: msg });
+        Notification.info({ title: "Info", message: "Pause campaign for edit, current status: " + status });
         return false;
       }
 
