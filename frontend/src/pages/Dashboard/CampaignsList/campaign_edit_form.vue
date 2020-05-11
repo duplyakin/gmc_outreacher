@@ -194,7 +194,7 @@
 <script>
 import { drop, every, forEach, some, get, isArray, map, set, findIndex } from 'lodash';
 
-import { Table, TimeSelect, TableColumn, Select, Option, Input } from "element-ui";
+import { Notification, Table, TimeSelect, TableColumn, Select, Option, Input } from "element-ui";
 
 import timezones from "./defaults/timezones";
 import axios from "axios";
@@ -319,15 +319,16 @@ export default {
                     } else if (template_type === "linkedin") {
                         this.$set(this.campaign_data.templates.linkedin, current_index, newValue);
                     } else {
-                        alert("Unsupported template_type");
+                        Notification.error({title: "Error", message: "Unsupported template_type"});
                     }
 
                     cuurent_table.$forceUpdate();
                 }
                 },
                 {
-                width: "720",
-                height: "auto"
+                width: "1100",
+                height: "auto",
+                scrollable: true
                 }
             );
         },
@@ -428,14 +429,14 @@ export default {
         save_changes(){
             /*Simple validation */
             if (this.campaign_data.title == ''){
-                alert("Title can't be empty");
+                Notification.error({title: "Error", message: "Title can't be empty"});
                 return false;
             }
 
 
             if (this.campaign_data.from_hour == '' ||
                 this.campaign_data.to_hour == ''){
-                    alert("Please select Delivery time");
+                    Notification.error({title: "Error", message: "Please select Delivery time"});
                     return false;
                 }
             
@@ -448,7 +449,7 @@ export default {
             }
 
             if (!days_selected){
-                alert("Sending days can't be emtpy");
+                Notification.error({title: "Error", message: "Sending days can't be emtpy"});
                 return false;
             }
 
@@ -473,14 +474,14 @@ export default {
                     var r = res.data;
                     if (r.code <= 0) {
                         var msg = "Save campaign error: " + r.msg + " code:" + r.code;
-                        alert(msg);
+                        Notification.error({title: "Error", message: msg});
                     } else {
                         this.$router.push({ path: "campaigns_new"});
                     }
                 })
                 .catch(error => {
                     var msg = "Save campaign ERROR: " + error;
-                    alert(msg);
+                    Notification.error({title: "Error", message: msg});
                 });
 
             
@@ -498,14 +499,14 @@ export default {
                 var r = res.data;
                 if (r.code <= 0) {
                     var msg = "Error loading data " + r.msg + " code:" + r.code;
-                    alert(msg);
+                    Notification.error({title: "Error", message: msg});
                 } else {
                     this.deserialize_data(r);
                 }
             })
             .catch(error => {
                 var msg = "Error loading data. ERROR: " + error;
-                alert(msg);
+                Notification.error({title: "Error", message: msg});
             });
 
         },
@@ -513,7 +514,7 @@ export default {
             console.log("load_campaign id:" + campaign_id);
 
             if (campaign_id === ''){
-                alert("ERROR loading campaign: ID can't be empty");
+                Notification.error({title: "Error", message: "ERROR loading campaign: ID can't be empty"});
                 return;
             }
 
@@ -527,14 +528,14 @@ export default {
                 var r = res.data;
                 if (r.code <= 0) {
                     var msg = "Error loading campaign " + r.msg + " code:" + r.code;
-                    alert(msg);
+                    Notification.error({title: "Error", message: msg});
                 } else {
                     this.deserialize_campaign(r);
                 }
             })
             .catch(error => {
                 var msg = "Error loading campaign. ERROR: " + error;
-                alert(msg);
+                Notification.error({title: "Error", message: msg});
             });
 
         }

@@ -1,5 +1,5 @@
 <template>
-    <span>Welcome to <b>Vue LBD PRO</b> - a beautiful freebie for every web developer.</span>
+    <span>Welcome to <b>Outreacher24</b></span>
 </template>
 <script>
   export default {

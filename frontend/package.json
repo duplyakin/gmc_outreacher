@@ -45,6 +45,7 @@
     "vue-scrollama": "^1.1.9",
     "vue-scrollbar-simple": "0.0.4",
     "vue-tinymce-editor": "^1.6.2",
+    "vue-youtube-embed": "^2.2.2",
     "vue2-google-maps": "^0.8.4",
     "vue2-transitions": "^0.2.3",
     "vuex": "^3.3.0"
@@ -54,7 +55,7 @@
     "@vue/cli-service": "^3.2.3",
     "babel-plugin-component": "^1.1.1",
     "es6-promise": "^4.2.4",
-    "node-sass": "^4.11.0",
+    "node-sass": "^4.14.1",
     "sass-loader": "^7.1.0",
     "vue-template-compiler": "^2.5.21"
   },

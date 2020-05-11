@@ -4,7 +4,7 @@
       <div class="row">
         <div class="col-4 d-flex align-self-center">
           <h3>
-            <i class="nc-icon nc-badge"></i> Statistics
+            <i class="nc-icon nc-chart-bar-32"></i> Statistics
           </h3>
         </div>
         <div class="col-8 d-flex flex-row-reverse align-self-center">
@@ -54,7 +54,7 @@
   </div>
 </template>
 <script>
-import { Table, TableColumn, Select, Option } from "element-ui";
+import { Notification, Table, TableColumn, Select, Option } from "element-ui";
 import { Pagination as LPagination } from "src/components/index";
 
 import axios from "axios";
@@ -167,14 +167,14 @@ export default {
           var r = res.data;
           if (r.code <= 0) {
             var msg = "Error loading data statistics " + r.msg;
-            alert(msg);
+            Notification.error({title: "Error", message: msg});
           } else {
             this.deserialize_data(r, init);
           }
         })
         .catch(error => {
           var msg = "Error loading data statistics " + error;
-          alert(msg);
+          Notification.error({title: "Error", message: msg});
         });
     },
     load_statistics() {
@@ -189,14 +189,14 @@ export default {
           var r = res.data;
           if (r.code <= 0) {
             var msg = "Error loading campaigns statistics " + r.msg;
-            alert(msg);
+            Notification.error({title: "Error", message: msg});
           } else {
             this.deserialize_statistics(r, init);
           }
         })
         .catch(error => {
           var msg = "Error loading campaigns statistics " + error;
-          alert(msg);
+          Notification.error({title: "Error", message: msg});
         });
     },
     load_data() {

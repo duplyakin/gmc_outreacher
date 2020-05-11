@@ -2,28 +2,20 @@
   <div class="wrapper" :class="{'nav-open': $sidebar.showSidebar}">
     <notifications></notifications>
     <side-bar>
-      <user-menu></user-menu>
       <mobile-menu></mobile-menu>
       <template slot-scope="props" slot="links">
-        <sidebar-item :link="{name: 'Dashboard', icon: 'nc-icon nc-chart-pie-35', path: '/admin/overview'}">
-        </sidebar-item>
-        <sidebar-item :link="{name: 'Prospects', icon: 'nc-icon nc-chart-bar-32', path: '/admin/prospects'}"></sidebar-item>
-        <sidebar-item :link="{name: 'Campaigns', icon: 'nc-icon nc-chart-bar-32', path: '/admin/campaigns'}"></sidebar-item>
-        <sidebar-item :link="{name: 'Campaigns_new', icon: 'nc-icon nc-chart-bar-32', path: '/admin/campaigns_new'}"></sidebar-item>
-        <sidebar-item :link="{name: 'Statistics', icon: 'nc-icon nc-chart-bar-32', path: '/admin/statistics'}"></sidebar-item>
+        <sidebar-item :link="{name: 'Overview', icon: 'nc-icon nc-chart-pie-35', path: '/user/overview'}"></sidebar-item>
+        <sidebar-item :link="{name: 'Campaigns', icon: 'nc-icon nc-bullet-list-67', path: '/user/campaigns'}"></sidebar-item>
+        <sidebar-item :link="{name: 'Statistics', icon: 'nc-icon nc-chart-bar-32', path: '/user/statistics'}"></sidebar-item>
+        <sidebar-item :link="{name: 'Accounts', icon: 'nc-icon nc-single-02', path: '/user/accounts'}"></sidebar-item>
+        <sidebar-item :link="{name: 'Team', icon: 'nc-icon nc-badge', path: '/user/team'}"></sidebar-item>
 
-        <sidebar-item :link="{name: 'TEST json campaigns', icon: 'nc-icon nc-chart-bar-32', path: '/admin/campaigns_test_json'}"></sidebar-item>
+        <sidebar-item :link="{name: 'Prospects', icon: 'nc-icon nc-single-copy-04', path: '/user/prospects'}"></sidebar-item>
 
-        <sidebar-item :link="{name: 'Accounts', icon: 'nc-icon nc-chart-bar-32', path: '/admin/accounts'}"></sidebar-item>
-        <sidebar-item :link="{name: 'Team', icon: 'nc-icon nc-chart-bar-32', path: '/admin/team'}"></sidebar-item>
+        <sidebar-item :link="{name: 'Actions', icon: 'nc-icon nc-tag-content', path: '/admin/actions'}"></sidebar-item>
 
-        <sidebar-item :link="{name: 'Actions', icon: 'nc-icon nc-chart-bar-32', path: '/admin/actions'}"></sidebar-item>
 
-        <sidebar-item :link="{name: 'Test Components', icon: 'nc-icon nc-chart-bar-32'}">
-          <sidebar-item :link="{name: 'Filter Form', path: '/test/1'}"></sidebar-item>
-          <sidebar-item :link="{name: 'Random Component', path: '/test/2'}"></sidebar-item>
-        </sidebar-item>
-
+        <sidebar-item :link="{name: 'Dashboard', icon: 'nc-icon nc-chart-pie-35', path: '/admin/overview_standart'}"></sidebar-item>
         <sidebar-item :link="{name: 'Components', icon: 'nc-icon nc-app'}">
           <sidebar-item :link="{name: 'Buttons', path: '/components/buttons'}"></sidebar-item>
           <sidebar-item :link="{name: 'Grid System', path: '/components/grid-system'}"></sidebar-item>
@@ -69,14 +61,12 @@
   import ContentFooter from './ContentFooter.vue'
   import DashboardContent from './Content.vue'
   import MobileMenu from './Extra/MobileMenu.vue'
-  import UserMenu from './Extra/UserMenu.vue'
   export default {
     components: {
       TopNavbar,
       ContentFooter,
       DashboardContent,
       MobileMenu,
-      UserMenu
     },
     methods: {
       toggleSidebar () {

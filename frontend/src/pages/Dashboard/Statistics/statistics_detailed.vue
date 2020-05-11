@@ -5,7 +5,7 @@
         <div class="row">
           <div class="col-12 d-flex align-self-center">
             <h3>
-              <i class="nc-icon nc-badge"></i> Campaign Detalization
+              <i class="nc-icon nc-chart-bar-32"></i> Campaign Detalization
             </h3>
           </div>
           <div class="col-4">
@@ -80,7 +80,7 @@
   </div>
 </template>
 <script>
-import { Table, TableColumn, Select, Option } from "element-ui";
+import { Notification, Table, TableColumn, Select, Option } from "element-ui";
 import { Pagination as LPagination } from "src/components/index";
 import LineChart from "./LineChart.js";
 
@@ -420,14 +420,14 @@ export default {
           var r = res.data;
           if (r.code <= 0) {
             var msg = "Error loading campaign statistics " + r.msg;
-            alert(msg);
+            Notification.error({title: "Error", message: msg});
           } else {
             this.deserialize_data(r, init);
           }
         })
         .catch(error => {
           var msg = "Error loading campaign statistics " + error;
-          alert(msg);
+          Notification.error({title: "Error", message: msg});
         });
     },
     load_data() {

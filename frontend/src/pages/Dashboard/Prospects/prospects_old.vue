@@ -154,7 +154,7 @@
 </div>
 </template>
 <script>
-  import { Table, TableColumn, Select, Option } from 'element-ui'
+  import { Notification, Table, TableColumn, Select, Option } from 'element-ui'
   import ProspectPagination from './prospectPagination.vue'
   import NotificationMessage from './notification.vue';
 
@@ -286,12 +286,12 @@
               this.update_prospects_data(r);
             }else{
                 var msg = 'Server Error loading prospects ' + r.msg;
-                alert(msg)
+                Notification.error({title: "Error", message: msg});
             }
         })
         .catch((error) => {
             var msg = 'Error loading prospects ' + error;
-            alert(msg);
+            Notification.error({title: "Error", message: msg});
         });
 
       },
@@ -308,14 +308,14 @@
             var r = res.data;
             if (r.code <= 0){
               var msg = "Error loading prospects " + r.msg;
-              alert(msg);
+              Notification.error({title: "Error", message: msg});
             }else{
               this.update_prospects_data(r, 1);
             }
           })
           .catch((error) => {
             var msg = "Error loading prospects " + error;
-            alert(msg);
+            Notification.error({title: "Error", message: msg});
           });
       },
       uploadProspect(){
@@ -408,7 +408,7 @@
                       var r = res.data;
                       if (r.code <= 0){
                         var msg = "Error " + r.msg;
-                        alert(msg);
+                        Notification.error({title: "Error", message: msg});
                       }else{
                         this.$notify(
                         {
@@ -424,7 +424,7 @@
                     })
                     .catch((error) => {
                       var msg = "Error " + error;
-                      alert(msg);
+                      Notification.error({title: "Error", message: msg});
                     });
 
               //End here
@@ -448,7 +448,7 @@
               var r = res.data;
               if (r.code <= 0){
                 var msg = "Error " + r.msg;
-                alert(msg);
+                Notification.error({title: "Error", message: msg});
               }else{
                 this.$notify(
                 {
@@ -462,7 +462,7 @@
             })
             .catch((error) => {
               var msg = "Error " + error;
-              alert(msg);
+              Notification.error({title: "Error", message: msg});
             });
 
         }
@@ -479,7 +479,7 @@
               var r = res.data;
               if (r.code <= 0){
                 var msg = "Error deleting prospects " + r.msg;
-                alert(msg);
+                Notification.error({title: "Error", message: msg});
               }else{
                 this.$notify(
                 {
@@ -493,7 +493,7 @@
             })
             .catch((error) => {
               var msg = "Error loading prospects " + error;
-              alert(msg);
+              Notification.error({title: "Error", message: msg});
             });
 
         }

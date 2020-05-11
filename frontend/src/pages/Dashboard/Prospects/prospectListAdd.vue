@@ -33,7 +33,7 @@
 </template>
 
 <script>
-import { Select, Option } from 'element-ui'
+import { Notification, Select, Option } from 'element-ui'
 import axios from 'axios'
 
 export default {
@@ -55,6 +55,7 @@ export default {
         listAddSubmit(){
             if (this.prospect_list == ''){
                 alert('List can not be empty');
+                Notification.error({title: "Error", message: 'List can not be empty'});
                 return false;
             }
             if (confirm("Are you sure?")){

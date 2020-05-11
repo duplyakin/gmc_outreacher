@@ -24,13 +24,16 @@
               />
             </fg-input>
           </div>
-          <div class="col-3">
-            <fg-input label="Interval">
-              <el-input-number
-                v-model="template.interval"
-                placeholder="ex: 1.00"
-              ></el-input-number>
-            </fg-input>
+          <div class="container">
+            <p
+              class="interval_text"
+            >If no reply is received for previous email, this email will be sent after</p>
+            <div class="col-2">
+              <fg-input label>
+                <el-input-number v-model="interval" placeholder="ex: 1.00" :min="1" :max="365"></el-input-number>
+              </fg-input>
+            </div>
+            <p class="interval_text">day(s) from previous email</p>
           </div>
         </card>
 
@@ -46,20 +49,27 @@
               />
             </fg-input>
           </div>
-          <div class="col-3">
-            <fg-input label="Interval">
-              <el-input-number
-                v-model="template.interval"
-                placeholder="ex: 1.00"
-              ></el-input-number>
-            </fg-input>
+          <div class="container">
+            <p
+              class="interval_text"
+            >If no reply is received for previous message, this message will be sent after</p>
+            <div class="col-2">
+              <fg-input label>
+                <el-input-number v-model="interval" placeholder="ex: 1.00" :min="1" :max="365"></el-input-number>
+              </fg-input>
+            </div>
+            <p class="interval_text">day(s) from previous message</p>
           </div>
-      </card>
+        </card>
 
         <div class="row">
           <div class="col-12 d-flex flex-row-reverse">
             <button type="submit" class="btn btn-outline btn-wd btn-success mx-1">Save</button>
-            <button v-on:click="discardEdit" type="button" class="btn btn-outline btn-wd btn-danger">Discard</button>
+            <button
+              v-on:click="discardEdit"
+              type="button"
+              class="btn btn-outline btn-wd btn-danger"
+            >Discard</button>
           </div>
         </div>
       </form>
@@ -68,7 +78,7 @@
 </template>
 
 <script>
-import { Select, Option } from "element-ui";
+import { Notification, Select, Option } from "element-ui";
 import Editor from "@tinymce/tinymce-vue";
 
 export default {
@@ -84,21 +94,22 @@ export default {
   },
   data() {
     return {
-      template : null,
+      interval: "", // feature
+      template: null,
       editorSettings: {
-         height: 200,
-         menubar: false,
-         plugins: [
-           'advlist autolink lists link image charmap print preview anchor',
-           'searchreplace visualblocks code fullscreen',
-           'insertdatetime media table paste code help wordcount'
-         ],
-         toolbar:
-           'undo redo | formatselect | bold italic backcolor | \
+        height: 200,
+        menubar: false,
+        plugins: [
+          "advlist autolink lists link image charmap print preview anchor",
+          "searchreplace visualblocks code fullscreen",
+          "insertdatetime media table paste code help wordcount"
+        ],
+        toolbar:
+          "undo redo | formatselect | bold italic backcolor | \
            alignleft aligncenter alignright alignjustify | \
            bullist numlist outdent indent | removeformat | help \
-           image | link | autolink'
-       },
+           image | link | autolink"
+      },
       modelValidations: {
         message_data: {
           required: true
@@ -113,69 +124,81 @@ export default {
     getError(fieldName) {
       return this.errors.first(fieldName);
     },
-    convertToPlainText(htmlText){
-      let res = htmlText.replace(/<style([\s\S]*?)<\/style>/gi, '');
-      res = res.replace(/<script([\s\S]*?)<\/script>/gi, '');
-      res = res.replace(/<\/div>/ig, '\n');
-      res = res.replace(/<\/li>/ig, '\n');
-      res = res.replace(/<li>/ig, '  *  ');
-      res = res.replace(/<\/ul>/ig, '\n');
-      res = res.replace(/<\/p>/ig, '\n');
+    convertToPlainText(htmlText) {
+      let res = htmlText.replace(/<style([\s\S]*?)<\/style>/gi, "");
+      res = res.replace(/<script([\s\S]*?)<\/script>/gi, "");
+      res = res.replace(/<\/div>/gi, "\n");
+      res = res.replace(/<\/li>/gi, "\n");
+      res = res.replace(/<li>/gi, "  *  ");
+      res = res.replace(/<\/ul>/gi, "\n");
+      res = res.replace(/<\/p>/gi, "\n");
       res = res.replace(/<br\s*[\/]?>/gi, "\n");
-      res = res.replace(/<[^>]+>/ig, '');
+      res = res.replace(/<[^>]+>/gi, "");
 
       return res;
     },
     submitData() {
-      if (!this.template){
-        alert("Template can't be empty")
+      if (!this.template) {
+        Notification.error({title: "Error", message: "Template can't be empty"});
         return false;
       }
       if (confirm("Are you sure?")) {
-        // variant 1
-        //this.message_data.body_plain = this.message_data.body.replace(/<(style|script|iframe)[^>]*?>[\s\S]+?<\/\1\s*>/gi,'').replace(/<[^>]+?>/g,'').replace(/\s+/g,' ').replace(/ /g,' ').replace(/>/g,' '); 
-        // variant 2
-        //this.message_data.body_plain = this.convertToPlainText(this.message_data.body);
-        this.$emit('close');
+        this.$emit("close");
+        this.template.interval = this.interval; // feature
         this.valueUpdated(this.template);
-        console.log('template: ', this.template);
-        }
+        console.log("template: ", this.template);
+      }
     },
     discardEdit() {
       this.$emit("close");
     }
   },
   created() {
-    if (Object.keys(this.templateObj).length != 0){
-            this.template =  JSON.parse(JSON.stringify(this.templateObj));
-            
-            /* If we create the new object we don't have properties */
-            if (this.template_type === 'email'){
-                if (!this.template.hasOwnProperty('subject')){
-                    this.template['subject'] = '';
-                }
-                if (!this.template.hasOwnProperty('body')){
-                    this.template['body'] = '';
-                }
-                if (!this.template.hasOwnProperty('interval')){
-                    this.template['interval'] = '';
-                }
-            }else if(this.template_type === 'linkedin'){
-                if (!this.template.hasOwnProperty('message')){
-                    this.template['message'] = '';
-                }
-                if (!this.template.hasOwnProperty('interval')){
-                    this.template['interval'] = '';
-                }
-            }
-            console.log(this.template);
+    if (Object.keys(this.templateObj).length != 0) {
+      this.template = JSON.parse(JSON.stringify(this.templateObj));
+      this.interval = this.template.interval; // feature
+
+      /* If we create the new object we don't have properties */
+      if (this.template_type === "email") {
+        if (!this.template.hasOwnProperty("subject")) {
+          this.template["subject"] = "";
         }
+        if (!this.template.hasOwnProperty("body")) {
+          this.template["body"] = "";
+        }
+        if (!this.template.hasOwnProperty("interval")) {
+          this.template["interval"] = "";
+        }
+      } else if (this.template_type === "linkedin") {
+        if (!this.template.hasOwnProperty("message")) {
+          this.template["message"] = "";
+        }
+        if (!this.template.hasOwnProperty("interval")) {
+          this.template["interval"] = "";
+        }
+      }
+      console.log(this.template);
+    }
   }
 };
 </script>
 <style>
 label {
   color: black;
+}
+.container {
+  display: flex;
+  justify-content: space-around;
+  align-items: flex-start;
+  padding: 10px 20px;
+}
+.interval_text {
+  display: flex;
+  align-items: flex-start;
+  font-size: 17px;
+  font-weight: 100;
+  line-height: 50px;
+  color: rgb(119, 119, 119);
 }
 </style>
   

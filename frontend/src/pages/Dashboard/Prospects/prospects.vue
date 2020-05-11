@@ -3,7 +3,7 @@
 <card>
 <div class="row">
     <div class="col-4 d-flex align-self-center">
-        <span font-><h3><i class="nc-icon nc-badge"></i> Prospects</h3></span>
+        <span font-><h3><i class="nc-icon nc-single-copy-04"></i> Prospects</h3></span>
     </div>
     <div class="col-8 d-flex flex-row-reverse align-self-center">
 
@@ -167,7 +167,7 @@ name="major_modal">
 </div>
 </template>
 <script>
-import { Table, TableColumn, Select, Option } from 'element-ui'
+import { Notification, Table, TableColumn, Select, Option } from 'element-ui'
 import ProspectPagination from './prospectPagination.vue'
 import NotificationMessage from './notification.vue';
 
@@ -383,14 +383,14 @@ methods: {
             var r = res.data;
             if (r.code <= 0){
                 var msg = "Error loading data. " + r.msg;
-                alert(msg);
+                Notification.error({title: "Error", message: msg});
             }else{
                 this.deserialize_data(r);
             }
             })
             .catch((error) => {
                 var msg = "Error loading data. ERROR: " + error;
-                alert(msg);
+                Notification.error({title: "Error", message: msg});
             });
     },
     load_prospects(page=1){
@@ -409,14 +409,14 @@ methods: {
             var r = res.data;
             if (r.code <= 0){
                 var msg = "Error loading prospects." + r.msg;
-                alert(msg);
+                Notification.error({title: "Error", message: msg});
             }else{
                 this.deserialize_prospects(r);
             }
             })
             .catch((error) => {
                 var msg = "Error loading prospects. ERROR: " + error;
-                alert(msg);
+                Notification.error({title: "Error", message: msg});
             });
     },
     uploadProspect(){
@@ -507,7 +507,7 @@ methods: {
                         var r = res.data;
                         if (r.code <= 0){
                             var msg = "Error " + r.msg;
-                            alert(msg);
+                            Notification.error({title: "Error", message: msg});
                         }else{
                         this.$notify(
                         {
@@ -523,7 +523,7 @@ methods: {
                     })
                     .catch((error) => {
                         var msg = "Error " + error;
-                        alert(msg);
+                        Notification.error({title: "Error", message: msg});
                     });
 
                 //End here
@@ -549,7 +549,7 @@ methods: {
                 var r = res.data;
                 if (r.code <= 0){
                     var msg = "Error code: " + r.msg;
-                    alert(msg);
+                    Notification.error({title: "Error", message: msg});
                 }else{
                     this.$notify(
                     {
@@ -564,7 +564,7 @@ methods: {
             })
             .catch((error) => {
                 var msg = "Catch Error: " + error;
-                alert(msg);
+                Notification.error({title: "Error", message: msg});
             });
         }
     },
@@ -586,7 +586,7 @@ methods: {
                         var r = res.data;
                         if (r.code <= 0){
                         var msg = "Error " + r.msg;
-                        alert(msg);
+                        Notification.error({title: "Error", message: msg});
                         }else{
                         this.$notify(
                         {
@@ -602,7 +602,7 @@ methods: {
                     })
                     .catch((error) => {
                         var msg = "Error " + error;
-                        alert(msg);
+                        Notification.error({title: "Error", message: msg});
                     });
 
                 //End here
@@ -625,7 +625,7 @@ methods: {
             var r = res.data;
             if (r.code <= 0){
             var msg = "Error " + r.msg;
-            alert(msg);
+            Notification.error({title: "Error", message: msg});
             }else{
             this.$notify(
             {
@@ -639,7 +639,7 @@ methods: {
         })
         .catch((error) => {
             var msg = "Error " + error;
-            alert(msg);
+            Notification.error({title: "Error", message: msg});
         });
 
     }
@@ -656,7 +656,7 @@ methods: {
             var r = res.data;
             if (r.code <= 0){
             var msg = "Error deleting prospects " + r.msg;
-            alert(msg);
+            Notification.error({title: "Error", message: msg});
             }else{
             this.$notify(
             {
@@ -670,7 +670,7 @@ methods: {
         })
         .catch((error) => {
             var msg = "Error loading prospects " + error;
-            alert(msg);
+            Notification.error({title: "Error", message: msg});
         });
 
     }

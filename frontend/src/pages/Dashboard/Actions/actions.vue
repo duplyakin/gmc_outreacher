@@ -5,7 +5,7 @@
         <div class="col-4 d-flex align-self-center">
           <span font->
             <h3>
-              <i class="nc-icon nc-badge"></i> Actions log
+              <i class="nc-icon nc-tag-content"></i> Actions log
             </h3>
           </span>
         </div>

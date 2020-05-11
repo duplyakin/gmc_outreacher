@@ -13,6 +13,9 @@ Vue.use(VueRouter)
 Vue.use(LightBootstrap)
 Vue.use(VModal, { dynamic: true, injectModalsContainer: true })
 
+import VueYouTubeEmbed from 'vue-youtube-embed'
+Vue.use(VueYouTubeEmbed)
+
 // configure router
 const router = new VueRouter({
   routes, // short for routes: routes

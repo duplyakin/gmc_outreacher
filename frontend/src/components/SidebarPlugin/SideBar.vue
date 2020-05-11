@@ -7,13 +7,7 @@
 
     <div class="sidebar-wrapper" ref="sidebarScrollArea">
       <div class="logo">
-        <a class="logo-mini"
-           href="https://www.creative-tim.com/product/vue-light-bootstrap-dashboard-pro">
-          <div class="logo-img">
-              <img :src="logo" alt="logo">
-          </div>
-        </a>
-        <a href="" class="simple-text logo-normal">
+        <a href="" class="logo_text logo-normal">
           {{ title }}
         </a>
       </div>
@@ -43,7 +37,7 @@
     props: {
       title: {
         type: String,
-        default: 'Vue LBD PRO'
+        default: 'Outreacher 24'
       },
       backgroundColor: {
         type: String,
@@ -67,7 +61,7 @@
       },
       logo: {
         type: String,
-        default: 'static/img/vue-logo.png'
+        default: 'static/img/FAVICON.png'
       },
       sidebarLinks: {
         type: Array,
@@ -114,5 +108,10 @@
     .nav-mobile-menu{
       display: none;
     }
+  }
+  .logo_text {
+    justify-content: center;
+    text-align: center;
+    color: rgb(255, 255, 255);
   }
 </style>
