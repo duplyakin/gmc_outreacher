@@ -69,6 +69,7 @@ class TestFilter(unittest.TestCase):
         print(prospects)
 
     def test_3_or_query(self):
+        return 
         current_user = get_current_user()
         p = Prospects.objects(id='5eb2b667fa795f404d2b9ce0').first()
 
@@ -87,6 +88,11 @@ class TestFilter(unittest.TestCase):
         query['$or'] = or_array
         prospects = Prospects.objects(__raw__=query).first()
         pprint(prospects.id)
+    
+    def test_4_failed(self):
+        credentials = Credentials.objects(data__account='ks.shilov@gmail.com').first()
+        credentials.status = 1
+        credentials._commit()
 
 def setUpModule():
     env = os.environ.get('APP_ENV', None)

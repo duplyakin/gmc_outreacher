@@ -24,7 +24,7 @@ from bson.json_util import dumps as bson_dumps
 from o24.backend.utils.filter_data import *
 from o24.backend.utils.helpers import template_key_dict 
 from o24.backend.dashboard.serializers import JSCampaignData
-
+from o24.backend.utils.aes_encode import *
 
 class User(db.Document, UserMixin):
     email = db.EmailField(unique=True)
@@ -102,8 +102,14 @@ user_manager = CustomUserManager(app, db, User)
 #### Menu: Outreach Accounts ####
 #### Store data to access external accounts
 class Credentials(db.Document):
+    SHOWED_MEDIUM = ['linkedin', 'email']
+
     owner = db.ReferenceField(User, reverse_delete_rule=1)
-    status = db.BooleanField(default=False)
+    
+    # 0 - Fresh or just created
+    # 1 - Refreshed (need to update all tasks)
+    # -1 - Failed
+    status = db.IntField(default=0)
     
     medium = db.StringField()
 
@@ -124,50 +130,58 @@ class Credentials(db.Document):
     @classmethod
     def ready_ids(cls, utc_now):
         #ids = [p.get('_id') for p in cls.objects(next_action__lte=utc_now).only('id').all().as_pymongo()]
-        ids = cls.objects(next_action__lte=utc_now).distinct('id')
+        ids = cls.objects(next_action__lte=utc_now, status=0).distinct('id')
         return ids
 
     @classmethod
-    def create_credentials(cls, owner, data):
+    def create_credentials(cls, owner, new_data, medium, limit_per_day=None):
         exist = None
-        new_data = data.get('data')
+
+        #hash password
+        #password = new_data.get('password', '')
+        #if password:
+        #    new_data['password'] = encode_passowrd(password)
 
         account = new_data.get('account', '')
         if account:
-            exist = Credentials.objects(Q(owner=owner) & Q(data__account=account) ).first()
+            exist = Credentials.objects(owner=owner, data__account=account).first()
 
         if not exist:
             exist = cls()
 
+        if (limit_per_day is not None) and (limit_per_day > 0):
+            exist.limit_per_day = limit_per_day
+
         exist.owner = owner
-        exist.medium = data.get('medium')
+        exist.medium = medium
         exist.data = new_data
+        
+        exist.status = 0
         
         exist._commit()
 
         return exist
-    
-    @classmethod
-    def delete_credentials(cls, owner_id, credentials_ids):
-        if not owner_id or not credentials_ids:
-            return 0
+     
+
+    def safe_delete_credentials(self):
+        campaign_assigned = Campaign.objects(owner=self.owner, credentials__in=[self.id]).first()
+        if campaign_assigned:
+            account = self.data.get('account', '')
+            error = "Can't delete credentials for account:{0} - you have campaign assigned, delete campaign first".format(account)
+            raise Exception(error)
         
-        active_campaign = Campaign.objects(owner=owner_id, credentials__in=credentials_ids, status=1).first()
-        if active_campaign:
-            raise Exception("Can't delete - you have active campaigns on this account")
-        
-        return Credentials.objects(owner=owner_id, id__in=credentials_ids).delete()
+        return self.delete()
 
 
     @classmethod
     def get_credentials(cls, user_id, medium=None, sender=None):
-        if medium:
-            return cls.objects(Q(owner=user_id) & Q(medium=medium)).first()
+        if medium is not None:
+            return cls.objects(owner=user_id, medium=medium).first()
 
-        if sender:
-            return cls.objects(Q(owner=user_id) & Q(data__sender=sender)).first()
+        if sender is not None:
+            return cls.objects(owner=user_id, data__sender=sender).first()
 
-        return credentials
+        return None
 
     @classmethod
     def async_credentials(cls, owner, page=None, per_page=config.CREDENTIALS_PER_PAGE):
@@ -178,8 +192,8 @@ class Credentials(db.Document):
             'owner' : owner
         }
 
-        db_query = cls.objects(__raw__=query). \
-                    only('id', 'data', 'status', 'medium', 'limit_per_day', 'last_action', 'next_action')
+        db_query = cls.objects(__raw__=query, medium__in=cls.SHOWED_MEDIUM). \
+                    only('id', 'data', 'status', 'medium', 'limit_per_day', 'last_action', 'next_action', 'current_daily_counter')
         
         total = db_query.count()
         results = []
@@ -226,19 +240,48 @@ class Credentials(db.Document):
         else:
             self.next_action = now + timedelta(seconds=self.limit_interval)        
 
-    def update_data(self, data, allow_update=['limit_per_day', 'li_at']):
-        new_limit_per_day = int(data.get('limit_per_day', 0))
-        if new_limit_per_day > 0:
-            self.limit_per_day = new_limit_per_day
+    def _check_for_duplicates(self, data):
+        #check duplicates:
+        account = data.get('account', '')
+        if account:
+            exist = Credentials.objects(owner=self.owner, data__account=account, id__ne=self.id).first()
+            if exist:
+                error = "Credentials duplicate error for account: {0}".format(account)
+                raise Exception(error)
 
-        data_prop = data.get('data', '')
-        if data_prop:
-            li_at = data_prop.get('li_at', None)
-            if li_at is not None:
-                self.data['li_at'] = li_at
+    def safe_update_credentials(self, credentials_data):
+        limit_per_day = credentials_data.get_limit_per_day()
+        if limit_per_day:
+            self.limit_per_day = limit_per_day
+        
+        data = credentials_data.get_data()
+        if data:
+            self.update_data(new_data=data, _commit=False)
         
         self._commit()
+
+    def update_data(self, new_data, _commit=True):
+        if not isinstance(new_data, dict):
+            raise Exception("Can't update_data, new_data is not dict object")
+        
+        if not new_data:
+            return 0
+
+        self._check_for_duplicates(new_data)
+        for key, val in new_data.items():
+            if val is not None:
+                self.data[key] = val
+        
+        #refreshed data
+        self.status = 1
+
+        if _commit:
+            self._commit()
     
+    def change_status(self, status):
+        self.status = status
+        self._commit()
+
     def warmup(self):
         self.limit_per_day = round(self.limit_per_day * 1.3)
 
@@ -505,7 +548,12 @@ class Campaign(db.Document):
             if not title:
                 raise Exception("Title can't be empty")
             
-            exist = Campaign.objects(owner=owner, id__ne=self.id, title=title).first()
+            exist = None
+            if self.id is not None:
+                exist = Campaign.objects(owner=owner, id__ne=self.id, title=title).first()
+            else:
+                exist = Campaign.objects(owner=owner, title=title).first()
+
             if exist:
                 raise Exception("Campaign with this title already exist")
 
@@ -592,6 +640,61 @@ class ProspectsList(db.Document):
     # 3 - finished
 
     @classmethod
+    def async_aggreagte_lists(cls, owner_id):
+        pipeline = [
+            {"$lookup" : {
+                "from" : "prospects",
+                "let" : { "list_id": "$_id"},
+                "pipeline" : [
+                        {"$match": { "owner": owner_id } },
+                        {"$group" : {
+                            '_id':"$assign_to_list", 
+                            'count' : {'$sum' : 1},
+                            "owner": { "$first": "$owner"},
+                            }
+                        },
+                        { "$match":
+                            { "$expr":
+                                { "$and":
+                                    [
+                                        { "$ne" :["$_id", None] },
+                                        { "$eq": [ "$_id",  "$$list_id" ] },
+                                    ]
+                                }
+                            }
+                        },
+                ],
+                "as" : "grouped_prospects"
+            }},
+            {
+                "$project" : {
+                    "_id" : 1,
+                    "title" : 1,
+                    "grouped_prospects" : 1,
+                    "total" : {
+                        "$map" : {
+                                "input" : "$grouped_prospects",
+                                "as": "g",
+                                "in" : { "$cond": {
+                                            "if": {"$ne": ["$$g.count", None]},
+                                            "then": "$$g.count",
+                                            "else": 0
+                                                }
+                                        }
+                        }
+                    }
+                }
+            }
+        ]
+
+
+        lists = list(ProspectsList.objects(owner=owner_id).aggregate(*pipeline))
+
+        sz = bson_dumps(lists)
+        return sz
+
+
+    @classmethod
     def async_lists(cls, owner_id, page=1):
         db_query = cls.objects(owner=owner_id). \
                     only('id', 'title')
@@ -630,6 +733,10 @@ class ProspectsList(db.Document):
             self._commit()
 
     def safe_delete(self):
+        has_prospects = Prospects.objects(assign_to_list=self.id).count()
+        if has_prospects > 0:
+            raise Exception("LIST DELETE ERROR: Remove prospects from the list, before delete")
+
         return self.delete()
 
     def _commit(self):
@@ -1122,5 +1229,4 @@ class MergeTags(db.Document):
 
 #Register delete rules for '' ReferenceFields as described here: https://github.com/MongoEngine/mongoengine/issues/1707
 
-ProspectsList.register_delete_rule(Campaign, "prospects_list", 1)
 ProspectsList.register_delete_rule(Prospects, "assign_to_list", 1)

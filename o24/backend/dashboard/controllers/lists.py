@@ -22,9 +22,9 @@ COLUMNS = [
         'prop' : 'title',
     },
     {
-        'label' : 'Number of prospects',
-        'prop' : 'prospects_num'
-    },
+        'label' : 'Number of prospects assigned',
+        'prop' : 'total'
+    }
 ]
 
 CORS(app, resources={r'/*': {'origins': '*'}})
@@ -36,26 +36,48 @@ def get_current_user():
 
     return user
 
+@bp_dashboard.route('/lists/aggregate', methods=['POST'])
+#@login_required
+def aggregate_lists():
+
+    current_user = get_current_user()
+
+    result = {
+        'code' : -1,
+        'msg' : 'Unknown request',
+        'lists' : '',
+        'columns' : json.dumps(COLUMNS)
+    }
+
+    try:
+        if request.method == 'POST':
+            lists = ProspectsList.async_aggreagte_lists(owner_id=current_user.id)    
+            if lists:
+                result['lists'] = lists
+
+            result['code'] = 1
+            result['msg'] = 'Success'
+    except Exception as e:
+        #TODO: change to loggin
+        print(e)
+        traceback.print_exc()
+
+        result['code'] = -1
+        result['msg'] = str(e)
+
+    return jsonify(result)
+
+
 @bp_dashboard.route('/lists/list', methods=['POST'])
 #@login_required
 def list_lists():
 
     current_user = get_current_user()
 
-    per_page = config.PROSPECTS_PER_PAGE
-    page = 1
-
-    pagination = {
-            'perPage' : per_page,
-            'currentPage' : page,
-            'total' : 0
-    }
-
     result = {
         'code' : -1,
         'msg' : 'Unknown request',
         'lists' : '',
-        'pagination' : json.dumps(pagination),
         'columns' : json.dumps(COLUMNS)
     }
 
@@ -63,15 +85,10 @@ def list_lists():
         if request.method == 'POST':
             page = int(request.form.get('_page',1))
 
-            total, lists = ProspectsLists.async_lists(owner_id=current_user.id,
+            total, lists = ProspectsList.async_lists(owner_id=current_user.id,
                                                 page=page)    
             if lists:
                 result['lists'] = lists
-                result['pagination'] = json.dumps({
-                    'perPage' : per_page,
-                    'currentPage' : page,
-                    'total' : total
-                })
 
             result['code'] = 1
             result['msg'] = 'Success'
@@ -97,7 +114,9 @@ def remove_lists():
     }
     if request.method == 'POST':
         try:
-            list_id = request.form['_list_id']
+            list_id = request.form.get('_list_id', '')
+            if not list_id:
+                raise Exception("BAD request: need _list_id parameter")
 
             prospect_list = ProspectsList.objects(owner=current_user.id, id=list_id).first()
             if not prospect_list:
@@ -129,12 +148,12 @@ def add_list():
     }
     if request.method == 'POST':
         try:
-            raw_data = request.form['_list']
-
-            js_data = json.loads(raw_data)
+            list_title = request.form.get('_list_title', '')
+            if not list_title:
+                raise Exception("List title can't be empty")
 
             res = ProspectsList.create_list(owner_id=current_user.id,
-                                            title=js_data['title'])
+                                            title=list_title)
 
             result['code'] = 1
             result['added'] = res
@@ -162,13 +181,15 @@ def edit_list():
     }
     if request.method == 'POST':
         try:
-            list_id = request.form['_list_id']
+            list_id = request.form.get('_list_id', '')
+            if not list_id:
+                raise Exception("BAD request: need _list_id parameter")
 
             prospect_list = ProspectsList.objects(owner=current_user.id, id=list_id).first()
             if not prospect_list:
                 raise Exception("There is no such list")
 
-            title = request.form.get('title', '')
+            title = request.form.get('_list_title', '')
             if not title:
                 raise Exception("Title can't be empty")
 
@@ -176,7 +197,7 @@ def edit_list():
             prospect_list.reload()
 
             result['code'] = 1
-            result['updated'] = prospect_list.serialize()
+            result['updated'] = prospect_list.to_json()
         except Exception as e:
             #TODO: change to loggin
             print(e)

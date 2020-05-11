@@ -40,13 +40,14 @@ class BaseConfig():
 
     # Secret key for signing cookies
     SECRET_KEY = "secret"
+    AES_SECRET = b'1234567890123456'
 
     #UI specific settings
     PER_PAGE = 10
     USER_PASSLIB_CRYPTCONTEXT_SCHEMES = ["pbkdf2_sha256"]
 
     PROSPECTS_PER_PAGE = 100
-    CREDENTIALS_PER_PAGE = 20
+    CREDENTIALS_PER_PAGE = 100
     CAMPAIGNS_PER_PAGE = 100
     #Flask-User customization
     #USER_LOGIN_TEMPLATE = 'login/login.html'

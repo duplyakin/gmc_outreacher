@@ -197,7 +197,7 @@ def remove_prospect():
 
             res = Prospects.delete_prospects(owner_id=current_user.id,
                                             prospects_ids=ids)
-
+            
             result['code'] = 1
             result['deleted'] = res
         except Exception as e:
@@ -236,7 +236,7 @@ def add_prospect_to_list():
             res = Prospects.add_to_list(owner_id=current_user.id,
                                             prospects_ids=ids,
                                             list_id=_list_id)
-
+            
             result['code'] = 1
             result['added'] = res
         except Exception as e:
