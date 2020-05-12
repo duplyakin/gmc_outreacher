@@ -46,7 +46,7 @@
                     <a @click.prevent="editCampaign(scope.row, scope.$index)" href="#"  v-if="column.prop === 'title'">{{ scope.row[column.prop] }}</a>
                     <template v-else-if="column.prop === 'status'">{{  status[scope.row[column.prop]] }}</template>
                     <template v-else> {{ show_data(scope.row, column) }} </template>
-                </template> 
+                </template>
             </el-table-column>
             <el-table-column :min-width="50" fixed="right" label="Action">
                 <template slot-scope="props">
@@ -72,23 +72,23 @@
             </el-table-column>
             </el-table>
         </div>
-    
-        </card>     
+
+        </card>
 
         <div v-if="test" class="row">
             <div class="col-12">
                 <pre>{{ this.campaigns_data}}</pre>
             </div>
-            
+
             <div class="col-12">
                 {{ this.list_data }}
             </div>
         </div>
-         
+
 </div>
 </template>
 <script>
-import { Table, TableColumn, Select, Option } from "element-ui";
+import { Notification, Table, TableColumn, Select, Option } from "element-ui";
 import { Pagination as LPagination } from "src/components/index";
 
 import CampaignForm from "./campaign_form.vue";
@@ -145,7 +145,7 @@ methods: {
         if (confirm("Are you sure?")) {
             var data = new FormData();
             data.append("_campaign_id", campaign._id.$oid);
-            
+
             const row_index = index;
             axios
                 .post(path, data)
@@ -153,14 +153,14 @@ methods: {
                 var r = res.data;
                 if (r.code <= 0) {
                     var msg = "Action error " + r.msg;
-                    alert(msg);
+                    Notification.error({title: "Error", message: msg});
                 } else {
                     this.load_campaigns();
                 }
                 })
                 .catch(error => {
                     var msg = "Action error " + error;
-                    alert(msg);
+                    Notification.error({title: "Error", message: msg});
                 });
         }
     },
@@ -185,7 +185,7 @@ methods: {
 
             var data = new FormData();
             data.append("_campaign_id", campaign_id);
-            
+
             const index = row_index;
             axios
                 .post(path, data)
@@ -193,14 +193,14 @@ methods: {
                 var r = res.data;
                 if (r.code <= 0) {
                     var msg = "Error deleting campaign " + r.msg;
-                    alert(msg);
+                    Notification.error({title: "Error", message: msg});
                 } else {
                     this.load_campaigns();
                 }
                 })
                 .catch(error => {
                     var msg = "Error deleting campaign " + error;
-                    alert(msg);
+                    Notification.error({title: "Error", message: msg});
                 });
         }
     },
@@ -213,7 +213,7 @@ methods: {
             status = msg_dict['status'];
         }
         if (status == -2 || status == 1){
-            alert("Pause campaign for edit, current status: " + status);
+            Notification.error({title: "Error", message: "Pause campaign for edit, current status: " + status});
             return false;
         }
 
@@ -228,7 +228,7 @@ methods: {
     },
     load_campaigns(page=1){
         const path = CAMPAIGNS_API_LIST;
-    
+
         var data = new FormData();
         data.append('_page', page);
 
@@ -237,14 +237,14 @@ methods: {
             var r = res.data;
             if (r.code <= 0){
                 var msg = "Error loading campaigns." + r.msg;
-                alert(msg);
+                Notification.error({title: "Error", message: msg});
             }else{
                 this.deserialize_campaigns(r);
             }
             })
             .catch((error) => {
                 var msg = "Error loading campaigns. ERROR: " + error;
-                alert(msg);
+                Notification.error({title: "Error", message: msg});
             });
 
     },
@@ -258,17 +258,17 @@ methods: {
             var r = res.data;
             if (r.code <= 0) {
                 var msg = "Error loading data " + r.msg;
-                alert(msg);
+                Notification.error({title: "Error", message: msg});
             } else {
                 this.deserialize_data(r);
             }
             })
             .catch(error => {
                 var msg = "Error loading data " + error;
-                alert(msg);
+                Notification.error({title: "Error", message: msg});
             });
     },
-    deserialize_data(from_data){            
+    deserialize_data(from_data){
         for (var key in from_data){
             if (this.list_data.hasOwnProperty(key) && from_data[key]){
                 var parsed_data = JSON.parse(from_data[key])

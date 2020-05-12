@@ -54,8 +54,8 @@
 </template>
 
 <script>
-import { Select, Option } from 'element-ui'
 import axios from '@/api/axios-auth'
+import { Notification, Select, Option } from 'element-ui'
 
 export default {
     components: {
@@ -93,7 +93,7 @@ export default {
         submitProspectData(){
            const path = this.api_url;
             if (this.prospect_data.data.email == ''){
-                alert("Email can't be empty");
+                Notification.error({title: "Error", message: "Email can't be empty"});
                 return false;
             }
             
@@ -118,12 +118,12 @@ export default {
                         this.valueUpdated(updated_prospect);
                     }else{
                         var msg = 'Answer Error editing prospect ' + result.msg;
-                        alert(msg)
+                        Notification.error({title: "Error", message: msg});
                     }
                 })
                 .catch((error) => {
                     var msg = 'Answer Error editing prospect ' + error;
-                    alert(msg);
+                    Notification.error({title: "Error", message: msg});
                 });
            };
         },

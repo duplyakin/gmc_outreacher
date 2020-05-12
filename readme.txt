@@ -19,6 +19,7 @@ py -m unittest discover -s .\o24\production_tests\ -p "*1_models.py"
 
 3. Запускаем тестовый сервер
 python -m o24.tests.run_flask_server
+py -m o24.tests.run_flask_server
 
 
 ПОСЛЕ ЭТОГО запускаем фронтенд:

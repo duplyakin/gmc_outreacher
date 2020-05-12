@@ -1,33 +1,5 @@
 <template>
   <ul class="nav nav-mobile-menu">
-    <form class="navbar-form navbar-left navbar-search-form" role="search">
-      <div class="input-group">
-        <i class="nc-icon nc-zoom-split"></i>
-        <input type="text" value="" class="form-control" placeholder="Search...">
-      </div>
-    </form>
-    <drop-down>
-      <template slot="title">
-        <i class="nc-icon nc-planet"></i>
-      </template>
-      <a class="dropdown-item" href="#">Create New Post</a>
-      <a class="dropdown-item" href="#">Manage Something</a>
-      <a class="dropdown-item" href="#">Do Nothing</a>
-      <a class="dropdown-item" href="#">Submit to Live</a>
-      <a class="dropdown-item" href="#">Another action</a>
-    </drop-down>
-    <drop-down>
-      <template slot="title">
-        <i class="nc-icon nc-bell-55"></i>
-        <span class="notification">5</span>
-        <span class="d-lg-none">Notification</span>
-      </template>
-      <a class="dropdown-item" href="#">Notification 1</a>
-      <a class="dropdown-item" href="#">Notification 2</a>
-      <a class="dropdown-item" href="#">Notification 3</a>
-      <a class="dropdown-item" href="#">Notification 4</a>
-      <a class="dropdown-item" href="#">Another notification</a>
-    </drop-down>
 
     <drop-down>
       <template slot="title">

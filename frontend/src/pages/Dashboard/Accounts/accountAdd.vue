@@ -63,7 +63,7 @@
 
 <script>
 import { Select, Option } from 'element-ui'
-import axios from '@/api/axios-auth'
+import axios from '@/api/axios-auth';
 
 const OAUTH_SERVER = 'http://127.0.0.1:5000';
 

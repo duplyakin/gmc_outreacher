@@ -43,41 +43,37 @@ class ConnectCheckAction {
   }
 
   async closeBrowser(browser) {
+    this.browser.disconnect();
     this.browser.close();
   }
 
   async connectCheck() {
     await this.gotoChecker(links.CONNECTS_LINK);
 
-    try {
-      await this.page.waitForSelector(selectors.SEARCH_CONNECTS_SELECTOR);
+    await this.page.waitForSelector(selectors.SEARCH_CONNECTS_SELECTOR);
 
-      await this.page.click(selectors.SEARCH_CONNECTS_SELECTOR);
-      await this.page.keyboard.type(this.connectName);
+    await this.page.click(selectors.SEARCH_CONNECTS_SELECTOR);
+    await this.page.keyboard.type(this.connectName);
 
-      await this.page.waitForSelector(selectors.CONNECTOR_SELECTOR);
-      await this.page.waitFor(1000);  // wait linkedIn loading process
+    await this.page.waitForSelector(selectors.CONNECTOR_SELECTOR);
+    await this.page.waitFor(1000);  // wait linkedIn loading process
 
-      let selector = selectors.CONNECTOR_SELECTOR;
-      let connect = await this.page.evaluate((selector) => {
-        let a = document.querySelector(selector);
-        if (a !== null) {
-          a = a.innerText;
-        };
-        return a;
-      }, selector);
+    let selector = selectors.CONNECTOR_SELECTOR;
+    let connect = await this.page.evaluate((selector) => {
+      let a = document.querySelector(selector);
+      if (a !== null) {
+        a = a.innerText;
+      };
+      return a;
+    }, selector);
 
-      if (connect === this.connectName) {
-        console.log("..... connect found - success: .....", connect)
-        return true;
-      }
-
-      console.log("..... connect NOT found: .....", connect)
-      return false;
-
-    } catch (err) {
-      throw MyExceptions.MessageCheckActionError(err);
+    if (connect === this.connectName) {
+      console.log("..... connect found - success: .....", connect)
+      return true;
     }
+
+    console.log("..... connect NOT found: .....", connect)
+    return false;
   }
 }
 

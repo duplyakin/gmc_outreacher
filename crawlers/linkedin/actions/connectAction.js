@@ -5,13 +5,14 @@ const LoginAction = require(__dirname + '/loginAction.js');
 const MyExceptions = require(__dirname + '/../.././exceptions/exceptions.js');
 
 class ConnectAction {
-  constructor(email, password, cookies, connectUrl, text) {
+  constructor(email, password, cookies, url, template, data) {
     this.email = email;
     this.password = password;
     this.cookies = cookies;
 
-    this.connectUrl = connectUrl;
-    this.text = text;
+    this.url = url;
+    this.template = template;
+    this.data = data;
   }
 
   // do 1 trie to connect URL or goto login
@@ -43,29 +44,55 @@ class ConnectAction {
   }
 
   async closeBrowser(browser) {
+    this.browser.disconnect();
     this.browser.close();
   }
 
   async connect() {
-    await this.gotoChecker(this.connectUrl);
+    await this.gotoChecker(this.url);
 
-    try {
-      await this.page.click(selectors.CONNECT_SELECTOR);
-      // TODO: add logic for already connected links
+    // close messages box !!! critical here?
+    await this.page.waitFor(1000);  // wait linkedIn loading process
+    await this.page.click(selectors.CLOSE_MSG_BOX_SELECTOR);
+    await this.page.waitFor(1000);  // wait linkedIn loading process
 
-      await this.page.waitForSelector(selectors.ADD_MSG_BTN_SELECTOR);
-      await this.page.click(selectors.ADD_MSG_BTN_SELECTOR);
+    //await this.page.waitForSelector(selectors.CONNECT_SELECTOR);
+    if (await this.page.$(selectors.CONNECT_SELECTOR) === null) {
+      console.log('You can\'t contact ' + this.url);
 
-      await this.page.waitForSelector(selectors.MSG_SELECTOR);
-      await this.page.click(selectors.MSG_SELECTOR);
-
-      await this.page.keyboard.type(this.text);
-      await this.page.click(selectors.SEND_INVITE_TEXT_BTN_SELECTOR);
-
-      return true;
-    } catch (err) {
-      throw MyExceptions.ConnectActionError(err);
+      // TODO: add logic for FOLLOW-UP (for famous contacts) and MESSAGE (for premium acc's)
+      return false;
     }
+    await this.page.click(selectors.CONNECT_SELECTOR);
+
+    // check - if CONNECT btm exist, but muted, then you have already sent request
+    //await this.page.waitForSelector(selectors.ADD_MSG_BTN_SELECTOR);
+    if (await this.page.$(selectors.ADD_MSG_BTN_SELECTOR) === null) {
+      console.log('You have already sent request to ' + this.url);
+      return true;
+    }
+    await this.page.click(selectors.ADD_MSG_BTN_SELECTOR);
+
+    await this.page.waitForSelector(selectors.MSG_SELECTOR);
+    await this.page.click(selectors.MSG_SELECTOR);
+
+    let text = this.formatMessage();
+
+    await this.page.keyboard.type(text);
+    await this.page.click(selectors.SEND_INVITE_TEXT_BTN_SELECTOR);
+    //await this.page.waitFor(100000); // to see result
+
+    return true;
+  }
+
+  formatMessage() {
+    // format template
+    let str = this.template;
+    for (var obj in this.data) {
+      str = str.replace(new RegExp('{' + obj + '}', 'g'), this.data[obj]);
+    }
+    str = str.replace(new RegExp('\{(.*?)\}', 'g'), '');
+    return str;
   }
 }
 

@@ -2,7 +2,7 @@ import DashboardLayout from 'src/pages/Dashboard/Layout/DashboardLayout.vue'
 // GeneralViews
 import NotFound from 'src/pages/GeneralViews/NotFoundPage.vue'
 // Dashboard pages
-import Overview from 'src/pages/Dashboard/Dashboard/Overview.vue'
+import Overview_standart from 'src/pages/Dashboard/Dashboard/Overview.vue'
 import Stats from 'src/pages/Dashboard/Dashboard/Stats.vue'
 
 // Pages
@@ -34,17 +34,17 @@ const ExtendedTables = () => import('src/pages/Dashboard/Tables/ExtendedTables.v
 const PaginatedTables = () => import('src/pages/Dashboard/Tables/PaginatedTables.vue')
 
 
-
 // Charts
 const Charts = () => import('src/pages/Dashboard/Charts.vue')
 
+
+
 //CUSTOM components created by me
 const Profile = () => import('src/pages/Dashboard/Profile/profile.vue')
+const Overview = () => import('src/pages/Dashboard/Overview/Overview.vue')
+const Help = () => import('src/pages/Dashboard/Overview/help.vue')
 
 const Prospects = () => import('src/pages/Dashboard/Prospects/prospects.vue')
-const CampaignWizard = () => import('src/pages/Dashboard/Campaigns/campaignWizard.vue')
-const Campaign = () => import('src/pages/Dashboard/Campaigns/campaign.vue')
-const Campaigns = () => import('src/pages/Dashboard/Campaigns/campaigns.vue')
 
 const CampaignsList = () => import('src/pages/Dashboard/CampaignsList/campaigns.vue')
 const CampaignForm = () => import('src/pages/Dashboard/CampaignsList/campaign_form.vue')
@@ -56,16 +56,11 @@ const ProspectLists = () => import('src/pages/Dashboard/ProspectLists/lists.vue'
 const Statistics = () => import('src/pages/Dashboard/Statistics/statistics.vue')
 const Statistics_detailed = () => import('src/pages/Dashboard/Statistics/statistics_detailed.vue')
 
-
 const Accounts = () => import('src/pages/Dashboard/Accounts/accounts.vue')
 const Team = () => import('src/pages/Dashboard/Team/team.vue')
 const Actions = () => import('src/pages/Dashboard/Actions/actions.vue')
 
-const test_json_campaign = () => import('src/pages/Dashboard/Campaigns/test_json_from_server.vue')
 
-
-const filterForm = () => import('src/pages/Dashboard/TestComponents/formComponent.vue')
-const randomComponent = () => import('src/pages/Dashboard/TestComponents/randomComponent.vue')
 
 let componentsMenu = {
   path: '/components',
@@ -108,24 +103,6 @@ let componentsMenu = {
       component: Typography
     }
 
-  ]
-}
-
-let testComponents = {
-  path: '/test',
-  component: DashboardLayout,
-  redirect: '/test/1',
-  children: [
-    {
-      path: '1',
-      name: 'Filter Form',
-      component: filterForm
-    },
-    {
-      path: '2',
-      name: 'Random component',
-      component: randomComponent
-    },
   ]
 }
 
@@ -212,31 +189,22 @@ let registerPage = {
   component: Register
 }
 
-let lockPage = {
-  path: '/lock',
-  name: 'Lock',
-  component: Lock
-}
-
 
 const routes = [
   {
-    path: '/',
-    redirect: '/admin/overview'
+    path: '/'
   },
   componentsMenu,
-  testComponents,
   formsMenu,
   tablesMenu,
   pagesMenu,
   loginPage,
   registerPage,
-  lockPage,
   {
-    path: '/admin',
     meta: { requiresAuth: true },
+    path: '/user',
     component: DashboardLayout,
-    redirect: '/admin/overview',
+    redirect: '/overview',
     children: [
       {
         path: 'profile',
@@ -249,14 +217,9 @@ const routes = [
         component: Overview
       },
       {
-        path: 'stats',
-        name: 'Stats',
-        component: Stats
-      },
-      {
-        path: 'charts',
-        name: 'Charts',
-        component: Charts
+        path: 'help',
+        name: 'Help',
+        component: Help
       },
       {
         path: 'prospects',
@@ -264,45 +227,24 @@ const routes = [
         component: Prospects
       },
       {
-        path: 'campaignWizard',
-        name: 'CampaignWizard',
-        component: CampaignWizard
-      },
-      {
         path: 'campaigns',
-        name: 'Campaigns',
-        component: Campaigns
-      },
-      {
-        path: 'campaigns_new',
-        name: 'CampaignsList',
+        name: 'Campaigns List',
         component: CampaignsList
       },
       {
         path: 'prospects_list',
-        name: 'ProspectLists',
+        name: 'Prospect Lists',
         component: ProspectLists
       },
       {
         path: 'campaign_form',
-        name: 'CampaignForm',
+        name: 'Campaign Form',
         component: CampaignForm
       },
       {
         path: 'campaign_edit_form',
-        name: 'CampaignEditForm',
+        name: 'Campaign Edit Form',
         component: CampaignEditForm
-      },
-
-      {
-        path: 'campaign',
-        name: 'Campaign',
-        component: Campaign
-      },
-      {
-        path: 'campaigns_test_json',
-        name: 'Campaigns TEST JSON',
-        component: test_json_campaign
       },
       {
         path: 'accounts',
@@ -315,20 +257,43 @@ const routes = [
         component: Team
       },
       {
-        path: 'actions',
-        name: 'Actions',
-        component: Actions
-      },
-      {
         path: 'statistics',
         name: 'Statistics',
         component: Statistics
       },
       {
         path: 'statistics_detailed',
-        name: 'Statistics_detailed',
+        name: 'Statistics detailed',
         component: Statistics_detailed
       }
+    ]
+  },
+  {
+    path: '/admin',
+    component: DashboardLayout,
+    meta: { requiresAuth: true },
+    redirect: '/overview',
+    children: [
+      {
+        path: 'overview_standart',
+        name: 'Overview standart',
+        component: Overview_standart
+      },
+      {
+        path: 'stats',
+        name: 'Stats',
+        component: Stats
+      },
+      {
+        path: 'charts',
+        name: 'Charts',
+        component: Charts
+      },
+      {
+        path: 'actions',
+        name: 'Actions',
+        component: Actions
+      },
     ]
   },
   {path: '*', component: NotFound}

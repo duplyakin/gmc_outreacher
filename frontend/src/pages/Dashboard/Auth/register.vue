@@ -82,7 +82,6 @@ export default {
         },
         onSubmit() {
             this.$store.dispatch('auth/register', this.model).then(() => {
-                    this.$router.push('/admin');
 			});
         }
     },

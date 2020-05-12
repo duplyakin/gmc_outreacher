@@ -33,8 +33,8 @@
 </template>
 
 <script>
-import { Select, Option } from 'element-ui'
 import axios from '@/api/axios-auth'
+import { Notification, Select, Option } from 'element-ui'
 
 export default {
     components: {
@@ -55,6 +55,7 @@ export default {
         listAddSubmit(){
             if (this.prospect_list == ''){
                 alert('List can not be empty');
+                Notification.error({title: "Error", message: 'List can not be empty'});
                 return false;
             }
             if (confirm("Are you sure?")){

@@ -23,6 +23,7 @@ class SearchAction {
   }
 
   async closeBrowser(browser) {
+    this.browser.disconnect();
     this.browser.close();
   }
 
@@ -69,49 +70,43 @@ class SearchAction {
 
   async search() {
     await this.gotoChecker(this.searchUrl);
-    try {
-      await this.page.waitForSelector(selectors.SEARCH_ELEMENT_SELECTOR);
 
-      let currentPage = 1;
-      let data = [];
-      let mySelectors = {
-        selector1: selectors.SEARCH_ELEMENT_SELECTOR,
-        selector2: selectors.LINK_SELECTOR,
-        selector3: selectors.FULL_NAME_SELECTOR,
-      };
-      while (currentPage <= this.pageNum) {
-        let newData = await this.page.evaluate((mySelectors) => {
+    await this.page.waitForSelector(selectors.SEARCH_ELEMENT_SELECTOR);
 
-          let results = [];
-          let items = document.querySelectorAll(mySelectors.selector1);
+    let currentPage = 1;
+    let data = [];
+    let mySelectors = {
+      selector1: selectors.SEARCH_ELEMENT_SELECTOR,
+      selector2: selectors.LINK_SELECTOR,
+      selector3: selectors.FULL_NAME_SELECTOR,
+    };
+    while (currentPage <= this.pageNum) {
+      let newData = await this.page.evaluate((mySelectors) => {
 
-          items.forEach((item) => {
-            if (item.querySelector(mySelectors.selector2) !== null)
-              results.push({
-                user_href: item.href,
-                full_name: item.querySelector(mySelectors.selector3).innerText,
-              });
-          });
-          return results;
-        }, mySelectors);
-        data = data.concat(newData);
+        let results = [];
+        let items = document.querySelectorAll(mySelectors.selector1);
 
-        currentPage++;
+        items.forEach((item) => {
+          if (item.querySelector(mySelectors.selector2) !== null)
+            results.push({
+              user_href: item.href,
+              full_name: item.querySelector(mySelectors.selector3).innerText,
+            });
+        });
+        return results;
+      }, mySelectors);
+      data = data.concat(newData);
 
-        await this.autoScroll(this.page);
+      currentPage++;
 
-        await this.page.waitForSelector(selectors.NEXT_PAGE_SELECTOR);
-        await this.page.click(selectors.NEXT_PAGE_SELECTOR);
+      await this.autoScroll(this.page);
 
-        //await this.page.waitForNavigation();
-      }
-
-      //console.log("..... User Data: .....", data)
-      return data;
-      
-    } catch (err) {
-      throw MyExceptions.SearchActionError(err);
+      await this.page.waitForSelector(selectors.NEXT_PAGE_SELECTOR);
+      await this.page.click(selectors.NEXT_PAGE_SELECTOR);
     }
+
+    //console.log("..... User Data: .....", data)
+    return JSON.stringify(data);
   }
 
   async autoScroll(page) {

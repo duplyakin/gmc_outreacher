@@ -28,6 +28,7 @@
 
 <script>
 import axios from '@/api/axios-auth';;
+import { Notification } from "element-ui";
 
 export default {
     components: {
@@ -48,7 +49,7 @@ export default {
     methods: {
         listAddSubmit(){
             if (this.list_title == ''){
-                alert('List title can not be empty');
+                Notification.error({title: "Error", message: 'List title can not be empty'});
                 return false;
             }
             
@@ -69,12 +70,12 @@ export default {
                         this.valueUpdated(this.list_title);
                     }else{
                         var msg = 'Error editing list ' + r.msg;
-                        alert(msg)
+                        Notification.error({title: "Error", message: msg});
                     }
                 })
                 .catch((error) => {
                     var msg = 'Error editing list ' + error;
-                    alert(msg);
+                    Notification.error({title: "Error", message: msg});
                 });
            };
 

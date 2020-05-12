@@ -33,8 +33,8 @@
 </template>
 
 <script>
-import { Select, Option } from 'element-ui'
 import axios from '@/api/axios-auth'
+import { Notification, Select, Option } from 'element-ui'
 
 export default {
     components: {
@@ -54,7 +54,7 @@ export default {
     methods: {
         assignSubmit(){
             if (this.campaign == ''){
-                alert('Campaign should not be empty');
+                Notification.error({title: "Error", message: 'Campaign should not be empty'});
                 return false;
             }
             if (confirm("Are you sure?")){

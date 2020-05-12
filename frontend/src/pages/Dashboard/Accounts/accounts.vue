@@ -5,18 +5,18 @@
         <div class="col-4 d-flex align-self-center">
             <span font-><h3><i class="nc-icon nc-badge"></i> Accounts</h3></span>
         </div>
-        <div class="col-8 d-flex flex-row-reverse align-self-center">            
+        <div class="col-8 d-flex flex-row-reverse align-self-center">
             <button @click.prevent="addAccount" type="button" class="btn btn-default btn-success mx-1">Add account</button>
             <button @click.prevent="loadCredentials" type="button" class="btn btn-default btn-success mx-1">Reload</button>
         </div>
 
     </div>
-    </card>    
+    </card>
 
     <div class="row">
     <div class="col-12">
         <card title="">
-        <div> 
+        <div>
             <div class="col-12">
             <el-table stripe
                         ref="accounts_data_table"
@@ -34,7 +34,7 @@
                             <a @click.prevent="editAccount(scope.row, scope.$index)" href="#"  v-if="column.prop === 'account'">{{ scope.row.data[column.prop] }}</a>
                             <template v-else-if="column.prop === 'status'">{{  status[scope.row[column.prop]] }}</template>
                             <template v-else> {{ show_data(scope.row, column) }} </template>
-                        </template>     
+                        </template>
                 </el-table-column>
                 <el-table-column :min-width="50" fixed="right" label="Delete">
                     <template slot-scope="props">
@@ -47,7 +47,7 @@
                     </a>
                     </template>
                 </el-table-column>
-    
+
             </el-table>
             </div>
         </div>
@@ -63,7 +63,7 @@
 </div>
 </template>
 <script>
-    import { Table, TableColumn, Select, Option } from 'element-ui'
+    import { Notification, Table, TableColumn, Select, Option } from 'element-ui'
     import O24Pagination from 'src/components/O24Pagination.vue'
     import O24NotificationMessage from 'src/components/O24Notification.vue'
     import AccountEdit from './accountEdit.vue'
@@ -88,7 +88,7 @@
         [Table.name]: Table,
         [TableColumn.name]: TableColumn
     },
-    data () {     
+    data () {
         return {
             status : {
                 0 : 'Active',
@@ -118,7 +118,7 @@
             data.append('_page', page);
 
             const path = CREDENTIALS_API_LIST;
-            
+
             axios.post(path, data)
             .then((res) => {
                 var r = res.data;
@@ -127,17 +127,17 @@
                     this.update_accounts_data(r);
                 }else{
                     var msg = 'Server Error loading credentials ' + r.msg;
-                    alert(msg)
+                    Notification.error({title: "Error", message: msg});
                 }
             })
             .catch((error) => {
                 var msg = 'Error loading credentials ' + error;
-                alert(msg);
+                Notification.error({title: "Error", message: msg});
             });
 
         },
         editAccount(account_dict, row_index) {
-        
+
         const current_index = row_index;
         const _table = this.$refs.accounts_data_table;
 
@@ -168,7 +168,7 @@
 
                 var data = new FormData();
                 data.append("_credentials_id", credentials_id);
-                
+
                 const index = row_index;
                 axios
                     .post(path, data)
@@ -176,14 +176,14 @@
                     var r = res.data;
                     if (r.code <= 0) {
                         var msg = "Error deleting " + r.msg;
-                        alert(msg);
+                        Notification.error({title: "Error", message: msg});
                     } else {
                         this.loadCredentials();
                     }
                     })
                     .catch(error => {
                         var msg = "Error deleting " + error;
-                        alert(msg);
+                        Notification.error({title: "Error", message: msg});
                     });
             }
         },
