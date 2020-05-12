@@ -25,6 +25,7 @@ Vue.use(VueYouTubeEmbed)
 
 // configure router
 const router = new VueRouter({
+  mode: 'history',
   routes, // short for routes: routes
   linkActiveClass: 'active'
 })

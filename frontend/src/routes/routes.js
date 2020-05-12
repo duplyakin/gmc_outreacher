@@ -202,9 +202,9 @@ const routes = [
   registerPage,
   {
     meta: { requiresAuth: true },
-    path: '/user',
+    path: '/',
     component: DashboardLayout,
-    redirect: '/overview',
+    redirect: '/profile',
     children: [
       {
         path: 'profile',
@@ -272,7 +272,6 @@ const routes = [
     path: '/admin',
     component: DashboardLayout,
     meta: { requiresAuth: true },
-    redirect: '/overview',
     children: [
       {
         path: 'overview_standart',
