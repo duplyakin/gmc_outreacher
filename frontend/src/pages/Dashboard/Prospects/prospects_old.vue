@@ -164,7 +164,7 @@
 
   import users from './dummy.js'
   import Fuse from 'fuse.js'
-  import axios from 'axios'
+  import axios from '@/api/axios-auth'
 
   const PROSPECTS_API_LIST = 'http://127.0.0.1:5000/prospects';
   const PROSPECTS_API_EDIT = 'http://127.0.0.1:5000/prospects/edit';

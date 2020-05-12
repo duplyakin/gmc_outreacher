@@ -7,4 +7,5 @@ template_folder='templates',
 static_folder='static'
 )
 
-from o24.backend.dashboard.controllers import settings, prospects, credentials, campaigns, lists
+from o24.backend.dashboard.controllers import settings, prospects, credentials, campaigns, lists, users
+

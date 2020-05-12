@@ -17,6 +17,7 @@ import traceback
 import o24.backend.models.shared as shared
 from o24.backend.dashboard.serializers import JSCampaignData
 import o24.backend.scheduler.scheduler as scheduler
+from o24.backend.utils.decors import auth_required
 
 
 COLUMNS = [
@@ -58,19 +59,10 @@ modified_fields_on_edit = {
     'sending_days' : True
 }
 
-CORS(app, resources={r'/*': {'origins': '*'}})
-
-def get_current_user():
-    user = User.objects(email='1@email.com').first()
-    if not user:
-        raise Exception('No such user')
-    
-    return user
-
 @bp_dashboard.route('/campaigns/data', methods=['POST'])
-#@login_required
+@auth_required
 def data_campaigns():
-    current_user = get_current_user()
+    current_user = g.user
 
     result = {
         'code' : -1,
@@ -106,14 +98,13 @@ def data_campaigns():
         result['code'] = -1
         result['msg'] = str(e)
 
-    return jsonify(result)
+    return jsonify(result), 200
 
 
 @bp_dashboard.route('/campaigns/list', methods=['POST'])
-#@login_required
+@auth_required
 def list_campaigns():
-
-    current_user = get_current_user()
+    current_user = g.user
 
     per_page = config.CAMPAIGNS_PER_PAGE
     page = 1
@@ -157,13 +148,13 @@ def list_campaigns():
         result['code'] = -1
         result['msg'] = str(e)
 
-    return jsonify(result)
+    return jsonify(result), 200
 
 
 @bp_dashboard.route('/campaigns/get', methods=['POST'])
-#@login_required
+@auth_required
 def get_campaign_by_id():
-    current_user = get_current_user()
+    current_user = g.user
 
     result = {
         'code' : 1,
@@ -208,9 +199,9 @@ def get_campaign_by_id():
 
 
 @bp_dashboard.route('/campaigns/create', methods=['POST'])
-#@login_required
+@auth_required
 def create_campaign():
-    current_user = get_current_user()
+    current_user = g.user
 
     result = {
         'code' : -1,
@@ -268,9 +259,9 @@ def create_campaign():
     return jsonify(result)
 
 @bp_dashboard.route('/campaigns/edit', methods=['POST'])
-#@login_required
+@auth_required
 def edit_campaign():
-    current_user = get_current_user()
+    current_user = g.user
 
     result = {
         'code' : 1,
@@ -322,9 +313,9 @@ def edit_campaign():
 
 
 @bp_dashboard.route('/campaigns/delete', methods=['POST'])
-#@login_required
+@auth_required
 def delete_campaign():
-    current_user = get_current_user()
+    current_user = g.user
 
     result = {
         'code' : 1,
@@ -357,9 +348,9 @@ def delete_campaign():
 
 
 @bp_dashboard.route('/campaigns/start', methods=['POST'])
-#@login_required
+@auth_required
 def start_campaign():
-    current_user = get_current_user()
+    current_user = g.user
 
     result = {
         'code' : 1,
@@ -393,9 +384,9 @@ def start_campaign():
 
 
 @bp_dashboard.route('/campaigns/pause', methods=['POST'])
-#@login_required
+@auth_required
 def pause_campaign():
-    current_user = get_current_user()
+    current_user = g.user
 
     result = {
         'code' : 1,

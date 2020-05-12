@@ -1,6 +1,8 @@
 USERS = [
     {'email' : '1@email.com',
      'password' : 'password1',
+     'invited_by' : 'test_invite',
+     'invite_code' : 'test_invite',
      'active' : True,
      'credentials' : [
          {

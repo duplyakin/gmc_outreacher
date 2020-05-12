@@ -99,7 +99,23 @@ class JSCredentialsData(JSObject):
 
     def get_limit_per_day(self):
         return self._custom_attr(attr='limit_per_day', default=None)
-  
+
+class JSUserData(JSObject):
+    def __init__(self, raw_data):
+        super().__init__(raw_data)
+
+    def get_email(self):
+        return self._custom_attr(attr='email', default=None)
+
+    def get_password(self):
+        return self._custom_attr(attr='password', default=None)
+    
+    def get_repeat_password(self):
+        return self._custom_attr(attr='repeat_password', default=None)
+
+    def get_invite_code(self):
+        return self._custom_attr(attr='invite_code', default='')
+
 
 class JSProspectData(JSObject):
     def __init__(self, raw_data):

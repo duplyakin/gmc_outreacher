@@ -14,6 +14,7 @@ import json
 import traceback
 from o24.backend.google.provider.oauth_provider import GoogleOauthProvider
 from o24.backend.dashboard.serializers import JSCredentialsData
+from o24.backend.utils.decors import auth_required
 
 
 COLUMNS = [
@@ -47,20 +48,12 @@ COLUMNS = [
     }
 ]
 
-CORS(app, resources={r'/*': {'origins': '*'}})
-
-def get_current_user():
-    user = User.objects(email='1@email.com').first()
-    if not user:
-        raise Exception('No such user')
-    
-    return user
 
 
 @bp_dashboard.route('/credentials/list', methods=['POST'])
-#@login_required
+@auth_required
 def list_credentials():
-    current_user = get_current_user()
+    current_user = g.user
 
     result = {
         'code' : -1,
@@ -92,9 +85,9 @@ def list_credentials():
 
 
 @bp_dashboard.route('/credentials/edit', methods=['POST'])
-#@login_required
+@auth_required
 def edit_credentials():
-    current_user = get_current_user()
+    current_user = g.user
 
     result = {
         'code' : -1,
@@ -132,9 +125,9 @@ def edit_credentials():
 
 
 @bp_dashboard.route('/credentials/delete', methods=['POST'])
-#@login_required
+@auth_required
 def delete_credentials():
-    current_user = get_current_user()
+    current_user = g.user
 
     result = {
         'code' : -1,
@@ -167,9 +160,9 @@ def delete_credentials():
 
 
 @bp_dashboard.route('/credentials/add', methods=['POST'])
-#@login_required
+@auth_required
 def add_credentials():
-    current_user = get_current_user()
+    current_user = g.user
 
     result = {
         'code' : -1,

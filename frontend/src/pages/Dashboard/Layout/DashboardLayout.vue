@@ -7,6 +7,7 @@
       <template slot-scope="props" slot="links">
         <sidebar-item :link="{name: 'Dashboard', icon: 'nc-icon nc-chart-pie-35', path: '/admin/overview'}">
         </sidebar-item>
+        <sidebar-item :link="{name: 'Profile', icon: 'nc-icon nc-chart-pie-35', path: '/admin/profile'}"></sidebar-item>
         <sidebar-item :link="{name: 'Prospects', icon: 'nc-icon nc-chart-bar-32', path: '/admin/prospects'}"></sidebar-item>
         <sidebar-item :link="{name: 'Prospects List', icon: 'nc-icon nc-chart-bar-32', path: '/admin/prospects_list'}"></sidebar-item>
         <sidebar-item :link="{name: 'Campaigns_new', icon: 'nc-icon nc-chart-bar-32', path: '/admin/campaigns_new'}"></sidebar-item>

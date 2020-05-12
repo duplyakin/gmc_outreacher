@@ -99,7 +99,7 @@
 <script>
 import { mapFields } from "vee-validate";
 import { Table, TableColumn, Select, Option } from "element-ui";
-import axios from "axios";
+import axios from '@/api/axios-auth';;
 
 const CAMPAIGN_API_CREATE = "http://127.0.0.1:5000/campaign/create";
 

@@ -84,7 +84,7 @@ import { Table, TableColumn, Select, Option } from "element-ui";
 import { Pagination as LPagination } from "src/components/index";
 import LineChart from "./LineChart.js";
 
-import axios from "axios";
+import axios from '@/api/axios-auth';;
 import dummy_detalization from "./dummy_detalization"; // test data
 
 const STATISTICS_API_DETALIZATION = "http://127.0.0.1:5000/statistics/campaign";

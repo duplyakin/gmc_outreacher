@@ -81,7 +81,7 @@ import { Table, TableColumn, Select, Option } from "element-ui";
 import NotificationMessage from './notification.vue';
 
 import ListForm from "./list_form.vue";
-import axios from "axios";
+import axios from '@/api/axios-auth';
 
 const LISTS_API_LIST = 'http://127.0.0.1:5000/lists/aggregate'
 const LISTS_API_ADD = 'http://127.0.0.1:5000/lists/add'

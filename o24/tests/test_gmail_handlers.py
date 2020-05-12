@@ -26,7 +26,6 @@ from o24.backend.google.models import GoogleAppSetting
 from flask_security.utils import login_user
 from flask import current_app
 
-from flask_user import login_required, current_user
 from flask_login import login_user, logout_user
 from flask import url_for
 

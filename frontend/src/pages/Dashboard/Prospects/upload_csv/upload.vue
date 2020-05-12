@@ -59,7 +59,7 @@ import 'vue-form-wizard/dist/vue-form-wizard.min.css'
 import FirstStep from './firstStep.vue'
 import SecondStep from './secondStep.vue'
 import ThirdStep from './thirdStep.vue'
-import axios from 'axios'
+import axios from '@/api/axios-auth'
 
 
 export default {

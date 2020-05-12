@@ -7,6 +7,9 @@ class BaseConfig():
     OAUTHLIB_RELAX_TOKEN_SCOPE = 1
     os.environ['OAUTHLIB_RELAX_TOKEN_SCOPE'] = '1'  # to not recieve Warning: Scope has changed
 
+    #JWT token
+    JWT_ACCESS_TOKEN_EXPIRES = False
+
     # Flask-User settings
     USER_APP_NAME = "O24Mc"      # Shown in and email templates and page footers
     USER_ENABLE_USERNAME = False    # Enable username authentication
@@ -90,6 +93,7 @@ class TestConfig(BaseConfig):
     CELERY_BACKEND_RESULT_EXPIRES = 300
     os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
 
+    TEST_USER_EMAIL = '1@email.com'
     WTF_CSRF_ENABLED = False
     LOGIN_DISABLED=False
     MONGODB_SETTINGS = {

@@ -2,7 +2,6 @@
 from flask import Blueprint, request, render_template, \
                   flash, g, session, redirect, url_for, render_template_string
 from werkzeug.security import check_password_hash, generate_password_hash
-from flask_user import login_required, current_user
 from o24.backend.dashboard.models import User, Credentials
 from jinja2 import TemplateNotFound
 from mongoengine.queryset.visitor import Q
@@ -12,31 +11,17 @@ from o24.backend import db
 from o24.backend import app
 from o24.backend.dashboard import bp_dashboard
 from o24.globals import *
-from flask_cors import CORS
+
 import json
 import traceback
+from o24.backend.utils.decors import auth_required
 
-CORS(app, resources={r'/*': {'origins': '*'}})
-
-
-def get_current_user():
-    user = User.objects(email='1@email.com').first()
-    if not user:
-        raise Exception('No such user')
-    
-    return user
-
-
-@bp_dashboard.route('/test', methods=['GET', 'POST'])
-@login_required
-def dashboard_main():
-    return 'Hello world'
 
 @bp_dashboard.route('/dashboard/gmail-oauth', methods=['GET', 'POST'])
-#@login_required
+@auth_required
 def dashboard_oauth_button():
     #TODO: for test purpose only TEST-REMOVE
-    current_user = get_current_user()
+    current_user = g.user
 
     provider = GoogleOauthProvider()
 
@@ -50,11 +35,10 @@ def dashboard_oauth_button():
 
 
 @bp_dashboard.route('/oauth/callback', methods=['GET', 'POST'])
-#@login_required
 def dashboard_oauth_callback():
     
     #TODO: for test purpose only TEST-REMOVE
-    current_user = get_current_user()
+    current_user = g.user
 
     provider = GoogleOauthProvider()
 

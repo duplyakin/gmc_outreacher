@@ -3,7 +3,7 @@ from Crypto.Cipher import AES
 import o24.config as config
 
 
-def encode_passowrd(password_string):
+def encode_password(password_string):
     b_pass = password_string.encode('utf-8').rjust(32)
     cipher = AES.new(config.AES_SECRET,AES.MODE_ECB)
 

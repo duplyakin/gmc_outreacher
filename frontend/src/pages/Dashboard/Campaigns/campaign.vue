@@ -337,7 +337,7 @@ import {
   TimeSelect
 } from "element-ui";
 import swal from "sweetalert2";
-import axios from "axios";
+import axios from '@/api/axios-auth';;
 import MessageEdit from "./Wizard/messageEdit.vue";
 import Preview from "./Preview.vue";
 import timezones from "./Wizard/timezone";

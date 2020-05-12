@@ -15,7 +15,7 @@
                   type="email">
         </fg-input>
 
-        <fg-input label="Passowrd"
+        <fg-input label="password"
                   name="password"
                   v-model="model.password"
                   v-validate="modelValidations.password"

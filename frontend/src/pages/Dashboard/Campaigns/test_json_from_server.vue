@@ -228,7 +228,7 @@ name="major_modal">
 </div>
 </template>
 <script>
-import axios from 'axios'
+import axios from '@/api/axios-auth'
 import { Table, TableColumn, Select, Option } from 'element-ui'
 import TemplateEdit from './test_create_templates.vue'
 

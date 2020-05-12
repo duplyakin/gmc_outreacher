@@ -92,7 +92,7 @@ import { Table, TableColumn, Select, Option } from "element-ui";
 import { Pagination as LPagination } from "src/components/index";
 
 import CampaignForm from "./campaign_form.vue";
-import axios from "axios";
+import axios from '@/api/axios-auth';
 
 const CAMPAIGNS_API_DATA = 'http://127.0.0.1:5000/campaigns/data'
 const CAMPAIGNS_API_LIST = 'http://127.0.0.1:5000/campaigns/list';

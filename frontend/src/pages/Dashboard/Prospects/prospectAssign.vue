@@ -34,7 +34,7 @@
 
 <script>
 import { Select, Option } from 'element-ui'
-import axios from 'axios'
+import axios from '@/api/axios-auth'
 
 export default {
     components: {

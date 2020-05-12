@@ -21,7 +21,6 @@
             <el-table stripe
                         ref="accounts_data_table"
                         style="width: 100%;"
-                        @selection-change="handleSelectionChange"
                         :data="accounts_data.credentials"
                         max-height="500"
                         border>
@@ -70,7 +69,7 @@
     import AccountEdit from './accountEdit.vue'
     import AccountAdd from './accountAdd.vue'
 
-    import axios from 'axios'
+    import axios from '@/api/axios-auth';
 
     const CREDENTIALS_API_LIST = 'http://127.0.0.1:5000/credentials/list';
     const CREDENTIALS_API_EDIT = 'http://127.0.0.1:5000/credentials/edit';

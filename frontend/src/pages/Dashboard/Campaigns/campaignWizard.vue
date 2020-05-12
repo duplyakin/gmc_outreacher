@@ -73,7 +73,7 @@ import SecondStep from "./Wizard/SecondStep.vue";
 import ThirdStep from "./Wizard/ThirdStep.vue";
 import LastStep from "./Wizard/LastStep.vue";
 import swal from "sweetalert2";
-import axios from 'axios'
+import axios from '@/api/axios-auth'
 
 const CAMPAIGNS_API_LIST = 'http://127.0.0.1:5000/campaigns';
 const CAMPAIGNS_API_CREATE = 'http://127.0.0.1:5000/campaigns/create';

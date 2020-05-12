@@ -15,7 +15,7 @@ import traceback
 import o24.backend.scheduler.scheduler as scheduler
 from o24.backend.dashboard.serializers import JSProspectData
 from bson.objectid import ObjectId
-
+from o24.backend.utils.decors import auth_required
 
 PROSPECTS = [
     {
@@ -74,19 +74,11 @@ COLUMNS = [
     }
 ]
 
-CORS(app, resources={r'/*': {'origins': '*'}})
-
-def get_current_user():
-    user = User.objects(email='1@email.com').first()
-    if not user:
-        raise Exception('No such user')
-    
-    return user
 
 @bp_dashboard.route('/prospects/data', methods=['POST'])
-#@login_required
+@auth_required
 def data_prospects():
-    current_user = get_current_user()
+    current_user = g.user
 
     result = {
         'code' : -1,
@@ -122,10 +114,10 @@ def data_prospects():
 
 
 @bp_dashboard.route('/prospects/list', methods=['POST'])
-#@login_required
+@auth_required
 def list_prospects():
 
-    current_user = get_current_user()
+    current_user = g.user
 
     per_page = config.PROSPECTS_PER_PAGE
     page = 1
@@ -176,9 +168,9 @@ def list_prospects():
     return jsonify(result)
 
 @bp_dashboard.route('/prospects/remove', methods=['POST'])
-#@login_required
+@auth_required
 def remove_prospect():
-    current_user = get_current_user()
+    current_user = g.user
 
     result = {
         'code' : -1,
@@ -211,9 +203,9 @@ def remove_prospect():
     return jsonify(result)
 
 @bp_dashboard.route('/prospects/list/add', methods=['POST'])
-#@login_required
+@auth_required
 def add_prospect_to_list():
-    current_user = get_current_user()
+    current_user = g.user
 
     result = {
         'code' : -1,
@@ -251,9 +243,9 @@ def add_prospect_to_list():
 
 
 @bp_dashboard.route('/prospects/list/remove', methods=['POST'])
-#@login_required
+@auth_required
 def remove_prospect_from_list():
-    current_user = get_current_user()
+    current_user = g.user
 
     result = {
         'code' : -1,
@@ -288,9 +280,9 @@ def remove_prospect_from_list():
 
 
 @bp_dashboard.route('/prospects/campaign/unassign', methods=['POST'])
-#@login_required
+@auth_required
 def unassign_prospect():
-    current_user = get_current_user()
+    current_user = g.user
 
     result = {
         'code' : -1,
@@ -324,9 +316,9 @@ def unassign_prospect():
 
 
 @bp_dashboard.route('/prospects/campaign/assign', methods=['POST'])
-#@login_required
+@auth_required
 def assign_prospect():
-    current_user = get_current_user()
+    current_user = g.user
 
     result = {
         'code' : -1,
@@ -369,9 +361,9 @@ def assign_prospect():
 
 #only data field can be edited
 @bp_dashboard.route('/prospects/edit', methods=['POST'])
-#@login_required
+@auth_required
 def edit_prospect():
-    current_user = get_current_user()
+    current_user = g.user
     
     result = {
         'code' : -1,
@@ -409,9 +401,9 @@ def edit_prospect():
 
 
 @bp_dashboard.route('/prospects/create', methods=['POST'])
-#@login_required
+@auth_required
 def create_prospect():
-    current_user = get_current_user()
+    current_user = g.user
 
     result = {
         'code' : -1,
@@ -452,9 +444,9 @@ def create_prospect():
     return jsonify(result)
 
 @bp_dashboard.route('/prospects/upload', methods=['POST'])
-#@login_required
+@auth_required
 def upload_prospects ():
-    current_user = get_current_user()
+    current_user = g.user
 
     result = {
         'code' : -1,

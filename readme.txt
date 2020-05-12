@@ -212,3 +212,7 @@ https://github.com/vuejs/vue/tree/6fe07ebf5ab3fea1860c59fe7cdd2ec1b760f9b0
 
 #element-ui el-select source code:
 https://github.com/ElemeFE/element/blob/3270276c3c1b7e477ca65b6b7e2f5015e6baa92e/packages/select/src/select.vue
+
+
+#JWT Auth
+https://github.com/AngCosmin/flask-vue-auth/blob/master/vue/src/api/axios-auth.js

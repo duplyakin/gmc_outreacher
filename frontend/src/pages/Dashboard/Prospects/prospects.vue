@@ -179,7 +179,7 @@ import CsvUpload from './upload_csv/upload.vue'
 
 import users from './dummy.js'
 import Fuse from 'fuse.js'
-import axios from 'axios'
+import axios from '@/api/axios-auth'
 
 const PROSPECTS_API_DATA = 'http://127.0.0.1:5000/prospects/data';
 const PROSPECTS_API_LIST = 'http://127.0.0.1:5000/prospects/list';

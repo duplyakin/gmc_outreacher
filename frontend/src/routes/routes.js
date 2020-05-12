@@ -8,8 +8,8 @@ import Stats from 'src/pages/Dashboard/Dashboard/Stats.vue'
 // Pages
 import User from 'src/pages/Dashboard/Pages/UserProfile.vue'
 import TimeLine from 'src/pages/Dashboard/Pages/TimeLinePage.vue'
-import Login from 'src/pages/Dashboard/Pages/Login.vue'
-import Register from 'src/pages/Dashboard/Pages/Register.vue'
+import Login from 'src/pages/Dashboard/Auth/login.vue'
+import Register from 'src/pages/Dashboard/Auth/register.vue'
 import Lock from 'src/pages/Dashboard/Pages/Lock.vue'
 
 
@@ -39,6 +39,8 @@ const PaginatedTables = () => import('src/pages/Dashboard/Tables/PaginatedTables
 const Charts = () => import('src/pages/Dashboard/Charts.vue')
 
 //CUSTOM components created by me
+const Profile = () => import('src/pages/Dashboard/Profile/profile.vue')
+
 const Prospects = () => import('src/pages/Dashboard/Prospects/prospects.vue')
 const CampaignWizard = () => import('src/pages/Dashboard/Campaigns/campaignWizard.vue')
 const Campaign = () => import('src/pages/Dashboard/Campaigns/campaign.vue')
@@ -132,6 +134,7 @@ let formsMenu = {
   path: '/forms',
   component: DashboardLayout,
   redirect: '/forms/regular',
+  meta: { requiresAuth: true },
   children: [
     {
       path: 'regular',
@@ -231,9 +234,15 @@ const routes = [
   lockPage,
   {
     path: '/admin',
+    meta: { requiresAuth: true },
     component: DashboardLayout,
     redirect: '/admin/overview',
     children: [
+      {
+        path: 'profile',
+        name: 'Profile',
+        component: Profile
+      },
       {
         path: 'overview',
         name: 'Overview',

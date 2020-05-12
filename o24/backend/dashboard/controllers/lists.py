@@ -14,7 +14,7 @@ import json
 import traceback
 import o24.backend.scheduler.scheduler as scheduler
 from o24.backend.dashboard.serializers import JSProspectData
-
+from o24.backend.utils.decors import auth_required
 
 COLUMNS = [
     {
@@ -27,20 +27,12 @@ COLUMNS = [
     }
 ]
 
-CORS(app, resources={r'/*': {'origins': '*'}})
-
-def get_current_user():
-    user = User.objects(email='1@email.com').first()
-    if not user:
-        raise Exception('No such user')
-
-    return user
 
 @bp_dashboard.route('/lists/aggregate', methods=['POST'])
-#@login_required
+@auth_required
 def aggregate_lists():
 
-    current_user = get_current_user()
+    current_user = g.user
 
     result = {
         'code' : -1,
@@ -69,10 +61,10 @@ def aggregate_lists():
 
 
 @bp_dashboard.route('/lists/list', methods=['POST'])
-#@login_required
+@auth_required
 def list_lists():
 
-    current_user = get_current_user()
+    current_user = g.user
 
     result = {
         'code' : -1,
@@ -103,9 +95,9 @@ def list_lists():
     return jsonify(result)
 
 @bp_dashboard.route('/lists/remove', methods=['POST'])
-#@login_required
+@auth_required
 def remove_lists():
-    current_user = get_current_user()
+    current_user = g.user
 
     result = {
         'code' : -1,
@@ -137,9 +129,9 @@ def remove_lists():
     return jsonify(result)
 
 @bp_dashboard.route('/lists/add', methods=['POST'])
-#@login_required
+@auth_required
 def add_list():
-    current_user = get_current_user()
+    current_user = g.user
 
     result = {
         'code' : -1,
@@ -170,9 +162,9 @@ def add_list():
 
 #only data field can be edited
 @bp_dashboard.route('/lists/edit', methods=['POST'])
-#@login_required
+@auth_required
 def edit_list():
-    current_user = get_current_user()
+    current_user = g.user
 
     result = {
         'code' : -1,

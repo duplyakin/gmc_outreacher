@@ -296,7 +296,7 @@ import { drop, every, forEach, some, get, isArray, map, set, findIndex } from 'l
 import { Table, TimeSelect, TableColumn, Select, Option, Input } from "element-ui";
 
 import timezones from "./defaults/timezones";
-import axios from "axios";
+import axios from '@/api/axios-auth';;
 import MessageEdit from "./messageEdit.vue";
 
 const CAMPAIGNS_API_GET = 'http://127.0.0.1:5000/campaigns/get';

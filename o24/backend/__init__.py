@@ -1,11 +1,13 @@
 # Import flask and template operators
-from flask import Flask, render_template, url_for
+from flask import Flask, request, g, session, redirect, url_for, render_template
 from flask_mongoengine import MongoEngine
 from flask import jsonify
 import logging
 import os
 import o24.config as config
 from celery import Celery
+from flask_jwt_extended import JWTManager
+from flask_cors import CORS
 
 logging.basicConfig(level=logging.DEBUG,
                     format='[%(asctime)s]: {} %(levelname)s %(message)s'.format(os.getpid()),
@@ -32,15 +34,30 @@ def create_app():
         }
     }
 
+    CORS(app)
     # Sample HTTP error handling
     @app.errorhandler(404)
     def not_found(error):
-        return render_template('errors/404.html'), 404
+        pass
+        #return render_template('errors/404.html'), 404
+    
+    #ADD BEFORE request handlers
+    #@app.before_request
+    #def before_request():
+    #    if env == "Test" and test_user:
+    #        g.user = test_user
+    #    else:
+    #        g.user = None
+    #        if 'user_id' in session:
+    #            g.user = models.User.objects.get(id=session['user_id'])
+    
 
     return app
 
 app = create_app()
 db = MongoEngine(app)
+jwt = JWTManager(app)
+
 
 # Import a module / component using its blueprint handler variable (mod_auth)
 from o24.backend.dashboard import bp_dashboard

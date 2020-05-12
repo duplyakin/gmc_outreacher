@@ -1,7 +1,6 @@
 from o24.backend import db
 from o24.backend import app
 import datetime
-from flask_user import UserManager, UserMixin
 import uuid
 from mongoengine.queryset.visitor import Q
 import json

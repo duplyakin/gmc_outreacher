@@ -4,7 +4,6 @@ from o24.backend import app
 from datetime import datetime  
 from datetime import timedelta  
 
-from flask_user import UserManager, UserMixin
 import uuid
 from mongoengine.queryset.visitor import Q
 import json
@@ -25,10 +24,16 @@ from o24.backend.utils.filter_data import *
 from o24.backend.utils.helpers import template_key_dict 
 from o24.backend.dashboard.serializers import JSCampaignData
 from o24.backend.utils.aes_encode import *
+import string
+import random
 
-class User(db.Document, UserMixin):
-    email = db.EmailField(unique=True)
-    password = db.StringField()
+def generate_invite_code(stringLength=10):
+    letters = string.ascii_lowercase
+    return ''.join(random.choice(letters) for i in range(stringLength))
+
+class User(db.Document):
+    email = db.EmailField(unique=True, required=True)
+    password = db.StringField(nullable=False)
 
     active = db.BooleanField(default=True)
     current_oauth_state = db.StringField()
@@ -38,16 +43,97 @@ class User(db.Document, UserMixin):
 
     created = db.DateTimeField( default=datetime.now() )
 
+    invite_code = db.StringField(default='')
+    invited_by = db.StringField(default='')
+
+    def _init_user(self, 
+                    email=None, 
+                    password=None, 
+                    invited_by='', 
+                    invite_code=''):
+
+        if not email or not password:
+            raise Exception("Email or password can't be empty")
+
+        self.email = email
+        try:
+            self.password = generate_password_hash(password)
+        except:
+            raise Exception("Week password - try another, 8 symbols minimum")
+
+        if not invite_code:
+            self.invite_code = generate_invite_code()
+        else:
+            self.invite_code = invite_code
+
+        self.invited_by = invited_by
+
+    @classmethod
+    def register(cls, user_data):
+        email = user_data.get_email()
+        password = user_data.get_password()
+        repeat_password = user_data.get_repeat_password()
+        invite_code = user_data.get_invite_code()
+
+        exist = cls.objects(email=email).first()
+        if exist:
+            raise Exception("User with this email already exists")
+
+        if not email:
+            raise Exception("Email can't be empty")
+
+        if not password:
+            raise Exception("Password can't be empty")
+        
+        if password != repeat_password:
+            raise Exception("Passwords should be equal")
+
+        if not invite_code:
+            raise Exception("You need an Invite code to register")
+
+        ref = cls.objects(invite_code=invite_code).first()
+        if not ref:
+            raise Exception("Unvalid invite code")
+            
+        new_user = cls()
+        new_user._init_user(
+            email=email,
+            password=password,
+            invited_by=invite_code
+        )
+
+        return new_user
+
+
+    @classmethod
+    def authenticate(cls, user_data):
+        email = user_data.get_email()
+        password = user_data.get_password()
+        
+        if not email or not password:
+            error = "Can't be empty: email: {0} password:{1}".format(email, password)
+            raise Exception(error)
+
+        user = cls.objects(email=email).first()
+        if not user:
+            error = "No user with email:{0}, sign up first".format(email)
+            raise Exception(error)
+        
+        if not check_password_hash(user.password, password):
+            raise Exception("Incorrect password")
+
+        return user
+
+
     @classmethod
     def create_user(cls, data):
         new_user = cls()
-
-        password_crypt_context = CryptContext(
-            schemes=["pbkdf2_sha256"])
-
-        new_user.email = data.get('email')
-        new_user.password = password_crypt_context.hash(data.get('password'))
-        new_user.active = data.get('active')
+        new_user._init_user(
+            email=data.get('email'),
+            password=data.get('password'),
+            invited_by=data.get('invited_by', ''),
+            invite_code=data.get('invite_code', '')
+        )
 
         new_user._commit()
         return new_user
@@ -77,26 +163,6 @@ class User(db.Document, UserMixin):
 
     def __repr__(self):
         return '<User %r>' % (self.email)
-
-# Customize Flask-User
-class CustomUserManager(UserManager):
-
-    def customize(self, app):
-        pass
-        # Configure customized forms
-        #self.RegisterFormClass = CustomRegisterForm
-        #self.LoginFormClass = CustomLoginForm
-
-    # Override the default password validator
-    def captcha_validator(form, field):
-        pass
-
-    # Override the default password validator
-    def invite_validator(form, field):
-        pass
-
-user_manager = CustomUserManager(app, db, User)
-
 
 
 #### Menu: Outreach Accounts ####
@@ -140,7 +206,7 @@ class Credentials(db.Document):
         #hash password
         #password = new_data.get('password', '')
         #if password:
-        #    new_data['password'] = encode_passowrd(password)
+        #    new_data['password'] = encode_password(password)
 
         account = new_data.get('account', '')
         if account:

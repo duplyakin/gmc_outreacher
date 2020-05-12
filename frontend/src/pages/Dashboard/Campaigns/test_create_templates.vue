@@ -73,7 +73,7 @@
 
 <script>
 import { Select, Option, Input } from 'element-ui'
-import axios from 'axios'
+import axios from '@/api/axios-auth'
 
 export default {
     components: {
