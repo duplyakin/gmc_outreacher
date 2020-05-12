@@ -81,7 +81,9 @@ export default {
             document.body.classList.remove('off-canvas-sidebar')
         },
         onSubmit() {
+            var _this = this;
             this.$store.dispatch('auth/register', this.model).then(() => {
+                _this.$router.push('profile');
 			});
         }
     },

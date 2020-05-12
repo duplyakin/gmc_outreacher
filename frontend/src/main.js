@@ -40,8 +40,10 @@ router.beforeEach((to, from, next) => {
 
 	if (requireAuth && !token) {
 		next('/login');
+	}else{
+		next();
 	}
-
+/*
 	if (to.path === '/login') {
 		if (token) {
 			axiosAuth.post('/verify-token').then(() => {
@@ -76,6 +78,7 @@ router.beforeEach((to, from, next) => {
 			next('/login');
 		})
 	}
+*/
 });
 
 
