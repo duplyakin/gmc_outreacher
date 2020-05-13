@@ -23,7 +23,6 @@ from bson.json_util import dumps as bson_dumps
 from o24.backend.utils.filter_data import *
 from o24.backend.utils.helpers import template_key_dict 
 from o24.backend.dashboard.serializers import JSCampaignData
-from o24.backend.utils.aes_encode import *
 import string
 import random
 
