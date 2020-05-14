@@ -8,6 +8,7 @@ server {
 
     location /api {
         include proxy_params;
+	rewrite /api/(.*) /$1 break;
         proxy_pass http://unix:/home/o24user/o24-dev.sock;
     }
 
