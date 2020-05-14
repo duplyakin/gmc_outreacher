@@ -1,0 +1,1 @@
+gunicorn -c gunicorn_config_dev.py -e APP_ENV=Test o24.wsgi:app
