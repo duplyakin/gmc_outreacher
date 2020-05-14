@@ -23,8 +23,8 @@ async function loginWorker(task_id) {
       if (err) throw MyExceptions.MongoDBError('MongoDB find err: ' + err);
     });*/
     let task = task_id;
-    let email = task.email;
-    let password = task.password;
+    let email = task.input_data.credentials.email;
+    let password = task.input_data.credentials.password;
     let cookies = await cookieModel.Cookies.findOne({ username: email });
 
     let loginAction = new modules.loginAction.LoginAction(email, password, cookies.data);
@@ -76,12 +76,12 @@ async function searchWorker(task_id) {
       if (err) throw MyExceptions.MongoDBError('MongoDB find err: ' + err);
     });*/
     let task = task_id;
-    let email = task.email;
-    let password = task.password;
+    let email = task.input_data.credentials.email;
+    let password = task.input_data.credentials.password;
     let cookies = await cookieModel.Cookies.findOne({ username: email });
 
-    let searchUrl = task.url;
-    let pageNum = task.pageNum;
+    let searchUrl = task.input_data.data.url;
+    let pageNum = task.input_data.data.pageNum;
 
     // check cookies
     await checkCookies(task_id, cookies);
@@ -92,10 +92,7 @@ async function searchWorker(task_id) {
     let res = await searchAction.search();
     await searchAction.closeBrowser();
 
-    let result = {
-      code: 0,
-      raw: res,
-    };
+    let result = res;
 
     await task.updateOne({ status: 5, result_data: result }, function (err, res) {
       if (err) throw MyExceptions.MongoDBError(error_db_save_text + err);
@@ -122,7 +119,7 @@ async function searchWorker(task_id) {
 
     await task.updateOne({ status: -1, result_data: err_result }, function (err, res) {
       if (err) throw MyExceptions.MongoDBError(error_db_save_text + err);
-      // updated!
+       //updated!
       console.log(success_db_save_text);
     });
 
@@ -135,15 +132,15 @@ async function connectWorker(task_id) {
       if (err) throw MyExceptions.MongoDBError('MongoDB find err: ' + err);
     });*/
     let task = task_id;
-    let email = task.email;
-    let password = task.password;
+    let email = task.input_data.credentials.email;
+    let password = task.input_data.credentials.password;
     let cookies = await cookieModel.Cookies.findOne({ username: email });
 
-    let connecthUrl = task.url;
-    let template = task.template;
-    let data = task.data;
+    let connecthUrl = task.input_data.data.url;
+    let template = task.input_data.data.template;
+    let data = task.input_data.data.template_data;
 
-    let connectName = task.connectName;
+    let connectName = task.input_data.data.connectName;
 
     // check cookies
     await checkCookies(task_id, cookies);
@@ -210,13 +207,13 @@ async function messageWorker(task_id) {
       if (err) throw MyExceptions.MongoDBError('MongoDB find err: ' + err);
     });*/
     let task = task_id;
-    let email = task.email;
-    let password = task.password;
+    let email = task.input_data.credentials.email;
+    let password = task.input_data.credentials.password;
     let cookies = await cookieModel.Cookies.findOne({ username: email });
 
-    let url = task.url;
-    let data = task.data;
-    let template = task.template;
+    let url = task.input_data.data.url;
+    let data = task.input_data.data.template_data;
+    let template = task.input_data.data.template;
 
     // check cookies
     await checkCookies(task_id, cookies);
@@ -291,11 +288,11 @@ async function scribeWorkWorker(task_id) {
       if (err) throw MyExceptions.MongoDBError('MongoDB find err: ' + err);
     });*/
     let task = task_id;
-    let email = task.email;
-    let password = task.password;
+    let email = task.input_data.credentials.email;
+    let password = task.input_data.credentials.password;
     let cookies = await cookieModel.Cookies.findOne({ username: email });
 
-    let url = task.url;
+    let url = task.input_data.data.url;
 
     // check cookies
     await checkCookies(task_id, cookies);
@@ -351,12 +348,12 @@ async function messageCheckWorker(task_id) {
       if (err) throw MyExceptions.MongoDBError('MongoDB find err: ' + err);
     });*/
     let task = task_id;
-    let email = task.email;
-    let password = task.password;
+    let email = task.input_data.credentials.email;
+    let password = task.input_data.credentials.password;
     let cookies = await cookieModel.Cookies.findOne({ username: email });
 
     // CONNECT URL
-    let url = task.url;
+    let url = task.input_data.data.url;
 
     // check cookies
     await checkCookies(task_id, cookies);
@@ -412,11 +409,11 @@ async function connectCheckWorker(task_id) {
       if (err) throw MyExceptions.MongoDBError('MongoDB find err: ' + err);
     });*/
     let task = task_id;
-    let email = task.email;
-    let password = task.password;
+    let email = task.input_data.credentials.email;
+    let password = task.input_data.credentials.password;
     let cookies = await cookieModel.Cookies.findOne({ username: email });
 
-    let connectName = task.connectName;
+    let connectName = task.input_data.data.connectName;
 
     // check cookies
     await checkCookies(task_id, cookies);

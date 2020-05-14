@@ -50,12 +50,12 @@ class ConnectCheckAction {
   async connectCheck() {
     await this.gotoChecker(links.CONNECTS_LINK);
 
-    await this.page.waitForSelector(selectors.SEARCH_CONNECTS_SELECTOR);
+    await this.page.waitForSelector(selectors.SEARCH_CONNECTS_SELECTOR, { timeout: 5000 });
 
     await this.page.click(selectors.SEARCH_CONNECTS_SELECTOR);
     await this.page.keyboard.type(this.connectName);
 
-    await this.page.waitForSelector(selectors.CONNECTOR_SELECTOR);
+    await this.page.waitForSelector(selectors.CONNECTOR_SELECTOR, { timeout: 5000 });
     await this.page.waitFor(1000);  // wait linkedIn loading process
 
     let selector = selectors.CONNECTOR_SELECTOR;

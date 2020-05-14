@@ -73,7 +73,7 @@ class ConnectAction {
     }
     await this.page.click(selectors.ADD_MSG_BTN_SELECTOR);
 
-    await this.page.waitForSelector(selectors.MSG_SELECTOR);
+    await this.page.waitForSelector(selectors.MSG_SELECTOR, { timeout: 5000 });
     await this.page.click(selectors.MSG_SELECTOR);
 
     let text = this.formatMessage();

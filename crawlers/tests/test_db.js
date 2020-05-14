@@ -1,7 +1,7 @@
 const workers = require(__dirname + '/../linkedin/workers/workers.js');
 
 
-const SEARCH_URL = "https://www.linkedin.com/search/results/people/?keywords=marketer&origin=GLOBAL_SEARCH_HEADER";
+const SEARCH_URL = "https://www.linkedin.com/search/results/all/?keywords=acronis&origin=GLOBAL_SEARCH_HEADER&page=97";
 const CONNECT_URL = "https://www.linkedin.com/in/kirill-shilov-25aa8630/";
 const MY_URL = "https://www.linkedin.com/in/grigoriy-polyanitsin/";
 
@@ -10,11 +10,11 @@ const MY_URL = "https://www.linkedin.com/in/grigoriy-polyanitsin/";
 (async () => {
   console.log("..... test_db started: .....", __filename);
 
-  let task = {
+  let task_0 = {
     email: "grinnbob@rambler.ru",
     password: "linked123",
-    url: CONNECT_URL,
-    pageNum: 9,
+    url: SEARCH_URL,
+    pageNum: 6,
     data: {
       first_name: 'Justin',
       last_name: 'Shilov',
@@ -24,10 +24,28 @@ const MY_URL = "https://www.linkedin.com/in/grigoriy-polyanitsin/";
     connectName: 'Kirill Shilov',
   };
 
-  console.log('-------res:---------- ', formatMessage(task));
+  let task = {
+    input_data: {
+      credentials: {
+        email: "grinnbob@rambler.ru",
+        password: "linked123",
+      },
+      data: {
+        url: SEARCH_URL,
+        pageNum: 6,
+        template_data: {
+          first_name: 'Justin',
+          last_name: 'Shilov',
+          company_name: 'howtotoken.com'
+        },
+        template: 'Hi {first_name}, nice to meet you. {first_name} 111 {first{first_name}_name} hi {ololo }',
+        connectName: 'Kirill Shilov',
+      }
+    }
+  };
 
   //await workers.loginWorker(task);
-  //await workers.searchWorker(task);
+  await workers.searchWorker(task);
   //await workers.connectWorker(task);
   //await workers.messageWorker(task);
   //await workers.scribeWorkWorker(task);
@@ -35,14 +53,3 @@ const MY_URL = "https://www.linkedin.com/in/grigoriy-polyanitsin/";
   //await workers.connectCheckWorker(task);
 
 })();
-
-function formatMessage(task) {
-  // format template
-  let str = task.template;
-  for (var obj in task.data) {
-    str = str.replace(new RegExp('{' + obj + '}', 'g'), task.data[obj]);
-    //console.log('----------str-----------', str);
-  }
-  str = str.replace(new RegExp('\{(.*?)\}', 'g'), '');
-  return str;
-}

@@ -50,7 +50,7 @@ class MessageCheckAction {
   async messageCheck() {
     await this.gotoChecker(this.url);
 
-    await this.page.waitForSelector(selectors.WRITE_MSG_BTN_SELECTOR);
+    await this.page.waitForSelector(selectors.WRITE_MSG_BTN_SELECTOR, { timeout: 5000 });
 
     // close messages box !!! (critical here)
     await this.page.waitFor(1000);  // wait linkedIn loading process

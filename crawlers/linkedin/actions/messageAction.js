@@ -62,13 +62,13 @@ class MessageAction {
 
     await page.click(selectors.WRITE_MSG_BTN_SELECTOR);
 
-    await page.waitForSelector(selectors.MSG_BOX_SELECTOR);
+    await page.waitForSelector(selectors.MSG_BOX_SELECTOR, { timeout: 5000 });
     await page.click(selectors.MSG_BOX_SELECTOR);
 
     let text = this.formatMessage();
 
     await page.keyboard.type(text);
-    await page.waitForSelector(selectors.SEND_MSG_BTN_SELECTOR);
+    await page.waitForSelector(selectors.SEND_MSG_BTN_SELECTOR, { timeout: 5000 });
     await page.waitFor(1000); // wait untill SEND button become active
     await page.click(selectors.SEND_MSG_BTN_SELECTOR);
     //await page.waitFor(100000); // to see result
