@@ -342,9 +342,9 @@ import MessageEdit from "./Wizard/messageEdit.vue";
 import Preview from "./Preview.vue";
 import timezones from "./Wizard/timezone";
 
-const CAMPAIGNS_API_DATA = "http://127.0.0.1:5000/campaigns/data";
-const CAMPAIGNS_API_CREATE = "http://127.0.0.1:5000/campaigns/create";
-const CAMPAIGNS_API_GET_BY_ID = "http://127.0.0.1:5000/campaigns/get";
+const CAMPAIGNS_API_DATA = "/campaigns/data";
+const CAMPAIGNS_API_CREATE = "/campaigns/create";
+const CAMPAIGNS_API_GET_BY_ID = "/campaigns/get";
 
 export default {
   components: {

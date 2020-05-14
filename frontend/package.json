@@ -6,6 +6,7 @@
   "private": true,
   "scripts": {
     "build": "vue-cli-service build",
+    "build-stage" : "vue-cli-service build --mode stage",
     "dev": "vue-cli-service serve --open",
     "lint": "vue-cli-service lint"
   },

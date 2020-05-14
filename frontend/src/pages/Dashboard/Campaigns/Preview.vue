@@ -49,8 +49,8 @@ import { Table, TableColumn, Select, Option } from "element-ui";
 import axios from '@/api/axios-auth';;
 import Campaigns from "./campaigns.vue";
 
-const CAMPAIGNS_API_CREATE = "http://127.0.0.1:5000/campaigns/create";
-const CAMPAIGNS_API_EDIT = "http://127.0.0.1:5000/campaigns/edit";
+const CAMPAIGNS_API_CREATE = "/campaigns/create";
+const CAMPAIGNS_API_EDIT = "/campaigns/edit";
 
 export default {
   components: {

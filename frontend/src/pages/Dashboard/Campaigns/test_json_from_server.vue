@@ -232,10 +232,10 @@ import axios from '@/api/axios-auth'
 import { Table, TableColumn, Select, Option } from 'element-ui'
 import TemplateEdit from './test_create_templates.vue'
 
-const CAMPAIGNS_API_LIST = 'http://127.0.0.1:5000/campaigns/list';
-const CAMPAIGNS_API_GET_BY_ID = 'http://127.0.0.1:5000/campaigns/get';
-const CAMPAIGNS_API_CREATE = 'http://127.0.0.1:5000/campaigns/create';
-const CAMPAIGNS_API_EDIT = 'http://127.0.0.1:5000/campaigns/edit';
+const CAMPAIGNS_API_LIST = '/campaigns/list';
+const CAMPAIGNS_API_GET_BY_ID = '/campaigns/get';
+const CAMPAIGNS_API_CREATE = '/campaigns/create';
+const CAMPAIGNS_API_EDIT = '/campaigns/edit';
 
 export default {
 components: {

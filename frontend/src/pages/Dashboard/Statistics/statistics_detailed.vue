@@ -87,7 +87,7 @@ import LineChart from "./LineChart.js";
 import axios from '@/api/axios-auth';;
 import dummy_detalization from "./dummy_detalization"; // test data
 
-const STATISTICS_API_DETALIZATION = "http://127.0.0.1:5000/statistics/campaign";
+const STATISTICS_API_DETALIZATION = "/statistics/campaign";
 
 export default {
   components: {

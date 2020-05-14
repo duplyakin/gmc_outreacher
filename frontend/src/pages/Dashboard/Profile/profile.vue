@@ -11,7 +11,7 @@
 import axios from '@/api/axios-auth';
 import { Notification, Table, TableColumn, Select, Option } from "element-ui";
 
-const PROFILE_API_LIST = 'http://127.0.0.1:5000/profile';
+const PROFILE_API_LIST = '/profile';
 
 export default {
 data () {     

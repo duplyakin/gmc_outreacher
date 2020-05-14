@@ -65,7 +65,7 @@
 import { Select, Option } from 'element-ui'
 import axios from '@/api/axios-auth';
 
-const OAUTH_SERVER = 'http://127.0.0.1:5000';
+const OAUTH_SERVER = process.env.VUE_APP_API_URL;
 
 export default {
     components: {

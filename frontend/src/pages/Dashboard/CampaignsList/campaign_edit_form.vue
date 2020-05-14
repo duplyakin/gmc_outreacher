@@ -200,9 +200,9 @@ import timezones from "./defaults/timezones";
 import axios from '@/api/axios-auth';;
 import MessageEdit from "./messageEdit.vue";
 
-const CAMPAIGNS_API_GET = 'http://127.0.0.1:5000/campaigns/get';
-const CAMPAIGNS_API_DATA = 'http://127.0.0.1:5000/campaigns/data';
-const CAMPAIGNS_API_EDIT = 'http://127.0.0.1:5000/campaigns/edit';
+const CAMPAIGNS_API_GET = '/campaigns/get';
+const CAMPAIGNS_API_DATA = '/campaigns/data';
+const CAMPAIGNS_API_EDIT = '/campaigns/edit';
 
 export default {
     components: {

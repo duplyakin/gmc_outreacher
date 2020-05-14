@@ -60,8 +60,8 @@ import { Pagination as LPagination } from "src/components/index";
 import axios from '@/api/axios-auth';;
 import dummy_statistics from "./dummy_statistics"; // test data
 
-const STATISTICS_API_LIST = "http://127.0.0.1:5000/statistics/list";
-const STATISTICS_API_DATA = "http://127.0.0.1:5000/statistics/data";
+const STATISTICS_API_LIST = "/statistics/list";
+const STATISTICS_API_DATA = "/statistics/data";
 
 export default {
   components: {

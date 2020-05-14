@@ -81,8 +81,8 @@ import Campaign from "./campaign.vue";
 import NotificationMessage from "./Wizard/notification.vue";
 import axios from '@/api/axios-auth';;
 
-const CAMPAIGNS_API_LIST = 'http://127.0.0.1:5000/campaigns/list';
-const CAMPAIGNS_API_DELETE = 'http://127.0.0.1:5000/campaigns/delete';
+const CAMPAIGNS_API_LIST = '/campaigns/list';
+const CAMPAIGNS_API_DELETE = '/campaigns/delete';
 
 export default {
   components: {

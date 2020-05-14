@@ -166,13 +166,13 @@
   import Fuse from 'fuse.js'
   import axios from '@/api/axios-auth'
 
-  const PROSPECTS_API_LIST = 'http://127.0.0.1:5000/prospects';
-  const PROSPECTS_API_EDIT = 'http://127.0.0.1:5000/prospects/edit';
-  const PROSPECTS_API_CREATE = 'http://127.0.0.1:5000/prospects/create';
-  const PROSPECTS_API_DELETE = 'http://127.0.0.1:5000/prospects/remove';
-  const PROSPECTS_API_UNASSIGN = 'http://127.0.0.1:5000/prospects/unassign';
-  const PROSPECTS_API_ASSIGN = 'http://127.0.0.1:5000/prospects/assign';
-  const PROSPECTS_API_UPLOAD = 'http://127.0.0.1:5000/prospects/upload';
+  const PROSPECTS_API_LIST = '/prospects';
+  const PROSPECTS_API_EDIT = '/prospects/edit';
+  const PROSPECTS_API_CREATE = '/prospects/create';
+  const PROSPECTS_API_DELETE = '/prospects/remove';
+  const PROSPECTS_API_UNASSIGN = '/prospects/unassign';
+  const PROSPECTS_API_ASSIGN = '/prospects/assign';
+  const PROSPECTS_API_UPLOAD = '/prospects/upload';
 
   export default {
     components: {

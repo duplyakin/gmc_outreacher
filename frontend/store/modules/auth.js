@@ -1,6 +1,11 @@
 import axios from 'axios';
 import router from '../../src/routes/routes'
 
+axios.create({
+	baseURL: process.env.VUE_APP_API_URL
+});
+  
+
 const state = {
 	email: null,
 	token: null,
@@ -49,7 +54,7 @@ const actions = {
 	login: ({commit}, auth_data) => {
 		commit('clear_auth_data');
 
-        const login_path = 'http://127.0.0.1:5000/sign_in';
+        const login_path = '/sign_in';
         var login_data = new FormData()
         login_data.append('_auth_data',JSON.stringify(auth_data)) 
 
@@ -71,7 +76,7 @@ const actions = {
 	register: ({commit}, auth_data) => {
 		commit('clear_auth_data');
 
-        const register_path = 'http://127.0.0.1:5000/sign_up';
+        const register_path = '/sign_up';
         var register_data = new FormData()
         register_data.append('_auth_data',JSON.stringify(auth_data)) 
 

@@ -13,7 +13,7 @@ import App from './App.vue'
 // router setup
 import routes from './routes/routes'
 
-axios.defaults.baseURL = 'http://localhost:5000';
+axios.defaults.baseURL = process.env.VUE_APP_API_URL;
 
 // plugin setup
 Vue.use(VueRouter)
@@ -22,6 +22,7 @@ Vue.use(VModal, { dynamic: true, injectModalsContainer: true })
 
 import VueYouTubeEmbed from 'vue-youtube-embed'
 Vue.use(VueYouTubeEmbed)
+
 
 // configure router
 const router = new VueRouter({

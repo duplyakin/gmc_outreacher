@@ -225,3 +225,8 @@ https://dev.to/pacheco/how-to-dockerize-a-node-app-and-deploy-to-heroku-3cch
 https://www.reddit.com/r/docker/comments/9q6lkn/the_best_way_to_dockerize_webapplication/
 
 https://semaphoreci.com/community/tutorials/dockerizing-a-python-django-web-application
+
+
+VUEJS login and register tutorial:
+https://jasonwatmore.com/post/2018/07/14/vue-vuex-user-registration-and-login-tutorial-example
+https://github.com/cornflourblue/vue-vuex-registration-login-example - example of login register app

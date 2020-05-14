@@ -83,10 +83,10 @@ import NotificationMessage from './notification.vue';
 import ListForm from "./list_form.vue";
 import axios from '@/api/axios-auth';
 
-const LISTS_API_LIST = 'http://127.0.0.1:5000/lists/aggregate'
-const LISTS_API_ADD = 'http://127.0.0.1:5000/lists/add'
-const LISTS_API_DELETE = 'http://127.0.0.1:5000/lists/remove';
-const LISTS_API_EDIT = 'http://127.0.0.1:5000/lists/edit';
+const LISTS_API_LIST = '/lists/aggregate'
+const LISTS_API_ADD = '/lists/add'
+const LISTS_API_DELETE = '/lists/remove';
+const LISTS_API_EDIT = '/lists/edit';
 
 
 export default {

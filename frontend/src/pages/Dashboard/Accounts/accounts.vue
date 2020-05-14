@@ -71,10 +71,10 @@
 
     import axios from '@/api/axios-auth';
 
-    const CREDENTIALS_API_LIST = 'http://127.0.0.1:5000/credentials/list';
-    const CREDENTIALS_API_EDIT = 'http://127.0.0.1:5000/credentials/edit';
-    const CREDENTIALS_API_DELETE = 'http://127.0.0.1:5000/credentials/delete';
-    const CREDENTIALS_API_ADD = 'http://127.0.0.1:5000/credentials/add';
+    const CREDENTIALS_API_LIST = '/credentials/list';
+    const CREDENTIALS_API_EDIT = '/credentials/edit';
+    const CREDENTIALS_API_DELETE = '/credentials/delete';
+    const CREDENTIALS_API_ADD = '/credentials/add';
 
 
     export default {

@@ -94,12 +94,12 @@ import { Pagination as LPagination } from "src/components/index";
 import CampaignForm from "./campaign_form.vue";
 import axios from '@/api/axios-auth';
 
-const CAMPAIGNS_API_DATA = 'http://127.0.0.1:5000/campaigns/data'
-const CAMPAIGNS_API_LIST = 'http://127.0.0.1:5000/campaigns/list';
+const CAMPAIGNS_API_DATA = '/campaigns/data'
+const CAMPAIGNS_API_LIST = '/campaigns/list';
 
-const CAMPAIGNS_API_DELETE = 'http://127.0.0.1:5000/campaigns/delete';
-const CAMPAIGNS_API_START = 'http://127.0.0.1:5000/campaigns/start';
-const CAMPAIGNS_API_PAUSE = 'http://127.0.0.1:5000/campaigns/pause';
+const CAMPAIGNS_API_DELETE = '/campaigns/delete';
+const CAMPAIGNS_API_START = '/campaigns/start';
+const CAMPAIGNS_API_PAUSE = '/campaigns/pause';
 
 export default {
 components: {
