@@ -2,6 +2,11 @@ server {
     server_name outreacher24.com dv.outreacher24.com;
 
     location / {
+	root /home/o24user/o24_dev/frontend/dist;
+	try_files $uri /index.html;
+    }
+
+    location /api {
         include proxy_params;
         proxy_pass http://unix:/home/o24user/o24-dev.sock;
     }
