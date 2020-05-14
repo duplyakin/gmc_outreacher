@@ -1,0 +1,15 @@
+pidfile = 'o24.pid'
+worker_tmp_dir = '/dev/shm'
+worker_class = 'gthread'
+workers = 2
+worker_connections = 1000
+timeout = 30
+keepalive = 2
+threads = 4
+proc_name = 'o24'
+bind = '0.0.0.0:5000'
+backlog = 2048
+accesslog = '-'
+errorlog = '-'
+user = 'o24'
+group = 'o24'
