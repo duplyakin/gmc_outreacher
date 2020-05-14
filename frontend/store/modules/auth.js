@@ -46,52 +46,62 @@ const getters = {
 };
 
 const actions = {
-	login: ({commit}, auth_data) => {
-		commit('clear_auth_data');
+	login: ({ commit }, auth_data) => {
+		return new Promise((resolve, reject) => {
+			commit('clear_auth_data');
 
-        const login_path = 'http://127.0.0.1:5000/sign_in';
-        var login_data = new FormData()
-        login_data.append('_auth_data',JSON.stringify(auth_data)) 
+			const login_path = 'http://127.0.0.1:5000/sign_in';
+			var login_data = new FormData()
+			login_data.append('_auth_data', JSON.stringify(auth_data))
 
-        axios.post(login_path, login_data).then(response => {
-			let r = response.data;
+			axios.post(login_path, login_data).then(response => {
+				let r = response.data;
 
-			if (r.code == 1) {
-				commit('auth_user', { email: auth_data.email, token: r.token });
-				localStorage.setItem('token', r.token);
-				localStorage.setItem('email', r.email);
-			} 
-			else {
-				commit('put_login_error', r.msg);
-			}
-		}).catch(error => {
-			commit('put_login_error', error)
+				if (r.code == 1) {
+					commit('auth_user', { email: auth_data.email, token: r.token });
+					localStorage.setItem('token', r.token);
+					localStorage.setItem('email', r.email);
+					resolve(r)
+				}
+				else {
+					commit('put_login_error', r.msg);
+					reject(r.msg)
+				}
+			}).catch(error => {
+				commit('put_login_error', error)
+				reject(error)
+			})
 		})
 	},
-	register: ({commit}, auth_data) => {
-		commit('clear_auth_data');
+	register: ({ commit }, auth_data) => {
+		return new Promise((resolve, reject) => {
+			commit('clear_auth_data');
 
-        const register_path = 'http://127.0.0.1:5000/sign_up';
-        var register_data = new FormData()
-        register_data.append('_auth_data',JSON.stringify(auth_data)) 
+			const register_path = 'http://127.0.0.1:5000/sign_up';
+			var register_data = new FormData()
+			register_data.append('_auth_data', JSON.stringify(auth_data))
 
-        axios.post(register_path, register_data).then(response => {
-			let r = response.data;
+			axios.post(register_path, register_data).then(response => {
+				let r = response.data;
 
-			if (r.code == 1) {
-				commit('auth_user', { email: auth_data.email, token: r.token });
-				localStorage.setItem('token', r.token);
-				localStorage.setItem('email', r.email);
-			} 
-			else {
-				commit('put_register_error', r.msg)
-			}
-		}).catch(error => {
-			commit('put_register_error', error)
+				if (r.code == 1) {
+					commit('auth_user', { email: auth_data.email, token: r.token });
+					localStorage.setItem('token', r.token);
+					localStorage.setItem('email', r.email);
+					resolve(r)
+				}
+				else {
+					commit('put_register_error', r.msg)
+					reject(r.msg)
+				}
+			}).catch(error => {
+				commit('put_register_error', error)
+				reject(error)
+			})
 		})
 	},
 
-	autoLogin({commit}) {
+	autoLogin({ commit }) {
 		let token = localStorage.getItem('token');
 		let email = localStorage.getItem('email');
 
@@ -101,7 +111,7 @@ const actions = {
 
 		commit('auth_user', { email: email, token: token });
 	},
-	logout: ({commit}) => {
+	logout: ({ commit }) => {
 		commit('clear_auth_data');
 		localStorage.removeItem('email');
 		localStorage.removeItem('token');

@@ -35,9 +35,9 @@
             <a class="dropdown-item" href="#">
               <i class="nc-icon nc-settings-90"></i> Settings
             </a>
-            <a href="/" class="dropdown-item text-danger">
-              <i class="nc-icon nc-button-power"></i> Log out
-            </a>
+            <div class="dropdown-item text-danger">
+              <button type="button" @click.prevent="onLogout" class="btn btn-fill btn-info btn-round btn-wd">Logout</button>
+            </div>
 
           </drop-down>
         </ul>
@@ -76,7 +76,14 @@
       },
       minimizeSidebar () {
         this.$sidebar.toggleMinimize()
-      }
+      },
+
+      onLogout(){
+        this.$store.dispatch('auth/logout').then(() => {
+                        this.$router.push('/admin');
+		});
+    },
+
     }
   }
 

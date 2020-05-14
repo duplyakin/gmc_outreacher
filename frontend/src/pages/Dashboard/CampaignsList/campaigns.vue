@@ -4,7 +4,7 @@
 <div class="row">
     <div class="col-4 d-flex align-self-center">
         <h3>
-        <i class="nc-icon nc-badge"></i> Campaigns
+        <i class="nc-icon nc-bullet-list-67"></i> Campaigns
         </h3>
     </div>
     <div class="col-8 d-flex flex-row-reverse align-self-center">
