@@ -1,0 +1,15 @@
+[Unit]
+Description=Gunicorn instance to serve dev o24 flask backend
+After=network.target
+
+[Service]
+User=o24user
+Group=o24user
+WorkingDirectory=/home/o24user/o24_dev
+Environment="PATH=/home/o24user/o24_dev/.venv/bin"
+ExecStart=/home/o24user/o24_dev/dev_start.sh
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
+

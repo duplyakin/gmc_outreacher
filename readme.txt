@@ -217,3 +217,11 @@ https://github.com/ElemeFE/element/blob/3270276c3c1b7e477ca65b6b7e2f5015e6baa92e
 
 #JWT Auth
 https://github.com/AngCosmin/flask-vue-auth/blob/master/vue/src/api/axios-auth.js
+
+https://testdriven.io/blog/deploying-flask-to-heroku-with-docker-and-gitlab/
+
+https://dev.to/pacheco/how-to-dockerize-a-node-app-and-deploy-to-heroku-3cch
+
+https://www.reddit.com/r/docker/comments/9q6lkn/the_best_way_to_dockerize_webapplication/
+
+https://semaphoreci.com/community/tutorials/dockerizing-a-python-django-web-application

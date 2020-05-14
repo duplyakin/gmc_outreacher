@@ -62,7 +62,10 @@ class BaseConfig():
 class DevConfig(BaseConfig):
     FLASK_ENV = 'development'
     DEBUG = True
+    TESTING = True
     CELERY_TASK_ALWAYS_EAGER = True
+    TEST_USER_EMAIL = '1@email.com'
+
     CELERY_BROKER = 'amqp://guest:guest@localhost:5672//'
     CELERY_BACKEND_RESULT_EXPIRES = 300
     os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
