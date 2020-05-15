@@ -1,4 +1,4 @@
-pidfile = 'o24-dev.pid'
+pidfile = '/home/o24user/o24-dev.pid'
 worker_tmp_dir = '/dev/shm'
 worker_class = 'gthread'
 workers = 2
