@@ -1,25 +1,24 @@
-import DashboardLayout from 'src/pages/Dashboard/Layout/DashboardLayout.vue'
+const DashboardLayout = () => import('src/pages/Dashboard/Layout/DashboardLayout.vue')
 // GeneralViews
-import NotFound from 'src/pages/GeneralViews/NotFoundPage.vue'
+const NotFound = () => import('src/pages/GeneralViews/NotFoundPage.vue')
 // Dashboard pages
-import Overview_standart from 'src/pages/Dashboard/Dashboard/Overview.vue'
-import Stats from 'src/pages/Dashboard/Dashboard/Stats.vue'
+const Overview_standart = () => import('src/pages/Dashboard/Dashboard/Overview.vue')
+const Stats = () => import('src/pages/Dashboard/Dashboard/Stats.vue')
 
 // Pages
-import User from 'src/pages/Dashboard/Pages/UserProfile.vue'
-import TimeLine from 'src/pages/Dashboard/Pages/TimeLinePage.vue'
-import Login from 'src/pages/Dashboard/Auth/login.vue'
-import Register from 'src/pages/Dashboard/Auth/register.vue'
-
+const User = () => import('src/pages/Dashboard/Pages/UserProfile.vue')
+const TimeLine = () => import('src/pages/Dashboard/Pages/TimeLinePage.vue')
+const Login = () => import('src/pages/Dashboard/Auth/login.vue')
+const Register = () => import('src/pages/Dashboard/Auth/register.vue')
 
 // Components pages
-import Buttons from 'src/pages/Dashboard/Components/Buttons.vue'
-import GridSystem from 'src/pages/Dashboard/Components/GridSystem.vue'
-import Panels from 'src/pages/Dashboard/Components/Panels.vue'
+const Buttons = () => import('src/pages/Dashboard/Components/Buttons.vue')
+const GridSystem = () => import('src/pages/Dashboard/Components/GridSystem.vue')
+const Panels = () => import('src/pages/Dashboard/Components/Panels.vue')
 const SweetAlert = () => import('src/pages/Dashboard/Components/SweetAlert.vue')
-import Notifications from 'src/pages/Dashboard/Components/Notifications.vue'
-import Icons from 'src/pages/Dashboard/Components/Icons.vue'
-import Typography from 'src/pages/Dashboard/Components/Typography.vue'
+const Notifications = () => import('src/pages/Dashboard/Components/Notifications.vue')
+const Icons = () => import('src/pages/Dashboard/Components/Icons.vue')
+const Typography = () => import('src/pages/Dashboard/Components/Typography.vue')
 
 // Forms pages
 const RegularForms = () => import('src/pages/Dashboard/Forms/RegularForms.vue')
@@ -62,7 +61,7 @@ const Actions = () => import('src/pages/Dashboard/Actions/actions.vue')
 
 
 let componentsMenu = {
-  path: '/components',
+  path: '/admin/components',
   component: DashboardLayout,
   redirect: '/components/buttons',
   children: [

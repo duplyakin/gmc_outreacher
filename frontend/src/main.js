@@ -26,9 +26,9 @@ Vue.use(VueYouTubeEmbed)
 
 // configure router
 const router = new VueRouter({
-  mode: 'history',
-  routes, // short for routes: routes
-  linkActiveClass: 'active'
+	mode: 'history',
+	routes, // short for routes: routes
+	linkActiveClass: 'active'
 })
 
 router.beforeEach((to, from, next) => {
@@ -37,10 +37,10 @@ router.beforeEach((to, from, next) => {
 
 	if (requireAuth && !token) {
 		next('/login');
-	}else if (token && (to.path == '/login' || to.path == '/register')){
+	} else if (token && (to.path == '/login' || to.path == '/register')) {
 		next('/profile');
 	}
-	else{
+	else {
 		next();
 	}
 });
@@ -48,9 +48,9 @@ router.beforeEach((to, from, next) => {
 
 /* eslint-disable no-new */
 new Vue({
-  el: '#app',
-  render: h => h(App),
-  router: router,
-  store: store
+	el: '#app',
+	render: h => h(App),
+	router: router,
+	store: store
 })
 

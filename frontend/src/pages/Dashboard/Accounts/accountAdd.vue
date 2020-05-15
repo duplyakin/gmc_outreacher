@@ -61,7 +61,7 @@
 </template>
 
 <script>
-import { Select, Option } from 'element-ui'
+import { Notification, Select, Option } from 'element-ui'
 import axios from '@/api/axios-auth';
 
 const OAUTH_SERVER = process.env.VUE_APP_API_URL;
@@ -96,19 +96,19 @@ export default {
     methods: {
         addAccount(){
             const path = this.api_url;
-            if (this.model.credentials_type == '' ){
-                alert("Select account type");
+            if (this.model.credentials_type == '' ) {
+                Notification.error({title: "Error", message: "Select account type"});
                 return false;
-            }else if (this.model.credentials_type == 'linkedin'){
+            } else if (this.model.credentials_type == 'linkedin') {
                 if ( (this.model.data.login == '') || 
                     (this.model.data.password == '') ||
                     (this.model.data.account == '')){
-                    alert("Input your linkedin account, login and password");
+                    Notification.error({title: "Error", message: "Input your linkedin account, login and password"});
                     return false;
                 }
             }
 
-            if (confirm("Are you sure?")){
+            if (confirm("Are you sure?")) {
                 var accountData = new FormData();
                 accountData.append("_credentials", JSON.stringify(this.model))
 
@@ -117,22 +117,22 @@ export default {
                 .then((res) => {
                     var result = res.data;
                     if (result.code > 0){
-                        if (result.hasOwnProperty('redirect')){
+                        if (result.hasOwnProperty('redirect')) {
                             var redirect_url = OAUTH_SERVER + result.redirect;
                             window.open(redirect_url, "_blank", "width=600,height=400,left=200,top=200");
-                        }else{
+                        } else {
                             this.valueUpdated(null);
                         }
 
                         this.$emit('close');
-                    }else{
+                    } else {
                         var msg = 'Error adding account ' + result.msg;
-                        alert(msg)
+                        Notification.error({title: "Error", message: msg});
                     }
                 })
                 .catch((error) => {
                     var msg = 'Error adding account ' + error;
-                    alert(msg);
+                    Notification.error({title: "Error", message: msg});
                 });
             };
         },

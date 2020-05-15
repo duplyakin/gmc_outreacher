@@ -62,7 +62,7 @@
 </template>
 
 <script>
-import { Select, Option } from 'element-ui'
+import { Notification, Select, Option } from 'element-ui'
 import axios from '@/api/axios-auth'
 
 export default {
@@ -92,7 +92,7 @@ export default {
         submitAccountData(){
             const path = this.api_url;
             if (Object.keys(this.account_data).length === 0 ){
-                alert("Data can't be empty");
+                Notification.error({title: "Error", message: "Data can't be empty"});
                 return false;
             }
 
@@ -112,12 +112,12 @@ export default {
                         this.valueUpdated(updated_account);
                     }else{
                         var msg = 'Error editing account ' + result.msg;
-                        alert(msg)
+                        Notification.error({title: "Error", message: msg});
                     }
                 })
                 .catch((error) => {
                     var msg = 'Error editing account ' + error;
-                    alert(msg);
+                    Notification.error({title: "Error", message: msg});
                 });
             };
         },
