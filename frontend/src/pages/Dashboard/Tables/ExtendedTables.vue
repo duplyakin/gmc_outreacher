@@ -124,7 +124,7 @@
 </template>
 <script>
   import {Table, TableColumn} from 'element-ui'
-  import LSwitch from 'src/components/Switch.vue'
+  const LSwitch = () => import('src/components/Switch.vue')
   export default{
     components: {
       LSwitch,

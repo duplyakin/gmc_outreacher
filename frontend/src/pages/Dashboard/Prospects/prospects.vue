@@ -168,16 +168,16 @@ name="major_modal">
 </template>
 <script>
 import { Notification, Table, TableColumn, Select, Option } from 'element-ui'
-import ProspectPagination from './prospectPagination.vue'
-import NotificationMessage from './notification.vue';
 
-import ProspectEdit from './prospectEdit.vue'
-import ProspectAssign from './prospectAssign.vue'
-import ProspectListAdd from './prospectListAdd.vue'
+const ProspectPagination = () => import('./prospectPagination.vue')
+const NotificationMessage = () => import('./notification.vue')
 
-import CsvUpload from './upload_csv/upload.vue'
+const ProspectEdit = () => import('./prospectEdit.vue')
+const ProspectAssign = () => import('./prospectAssign.vue')
+const ProspectListAdd = () => import('./prospectListAdd.vue')
 
-import users from './dummy.js'
+const CsvUpload = () => import('./upload_csv/upload.vue')
+
 import Fuse from 'fuse.js'
 import axios from '@/api/axios-auth'
 

@@ -198,7 +198,8 @@ import { Notification, Table, TimeSelect, TableColumn, Select, Option, Input } f
 
 import timezones from "./defaults/timezones";
 import axios from '@/api/axios-auth';;
-import MessageEdit from "./messageEdit.vue";
+
+const MessageEdit = () => import('./messageEdit.vue')
 
 const CAMPAIGNS_API_GET = '/campaigns/get';
 const CAMPAIGNS_API_DATA = '/campaigns/data';

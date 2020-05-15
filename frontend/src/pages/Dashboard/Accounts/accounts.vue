@@ -64,12 +64,12 @@
 </template>
 <script>
     import { Notification, Table, TableColumn, Select, Option } from 'element-ui'
-    import O24Pagination from 'src/components/O24Pagination.vue'
-    import O24NotificationMessage from 'src/components/O24Notification.vue'
-    import AccountEdit from './accountEdit.vue'
-    import AccountAdd from './accountAdd.vue'
-
     import axios from '@/api/axios-auth';
+
+    const O24Pagination = () => import('src/components/O24Pagination.vue')
+    const O24NotificationMessage = () => import('src/components/O24Notification.vue')
+    const AccountEdit = () => import('./accountEdit.vue')
+    const AccountAdd = () => import('./accountAdd.vue')
 
     const CREDENTIALS_API_LIST = '/credentials/list';
     const CREDENTIALS_API_EDIT = '/credentials/edit';

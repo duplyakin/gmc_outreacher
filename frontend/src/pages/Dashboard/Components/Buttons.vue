@@ -367,7 +367,7 @@
   </div>
 </template>
 <script>
-  import LPagination from 'src/components/Pagination.vue'
+  const LPagination = () => import('src/components/Pagination.vue')
 
   export default {
     components: {

@@ -24,7 +24,7 @@
   </ul>
 </template>
 <script>
-  import DropDown from 'src/components/Dropdown.vue'
+  const DropDown = () => import('src/components/Dropdown.vue')
 
   export default {
     components: {

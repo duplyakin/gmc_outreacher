@@ -225,10 +225,10 @@
   </div>
 </template>
 <script>
-  import TimeLine from './Stats/TimeLine.vue'
-  import TimeLineItem from './Stats/TimeLineItem.vue'
-  import TaskList from './Stats/TaskList'
-  import ChartCard from 'src/components/Cards/ChartCard.vue'
+  const TimeLine = () => import('./Stats/TimeLine.vue')
+  const TaskList = () => import('./Stats/TaskList.vue')
+  const TimeLineItem = () => import('./Stats/TimeLineItem.vue')
+  const ChartCard = () => import('src/components/Cards/ChartCard.vue')
 
   export default {
     components: {

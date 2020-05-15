@@ -91,8 +91,9 @@
 import { Notification, Table, TableColumn, Select, Option } from "element-ui";
 import { Pagination as LPagination } from "src/components/index";
 
-import CampaignForm from "./campaign_form.vue";
 import axios from '@/api/axios-auth';
+
+//const CampaignForm = () => import('./campaign_form.vue')
 
 const CAMPAIGNS_API_DATA = '/campaigns/data'
 const CAMPAIGNS_API_LIST = '/campaigns/list';
@@ -103,7 +104,7 @@ const CAMPAIGNS_API_PAUSE = '/campaigns/pause';
 
 export default {
 components: {
-    CampaignForm,
+    //CampaignForm,
     LPagination,
     [Select.name]: Select,
     [Option.name]: Option,

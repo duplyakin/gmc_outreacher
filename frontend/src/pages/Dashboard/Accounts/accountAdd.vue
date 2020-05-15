@@ -56,7 +56,6 @@
                     <button v-on:click="discard" type="button" class="btn btn-outline btn-wd btn-danger">Close</button>
                 </div>
         </div>
-    </form>  
 </card>
 </div>
 </template>

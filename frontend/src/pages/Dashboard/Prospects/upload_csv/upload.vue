@@ -56,9 +56,10 @@
 import {FormWizard, TabContent} from 'vue-form-wizard'
 import 'vue-form-wizard/dist/vue-form-wizard.min.css'
 
-import FirstStep from './firstStep.vue'
-import SecondStep from './secondStep.vue'
-import ThirdStep from './thirdStep.vue'
+const FirstStep = () => import('./firstStep.vue')
+const SecondStep = () => import('./secondStep.vue')
+const ThirdStep = () => import('./thirdStep.vue')
+
 import axios from '@/api/axios-auth'
 
 

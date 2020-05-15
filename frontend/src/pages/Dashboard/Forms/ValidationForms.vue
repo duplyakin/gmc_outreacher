@@ -13,9 +13,9 @@
   </div>
 </template>
 <script>
-  import RegisterForm from './ValidationForms/RegisterForm.vue'
-  import LoginForm from './ValidationForms/LoginForm.vue'
-  import TypeValidationForm from './ValidationForms/TypeValidationForm.vue'
+  const RegisterForm = () => import('./ValidationForms/RegisterForm.vue')
+  const LoginForm = () => import('./ValidationForms/LoginForm.vue')
+  const TypeValidationForm = () => import('./ValidationForms/TypeValidationForm.vue')
 
   export default {
     components: {

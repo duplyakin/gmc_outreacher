@@ -60,10 +60,11 @@
   </div>
 </template>
 <script>
-  import TopNavbar from './TopNavbar.vue'
-  import ContentFooter from './ContentFooter.vue'
-  import DashboardContent from './Content.vue'
-  import MobileMenu from './Extra/MobileMenu.vue'
+  const TopNavbar = () => import('./TopNavbar.vue')
+  const ContentFooter = () => import('./ContentFooter.vue')
+  const DashboardContent = () => import('./Content.vue')
+  const MobileMenu = () => import('./Extra/MobileMenu.vue')
+
   export default {
     components: {
       TopNavbar,

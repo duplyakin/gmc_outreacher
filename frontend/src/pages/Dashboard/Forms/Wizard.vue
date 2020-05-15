@@ -45,9 +45,10 @@
 <script>
   import {FormWizard, TabContent} from 'vue-form-wizard'
   import 'vue-form-wizard/dist/vue-form-wizard.min.css'
-  import FirstStep from './Wizard/FirstStep.vue'
-  import SecondStep from './Wizard/SecondStep.vue'
   import swal from 'sweetalert2'
+
+  const FirstStep = () => import('./Wizard/FirstStep.vue')
+  const SecondStep = () => import('./Wizard/SecondStep.vue')
 
   export default {
     data () {

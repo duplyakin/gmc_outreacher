@@ -62,7 +62,6 @@
 import { Table, TableColumn, Select, Option } from "element-ui";
 import { Pagination as LPagination } from "src/components/index";
 import get_actions from "./dummy_actions";
-import Fuse from "fuse.js";
 
 export default {
   components: {

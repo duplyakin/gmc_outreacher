@@ -17,7 +17,9 @@ export default
                     }
                 },
             ],
-            funnel: 'funnel title',
+            funnel: {
+                title: 'funnel title',
+            }
         },
         statistics: {
             email: [

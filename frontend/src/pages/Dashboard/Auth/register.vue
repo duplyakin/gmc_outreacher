@@ -56,7 +56,9 @@ import {
   Checkbox as LCheckbox,
   FadeRenderTransition
 } from "src/components/index";
-import AuthLayout from "./AuthLayout.vue";
+
+const AuthLayout = () => import('./AuthLayout.vue')
+
 import { mapGetters } from "vuex";
 
 export default {

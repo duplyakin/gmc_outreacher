@@ -78,9 +78,10 @@ name="major_modal">
 </template>
 <script>
 import { Notification, Table, TableColumn, Select, Option } from "element-ui";
-import NotificationMessage from './notification.vue';
 
-import ListForm from "./list_form.vue";
+const NotificationMessage = () => import('./notification.vue')
+const ListForm = () => import('./list_form.vue')
+
 import axios from '@/api/axios-auth';
 
 const LISTS_API_LIST = '/lists/aggregate'
