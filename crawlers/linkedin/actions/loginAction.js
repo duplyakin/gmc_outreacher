@@ -45,7 +45,7 @@ class LoginAction {
     }
 
     try {
-      await this.page.waitForSelector(selectors.USERNAME_SELECTOR);
+      await this.page.waitForSelector(selectors.USERNAME_SELECTOR, { timeout: 5000 });
     } catch (err) {
       throw MyExceptions.LoginPageError('Login page is not available');
     }
@@ -101,7 +101,7 @@ class LoginAction {
   }
 
   async skip_phone(page) {
-    await page.waitForSelector(selectors.SKIP_PHONE_BTN_SELECTOR);
+    await page.waitForSelector(selectors.SKIP_PHONE_BTN_SELECTOR, { timeout: 5000 });
     await page.click(selectors.SKIP_PHONE_BTN_SELECTOR);
   }
 

@@ -3,7 +3,7 @@
 <card>
 <div class="row">
     <div class="col-4 d-flex align-self-center">
-        <span font-><h3><i class="nc-icon nc-single-copy-04"></i> Prospects</h3></span>
+        <span font-><h3><i class="nc-icon nc-layers-3"></i> Prospects</h3></span>
     </div>
     <div class="col-8 d-flex flex-row-reverse align-self-center">
 
@@ -435,7 +435,8 @@ methods: {
             },
             {
             width: '720',
-            height: 'auto'
+            height: 'auto',
+            scrollable: true
             })
     },
     addProspect(){
@@ -458,7 +459,8 @@ methods: {
             },
             {
             width: '720',
-            height: 'auto'
+            height: 'auto',
+            scrollable: true
             })
     },
     editProspect(prospect_dict, row_index) {
@@ -484,7 +486,8 @@ methods: {
             },
             {
             width: '720',
-            height: 'auto'
+            height: 'auto',
+            scrollable: true
             })
     },
     handleSelectionChange(val) {
@@ -531,7 +534,8 @@ methods: {
             },
             {
             width: '720',
-            height: 'auto'
+            height: 'auto',
+            scrollable: true
             })
     },
     listRemoveProspects(){
@@ -610,7 +614,8 @@ methods: {
             },
             {
             width: '720',
-            height: 'auto'
+            height: 'auto',
+            scrollable: true
             })
     },
     unassignProspects(){

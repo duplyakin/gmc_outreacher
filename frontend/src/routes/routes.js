@@ -10,7 +10,6 @@ import User from 'src/pages/Dashboard/Pages/UserProfile.vue'
 import TimeLine from 'src/pages/Dashboard/Pages/TimeLinePage.vue'
 import Login from 'src/pages/Dashboard/Auth/login.vue'
 import Register from 'src/pages/Dashboard/Auth/register.vue'
-import Lock from 'src/pages/Dashboard/Pages/Lock.vue'
 
 
 // Components pages
@@ -155,7 +154,8 @@ let tablesMenu = {
       path: 'paginated',
       name: 'Paginated Tables',
       component: PaginatedTables
-    }]
+    }
+  ]
 }
 
 
@@ -191,9 +191,6 @@ let registerPage = {
 
 
 const routes = [
-  {
-    path: '/'
-  },
   componentsMenu,
   formsMenu,
   tablesMenu,
@@ -295,7 +292,7 @@ const routes = [
       },
     ]
   },
-  {path: '*', component: NotFound}
+  {path: '*', component: NotFound},
 ]
 
 export default routes

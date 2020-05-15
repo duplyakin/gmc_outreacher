@@ -168,7 +168,8 @@ methods: {
             },
             {
             width: '720',
-            height: 'auto'
+            height: 'auto',
+            scrollable: true
             })
     },
     editList(msg_dict, index) {
@@ -190,7 +191,8 @@ methods: {
             },
             {
             width: '720',
-            height: 'auto'
+            height: 'auto',
+            scrollable: true
             })
     },
     load_lists(){

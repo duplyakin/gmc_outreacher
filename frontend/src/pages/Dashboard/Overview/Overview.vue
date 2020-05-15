@@ -2,7 +2,19 @@
   <div>
     <div class="row">
       <card>
-        <youtube :video-id="videoId" player-width="750" player-height="400" :player-vars="{host: 'https://www.youtube.com'}"></youtube>
+        <div class="col-4 d-flex align-self-center">
+          <h3>
+            <i class="nc-icon nc-air-baloon"></i> Overview
+          </h3>
+        </div>
+        <card>
+          <youtube
+            :video-id="videoId"
+            player-width="750"
+            player-height="400"
+            :player-vars="{host: 'https://www.youtube.com'}"
+          ></youtube>
+        </card>
       </card>
     </div>
   </div>
@@ -12,14 +24,15 @@ import { getIdFromURL, getTimeFromURL } from "vue-youtube-embed";
 export default {
   data() {
     return {
-      videoId: '',
+      videoId: ""
       //domain: 'http://192.168.0.104:8080/'
     };
   },
-  methods: {
-  },
+  methods: {},
   mounted() {
-    this.videoId = getIdFromURL("https://www.youtube.com/watch?v=6pqOZq9eBBg&list=LLFo6SCt0GGcF5D7c-yGNuUQ&index=18&t=0s");
+    this.videoId = getIdFromURL(
+      "https://www.youtube.com/watch?v=6pqOZq9eBBg&list=LLFo6SCt0GGcF5D7c-yGNuUQ&index=18&t=0s"
+    );
   }
 };
 </script>

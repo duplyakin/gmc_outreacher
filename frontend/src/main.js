@@ -44,42 +44,6 @@ router.beforeEach((to, from, next) => {
 	}else{
 		next();
 	}
-/*
-	if (to.path === '/login') {
-		if (token) {
-			axiosAuth.post('/verify-token').then(() => {
-				next('/');
-			}).catch(() => {
-				next();
-			});
-		}
-		else {
-			next();
-		}
-	}
-
-	if (to.path === '/register') {
-		if (token) {
-			axiosAuth.post('/verify-token').then(() => {
-				next('/');
-			}).catch(() => {
-				next();
-			});
-		}
-		else {
-			next();
-		}
-	}
-
-
-	if (requireAuth && token) {
-		axiosAuth.post('/verify-token').then(() => {
-			next();
-		}).catch(() => {
-			next('/login');
-		})
-	}
-*/
 });
 
 

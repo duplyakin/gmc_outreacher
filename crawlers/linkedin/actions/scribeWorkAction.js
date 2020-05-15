@@ -53,7 +53,7 @@ class ScribeWorkAction {
     let result = {};
 
     try {
-      await this.page.waitForSelector(selectors.JOB_LINK_SELECTOR);
+      await this.page.waitForSelector(selectors.JOB_LINK_SELECTOR, { timeout: 5000 });
     } catch (err) {
       // if we cant find company informatiom
       return result;
@@ -73,7 +73,7 @@ class ScribeWorkAction {
 
     await this.page.goto(link + '/about');
     try {
-      await this.page.waitForSelector(selectors.JOB_SITE_SELECTOR);
+      await this.page.waitForSelector(selectors.JOB_SITE_SELECTOR, { timeout: 5000 });
     } catch (err) {
       // if we cant find company website on About page
       return result;

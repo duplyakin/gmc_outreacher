@@ -5,14 +5,14 @@
       <mobile-menu></mobile-menu>
       <template slot-scope="props" slot="links">
 
-        <sidebar-item :link="{name: 'Profile', icon: 'nc-icon nc-chart-pie-35', path: '/profile'}"></sidebar-item>
-        <sidebar-item :link="{name: 'Overview', icon: 'nc-icon nc-chart-pie-35', path: '/overview'}"></sidebar-item>
+        <sidebar-item :link="{name: 'Overview', icon: 'nc-icon nc-air-baloon', path: '/overview'}"></sidebar-item>
+        <sidebar-item :link="{name: 'Profile', icon: 'nc-icon nc-circle-09', path: '/profile'}"></sidebar-item>
         <sidebar-item :link="{name: 'Campaigns', icon: 'nc-icon nc-bullet-list-67', path: '/campaigns'}"></sidebar-item>
         <sidebar-item :link="{name: 'Statistics', icon: 'nc-icon nc-chart-bar-32', path: '/statistics'}"></sidebar-item>
         <sidebar-item :link="{name: 'Accounts', icon: 'nc-icon nc-single-02', path: '/accounts'}"></sidebar-item>
         <sidebar-item :link="{name: 'Team', icon: 'nc-icon nc-badge', path: '/team'}"></sidebar-item>
 
-        <sidebar-item :link="{name: 'Prospects', icon: 'nc-icon nc-single-copy-04', path: '/prospects'}"></sidebar-item>
+        <sidebar-item :link="{name: 'Prospects', icon: 'nc-icon nc-layers-3', path: '/prospects'}"></sidebar-item>
         <sidebar-item :link="{name: 'Prospects List', icon: 'nc-icon nc-single-copy-04', path: '/prospects_list'}"></sidebar-item>
 
         <sidebar-item :link="{name: 'Actions', icon: 'nc-icon nc-tag-content', path: '/admin/actions'}"></sidebar-item>

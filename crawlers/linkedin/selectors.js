@@ -8,6 +8,7 @@ module.exports.SEARCH_ELEMENT_SELECTOR = '.search-result__wrapper .search-result
 module.exports.LINK_SELECTOR = 'span > .actor-name';
 module.exports.FULL_NAME_SELECTOR = 'span > .actor-name';
 module.exports.NEXT_PAGE_SELECTOR = '.artdeco-pagination__button--next';
+module.exports.NEXT_PAGE_MUTED_SELECTOR = '.artdeco-pagination__button--next.artdeco-button--disabled';
 
 // connect
 module.exports.CONNECT_SELECTOR = '.pv-s-profile-actions.pv-s-profile-actions--connect';
