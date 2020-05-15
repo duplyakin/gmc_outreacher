@@ -79,9 +79,18 @@
       },
 
       onLogout(){
-        this.$store.dispatch('auth/logout').then(() => {
-                        this.$router.push('/admin');
-		});
+        var _this = this;
+        this.$store.dispatch('auth/logout').then(
+          resolve => {
+            _this.$router.push("login");
+          },
+          reject => {
+            console.log("error here: ", reject);
+          }
+        )
+        .catch(err => {
+          console.error("login error: ", err);
+        });
     },
 
     }

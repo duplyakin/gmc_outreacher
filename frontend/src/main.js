@@ -35,13 +35,12 @@ router.beforeEach((to, from, next) => {
 	let token = localStorage.getItem('token');
 	let requireAuth = to.matched.some(record => record.meta.requiresAuth);
 
-	if (!requireAuth) {
-		next();
-	}
-
 	if (requireAuth && !token) {
 		next('/login');
-	}else{
+	}else if (token && (to.path == '/login' || to.path == '/register')){
+		next('/profile');
+	}
+	else{
 		next();
 	}
 });

@@ -107,20 +107,27 @@ const actions = {
 	},
 
 	autoLogin({ commit }) {
-		let token = localStorage.getItem('token');
-		let email = localStorage.getItem('email');
+		return new Promise((resolve, reject) => {
+			let token = localStorage.getItem('token');
+			let email = localStorage.getItem('email');
 
-		if (!token || !email) {
-			return;
-		}
+			if (!token || !email) {
+				reject();
+				return;
+			}
 
-		commit('auth_user', { email: email, token: token });
+			commit('auth_user', { email: email, token: token });
+			resolve();
+		})
 	},
 	logout: ({ commit }) => {
-		commit('clear_auth_data');
-		localStorage.removeItem('email');
-		localStorage.removeItem('token');
-		router.push('login');
+		return new Promise((resolve, reject) => {
+			commit('clear_auth_data');
+			localStorage.removeItem('email');
+			localStorage.removeItem('token');
+			router.push('login');
+			resolve();
+		})
 	},
 };
 
