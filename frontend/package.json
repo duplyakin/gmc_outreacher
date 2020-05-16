@@ -1,12 +1,13 @@
 {
   "name": "vue-light-bootstrap-dashboard-pro",
   "version": "1.0.0",
-  "description": "Vue Light Bootstrap Dashboard PRO",
-  "author": "cristijora <joracristi@gmail.com>",
+  "description": "Outreacher24 application",
+  "author": "Outreacher24 team <3",
   "private": true,
   "scripts": {
     "build": "vue-cli-service build",
     "build-stage": "vue-cli-service build --mode stage",
+    "build-prod": "vue-cli-service build --mode prod",
     "dev": "vue-cli-service serve --open",
     "lint": "vue-cli-service lint"
   },

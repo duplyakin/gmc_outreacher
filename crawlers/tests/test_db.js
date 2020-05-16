@@ -32,7 +32,7 @@ const MY_URL = "https://www.linkedin.com/in/grigoriy-polyanitsin/";
       },
       data: {
         url: SEARCH_URL,
-        pageNum: 6,
+        pageNum: 2,
         template_data: {
           first_name: 'Justin',
           last_name: 'Shilov',

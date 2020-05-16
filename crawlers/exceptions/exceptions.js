@@ -26,6 +26,11 @@ const MongoDBError = (message) => ({
   code: ERROR_CODES.MONGODB_ERROR
 });
 
+const BanError = (message) => ({
+  error: new Error(message),
+  code: ERROR_CODES.BAN_ERROR
+});
+
 //------Workers-------
 const LoginWorkerError = (message) => ({
   error: new Error(message),
@@ -100,6 +105,7 @@ module.exports = {
   WorkerError: WorkerError,
   ActionError: ActionError,
   MongoDBError: MongoDBError,
+  BanError: BanError,
 
   LoginWorkerError: LoginWorkerError,
   ConnectWorkerError: ConnectWorkerError,

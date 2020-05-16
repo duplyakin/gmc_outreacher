@@ -1,54 +1,18 @@
-const puppeteer = require(__dirname + "/./../../node_modules/puppeteer");
 const selectors = require(__dirname + "/.././selectors");
-const LoginAction = require(__dirname + '/loginAction.js');
+const action = require(__dirname + '/action.js');
 
 const MyExceptions = require(__dirname + '/../.././exceptions/exceptions.js');
 
-class MessageCheckAction {
+class MessageCheckAction extends action.Action {
   constructor(email, password, cookies, url) {
-    this.email = email;
-    this.password = password;
-    this.cookies = cookies;
+    super(email, password, cookies);
 
     // CONNECT URL
     this.url = url;
   }
 
-  // do 1 trie to connect URL or goto login
-  async gotoChecker(url) {
-    await this.page.goto(url);
-    let current_url = await this.page.url();
-    if (current_url.includes('login') || current_url.includes('signup')) {
-      let loginAction = new LoginAction.LoginAction(this.email, this.password, this.cookies);
-      await loginAction.setContext(this.context);
-      let result = await loginAction.login();
-      if (!result) {
-        // TODO: throw exception
-        return false;
-      } else {
-        await this.page.goto(url);
-        return true;
-      }
-    } else {
-      return true;
-    }
-  }
-
-  async startBrowser() {
-    this.browser = await puppeteer.launch({ headless: false });
-    //this.browser = await puppeteer.launch();
-    this.context = await this.browser.createIncognitoBrowserContext();
-    this.page = await this.context.newPage();
-    await this.page.setCookie(...this.cookies);
-  }
-
-  async closeBrowser(browser) {
-    this.browser.disconnect();
-    this.browser.close();
-  }
-
   async messageCheck() {
-    await this.gotoChecker(this.url);
+    await super.gotoChecker(this.url);
 
     await this.page.waitForSelector(selectors.WRITE_MSG_BTN_SELECTOR, { timeout: 5000 });
 

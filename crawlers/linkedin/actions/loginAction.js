@@ -1,16 +1,14 @@
-const puppeteer = require(__dirname + "/../../node_modules/puppeteer");
 const selectors = require(__dirname + "/.././selectors");
 const links = require(__dirname + "/.././links");
 const cookieModel = require(__dirname + "/../.././models/models.js");
+const action = require(__dirname + '/action.js');
+const puppeteer = require(__dirname + "/./../../node_modules/puppeteer");
 
 const MyExceptions = require(__dirname + '/../.././exceptions/exceptions.js');
 
-class LoginAction {
+class LoginAction extends action.Action {
   constructor(email, password, cookies) {
-    this.email = email;
-    this.password = password;
-
-    this.cookies = cookies;
+    super(email, password, cookies);
   }
 
   async startBrowser() {
@@ -19,7 +17,7 @@ class LoginAction {
     this.context = await this.browser.createIncognitoBrowserContext();
     this.page = await this.context.newPage();
 
-    if (this.cookies != undefined || this.cookies != null) {
+    if (this.cookies != undefined && this.cookies != null) {
       await this.page.setCookie(...this.cookies);
     }
   }
@@ -27,11 +25,6 @@ class LoginAction {
   async setContext(context) {
     this.context = context;
     this.page = await this.context.newPage();
-  }
-
-  async closeBrowser(browser) {
-    this.browser.disconnect();
-    this.browser.close(); // create ZOMBIE processes...?
   }
 
   async login() {

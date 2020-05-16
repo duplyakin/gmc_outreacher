@@ -8,12 +8,12 @@ const success_db_save_text = "........SUCCSESS MONGODB: result_data added.......
 
 
 async function checkCookies(task_id, cookies) {
-  if (cookies != undefined || cookies != null) {
+  if (cookies != undefined && cookies != null) {
     if (Date.now() / 1000 > cookies.expires) {
-      loginWorker(task_id);
+      await loginWorker(task_id);
     }
   } else {
-    loginWorker(task_id);
+    await loginWorker(task_id);
   }
 }
 
@@ -26,8 +26,13 @@ async function loginWorker(task_id) {
     let email = task.input_data.credentials.email;
     let password = task.input_data.credentials.password;
     let cookies = await cookieModel.Cookies.findOne({ username: email });
+    
+    let cookies_data = null;
+    if(cookies != undefined && cookies != null) {
+      cookies_data = cookies.data;
+    }
 
-    let loginAction = new modules.loginAction.LoginAction(email, password, cookies.data);
+    let loginAction = new modules.loginAction.LoginAction(email, password, cookies_data);
     await loginAction.startBrowser();
     let res = await loginAction.login();
     await loginAction.closeBrowser();
@@ -92,9 +97,8 @@ async function searchWorker(task_id) {
     let res = await searchAction.search();
     await searchAction.closeBrowser();
 
-    let result = res;
-
-    await task.updateOne({ status: 5, result_data: result }, function (err, res) {
+    // if we got some exception (BAN?), we have to save results before catch Error and send task status -1
+    await task.updateOne({ status: res.code >= 0 ? 5 : -1, result_data: res }, function (err, res) {
       if (err) throw MyExceptions.MongoDBError(error_db_save_text + err);
       // updated!
       console.log(success_db_save_text);
@@ -136,7 +140,7 @@ async function connectWorker(task_id) {
     let password = task.input_data.credentials.password;
     let cookies = await cookieModel.Cookies.findOne({ username: email });
 
-    let connecthUrl = task.input_data.data.url;
+    let url = task.input_data.data.url;
     let template = task.input_data.data.template;
     let data = task.input_data.data.template_data;
 
@@ -155,7 +159,7 @@ async function connectWorker(task_id) {
     let res = false;
     if (!resCheck) {
       // connect if not connected
-      let connectAction = new modules.connectAction.ConnectAction(email, password, cookies.data, connecthUrl, template, data);
+      let connectAction = new modules.connectAction.ConnectAction(email, password, cookies.data, url, template, data);
       await connectAction.startBrowser();
       res = await connectAction.connect();
       await connectAction.closeBrowser();
