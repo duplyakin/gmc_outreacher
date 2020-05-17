@@ -10,36 +10,24 @@ const MY_URL = "https://www.linkedin.com/in/grigoriy-polyanitsin/";
 (async () => {
   console.log("..... test_db started: .....", __filename);
 
-  let task_0 = {
-    email: "grinnbob@rambler.ru",
-    password: "linked123",
-    url: SEARCH_URL,
-    pageNum: 6,
-    data: {
-      first_name: 'Justin',
-      last_name: 'Shilov',
-      company_name: 'howtotoken.com'
-    },
-    template: 'Hi {first_name}, nice to meet you. {first_name} 111 {first{first_name}_name} hi {ololo }',
-    connectName: 'Kirill Shilov',
-  };
-
   let task = {
     input_data: {
-      credentials: {
+      credentials_data: {
         email: "grinnbob@rambler.ru",
         password: "linked123",
       },
-      data: {
-        url: SEARCH_URL,
-        pageNum: 2,
-        template_data: {
-          first_name: 'Justin',
-          last_name: 'Shilov',
-          company_name: 'howtotoken.com'
-        },
+      campaign_data: {
+        next_url: SEARCH_URL,
+        page_count: 2,
+      },
+      template_data: {
         template: 'Hi {first_name}, nice to meet you. {first_name} 111 {first{first_name}_name} hi {ololo }',
-        connectName: 'Kirill Shilov',
+      },
+      prospect_data: {
+        first_name: 'Justin',
+        last_name: 'Shilov',
+        company_title: 'howtotoken.com',
+        linkedin: CONNECT_URL,
       }
     }
   };

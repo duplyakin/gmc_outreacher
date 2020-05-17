@@ -5,10 +5,10 @@ const action = require(__dirname + '/action.js');
 const MyExceptions = require(__dirname + '/../.././exceptions/exceptions.js');
 
 class ConnectCheckAction extends action.Action {
-  constructor(email, password, cookies, connectName) {
+  constructor(email, password, cookies, prospect_full_name) {
     super(email, password, cookies);
 
-    this.connectName = connectName;
+    this.prospect_full_name = prospect_full_name;
   }
 
   async connectCheck() {
@@ -17,7 +17,7 @@ class ConnectCheckAction extends action.Action {
     await this.page.waitForSelector(selectors.SEARCH_CONNECTS_SELECTOR, { timeout: 5000 });
 
     await this.page.click(selectors.SEARCH_CONNECTS_SELECTOR);
-    await this.page.keyboard.type(this.connectName);
+    await this.page.keyboard.type(this.prospect_full_name);
 
     await this.page.waitForSelector(selectors.CONNECTOR_SELECTOR, { timeout: 5000 });
     await this.page.waitFor(1000);  // wait linkedIn loading process
@@ -31,7 +31,7 @@ class ConnectCheckAction extends action.Action {
       return a;
     }, selector);
 
-    if (connect === this.connectName) {
+    if (connect === this.prospect_full_name) {
       console.log("..... connect found - success: .....", connect)
       return true;
     }

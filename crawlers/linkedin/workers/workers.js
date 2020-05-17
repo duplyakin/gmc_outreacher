@@ -6,7 +6,7 @@ const MyExceptions = require(__dirname + '/../.././exceptions/exceptions.js');
 const error_db_save_text = "........ERROR MONGODB: update TASK failed: ";
 const success_db_save_text = "........SUCCSESS MONGODB: result_data added........";
 
-
+// update cookies if: 1. old cookies, 2. there is no cookies
 async function checkCookies(task_id, cookies) {
   if (cookies != undefined && cookies != null) {
     if (Date.now() / 1000 > cookies.expires) {
@@ -26,7 +26,7 @@ async function loginWorker(task_id) {
     let email = task.input_data.credentials.email;
     let password = task.input_data.credentials.password;
     let cookies = await cookieModel.Cookies.findOne({ username: email });
-    
+
     let cookies_data = null;
     if(cookies != undefined && cookies != null) {
       cookies_data = cookies.data;
@@ -85,14 +85,14 @@ async function searchWorker(task_id) {
     let password = task.input_data.credentials.password;
     let cookies = await cookieModel.Cookies.findOne({ username: email });
 
-    let searchUrl = task.input_data.data.url;
-    let pageNum = task.input_data.data.pageNum;
+    let searchUrl = task.input_data.campaign_data.next_url;
+    let page_count = task.input_data.campaign_data.page_count;
 
     // check cookies
     await checkCookies(task_id, cookies);
 
     // start work
-    let searchAction = new modules.searchAction.SearchAction(email, password, cookies.data, searchUrl, pageNum);
+    let searchAction = new modules.searchAction.SearchAction(email, password, cookies.data, searchUrl, page_count);
     await searchAction.startBrowser();
     let res = await searchAction.search();
     await searchAction.closeBrowser();
@@ -140,18 +140,18 @@ async function connectWorker(task_id) {
     let password = task.input_data.credentials.password;
     let cookies = await cookieModel.Cookies.findOne({ username: email });
 
-    let url = task.input_data.data.url;
-    let template = task.input_data.data.template;
-    let data = task.input_data.data.template_data;
+    let url = task.input_data.prospect_data.linkedin;
+    let template = task.input_data.template_data.template;
+    let data = task.input_data.prospect_data.template_data;
 
-    let connectName = task.input_data.data.connectName;
+    let prospect_full_name = task.input_data.prospect_data.first_name + ' ' + task.input_data.prospect_data.last_name;
 
     // check cookies
     await checkCookies(task_id, cookies);
 
     // start work
     // check connect
-    let connectCheckAction = new modules.connectCheckAction.ConnectCheckAction(email, password, cookies.data, connectName);
+    let connectCheckAction = new modules.connectCheckAction.ConnectCheckAction(email, password, cookies.data, prospect_full_name);
     await connectCheckAction.startBrowser();
     let resCheck = await connectCheckAction.connectCheck();
     await connectCheckAction.closeBrowser();
@@ -215,9 +215,9 @@ async function messageWorker(task_id) {
     let password = task.input_data.credentials.password;
     let cookies = await cookieModel.Cookies.findOne({ username: email });
 
-    let url = task.input_data.data.url;
-    let data = task.input_data.data.template_data;
-    let template = task.input_data.data.template;
+    let url = task.input_data.prospect_data.linkedin;
+    let data = task.input_data.prospect_data;
+    let template = task.input_data.template_data.template;
 
     // check cookies
     await checkCookies(task_id, cookies);
@@ -231,11 +231,11 @@ async function messageWorker(task_id) {
 
     let task_status = 1;
     let result = {};
-    if (resCheckMsg === '') {
+    if (resCheckMsg.message === '') {
       // if no reply - send msg
       let messageAction = new modules.messageAction.MessageAction(email, password, cookies.data, url, data, template);
       await messageAction.startBrowser();
-      res = await messageAction.message();
+      let res = await messageAction.message();
       await messageAction.closeBrowser();
 
       task_status = 5;
@@ -249,7 +249,7 @@ async function messageWorker(task_id) {
       result = {
         code: 0,
         if_true: true,
-        raw: resCheckMsg
+        data: JSON.stringify(resCheckMsg)
       };
     }
 
@@ -286,7 +286,7 @@ async function messageWorker(task_id) {
   }
 }
 
-async function scribeWorkWorker(task_id) {
+async function scribeWorker(task_id) {
   try {
     /*let task = await taskModel.TaskQueue.findOne({ id: task_id }, function (err, res) {
       if (err) throw MyExceptions.MongoDBError('MongoDB find err: ' + err);
@@ -296,21 +296,21 @@ async function scribeWorkWorker(task_id) {
     let password = task.input_data.credentials.password;
     let cookies = await cookieModel.Cookies.findOne({ username: email });
 
-    let url = task.input_data.data.url;
+    let url = task.input_data.prospect_data.linkedin;
 
     // check cookies
     await checkCookies(task_id, cookies);
 
     // start work
-    let scribeWorkAction = new modules.scribeWorkAction.ScribeWorkAction(email, password, cookies.data, url);
-    await scribeWorkAction.startBrowser();
-    let res = await scribeWorkAction.scribe();
-    await scribeWorkAction.closeBrowser();
+    let scribeAction = new modules.scribeAction.ScribeAction(email, password, cookies.data, url);
+    await scribeAction.startBrowser();
+    let res = await scribeAction.scribe();
+    await scribeAction.closeBrowser();
 
     let result = {
       code: 0,
-      //if_true: true,
-      raw: JSON.stringify(res),
+      if_true: true,
+      data: JSON.stringify(res),
     };
 
     await task.updateOne({ status: 5, result_data: result }, function (err, res) {
@@ -332,7 +332,7 @@ async function scribeWorkWorker(task_id) {
       err_result = {
         code: MyExceptions.ScribeWorkerError().code,
         if_true: false,
-        raw: MyExceptions.ScribeWorkerError("scribeWorkWorker error: " + err).error
+        raw: MyExceptions.ScribeWorkerError("scribeWorker error: " + err).error
       };
     }
     console.log("RES: ", err_result);
@@ -357,7 +357,7 @@ async function messageCheckWorker(task_id) {
     let cookies = await cookieModel.Cookies.findOne({ username: email });
 
     // CONNECT URL
-    let url = task.input_data.data.url;
+    let url = task.input_data.prospect_data.linkedin;
 
     // check cookies
     await checkCookies(task_id, cookies);
@@ -370,9 +370,10 @@ async function messageCheckWorker(task_id) {
 
     let result = {
       code: 0,
-      if_true: (res === '' ? false : true),
-      raw: res
+      if_true: (res.message === '' ? false : true),
+      data: JSON.stringify(res)
     };
+    console.log('result_data: ', result);
 
     await task.updateOne({ status: 3, result_data: result }, function (err, res) {
       if (err) throw MyExceptions.MongoDBError(error_db_save_text + err);
@@ -417,13 +418,13 @@ async function connectCheckWorker(task_id) {
     let password = task.input_data.credentials.password;
     let cookies = await cookieModel.Cookies.findOne({ username: email });
 
-    let connectName = task.input_data.data.connectName;
+    let prospect_full_name = task.input_data.prospect_data.first_name + ' ' + task.input_data.prospect_data.last_name;
 
     // check cookies
     await checkCookies(task_id, cookies);
 
     // start work
-    let connectCheckAction = new modules.connectCheckAction.ConnectCheckAction(email, password, cookies.data, connectName);
+    let connectCheckAction = new modules.connectCheckAction.ConnectCheckAction(email, password, cookies.data, prospect_full_name);
     await connectCheckAction.startBrowser();
     let res = await connectCheckAction.connectCheck();
     await connectCheckAction.closeBrowser();
@@ -471,7 +472,7 @@ module.exports = {
   searchWorker: searchWorker,
   connectWorker: connectWorker,
   messageWorker: messageWorker,
-  scribeWorkWorker: scribeWorkWorker,
+  scribeWorker: scribeWorker,
   messageCheckWorker: messageCheckWorker,
   connectCheckWorker: connectCheckWorker,
 }

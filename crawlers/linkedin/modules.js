@@ -5,5 +5,5 @@ module.exports = {
    connectCheckAction : require('./actions/connectCheckAction.js'),
    messageAction : require('./actions/messageAction.js'),
    messageCheckAction : require('./actions/messageCheckAction.js'),
-   scribeWorkAction : require('./actions/scribeWorkAction.js'),
+   scribeAction : require('./actions/scribeAction.js'),
 }

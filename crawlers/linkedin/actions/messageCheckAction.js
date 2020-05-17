@@ -34,11 +34,11 @@ class MessageCheckAction extends action.Action {
 
     if (lastSender.res === this.url) {
       console.log("..... new message: .....", lastSender)
-      return lastSender.text;
+      return { message: lastSender.text };
     }
 
     console.log("..... NO new messages: .....", lastSender)
-    return '';
+    return { message: '' };
   }
 
 }

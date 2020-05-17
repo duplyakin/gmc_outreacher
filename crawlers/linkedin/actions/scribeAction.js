@@ -3,7 +3,7 @@ const action = require(__dirname + '/action.js');
 
 const MyExceptions = require(__dirname + '/../.././exceptions/exceptions.js');
 
-class ScribeWorkAction extends action.Action {
+class ScribeAction extends action.Action {
   constructor(email, password, cookies, url) {
     super(email, password, cookies);
 
@@ -62,5 +62,5 @@ class ScribeWorkAction extends action.Action {
 }
 
 module.exports = {
-  ScribeWorkAction: ScribeWorkAction
+  ScribeAction: ScribeAction
 }

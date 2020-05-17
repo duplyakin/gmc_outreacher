@@ -11,7 +11,7 @@ class Action {
   }
 
   async startBrowser() {
-    this.browser = await puppeteer.launch({ headless: false });
+    this.browser = await puppeteer.launch({ headless: false }); // test mode
     //this.browser = await puppeteer.launch();
     this.context = await this.browser.createIncognitoBrowserContext();
     this.page = await this.context.newPage();
@@ -68,7 +68,7 @@ class Action {
       } else {
         console.log('current_url: ', current_url);
         console.log('url: ', url);
-        throw MyExceptions.BanError('we cann\'t go to page, we got: ' + current_url);
+        throw MyExceptions.BanError('We cann\'t go to page, we got: ' + current_url);
       }
     }
   }
