@@ -23,8 +23,8 @@ async function loginWorker(task_id) {
       if (err) throw MyExceptions.MongoDBError('MongoDB find err: ' + err);
     });*/
     let task = task_id;
-    let email = task.input_data.credentials.email;
-    let password = task.input_data.credentials.password;
+    let email = task.input_data.credentials_data.email;
+    let password = task.input_data.credentials_data.password;
     let cookies = await cookieModel.Cookies.findOne({ username: email });
 
     let cookies_data = null;
@@ -42,6 +42,7 @@ async function loginWorker(task_id) {
       if_true: res,
     };
 
+    console.log('result_data: ', result);
     await task.updateOne({ status: 5, result_data: result }, function (err, res) {
       if (err) throw MyExceptions.MongoDBError(error_db_save_text + err);
       // updated!
@@ -54,13 +55,11 @@ async function loginWorker(task_id) {
     if (err.code !== undefined && err.code !== null) {
       err_result = {
         code: err.code,
-        if_true: false,
         raw: err.error
       };
     } else {
       err_result = {
         code: MyExceptions.LoginWorkerError().code,
-        if_true: false,
         raw: MyExceptions.LoginWorkerError("loginWorker error: " + err).error
       };
     }
@@ -81,8 +80,8 @@ async function searchWorker(task_id) {
       if (err) throw MyExceptions.MongoDBError('MongoDB find err: ' + err);
     });*/
     let task = task_id;
-    let email = task.input_data.credentials.email;
-    let password = task.input_data.credentials.password;
+    let email = task.input_data.credentials_data.email;
+    let password = task.input_data.credentials_data.password;
     let cookies = await cookieModel.Cookies.findOne({ username: email });
 
     let searchUrl = task.input_data.campaign_data.next_url;
@@ -97,6 +96,7 @@ async function searchWorker(task_id) {
     let res = await searchAction.search();
     await searchAction.closeBrowser();
 
+    console.log('result_data: ', res);
     // if we got some exception (BAN?), we have to save results before catch Error and send task status -1
     await task.updateOne({ status: res.code >= 0 ? 5 : -1, result_data: res }, function (err, res) {
       if (err) throw MyExceptions.MongoDBError(error_db_save_text + err);
@@ -109,13 +109,11 @@ async function searchWorker(task_id) {
     if (err.code !== undefined && err.code !== null) {
       err_result = {
         code: err.code,
-        if_true: false,
         raw: err.error
       };
     } else {
       err_result = {
         code: MyExceptions.SearchWorkerError().code,
-        if_true: false,
         raw: MyExceptions.SearchWorkerError("searchWorker error: " + err).error
       };
     }
@@ -136,8 +134,8 @@ async function connectWorker(task_id) {
       if (err) throw MyExceptions.MongoDBError('MongoDB find err: ' + err);
     });*/
     let task = task_id;
-    let email = task.input_data.credentials.email;
-    let password = task.input_data.credentials.password;
+    let email = task.input_data.credentials_data.email;
+    let password = task.input_data.credentials_data.password;
     let cookies = await cookieModel.Cookies.findOne({ username: email });
 
     let url = task.input_data.prospect_data.linkedin;
@@ -173,6 +171,7 @@ async function connectWorker(task_id) {
       if_true: res,
     };
 
+    console.log('result_data: ', result);
     await task.updateOne({ status: 5, result_data: result }, function (err, res) {
       if (err) throw MyExceptions.MongoDBError(error_db_save_text + err);
       // updated!
@@ -184,13 +183,11 @@ async function connectWorker(task_id) {
     if (err.code !== undefined && err.code !== null) {
       err_result = {
         code: err.code,
-        if_true: false,
         raw: err.error
       };
     } else {
       err_result = {
         code: MyExceptions.ConnectWorkerError().code,
-        if_true: false,
         raw: MyExceptions.ConnectWorkerError("connectWorker error: " + err).error
       };
     }
@@ -211,8 +208,8 @@ async function messageWorker(task_id) {
       if (err) throw MyExceptions.MongoDBError('MongoDB find err: ' + err);
     });*/
     let task = task_id;
-    let email = task.input_data.credentials.email;
-    let password = task.input_data.credentials.password;
+    let email = task.input_data.credentials_data.email;
+    let password = task.input_data.credentials_data.password;
     let cookies = await cookieModel.Cookies.findOne({ username: email });
 
     let url = task.input_data.prospect_data.linkedin;
@@ -253,6 +250,7 @@ async function messageWorker(task_id) {
       };
     }
 
+    console.log('result_data: ', result);
     await task.updateOne({ status: task_status, result_data: result }, function (err, res) {
       if (err) throw MyExceptions.MongoDBError(error_db_save_text + err);
       // updated!
@@ -265,18 +263,17 @@ async function messageWorker(task_id) {
     if (err.code !== undefined && err.code !== null) {
       err_result = {
         code: err.code,
-        if_true: false,
         raw: err.error
       };
     } else {
       err_result = {
         code: MyExceptions.MessageWorkerError().code,
-        if_true: false,
         raw: MyExceptions.MessageWorkerError("messageWorker error: " + err).error
       };
     }
     console.log("RES: ", err_result);
 
+    console.log('result_data: ', result);
     await task.updateOne({ status: -1, result_data: err_result }, function (err, res) {
       if (err) throw MyExceptions.MongoDBError(error_db_save_text + err);
       // updated!
@@ -292,8 +289,8 @@ async function scribeWorker(task_id) {
       if (err) throw MyExceptions.MongoDBError('MongoDB find err: ' + err);
     });*/
     let task = task_id;
-    let email = task.input_data.credentials.email;
-    let password = task.input_data.credentials.password;
+    let email = task.input_data.credentials_data.email;
+    let password = task.input_data.credentials_data.password;
     let cookies = await cookieModel.Cookies.findOne({ username: email });
 
     let url = task.input_data.prospect_data.linkedin;
@@ -313,6 +310,7 @@ async function scribeWorker(task_id) {
       data: JSON.stringify(res),
     };
 
+    console.log('result_data: ', result);
     await task.updateOne({ status: 5, result_data: result }, function (err, res) {
       if (err) throw MyExceptions.MongoDBError(error_db_save_text + err);
       // updated!
@@ -325,13 +323,11 @@ async function scribeWorker(task_id) {
     if (err.code !== undefined && err.code !== null) {
       err_result = {
         code: err.code,
-        if_true: false,
         raw: err.error
       };
     } else {
       err_result = {
         code: MyExceptions.ScribeWorkerError().code,
-        if_true: false,
         raw: MyExceptions.ScribeWorkerError("scribeWorker error: " + err).error
       };
     }
@@ -352,8 +348,8 @@ async function messageCheckWorker(task_id) {
       if (err) throw MyExceptions.MongoDBError('MongoDB find err: ' + err);
     });*/
     let task = task_id;
-    let email = task.input_data.credentials.email;
-    let password = task.input_data.credentials.password;
+    let email = task.input_data.credentials_data.email;
+    let password = task.input_data.credentials_data.password;
     let cookies = await cookieModel.Cookies.findOne({ username: email });
 
     // CONNECT URL
@@ -387,13 +383,11 @@ async function messageCheckWorker(task_id) {
     if (err.code !== undefined && err.code !== null) {
       err_result = {
         code: err.code,
-        if_true: false,
         raw: err.error
       };
     } else {
       err_result = {
         code: MyExceptions.MessageCheckWorkerError().code,
-        if_true: false,
         raw: MyExceptions.MessageCheckWorkerError("messageCheckWorker error: " + err).error
       };
     }
@@ -414,8 +408,8 @@ async function connectCheckWorker(task_id) {
       if (err) throw MyExceptions.MongoDBError('MongoDB find err: ' + err);
     });*/
     let task = task_id;
-    let email = task.input_data.credentials.email;
-    let password = task.input_data.credentials.password;
+    let email = task.input_data.credentials_data.email;
+    let password = task.input_data.credentials_data.password;
     let cookies = await cookieModel.Cookies.findOne({ username: email });
 
     let prospect_full_name = task.input_data.prospect_data.first_name + ' ' + task.input_data.prospect_data.last_name;
@@ -434,6 +428,7 @@ async function connectCheckWorker(task_id) {
       if_true: res,
     };
 
+    console.log('result_data: ', result);
     await task.updateOne({ status: 5, result_data: result }, function (err, res) {
       if (err) throw MyExceptions.MongoDBError(error_db_save_text + err);
       // updated!
@@ -446,13 +441,11 @@ async function connectCheckWorker(task_id) {
     if (err.code !== undefined && err.code !== null) {
       err_result = {
         code: err.code,
-        if_true: false,
         raw: err.error
       };
     } else {
       err_result = {
         code: MyExceptions.ConnectCheckWorkerError().code,
-        if_true: false,
         raw: MyExceptions.ConnectCheckWorkerError("connectCheckWorker error: " + err).error
       };
     }

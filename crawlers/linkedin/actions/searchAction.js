@@ -86,8 +86,8 @@ class SearchAction extends action.Action {
       //throw MyExceptions.SearchActionError('It is BAN (?) in searchAction: '+ err);
     }
 
-    console.log("..... User Data: .....", result_data)
-    console.log("..... User Data: .....", result_data.data.arr)
+    //console.log("..... User Data: .....", result_data)
+    //console.log("..... User Data: .....", result_data.data.arr)
     result_data.data = JSON.stringify(result_data.data);
     return result_data;
   }

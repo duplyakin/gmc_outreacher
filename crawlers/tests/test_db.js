@@ -24,7 +24,7 @@ const MY_URL = "https://www.linkedin.com/in/grigoriy-polyanitsin/";
         template: 'Hi {first_name}, nice to meet you. {first_name} 111 {first{first_name}_name} hi {ololo }',
       },
       prospect_data: {
-        first_name: 'Justin',
+        first_name: 'Kirill',
         last_name: 'Shilov',
         company_title: 'howtotoken.com',
         linkedin: CONNECT_URL,
@@ -36,7 +36,7 @@ const MY_URL = "https://www.linkedin.com/in/grigoriy-polyanitsin/";
   await workers.searchWorker(task);
   //await workers.connectWorker(task);
   //await workers.messageWorker(task);
-  //await workers.scribeWorkWorker(task);
+  //await workers.scribeWorker(task);
   //await workers.messageCheckWorker(task);
   //await workers.connectCheckWorker(task);
 
