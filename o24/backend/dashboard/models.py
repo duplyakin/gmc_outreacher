@@ -293,7 +293,9 @@ class Credentials(db.Document):
 
     def get_data(self):
         return self.data
-
+    
+    def get_medium(self):
+        return self.medium
 
     def change_limits(self, now):
         self.current_daily_counter = self.current_daily_counter + 1
@@ -547,20 +549,16 @@ class Campaign(db.Document):
         return new_campaign
     
     @classmethod
-    def get_credentials(cls, campaign_id, funnel_node):
+    def get_credentials_id(cls, campaign_id, funnel_node):
         campaign = cls.objects(id=campaign_id).get()
 
         medium = funnel_node.action.medium
 
-        credentials_dict = {}
         for c in campaign.credentials:
             if c.medium == medium:
-                credentials_dict['id'] = c.id
-                credentials_dict['data'] = c.data
-                credentials_dict['medium'] = medium
-                break
+                return c.id
         
-        return credentials_dict
+        return None
                 
     @classmethod
     def update_campaigns(cls, campaigns):
@@ -575,6 +573,14 @@ class Campaign(db.Document):
             return False
         
         return True
+
+    def get_template_data(self, template_key, medium):
+        templates_for_medium = self.templates.get(medium, '')
+        if not templates_for_medium:
+            return {}
+        
+        template_data = templates_for_medium.get(template_key, {})
+        return template_data
 
     def get_node_template(self, template_key, medium):
         if not template_key:
@@ -711,6 +717,27 @@ class Campaign(db.Document):
             return True
         
         return False
+
+    def get_data(self):
+        return self.data
+
+    def get_list_id(self):
+        if not self.data:
+            return None
+
+        return self.data.get('list_id', None)
+    
+    def get_update_existing(self):
+        if not self.data:
+            return False
+
+        return self.data.get('update_existing', False)
+
+    def get_owner_id(self):
+        if not self.owner:
+            return None
+        
+        return self.owner.id
 
     def update_status(self, status):
         self.status = status
@@ -1124,6 +1151,66 @@ class Prospects(db.Document):
                     prospect._commit()
                     del data
                     break
+    
+    @classmethod
+    def upload_from_list(cls, owner_id, prospects_arr, list_id, update_existing=0):
+        if not prospects_arr:
+            return False
+
+        emails = []
+        linkedins = []
+
+        create_prospects = {}
+        for prospect in prospects_arr:
+            email = prospect.get('email', '')
+            linkedin = prospect.get('linkedin', '')
+            if not email and not linkedin:
+                continue
+            
+            next_prospect = cls.create_prospect(owner_id=owner_id,
+                                                data=prospect, 
+                                                list_id=list_id, 
+                                                commit=False)
+
+            if linkedin:
+                create_prospects[linkedin] = next_prospect
+                linkedins.append(linkedin)
+                continue
+
+            if email:
+                create_prospects[email] = next_prospect
+                emails.append(email)
+                continue
+                    
+        # we have found duplicates
+        if emails or linkedins:
+            duplicates = Prospects.objects(Q(owner=owner_id) & (Q(data__email__in=emails) | Q(data__linkedin__in=linkedins)))
+            if duplicates and len(duplicates):
+                for d in duplicates:
+                    try:
+                        linkedin = d.get_linkedin()
+                        email = d.get_email()
+
+                        key = linkedin
+                        prospect = create_prospects.get(linkedin, None)
+                        if not prospect:
+                            key = email
+                            prospect = create_prospects.get(email, None)
+                        
+                        if prospect:
+                            if update_existing:
+                                new_data = prospect.data
+                                d.update_data_partly(new_data=new_data, list_id=list_id)
+                            del create_prospects[key]
+
+                    except:
+                        pass
+
+            arr = list(create_prospects.values())
+            if arr:
+                cls.objects.insert(arr, load_bulk=False)
+        
+        return True
 
     @classmethod
     def upload(cls, owner_id, csv_with_header, map_to, list_id, update_existing=0):
@@ -1287,8 +1374,26 @@ class Prospects(db.Document):
     def update_prospects(cls, ids, status):
         return cls.objects(id__in=ids).update(status=status)
 
+    def get_data(self):
+        return self.data
+
     def get_email(self):
         return self.data.get('email', '')
+    
+    def get_linkedin(self):
+        return self.data.get('linkedin', '')
+
+    def update_data_partly(self, new_data, list_id, _reload=False):
+        if not new_data:
+            return 
+
+        for k, v in new_data.items():
+            self.data[k] = v
+
+        if list_id:
+            self.assign_to_list = list_id
+
+        self._commit(_reload=_reload)
 
     def update_data(self, data, _reload=False):
         self._chek_for_duplicates(owner_id=self.owner.id, data=data)
