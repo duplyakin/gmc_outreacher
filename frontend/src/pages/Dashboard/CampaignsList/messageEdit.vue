@@ -167,14 +167,14 @@ export default {
           this.template["body"] = "";
         }
         if (!this.template.hasOwnProperty("interval")) {
-          this.template["interval"] = "";
+          this.template["interval"] = 1;
         }
       } else if (this.template_type === "linkedin") {
         if (!this.template.hasOwnProperty("message")) {
           this.template["message"] = "";
         }
         if (!this.template.hasOwnProperty("interval")) {
-          this.template["interval"] = "";
+          this.template["interval"] = 1;
         }
       }
       console.log(this.template);

@@ -94,6 +94,7 @@ import { Pagination as LPagination } from "src/components/index";
 import axios from '@/api/axios-auth';
 
 //const CampaignForm = () => import('./campaign_form.vue')
+const Campaign_choose = () => import('./campaign_choose_modal.vue')
 
 const CAMPAIGNS_API_DATA = '/campaigns/data'
 const CAMPAIGNS_API_LIST = '/campaigns/list';
@@ -206,7 +207,19 @@ methods: {
         }
     },
     addCampaign() {
-        this.$router.push({ path: "campaign_form", query: { action_type: 'add' } })
+        this.$modal.show(
+        Campaign_choose,
+        {
+          valueUpdated: newValue => {
+
+          }
+        },
+        {
+          width: "720",
+          height: "auto",
+          scrollable: true
+        }
+      );
     },
     editCampaign(msg_dict, index) {
         var status = -2;

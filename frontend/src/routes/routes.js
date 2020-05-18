@@ -47,6 +47,8 @@ const Prospects = () => import('src/pages/Dashboard/Prospects/prospects.vue')
 const CampaignsList = () => import('src/pages/Dashboard/CampaignsList/campaigns.vue')
 const CampaignForm = () => import('src/pages/Dashboard/CampaignsList/campaign_form.vue')
 const CampaignEditForm = () => import('src/pages/Dashboard/CampaignsList/campaign_edit_form.vue')
+const CampaignLinkedinParsing = () => import('src/pages/Dashboard/CampaignsList/campaign_linkedin_parsing.vue')
+const CampaignLinkedinEnreachment = () => import('src/pages/Dashboard/CampaignsList/campaign_linkedin_enreachment.vue')
 
 const ProspectLists = () => import('src/pages/Dashboard/ProspectLists/lists.vue')
 
@@ -236,6 +238,16 @@ const routes = [
         path: 'campaign_form',
         name: 'Campaign Form',
         component: CampaignForm
+      },
+      {
+        path: 'campaign_linkedin_parsing',
+        name: 'Campaign Linkedin Parsing',
+        component: CampaignLinkedinParsing
+      },
+      {
+        path: 'campaign_linkedin_enreachment',
+        name: 'Campaign Linkedin Enreachment',
+        component: CampaignLinkedinEnreachment
       },
       {
         path: 'campaign_edit_form',

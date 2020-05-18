@@ -9,36 +9,17 @@
           v-model="campaign_data.title"
         ></el-input>
       </card>
-      <card>
-        <p>Select prospects list to send data to (required)</p>
-        <el-select
-          class="select-default mb-3"
-          style="width: 100%;"
-          placeholder="Select prospects list"
-          v-model="campaign_data.list_selected"
-          value-key="title"
-          :disabled="!modified_fields['lists']"
-        >
-          <el-option
-            class="select-default"
-            v-for="(list,index) in list_data.lists"
-            :key="list._id.$oid"
-            :label="list.title"
-            :value="list"
-          ></el-option>
-        </el-select>
-      </card>
 
       <card>
-        <p>Funnel to use for communication (required)</p>
+        <p>Funnel</p>
         <el-select
           class="select-default mb-3"
           name="Campaign funnel"
-          v-on:change="onChangeFunnel"
           style="width: 100%;"
           placeholder="Select funnel"
           v-model="campaign_data.funnel"
           value-key="title"
+          :disabled="true"
         >
           <el-option
             class="select-default"
@@ -50,30 +31,8 @@
         </el-select>
       </card>
 
-      <card v-if="hasMedium('any')">
-        <div v-if="hasMedium('email')" class="col-6">
-          <p>Select Email account</p>
-          <el-select
-            class="select-default mb-3"
-            style="width: 100%;"
-            placeholder="Select email account"
-            v-on:change="onChangeEmailCredentials"
-            v-model="email_account_selected"
-            value-key="data.account"
-            :disabled="!modified_fields['credentials']"
-          >
-            <el-option
-              class="select-default"
-              v-for="(account,index) in list_data.credentials"
-              v-if="account.medium == 'email'"
-              :key="account._id.$oid"
-              :label="account.data.account"
-              :value="account"
-            ></el-option>
-          </el-select>
-        </div>
-
-        <div v-if="hasMedium('linkedin')" class="col-6">
+      <card>
+        <div class="col-6">
           <p>Select Linkedin account</p>
           <el-select
             class="select-default mb-3"
@@ -96,66 +55,28 @@
         </div>
       </card>
 
-      <card v-if="modified_fields['templates'] && campaign_data.templates.email.length != 0">
-        <p>Fill Email templates</p>
-        <el-table
-          stripe
-          ref="email_templates_data_table"
+      <card>
+        <p>Select prospects list to enreach (required)</p>
+        <el-select
+          class="select-default mb-3"
           style="width: 100%;"
-          :data="campaign_data.templates.email"
-          max-height="500"
-          border
+          placeholder="Select prospects list"
+          v-model="campaign_data.list_selected"
+          value-key="title"
+          :disabled="!modified_fields['lists']"
         >
-          <el-table-column
-            v-for="(column, index) in email_table_columns"
-            :key="index"
-            :label="column.label"
-            :prop="column.prop"
-            show-overflow-tooltip
-          >
-            <template slot-scope="scope">
-              <a
-                @click.prevent="editEmailTemplate(scope.row, scope.$index)"
-                href="#"
-                v-if="column.prop === 'title'"
-              >{{ scope.row[column.prop] }}</a>
-              <template v-else>{{ scope.row[column.prop] }}</template>
-            </template>
-          </el-table-column>
-        </el-table>
-      </card>
-
-      <card v-if="modified_fields['templates'] && campaign_data.templates.linkedin.length != 0">
-        <p>Fill Linkedin templates</p>
-        <el-table
-          stripe
-          ref="linkedin_templates_data_table"
-          style="width: 100%;"
-          :data="campaign_data.templates.linkedin"
-          max-height="500"
-          border
-        >
-          <el-table-column
-            v-for="(column, index) in linkedin_table_columns"
-            :key="index"
-            :label="column.label"
-            :prop="column.prop"
-            show-overflow-tooltip
-          >
-            <template slot-scope="scope">
-              <a
-                @click.prevent="editLinkedinTemplate(scope.row, scope.$index)"
-                href="#"
-                v-if="column.prop === 'title'"
-              >{{ scope.row[column.prop] }}</a>
-              <template v-else>{{ scope.row[column.prop] }}</template>
-            </template>
-          </el-table-column>
-        </el-table>
+          <el-option
+            class="select-default"
+            v-for="(list,index) in list_data.lists"
+            :key="list._id.$oid"
+            :label="list.title"
+            :value="list"
+          ></el-option>
+        </el-select>
       </card>
 
       <card v-if="modified_fields['time_table']">
-        <h5 class="text-center">Delivery time with respect to prospect's timezone</h5>
+        <h5 class="text-center">Enreach time with respect to prospect's timezone</h5>
         <div class="extended-forms">
           <card>
             <div class="col-12">
@@ -340,44 +261,12 @@ export default {
       action_type: "",
       campaign_id: "",
 
-      email_account_selected: "",
       linkedin_account_selected: "",
       timezones_selected: "",
 
       /*All defaults that you store on client*/
       timezones_selects: timezones,
       modified_fields: {},
-
-      email_table_columns: [
-        {
-          prop: "title",
-          label: "Template title",
-          minWidth: 300
-        },
-        {
-          prop: "subject",
-          label: "Subject",
-          minWidth: 300
-        },
-        {
-          prop: "interval",
-          label: "Interval",
-          minWidth: 100
-        }
-      ],
-
-      linkedin_table_columns: [
-        {
-          prop: "title",
-          label: "Template title",
-          minWidth: 300
-        },
-        {
-          prop: "interval",
-          label: "Interval",
-          minWidth: 100
-        }
-      ],
 
       /* All lists that we need to select */
       list_data: {
@@ -393,10 +282,6 @@ export default {
         title: "",
         funnel: {},
         credentials: [],
-        templates: {
-          email: [],
-          linkedin: []
-        },
 
         from_hour: "",
         to_hour: "",
@@ -427,87 +312,6 @@ export default {
       ];
       return true;
     },
-    editLinkedinTemplate(teamplateObj, row_index) {
-      var table = this.$refs["linkedin_templates_data_table"];
-      this.editTemplate("linkedin", teamplateObj, row_index, table);
-    },
-    editEmailTemplate(teamplateObj, row_index) {
-      var table = this.$refs["email_templates_data_table"];
-      this.editTemplate("email", teamplateObj, row_index, table);
-    },
-    editTemplate(template_type, templateObj, _row_index, _table) {
-      const current_index = _row_index;
-      const cuurent_table = _table;
-
-      this.$modal.show(
-        MessageEdit,
-        {
-          templateObj: templateObj,
-          template_type: template_type,
-          valueUpdated: newValue => {
-            if (template_type === "email") {
-              this.$set(
-                this.campaign_data.templates.email,
-                current_index,
-                newValue
-              );
-            } else if (template_type === "linkedin") {
-              this.$set(
-                this.campaign_data.templates.linkedin,
-                current_index,
-                newValue
-              );
-            } else {
-              Notification.error({
-                title: "Error",
-                message: "Unsupported template_type"
-              });
-            }
-
-            cuurent_table.$forceUpdate();
-          }
-        },
-        {
-          width: "1100",
-          height: "auto",
-          scrollable: true
-        }
-      );
-    },
-
-    hasMedium(medium) {
-      var templates_required =
-        this.campaign_data.funnel.templates_required || null;
-      if (templates_required) {
-        var email = templates_required.email || null;
-        var linkedin = templates_required.linkedin || null;
-        if (medium == "any") {
-          if (email || linkedin) {
-            return true;
-          } else {
-            return false;
-          }
-        }
-
-        if (medium == "email") {
-          if (email) {
-            return true;
-          } else {
-            return false;
-          }
-        }
-
-        if (medium == "linkedin") {
-          if (linkedin) {
-            return true;
-          } else {
-            return false;
-          }
-        }
-      }
-
-      return false;
-    },
     onChangeEmailCredentials(new_credentials) {
       return this.onChangeCredentials("email", new_credentials);
     },
@@ -530,49 +334,6 @@ export default {
           this.campaign_data.credentials.push(new_credentials);
         }
         return;
-      }
-    },
-    _clear_funnel_dependent_data() {
-      this.$set(this.campaign_data, "templates", {
-        email: [],
-        linkedin: []
-      });
-      this.$set(this.campaign_data, "credentials", []);
-      this.email_account_selected = "";
-      this.linkedin_account_selected = "";
-    },
-    onChangeFunnel() {
-      this._clear_funnel_dependent_data();
-
-      var templates_required =
-        this.campaign_data.funnel.templates_required || null;
-      if (templates_required) {
-        var email = templates_required.email || null;
-        if (email) {
-          var email_templates = Object.values(email);
-          /*sort by order field*/
-          email_templates.sort(function(first, second) {
-            return first["order"] - second["order"];
-          });
-
-          this.$set(this.campaign_data.templates, "email", email_templates);
-        }
-
-        var linkedin = templates_required.linkedin || null;
-        if (linkedin) {
-          var linkedin_templates = Object.values(linkedin);
-
-          /*sort by order field*/
-          linkedin_templates.sort(function(first, second) {
-            return first["order"] - second["order"];
-          });
-
-          this.$set(
-            this.campaign_data.templates,
-            "linkedin",
-            linkedin_templates
-          );
-        }
       }
     },
     deserialize_data(from_data) {
@@ -603,11 +364,7 @@ export default {
 
             var linkedin_templates = campaign_dict[key].linkedin || null;
             if (linkedin_templates) {
-              this.$set(
-                this.campaign_data[key],
-                "linkedin",
-                linkedin_templates
-              );
+              this.$set(this.campaign_data[key], "linkedin", linkedin_templates);
             }
           } else {
             this.$set(this.campaign_data, key, campaign_dict[key]);
@@ -642,11 +399,11 @@ export default {
         return false;
       }
 
-      var funnel_selected = this.campaign_data.funnel._id || "";
-      if (!funnel_selected) {
+      var credentials = this.campaign_data.credentials;
+      if (credentials.length == 0) {
         Notification.error({
           title: "Error",
-          message: "You need to select the funnel"
+          message: "You need to select account"
         });
         return false;
       }
@@ -707,8 +464,8 @@ export default {
               var msg = "Save campaign error: " + r.msg + " code:" + r.code;
               Notification.error({ title: "Error", message: msg });
             } else {
-              this.$router.push({ path: "campaigns" });
               Notification.success({ title: "Success", message: "Campaign created" });
+              this.$router.push({ path: "campaigns" });
             }
           })
           .catch(error => {
@@ -774,14 +531,13 @@ export default {
   async mounted() {
     this.action_type = this.$route.query.action_type;
     this.campaign_id = this.$route.query.campaign_id || "";
-    console.log(
-      "mounted with action_type:" +
-        this.action_type +
-        " campaign_id:" +
-        this.campaign_id
+
+    console.log("mounted with action_type:" + this.action_type + " campaign_id:" + this.campaign_id
     );
 
     await this.load_data();
+    this.campaign_data.funnel = {"_id": {"$oid": "5ec10e4652bbd4237a450ba9"}, "title": "Enreach linkedin funnel", "templates_required": {"search_url": true}, "template_key": "", "root": true};
+    //this.campaign_data.funnel = {"_id": {"$oid": "5ec10e4652bbd4237a450ba4"}, "title": "Parse linkedin funnel", "templates_required": {"search_url": true}, "template_key": "", "root": true};
 
     if (this.action_type == "edit") {
       await this.load_campaign(this.campaign_id);
@@ -790,4 +546,18 @@ export default {
 };
 </script>
 <style lang="scss">
+.container {
+  display: flex;
+  justify-content: space-around;
+  align-items: flex-start;
+  padding: 10px 20px;
+}
+.interval_text {
+  display: flex;
+  align-items: flex-start;
+  font-size: 15px;
+  font-weight: 100;
+  line-height: 22px;
+  color: rgb(119, 119, 119);
+}
 </style>

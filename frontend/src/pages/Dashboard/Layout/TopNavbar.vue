@@ -29,7 +29,7 @@
           </drop-down>
           <drop-down position="right">
             <i slot="title" class="nc-icon nc-bullet-list-67"></i>
-            <a class="dropdown-item" href="#/user/help">
+            <a class="dropdown-item" href="/help">
               <i class="nc-icon nc-umbrella-13"></i> Help Center
             </a>
             <a class="dropdown-item" href="#">
