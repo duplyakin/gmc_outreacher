@@ -110,7 +110,7 @@ def edit_credentials():
 
             credentials_data = JSCredentialsData(raw_data=raw_data)
 
-            credentials.safe_update_credentials(credentials_data=credentials_data)
+            credentials.safe_update_credentials(credentials_data=credentials_data, _reload=True)
 
             result['code'] = 1
             result['updated'] = credentials.to_json()

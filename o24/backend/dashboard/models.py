@@ -156,9 +156,10 @@ class User(db.Document):
         return state
 
 
-    def _commit(self):
+    def _commit(self, _reload=False):
         self.save()
-        self.reload()
+        if _reload:
+            self.reload()
 
     def __repr__(self):
         return '<User %r>' % (self.email)
@@ -175,7 +176,8 @@ class Credentials(db.Document):
     # 1 - Refreshed (need to update all tasks)
     # -1 - Failed
     status = db.IntField(default=0)
-    
+    error = db.StringField(default='')
+
     medium = db.StringField()
 
     data = db.DictField()
@@ -223,7 +225,7 @@ class Credentials(db.Document):
         
         exist.status = 0
         
-        exist._commit()
+        exist._commit(_reload=True)
 
         return exist
      
@@ -305,6 +307,15 @@ class Credentials(db.Document):
         else:
             self.next_action = now + timedelta(seconds=self.limit_interval)        
 
+    def _inc_next_action(seconds, _commit=True):
+        now = datetime.datetime.now()
+
+        self.next_action = now + timedelta(seconds=seconds)
+        self.current_daily_counter = 0
+        
+        if _commit:
+            self._commit()
+
     def _check_for_duplicates(self, data):
         #check duplicates:
         account = data.get('account', '')
@@ -314,7 +325,7 @@ class Credentials(db.Document):
                 error = "Credentials duplicate error for account: {0}".format(account)
                 raise Exception(error)
 
-    def safe_update_credentials(self, credentials_data):
+    def safe_update_credentials(self, credentials_data, _reload=False):
         limit_per_day = credentials_data.get_limit_per_day()
         if limit_per_day:
             self.limit_per_day = limit_per_day
@@ -323,7 +334,7 @@ class Credentials(db.Document):
         if data:
             self.update_data(new_data=data, _commit=False)
         
-        self._commit()
+        self._commit(_reload=_reload)
 
     def update_data(self, new_data, _commit=True):
         if not isinstance(new_data, dict):
@@ -343,6 +354,24 @@ class Credentials(db.Document):
         if _commit:
             self._commit()
     
+    def error(self, error='', delay=None):
+        self.error = error
+        self.status = -1
+
+        if delay is not None and delay > 0 :
+            self._inc_next_action(seconds=delay*NEXT_DAY_SECONDS, _commit=False)
+
+        self._commit()
+
+    def resume(self):
+        self.error = ''
+        self.status = 0
+
+        self._commit()
+
+    def is_refreshed(self):
+        return self.status == 1
+
     def change_status(self, status):
         self.status = status
         self._commit()
@@ -350,9 +379,10 @@ class Credentials(db.Document):
     def warmup(self):
         self.limit_per_day = round(self.limit_per_day * 1.3)
 
-    def _commit(self):
+    def _commit(self, _reload=False):
         self.save()
-        self.reload()
+        if _reload:
+            self.reload()
 
 #### Menu: Teams ####
 #### Manage teams
@@ -374,9 +404,10 @@ class Team(db.Document):
 
         return new_team
 
-    def _commit(self):
+    def _commit(self, _reload=False):
         self.save()
-        self.reload()
+        if _reload:
+            self.reload()
 
 class Campaign(db.Document):
     RESTRICTED_SET_FIELDS = [
@@ -648,7 +679,7 @@ class Campaign(db.Document):
             elif field in self.CAN_BE_NULL:
                 self._async_set_field(field_name=field, val=val)
         
-        self._commit()
+        self._commit(_reload=True)
         return True
 
     @classmethod
@@ -671,7 +702,7 @@ class Campaign(db.Document):
             elif field in cls.CAN_BE_NULL:
                 new_campaign._async_set_field(field_name=field, val=val)
 
-        new_campaign._commit()
+        new_campaign._commit(_reload=True)
         return new_campaign
 
 
@@ -685,9 +716,10 @@ class Campaign(db.Document):
         self.status = status
         self._commit()
 
-    def _commit(self):
+    def _commit(self, _reload=False):
         self.save()
-        self.reload()
+        if _reload:
+            self.reload()
 
 
 
@@ -786,16 +818,16 @@ class ProspectsList(db.Document):
         new_list.owner = owner_id
         new_list.title = title
 
-        new_list._commit()
+        new_list._commit(_reload=True)
         return new_list
     
     def serialize(self):
         return 0
 
-    def update_data(self, title=None):
+    def update_data(self, title=None, _reload=False):
         if title:
             self.title = title
-            self._commit()
+            self._commit(_reload=_reload)
 
     def safe_delete(self):
         has_prospects = Prospects.objects(assign_to_list=self.id).count()
@@ -804,9 +836,10 @@ class ProspectsList(db.Document):
 
         return self.delete()
 
-    def _commit(self):
+    def _commit(self, _reload=False):
         self.save()
-        self.reload()
+        if _reload:
+            self.reload()
 
 
 class Prospects(db.Document):
@@ -950,7 +983,7 @@ class Prospects(db.Document):
             if val:
                 new_prospect._async_set_field(field_name=field, val=val)
 
-        new_prospect._commit()
+        new_prospect._commit(_reload=True)
         return new_prospect
 
 
@@ -1257,20 +1290,21 @@ class Prospects(db.Document):
     def get_email(self):
         return self.data.get('email', '')
 
-    def update_data(self, data):
+    def update_data(self, data, _reload=False):
         self._chek_for_duplicates(owner_id=self.owner.id, data=data)
 
         self.data = data
-        self._commit()
+        self._commit(_reload=_reload)
 
     def update_status(self, status):
         self.status = status
 
         self._commit()
 
-    def _commit(self):
+    def _commit(self, _reload=False):
         self.save()
-        self.reload()
+        if _reload:
+            self.reload()
 
 
 class MediumSettings(db.Document):

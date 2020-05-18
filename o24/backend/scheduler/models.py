@@ -36,9 +36,10 @@ class Priority(db.Document):
         self.followup_level = followup_level
         self._commit()
 
-    def _commit(self):
+    def _commit(self, _reload=False):
         self.save()
-        self.reload()
+        if _reload:
+            self.reload()
 
 class TaskLog(db.Document):
     prospect_id = db.ObjectIdField()
@@ -77,6 +78,7 @@ class TaskLog(db.Document):
             
         #TaskLog.objects.update(logs, multi=True)
 
-    def _commit(self):
+    def _commit(self, _reload=False):
         self.save()
-        self.reload()
+        if _reload:
+            self.reload()

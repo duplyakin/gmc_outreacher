@@ -1,3 +1,5 @@
+from o24.globals import *
+
 USERS = [
     {'email' : '1@email.com',
      'password' : 'password1',
@@ -225,11 +227,15 @@ TEAMS = [
 ACTIONS = [
     {
         'action_type' : 0,
-        'data' : {
-            'what' : 'parse-linkedin'
-        },
+        'data' : {},
         'medium' : 'linkedin',
-        'key' : 'parse-linkedin'
+        'key' : LINKEDIN_SEARCH_ACTION 
+    },
+    {
+        'action_type' : 0,
+        'data' : {},
+        'medium' : 'linkedin',
+        'key' : LINKEDIN_PARSE_PROFILE_ACTION 
     },
 
     {
@@ -238,7 +244,7 @@ ACTIONS = [
             'what' : 'visit-profile'
         },
         'medium' : 'linkedin',
-        'key' : 'linkedin-visit-profile'
+        'key' : LINKEDIN_VISIT_PROFILE_ACTION
     },
     {
         'action_type' : 0,
@@ -246,7 +252,7 @@ ACTIONS = [
             'what' : 'connect'
         },
         'medium' : 'linkedin',
-        'key' : 'linkedin-connect'
+        'key' : LINKEDIN_CONNECT_ACTION
     },
     {
         'action_type' : 0,
@@ -254,9 +260,25 @@ ACTIONS = [
             'what' : 'send-message'
         },
         'medium' : 'linkedin',
-        'key' : 'linkedin-send-message'
+        'key' : LINKEDIN_SEND_MESSAGE_ACTION
     },
-    
+   {
+        'action_type' : 2,
+        'data' : {
+            'what' : 'check-accept'
+        },
+        'medium' : 'linkedin',
+        'key' : LINKEDIN_CHECK_ACCEPT_ACTION
+    },
+
+    {
+        'action_type' : 2,
+        'data' : {
+            'what' : 'check-reply'
+        },
+        'medium' : 'linkedin',
+        'key' : LINKEDIN_CHECK_REPLY_ACTION
+    },    
 
     {
         'action_type' : 0,
@@ -264,9 +286,16 @@ ACTIONS = [
             'what' : 'send-message'
         },
         'medium' : 'email',
-        'key' : 'email-send-message'
+        'key' : EMAIL_SEND_MESSAGE_ACTION
     },
-
+    {
+        'action_type' : 2,
+        'data' : {
+            'what' : 'check-reply'
+        },
+        'medium' : 'email',
+        'key' : EMAIL_CHECK_REPLY_ACTION
+    }
 
     {
         'action_type' : 1,
@@ -274,7 +303,7 @@ ACTIONS = [
             'what' : 'delay'
         },
         'medium' : 'special-medium',
-        'key' : 'delay-linkedin'
+        'key' : DELAY_LINKEDIN_ACTION
     },
 
      {
@@ -283,7 +312,7 @@ ACTIONS = [
             'what' : 'delay'
         },
         'medium' : 'special-medium',
-        'key' : 'delay-email'
+        'key' : DELAY_EMAIL_ACTION
     },
 
     {
@@ -292,65 +321,41 @@ ACTIONS = [
             'what' : 'FINISHED'
         },
         'medium' : 'special-medium',
-        'key' : 'finished'
+        'key' : FINISHED_ACTION
     },
-    
     {
         'action_type' : 5,
         'data' : {
             'what' : 'SUCCESS'
         },
         'medium' : 'special-medium',
-        'key' : 'success'
-    },
-
-    {
-        'action_type' : 2,
-        'data' : {
-            'what' : 'check-accept'
-        },
-        'medium' : 'linkedin',
-        'key' : 'linkedin-check-accept'
-    },
-
-    {
-        'action_type' : 2,
-        'data' : {
-            'what' : 'check-reply'
-        },
-        'medium' : 'linkedin',
-        'key' : 'linkedin-check-reply'
-    },
-
-    {
-        'action_type' : 2,
-        'data' : {
-            'what' : 'check-reply'
-        },
-        'medium' : 'email',
-        'key' : 'email-check-reply'
+        'key' : SUCCESS_ACTION
     }
 ]
 
 FUNNELS = [
     {
         'root' : {
-            'key' : 'parse-linkedin',
-            'title' : 'Parse linkedin funnel',
+            'key' : LINKEDIN_SEARCH_ACTION,
+            'title' : 'Funnel for linkedin parsing',
             'root' : True,
-            'templates_required' : {
-                'search_url' : True
-            },
-            'if_true' : 'success',
-            'if_false' : 'finished',
+            'if_true' : FINISHED_ACTION,
+            'if_false' : FINISHED_ACTION,
         },
-
-        'finished' : {
-            'key' : 'finished'
+        FINISHED_ACTION : {
+            'key' : FINISHED_ACTION
+        }
+    },
+    {
+        'root' : {
+            'key' : LINKEDIN_PARSE_PROFILE_ACTION,
+            'title' : 'Funnel for parsing profile data',
+            'root' : True,
+            'if_true' : FINISHED_ACTION,
+            'if_false' : FINISHED_ACTION,
         },
-
-        'success' : {
-            'key' : 'success'
+        FINISHED_ACTION : {
+            'key' : FINISHED_ACTION
         }
     },
 

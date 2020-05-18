@@ -37,6 +37,7 @@ class GoogleAppSetting(db.Document):
             'Active' : self.active
         }
 
-    def _commit(self):
+    def _commit(self, _reload=False):
         self.save()
-        self.reload()
+        if _reload:
+            self.reload()

@@ -31,9 +31,10 @@ class Action(db.Document):
         action = cls.objects(key=key).first()
         return action
 
-    def _commit(self):
+    def _commit(self, _reload=False):
         self.save()
-        self.reload()
+        if _reload:
+            self.reload()
     
     def is_true(self, result):
         if self.action_type == ACTION_NONE:
@@ -149,9 +150,10 @@ class Funnel(db.Document):
         self._commit()
         
 
-    def _commit(self):
+    def _commit(self, _reload=False):
         self.save()
-        self.reload()
+        if _reload:
+            self.reload()
 
 # How TaskQueue works
 # When the new task created status = NEW
@@ -241,6 +243,13 @@ class TaskQueue(db.Document):
         
         return result
 
+    def get_code(self):
+        return self.result_data.get('code', None)
+
+    def _resume(self):
+        self.status = NEW
+        self._commit()
+
     @classmethod
     def get_task(cls, task_id):
         return cls.objects(id=task_id).get()
@@ -248,6 +257,10 @@ class TaskQueue(db.Document):
     @classmethod
     def get_ready(cls):
         return TaskQueue.objects(status=READY)
+
+    @classmethod
+    def get_trail_tasks(cls):
+        return TaskQueue.objects(Q(status=FAILED) | Q(status=CARRYOUT))
 
     @classmethod
     def get_execute_tasks(cls, do_next, followup_level, now):
@@ -346,9 +359,10 @@ class TaskQueue(db.Document):
         
         return TaskQueue.objects.insert(tasks, load_bulk=True)
 
-    def _commit(self):
+    def _commit(self, _reload=False):
         self.save()
-        self.reload()
+        if _reload:
+            self.reload()
 
 #We put async tasks here. 
 class AsyncTaskQueue(db.Document):
@@ -383,9 +397,10 @@ class AsyncTaskQueue(db.Document):
         new_task._commit()
         return new_task
 
-    def _commit(self):
+    def _commit(self, _reload=False):
         self.save()
-        self.reload()
+        if _reload:
+            self.reload()
 
 class OpenTracker(db.Document):
     #open, reply
