@@ -44,6 +44,11 @@ class Funnel(db.Document):
     action = db.ReferenceField(Action, reverse_delete_rule=1)
     paramters = db.DictField()
 
+    #0 - general
+    #1 - Linkedin parsing funnel
+    #2 - Linkedin Enrichment funnel
+    funnel_type = db.IntField(default=0)
+
     title = db.StringField()
     templates_required = db.DictField()
     template_key = db.StringField(default='')
@@ -54,6 +59,18 @@ class Funnel(db.Document):
     if_false = db.ObjectIdField(default=None)
 
     data = db.DictField() #any info here, like delay for DELAY action
+
+    @classmethod
+    def get_linkedin_enrichment_funnel_id(cls):
+        funnel = cls.objects(funnel_type=2).first()
+        if funnel:
+            return funnel.id
+
+    @classmethod
+    def get_linkedin_parsing_funnel_id(cls):
+        funnel = cls.objects(funnel_type=1).first()
+        if funnel:
+            return funnel.id
 
     @classmethod
     def async_funnels(cls, owner=None):
@@ -332,11 +349,14 @@ class TaskQueue(db.Document):
 
     @classmethod
     def get_ready(cls):
-        return TaskQueue.objects(status=READY)
+        active_campaigns = models.Campaign.objects(status=IN_PROGRESS).distinct('id')
+
+        return TaskQueue.objects(status=READY, campaign_id__in=active_campaigns)
 
     @classmethod
     def get_trail_tasks(cls):
-        return TaskQueue.objects(Q(status=FAILED) | Q(status=CARRYOUT))
+        active_campaigns = models.Campaign.objects(status=IN_PROGRESS).distinct('id')
+        return TaskQueue.objects(Q(campaign_id__in=active_campaigns) & (Q(status=FAILED) | Q(status=CARRYOUT)))
 
     @classmethod
     def get_execute_tasks(cls, do_next, followup_level, now):

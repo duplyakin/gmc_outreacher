@@ -38,30 +38,28 @@ COLUMNS = [
 
 modified_fields_on_create = {
     'title' : True,
-    'funnel' : True,
     'credentials' : True,
-    'templates' : True,
     'time_table' : True,
-    'lists' : True
+    'lists' : True,
+    'data' : True
 }
 
 modified_fields_on_edit = {
     'title' : True,
-    'templates' : True,
     'time_table' : True,
-    'funnel' : False,
     'credentials' : False,
     'lists' : False,
     'from_hour' : True,
     'to_hour' : True,
     'from_minutes' : True,
     'to_minutes' : True,
-    'sending_days' : True
+    'sending_days' : True,
+    'data' : True
 }
 
-@bp_dashboard.route('/campaigns/data', methods=['POST'])
+@bp_dashboard.route('/campaign/linkedin/data', methods=['POST'])
 @auth_required
-def data_campaigns():
+def data_linkedin_campaign():
     current_user = g.user
 
     result = {
@@ -69,7 +67,6 @@ def data_campaigns():
         'msg' : '',
         'lists' : '',
         'credentials' : '',
-        'funnels' : '',
         'modified_fields' : json.dumps(modified_fields_on_create),
         'columns' : json.dumps(COLUMNS)
     }
@@ -80,14 +77,10 @@ def data_campaigns():
             if lists:
                 result['lists'] = lists.to_json()
 
-            total, credentials = Credentials.async_credentials(owner=current_user.id)
+            total, credentials = Credentials.async_credentials(owner=current_user.id, medium='linkedin')
             if credentials:
                 result['credentials'] = credentials
             
-            funnels = shared.Funnel.async_funnels()
-            if funnels:
-                result['funnels'] = funnels
-
             result['code'] = 1
             result['msg'] = 'Success'
     except Exception as e:
@@ -101,9 +94,9 @@ def data_campaigns():
     return jsonify(result), 200
 
 
-@bp_dashboard.route('/campaigns/list', methods=['POST'])
+@bp_dashboard.route('/campaign/linkedin/list', methods=['POST'])
 @auth_required
-def list_campaigns():
+def list_linkedin_campaigns():
     current_user = g.user
 
     per_page = config.CAMPAIGNS_PER_PAGE
@@ -129,6 +122,7 @@ def list_campaigns():
             page = int(request.form.get('_page',1))
 
             total, campaigns = Campaign.async_campaigns_list(owner=current_user.id,
+                                                campaign_types=[LINKEDIN_PARSING_CAMPAIGN_TYPE, LINKEDIN_ENRICHMENT_CAMPAIGN_TYPE],
                                                 page=page)    
             if campaigns:
                 result['campaigns'] = campaigns
@@ -151,9 +145,9 @@ def list_campaigns():
     return jsonify(result), 200
 
 
-@bp_dashboard.route('/campaigns/get', methods=['POST'])
+@bp_dashboard.route('/campaign/linkedin/get', methods=['POST'])
 @auth_required
-def get_campaign_by_id():
+def get_linkedin_campaign_by_id():
     current_user = g.user
 
     result = {
@@ -169,21 +163,17 @@ def get_campaign_by_id():
             if not campaign_id:
                 raise Exception("Bad campaign_id")
 
-            campaign = Campaign.objects(owner=current_user.id, id=campaign_id).first()
+            campaign = Campaign.objects(owner=current_user.id, 
+                                        id=campaign_id,
+                                        campaign_type__in=[LINKEDIN_PARSING_CAMPAIGN_TYPE,LINKEDIN_ENRICHMENT_CAMPAIGN_TYPE]).first()
             if not campaign:
-                raise Exception("No such campaign")
+                raise Exception("No such enrichment campaign")
 
-
-            if not campaign.valid_funnel():
-                modified_fields_on_edit['funnel'] = True
-                modified_fields_on_edit['credentials'] = True
-
-            #check that the list has prospects and funnel exists
             
             campaign_dict = to_json_deep_dereference(campaign)
 
             result['code'] = 1
-            result['msg'] = 'Success'
+            result['msg'] = 'Success' 
             result['campaign'] = json.dumps(campaign_dict)
             result['modified_fields'] = json.dumps(modified_fields_on_edit)
     except Exception as e:
@@ -198,9 +188,9 @@ def get_campaign_by_id():
 
 
 
-@bp_dashboard.route('/campaigns/create', methods=['POST'])
+@bp_dashboard.route('/campaign/linkedin/parsing/create', methods=['POST'])
 @auth_required
-def create_campaign():
+def create_linkedin_parsing_campaign():
     current_user = g.user
 
     result = {
@@ -214,35 +204,32 @@ def create_campaign():
             
             campaign_data = JSCampaignData(raw_data=raw_data)
 
-            funnel_id = campaign_data.funnel()
-            funnel = shared.Funnel.objects(id=funnel_id).first()
-            if not funnel:
-                raise Exception("No such funnel")
-
             credentials = campaign_data.credentials()
             if not credentials:
                 raise Exception("Credentials can't be empty")
-        
-            prospects_list = ProspectsList.objects(owner=current_user.id, id=campaign_data.prospects_list()).first()
-            if not prospects_list:
-                raise Exception("There is no such prospects list")
+            
+            list_title = campaign_data.get_list_title()
+            if not list_title:
+                raise Exception("Prospects list can't be empty")
             
             create_fields = Campaign.get_create_fields()
             new_campaign = Campaign.async_create(owner=current_user.id, 
                                                 campaign_data=campaign_data,
+                                                campaign_type=LINKEDIN_PARSING_CAMPAIGN_TYPE,
                                                 create_fields=create_fields)
+            
             if not new_campaign or not new_campaign.id:
                 raise Exception("Something went wrong contact support.")
-
+            
+            new_campaign.set_linkedin_parsing_funnel()
             #ALWAYS need this: as we create objecId from Json, need mongo to update it with object
             #new_campaign.reload()
             
-            #assign prospects
-            prospects = Prospects.objects(owner=current_user.id, assign_to_list=prospects_list.id)
-            if prospects:
-                ids = [p.id for p in prospects]
-                if ids:
-                    Prospects._assign_campaign_on_create(owner_id=current_user.id, campaign_id=new_campaign.id, prospects_ids=ids)
+            p_list = ProspectsList.create_list(owner_id=current_user.id, 
+                                            title=list_title)
+
+            new_campaign.add_data_value(key="list_id", value=str(p_list.id))
+            new_campaign.reload()
 
             campaign_dict = to_json_deep_dereference(new_campaign)
 
@@ -258,9 +245,71 @@ def create_campaign():
 
     return jsonify(result)
 
-@bp_dashboard.route('/campaigns/edit', methods=['POST'])
+
+@bp_dashboard.route('/campaign/linkedin/enrichment/create', methods=['POST'])
 @auth_required
-def edit_campaign():
+def create_linkedin_enrichment_campaign():
+    current_user = g.user
+
+    result = {
+        'code' : -1,
+        'msg' : '',
+        'added' : ''
+    }
+    if request.method == 'POST':
+        try:
+            raw_data = request.form['_add_campaign']
+            
+            campaign_data = JSCampaignData(raw_data=raw_data)
+
+            credentials = campaign_data.credentials()
+            if not credentials:
+                raise Exception("Credentials can't be empty")
+            
+            prospects_list = ProspectsList.objects(owner=current_user.id, id=campaign_data.prospects_list()).first()
+            if not prospects_list:
+                raise Exception("There is no such prospects list")
+            
+            create_fields = Campaign.get_create_fields()
+            new_campaign = Campaign.async_create(owner=current_user.id, 
+                                                campaign_data=campaign_data,
+                                                campaign_type=LINKEDIN_ENRICHMENT_CAMPAIGN_TYPE,
+                                                create_fields=create_fields)
+            
+            if not new_campaign or not new_campaign.id:
+                raise Exception("Something went wrong contact support.")
+            
+            new_campaign.set_linkedin_enrichment_funnel()
+            new_campaign.add_data_value(key="list_id", value=str(prospects_list.id))
+
+            #assign prospects
+            prospects = Prospects.objects(owner=current_user.id, assign_to_list=prospects_list.id)
+            if prospects:
+                ids = [p.id for p in prospects]
+                if ids:
+                    Prospects._assign_campaign_on_create(owner_id=current_user.id, campaign_id=new_campaign.id, prospects_ids=ids)
+
+
+            new_campaign.reload()
+            campaign_dict = to_json_deep_dereference(new_campaign)
+
+            result['code'] = 1
+            result['added'] = json.dumps(campaign_dict)
+        except Exception as e:
+            #TODO: change to loggin
+            print(e)
+            traceback.print_exc()
+
+            result['code'] = -1
+            result['msg'] = 'SERVER ERROR: ' + str(e)
+
+    return jsonify(result)
+
+
+
+@bp_dashboard.route('/campaign/linkedin/edit', methods=['POST'])
+@auth_required
+def edit_linkedin_campaign():
     current_user = g.user
 
     result = {
@@ -311,9 +360,9 @@ def edit_campaign():
     return jsonify(result)
 
 
-@bp_dashboard.route('/campaigns/delete', methods=['POST'])
+@bp_dashboard.route('/campaign/linkedin/delete', methods=['POST'])
 @auth_required
-def delete_campaign():
+def delete_linkedin_campaign():
     current_user = g.user
 
     result = {
@@ -331,7 +380,7 @@ def delete_campaign():
             if not campaign:
                 raise Exception("No such campaign")
 
-            scheduler.Scheduler.safe_delete_campaign(owner_id=current_user.id, campaign=campaign)
+            scheduler.Scheduler.safe_delete_campaign(owner_id=current_user.id, campaign=campaign, _unassign=True)
 
             result['code'] = 1
             result['msg'] = 'Success'
@@ -346,9 +395,9 @@ def delete_campaign():
     return jsonify(result)
 
 
-@bp_dashboard.route('/campaigns/start', methods=['POST'])
+@bp_dashboard.route('/campaign/linkedin/start', methods=['POST'])
 @auth_required
-def start_campaign():
+def start_linkedin_campaign():
     current_user = g.user
 
     result = {
@@ -382,9 +431,9 @@ def start_campaign():
     return jsonify(result)
 
 
-@bp_dashboard.route('/campaigns/pause', methods=['POST'])
+@bp_dashboard.route('/campaign/linkedin/pause', methods=['POST'])
 @auth_required
-def pause_campaign():
+def pause_linkedin_campaign():
     current_user = g.user
 
     result = {

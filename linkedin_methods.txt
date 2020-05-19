@@ -1,0 +1,137 @@
+Данный функционал нужно реализовать в отдельном разделе: "Linkedin enrichment"
+
+Все работает также как и для обычных кампаний, НО "Add campaign" просит выбрать тип:
+- Parse Linkedin Data
+- Enrich Linkedin Prospects
+
+
+Описание типов запросов:
+
+1. /campaign/linkedin/data (POST)
+request:
+- Нет параметров
+
+response:
+{
+    'code' : 
+    'msg' : '',
+    'lists' : '',
+    'credentials' : '',
+    'modified_fields' : ,
+    'columns' : 
+}
+
+2. /campaign/linkedin/list (POST)
+request:
+- _page
+
+response:
+{
+    'code' :,
+    'msg' : '',
+    'campaigns' : '', // Здесь уже будут отфильтрованы только Linkedin кампании
+    'modified_fields' : 
+    'pagination' : 
+    'columns' : 
+}
+
+
+3. /campaign/linkedin/get (POST)
+request:
+- _campaign_id
+
+response:
+{
+    'code' :
+    'msg' : '',
+    'campaign' : '',  // Здесь будет кампания
+    'modified_fields': 
+}
+
+
+4. /campaign/linkedin/parsing/create (POST)  - ЭТИМ ЗАПРОСОМ СОЗДАЕШЬ КАМПАНИЮ ТИПА "1 - Linkedin Parse campaign"
+request:
+- _add_campaign = {
+        list_title: '',
+        campaign_type: 1,
+        data : {
+            search_url: '',
+            total_pages: 100,
+            interval_pages: 10,
+        }
+        title: "",
+        credentials: [],
+
+        from_hour: "",
+        to_hour: "",
+        time_zone: "",
+        sending_days: {
+          "0": true,
+          "1": true,
+          "2": true,
+          "3": true,
+          "4": true,
+          "5": false,
+          "6": false
+        }
+      }
+}
+
+response:
+{
+    'code' :,
+    'msg' : '',
+    'added' : '' //Созданная кампания
+}
+
+
+5. /campaign/linkedin/enrichment/create (POST)  - ЭТИМ ЗАПРОСОМ СОЗДАЕШЬ КАМПАНИЮ ТИПА "2 - Linkedin Enrichment"
+request:
+- _add_campaign = {
+        list_selected: '', // по аналогии с обычной кампаний (объект здесь передаем?)
+        campaign_type: 2,
+        title: "",
+        credentials: [],
+
+        from_hour: "",
+        to_hour: "",
+        time_zone: "",
+        sending_days: {
+          "0": true,
+          "1": true,
+          "2": true,
+          "3": true,
+          "4": true,
+          "5": false,
+          "6": false
+        }
+      }
+}
+
+response:
+{
+    'code' :,
+    'msg' : '',
+    'added' : '' //Созданная кампания
+}
+
+
+6. /campaign/linkedin/edit (POST)  - для обоих типов кампаний
+request:
+- Аналогично обычной кампании, НО все что было в data при создании также передается в data
+
+response:
+{
+    'code' :,
+    'msg' : '',
+    'updated' : '' //Отредактированная кампания
+}
+
+7. /campaign/linkedin/delete (POST)
+Аналогично обычной кампании
+
+8. /campaign/linkedin/start (POST)
+Аналогично обычной кампании
+
+9. /campaign/linkedin/pause (POST)
+Аналогично обычной кампании
