@@ -252,5 +252,12 @@ class JSCampaignData(JSObject):
     def time_zone(self):
         return self._custom_attr(attr='time_zone', default='')
 
+    def campaign_type(self):
+        return self._custom_attr(attr='campaign_type', default=None)
+
+    def get_list_title(self):
+        return self._custom_attr(attr='list_title', default='')
+
     def __str__(self):
         return str(self.__dict__)
+

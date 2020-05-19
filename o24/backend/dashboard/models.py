@@ -251,13 +251,16 @@ class Credentials(db.Document):
         return None
 
     @classmethod
-    def async_credentials(cls, owner, page=None, per_page=config.CREDENTIALS_PER_PAGE):
+    def async_credentials(cls, owner, page=None, medium=None, per_page=config.CREDENTIALS_PER_PAGE):
         if page and page <= 1:
             page = 1
 
         query = {
             'owner' : owner
         }
+
+        if medium:
+            query['medium'] = medium
 
         db_query = cls.objects(__raw__=query, medium__in=cls.SHOWED_MEDIUM). \
                     only('id', 'data', 'status', 'medium', 'limit_per_day', 'last_action', 'next_action', 'current_daily_counter')
@@ -419,11 +422,10 @@ class Campaign(db.Document):
         'status',
         'last_action',
         'next_action',
-        'data',
         'created'
     ]
 
-    CAN_BE_NULL = ['from_hour', 'to_hour', 'from_minutes', 'to_minutes', 'status']
+    CAN_BE_NULL = ['from_hour', 'to_hour', 'from_minutes', 'to_minutes', 'status', 'campaign_type']
 
     @classmethod
     def get_create_fields(cls):
@@ -435,6 +437,7 @@ class Campaign(db.Document):
     # 2 - paused
     # 11 - archived (deleted)
     status = db.IntField(default=0)
+    campaign_type = db.IntField(default=0)
 
     title = db.StringField(required=True)
 
@@ -461,11 +464,11 @@ class Campaign(db.Document):
 
 
     @classmethod
-    def async_campaigns_list(cls, owner, page=None, per_page=config.CAMPAIGNS_PER_PAGE):
+    def async_campaigns_list(cls, owner, page=None, campaign_types=[0], per_page=config.CAMPAIGNS_PER_PAGE):
         if page and page <= 1:
             page = 1
 
-        db_query = cls.objects(owner=owner)
+        db_query = cls.objects(owner=owner, campaign_type__in=campaign_types)
                 
         total = db_query.count()
 
@@ -502,10 +505,6 @@ class Campaign(db.Document):
         results = bson_dumps(campaigns)
 
         return (total, results)
-
-    @classmethod
-    def get_campaign_for_list(cls, owner_id, list_id):
-        return cls.objects(owner=owner_id, prospects_list=list_id).first()
 
     @classmethod
     def get_campaign(cls, owner=None, id=None, title=None):
@@ -568,6 +567,17 @@ class Campaign(db.Document):
         for c in campaigns:
             c._commit()
 
+    def set_linkedin_enrichment_funnel(self):
+        funnel_id = shared.Funnel.get_linkedin_enrichment_funnel_id()
+        self.funnel = funnel_id
+        self._commit()
+
+
+    def set_linkedin_parsing_funnel(self):
+        funnel_id = shared.Funnel.get_linkedin_parsing_funnel_id()
+        self.funnel = funnel_id
+        self._commit()
+
     def valid_funnel(self):
         if self.funnel == None:
             return False
@@ -626,6 +636,12 @@ class Campaign(db.Document):
 
         return delta
 
+    def _allow_no_prospects(self):
+        if self.campaign_type == LINKEDIN_PARSING_CAMPAIGN_TYPE:
+            return True
+
+        return False
+
     def _safe_pause(self):
         self.update_status(status=PAUSED)
 
@@ -636,9 +652,10 @@ class Campaign(db.Document):
         if not self.funnel:
             raise Exception("Starting error: there is not selected funnel for campaign_id:{0}".format(self.id))
         
-        has_prospects = Prospects.get_prospects(campaign_id=self.id)
-        if not has_prospects:
-            raise Exception("Starting error: There is no assigned prospects for this campaign")
+        if not self._allow_no_prospects():
+            has_prospects = Prospects.get_prospects(campaign_id=self.id)
+            if not has_prospects:
+                raise Exception("Starting error: There is no assigned prospects for this campaign")
 
         self.update_status(status=IN_PROGRESS)
 
@@ -669,6 +686,12 @@ class Campaign(db.Document):
         else:
             setattr(self, field_name, val)
 
+    def update_data(self, new_data, _commit=True):
+        for k,v in new_data.items():
+            self.data[k] = v
+        if _commit:
+            self._commit()
+
     def async_edit(self, owner, campaign_data, edit_fields, restricted_fields=None):
         if not restricted_fields:
             restricted_fields = self.RESTRICTED_SET_FIELDS
@@ -681,7 +704,10 @@ class Campaign(db.Document):
 
             val = campaign_data.get_field(field)
             if val:
-                self._async_set_field(field_name=field, val=val)
+                if field == 'data':
+                    self.update_data(new_data=val, _commit=False)
+                else:
+                    self._async_set_field(field_name=field, val=val)
             elif field in self.CAN_BE_NULL:
                 self._async_set_field(field_name=field, val=val)
         
@@ -689,12 +715,13 @@ class Campaign(db.Document):
         return True
 
     @classmethod
-    def async_create(cls, owner, campaign_data, create_fields, restricted_fields=None):
+    def async_create(cls, owner, campaign_data, create_fields, campaign_type=0, restricted_fields=None):
         if not restricted_fields:
             restricted_fields = cls.RESTRICTED_SET_FIELDS
 
         new_campaign = cls()
         new_campaign.owner = owner
+        new_campaign.campaign_type = campaign_type
 
         new_campaign._validate_campaign_data(owner=owner, campaign_data=campaign_data, changed_fields=create_fields)
 
@@ -727,6 +754,10 @@ class Campaign(db.Document):
 
         return self.data.get('list_id', None)
     
+    def add_data_value(self, key, value):
+        self.data[key] = value
+        self._commit()
+
     def get_update_existing(self):
         if not self.data:
             return False

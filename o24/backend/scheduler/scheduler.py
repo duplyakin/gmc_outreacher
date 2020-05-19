@@ -185,18 +185,21 @@ class Scheduler():
         if campaign.status != NEW:
             return self.resume_campaign(owner=owner, campaign=campaign)
 
-        prospects = models.Prospects.get_prospects(status=NEW, campaign_id=campaign.id)
-        if not prospects:
-            raise Exception("There is no prospects assigned to campaign")
+        if campaign._allow_no_prospects():
+            campaign._safe_start()
+        else:
+            prospects = models.Prospects.get_prospects(status=NEW, campaign_id=campaign.id)
+            if not prospects:
+                raise Exception("There is no prospects assigned to campaign")
 
-        campaign._safe_start()
+            campaign._safe_start()
 
-        prospect_ids = self._load_prospects(campaign, prospects)
-        if not prospect_ids:
-            campaign._safe_pause()
-            raise Exception("Can't load_prospects campaign_title={0} prospect_ids={1}".format(campaign.title, prospect_ids))
+            prospect_ids = self._load_prospects(campaign, prospects)
+            if not prospect_ids:
+                campaign._safe_pause()
+                raise Exception("Can't load_prospects campaign_title={0} prospect_ids={1}".format(campaign.title, prospect_ids))
 
-        self._update_prospects(prospect_ids, status=IN_PROGRESS)    
+            self._update_prospects(prospect_ids, status=IN_PROGRESS)    
         
         self._setup_scheduler_data(campaign)
 
@@ -284,17 +287,21 @@ class Scheduler():
 
 
     @classmethod
-    def safe_delete_campaign(cls, campaign):
+    def safe_delete_campaign(cls, owner_id, campaign, _unassign=False):
         if not campaign:
             raise Exception("DELETE ERROR: No such campaign")
 
         if campaign.inprogress():
             raise Exception("DELETE ERROR: campaign in progress, stop it first")
-        
+
         assigned_prospects = models.Prospects.get_prospects(campaign_id=campaign.id)
         if assigned_prospects:
-            raise Exception("DELETE ERROR: campaign has prospects, unassign all prospects before delete")
-        
+            if _unassign:
+                ids = [p.id for p in assigned_prospects]
+                cls.safe_unassign_prospects(owner_id=owner_id, prospects_ids=ids)
+            else:
+                raise Exception("DELETE ERROR: campaign has prospects, unassign all prospects before delete")
+
         TaskQueue.delete_campaign(campaign_id=campaign.id)
 
         return campaign.delete()
