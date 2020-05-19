@@ -61,7 +61,7 @@
         <el-input
           :disabled="!modified_fields['title']"
           placeholder="Input prospects list title"
-          v-model="campaign_data.prospects_list_title"
+          v-model="campaign_data.list_title"
         ></el-input>
       </card>
 
@@ -70,7 +70,7 @@
         <el-input
           :disabled="!modified_fields['title']"
           placeholder="ex: https://www.linkedin.com/search/results/all/?keywords=company&origin=GLOBAL_SEARCH_HEADER&page=97"
-          v-model="campaign_data.search_url"
+          v-model="campaign_data.data.search_url"
         ></el-input>
       </card>
 
@@ -80,14 +80,14 @@
             <p class="interval_text">Total pages required</p>
             <div class="col-3">
               <fg-input label>
-                <el-input-number v-model="campaign_data.total_pages" placeholder="ex: 1.00" :min="1" :max="8000000000"></el-input-number>
+                <el-input-number v-model="campaign_data.data.total_pages" placeholder="ex: 1.00" :min="1" :max="8000000000"></el-input-number>
               </fg-input>
             </div>
             <p class="interval_text">Number of pages for iteration (10 recommended)</p>
 
             <div class="col-3">
               <fg-input label>
-                <el-input-number v-model="campaign_data.interval_pages" placeholder="ex: 10.00" :min="1" :max="1000"></el-input-number>
+                <el-input-number v-model="campaign_data.data.interval_pages" placeholder="ex: 10.00" :min="1" :max="1000"></el-input-number>
               </fg-input>
             </div>
           </div>
@@ -255,11 +255,11 @@ import {
 import timezones from "../CampaignsList/defaults/timezones";
 import axios from '@/api/axios-auth';
 
-const CAMPAIGNS_API_GET = "/campaigns/get";
-const CAMPAIGNS_API_DATA = "/campaigns/data";
+const CAMPAIGNS_API_GET = "/campaigns/linkedin/get";
+const CAMPAIGNS_API_DATA = "/campaigns/linkedin/data";
 
-const CAMPAIGNS_API_ADD = "/campaigns/create";
-const CAMPAIGNS_API_EDIT = "/campaigns/edit";
+const CAMPAIGNS_API_ADD = "/campaigns/linkedin/parsing/create";
+const CAMPAIGNS_API_EDIT = "/campaigns/linkedin/edit";
 
 export default {
   components: {
@@ -295,17 +295,14 @@ export default {
       /*Object data*/
       campaign_data: {
         campaign_type: 1,
-        prospects_list_title: '',
-        search_url: '',
-        total_pages: 100,
-        interval_pages: 10,
-        title: "",
-        funnel: {},
-        credentials: [],
-        templates: {
-          email: [],
-          linkedin: []
+        list_title: '',
+        data: {
+            search_url: '',
+            total_pages: 100,
+            interval_pages: 10,
         },
+        title: "",
+        credentials: [],
 
         from_hour: "",
         to_hour: "",
@@ -458,7 +455,7 @@ export default {
         return false;
       }
 
-      if (this.campaign_data.prospects_list_title == "") {
+      if (this.campaign_data.list_title == "") {
         Notification.error({
           title: "Error",
           message: "You need to enter prospects list title"
@@ -466,7 +463,7 @@ export default {
         return false;
       }
 
-      if (this.campaign_data.search_url == "") {
+      if (this.campaign_data.data.search_url == "") {
         Notification.error({
           title: "Error",
           message: "You need to enter search url"
@@ -539,7 +536,8 @@ export default {
               var msg = "Save campaign error: " + r.msg + " code:" + r.code;
               Notification.error({ title: "Error", message: msg });
             } else {
-              this.$router.push({ path: "campaigns" });
+              Notification.success({ title: "Success", message: "Action created" });
+              this.$router.push({ path: "linkedin_actions" });
             }
           })
           .catch(error => {

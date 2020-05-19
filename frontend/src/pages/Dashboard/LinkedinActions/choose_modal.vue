@@ -67,9 +67,9 @@ export default {
         this.$router.push({
           path: "linkedin_parsing"
         });
-      } else if (this.campaign_type.label === "Linkedin data enreachment") {
+      } else if (this.campaign_type.label === "Linkedin data enrichment") {
         this.$router.push({
-          path: "linkedin_enreachment"
+          path: "linkedin_enrichment"
         });
       }
       this.$emit("close");

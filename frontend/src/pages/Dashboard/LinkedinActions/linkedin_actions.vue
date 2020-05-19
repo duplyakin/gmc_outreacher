@@ -13,12 +13,12 @@
             @click.prevent="addCampaign"
             type="button"
             class="btn btn-default btn-success mx-1"
-        >Add Campaign</button>
+        >Add action</button>
         <button
             @click.prevent="reload_campaigns"
             type="button"
             class="btn btn-default btn-success mx-1"
-        >Reload campaigns</button>
+        >Reload actions</button>
 
     </div>
     </div>
@@ -95,12 +95,12 @@ import axios from '@/api/axios-auth';
 
 const Campaign_choose = () => import('./choose_modal.vue')
 
-const CAMPAIGNS_API_DATA = '/campaigns/data'
-const CAMPAIGNS_API_LIST = '/campaigns/list';
+const CAMPAIGNS_API_DATA = '/campaigns/linkedin/data'
+const CAMPAIGNS_API_LIST = '/campaigns/linkedin/list';
 
-const CAMPAIGNS_API_DELETE = '/campaigns/delete';
-const CAMPAIGNS_API_START = '/campaigns/start';
-const CAMPAIGNS_API_PAUSE = '/campaigns/pause';
+const CAMPAIGNS_API_DELETE = '/campaigns/linkedin/delete';
+const CAMPAIGNS_API_START = '/campaigns/linkedin/start';
+const CAMPAIGNS_API_PAUSE = '/campaigns/linkedin/pause';
 
 export default {
 components: {

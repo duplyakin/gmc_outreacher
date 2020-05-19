@@ -237,11 +237,11 @@ import {
 import timezones from "../CampaignsList/defaults/timezones";
 import axios from '@/api/axios-auth';
 
-const CAMPAIGNS_API_GET = "/campaigns/get";
-const CAMPAIGNS_API_DATA = "/campaigns/data";
+const CAMPAIGNS_API_GET = "/campaigns/linkedin/get";
+const CAMPAIGNS_API_DATA = "/campaigns/linkedin/data";
 
-const CAMPAIGNS_API_ADD = "/campaigns/create";
-const CAMPAIGNS_API_EDIT = "/campaigns/edit";
+const CAMPAIGNS_API_ADD = "/campaigns/linkedin/enrichment/create";
+const CAMPAIGNS_API_EDIT = "/campaigns/linkedin/edit";
 
 export default {
   components: {
@@ -463,8 +463,8 @@ export default {
               var msg = "Save campaign error: " + r.msg + " code:" + r.code;
               Notification.error({ title: "Error", message: msg });
             } else {
-              Notification.success({ title: "Success", message: "Campaign created" });
-              this.$router.push({ path: "campaigns" });
+              Notification.success({ title: "Success", message: "Action created" });
+              this.$router.push({ path: "linkedin_actions" });
             }
           })
           .catch(error => {
