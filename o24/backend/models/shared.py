@@ -133,6 +133,10 @@ class Funnel(db.Document):
             if template_key:
                 self.template_key = template_key
 
+            funnel_type = json.get('funnel_type', '')
+            if funnel_type:
+                self.funnel_type = int(funnel_type)
+
             templates_required = json.get('templates_required', {})
             if root and not templates_required:
                 raise Exception("ERROR: templates_required for root funnel can't be empty")
@@ -329,6 +333,12 @@ class TaskQueue(db.Document):
 
     def get_code(self):
         return self.result_data.get('code', None)
+
+    def get_prospect(self):
+        if not self.prospect_id:
+            return None
+        
+        return models.Prospects.objects(id=self.prospect_id).get()
 
     def get_campaign(self):
         if not self.campaign_id:
