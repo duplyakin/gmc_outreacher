@@ -115,7 +115,7 @@ let formsMenu = {
   path: '/forms',
   component: DashboardLayout,
   redirect: '/forms/regular',
-  meta: { requiresAuth: true },
+  meta: { requiresAuth: true, requiresAdmin: false },
   children: [
     {
       path: 'regular',
@@ -164,24 +164,6 @@ let tablesMenu = {
 }
 
 
-let pagesMenu = {
-  path: '/pages',
-  component: DashboardLayout,
-  redirect: '/pages/user',
-  children: [
-    {
-      path: 'user',
-      name: 'User Page',
-      component: User
-    },
-    {
-      path: 'timeline',
-      name: 'Timeline Page',
-      component: TimeLine
-    }
-  ]
-}
-
 let loginPage = {
   path: '/login',
   name: 'Login',
@@ -198,7 +180,7 @@ let adminMenu = {
   path: '/admin',
   component: DashboardLayout,
   redirect: '/admin/users_list',
-  meta: { requiresAuth: true, role: ['admin'] },
+  meta: { requiresAuth: true, requiresAdmin: true },
   children: [
     {
       path: 'users_list',
@@ -212,12 +194,11 @@ const routes = [
   componentsMenu,
   formsMenu,
   tablesMenu,
-  pagesMenu,
   loginPage,
   registerPage,
   adminMenu,
   {
-    meta: { requiresAuth: true },
+    meta: { requiresAuth: true, role: 'user' },
     path: '/',
     component: DashboardLayout,
     redirect: '/profile',
@@ -302,7 +283,7 @@ const routes = [
   {
     path: '/admin',
     component: DashboardLayout,
-    meta: { requiresAuth: true, role: ['admin'] },
+    meta: { requiresAuth: true, requiresAdmin: true },
     children: [
       {
         path: 'overview_standart',

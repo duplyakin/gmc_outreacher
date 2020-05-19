@@ -289,12 +289,16 @@ methods: {
         }
     },
     deserialize_campaigns(from_data){
-        var pagination_dict = JSON.parse(from_data.pagination);
-        this.$set(this, 'pagination', pagination_dict);
+        if (form_data.pagination){
+            var pagination_dict = JSON.parse(from_data.pagination);
+            this.$set(this, 'pagination', pagination_dict);
+        }
 
-        var columns = JSON.parse(from_data.columns);
-        this.$set(this.list_data, 'columns', columns);
-
+        if (form_data.columns){
+            var columns = JSON.parse(from_data.columns);
+            this.$set(this.list_data, 'columns', columns);
+        }
+        
         if (from_data.campaigns){
             var campaigns = JSON.parse(from_data.campaigns)
             this.$set(this.campaigns_data, 'campaigns', campaigns);

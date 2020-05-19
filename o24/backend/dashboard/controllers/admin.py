@@ -1,6 +1,6 @@
 # Import flask dependencies
 from flask import Blueprint, request, render_template, \
-                  flash, g, session, redirect, url_for, render_template_string
+                  flash, g, session, redirect, url_for, render_template_string, jsonify
 from werkzeug.security import check_password_hash, generate_password_hash
 from o24.backend.dashboard.models import User, Credentials
 from jinja2 import TemplateNotFound

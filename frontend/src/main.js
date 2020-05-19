@@ -34,23 +34,16 @@ const router = new VueRouter({
 router.beforeEach((to, from, next) => {
 	let token = localStorage.getItem('token');
 	let role = localStorage.getItem('role');
+
 	let requireAuth = to.matched.some(record => record.meta.requiresAuth);
+	let requireAdmin = to.matched.some(record => record.meta.requiresAdmin);
 
 	if (requireAuth && !token) {
 		next('/login');
 	} else if (token && (to.path == '/login' || to.path == '/register')) {
 		next('/profile');
-	/*} else if (to.meta.roles.includes(role)) {
-		switch (role) {
-			case 'user':
-				next('/profile')
-				break;
-			case 'admin':
-				next('/profile')
-				break;
-			default:
-				next('/profile')
-		}*/
+	} else if (requireAdmin && role != 'admin') {
+		next('/profile');
 	} else {
 		next();
 	}

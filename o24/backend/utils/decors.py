@@ -1,5 +1,5 @@
 from functools import wraps
-from flask import g, request, redirect, url_for
+from flask import g, request, redirect, url_for, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity, verify_jwt_in_request
 import o24.backend.dashboard.models as models
 

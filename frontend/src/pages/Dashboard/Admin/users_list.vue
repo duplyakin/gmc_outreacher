@@ -229,9 +229,6 @@ methods: {
         }
     },
     deserialize_users(from_data){
-        var pagination_dict = JSON.parse(from_data.pagination);
-        this.$set(this, 'pagination', pagination_dict);
-
         var columns = JSON.parse(from_data.columns);
         this.$set(this.list_data, 'columns', columns);
 
