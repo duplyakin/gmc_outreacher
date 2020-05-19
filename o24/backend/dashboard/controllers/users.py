@@ -43,6 +43,7 @@ def sign_in():
             result['code'] = 1
             result['msg'] = 'Success'
             result['token'] = get_token(current_user)
+            result['role'] = current_user.role
     except Exception as e:
         print(e)
         traceback.print_exc()
@@ -78,6 +79,7 @@ def sign_up():
             result['code'] = 1
             result['msg'] = 'Success'
             result['token'] = get_token(current_user)
+            result['role'] = current_user.role
     except Exception as e:
         print(e)
         traceback.print_exc()

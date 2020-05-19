@@ -27,7 +27,49 @@ class GoogleAppSetting(db.Document):
             raise Exception("There is no active config created for gogole app service")
         
         return settings
+    
+    @classmethod
+    def create_settings(cls, from_data):
+        if not from_data:
+            return None
 
+        new_settings = cls()
+
+        for k,v in from_data.items():
+            if k in ['credentials', 'created']:
+                continue
+            
+            if k == 'active':
+                if v in ['true', 'True', '1']:
+                    new_settings.active = True
+                else:
+                    new_settings.active = False
+                continue
+            
+            setattr(new_settings, k, v)
+
+
+        new_settings._commit()
+        return new_settings
+
+    def update_data(self, from_data):
+        if not from_data:
+            return
+        
+        for k,v in from_data.items():
+            if k in ['credentials', 'created']:
+                continue
+            
+            if k == 'active':
+                if v in ['true', 'True', '1']:
+                    self.active = True
+                else:
+                    self.active = False
+                continue
+            
+            setattr(self, k, v)
+        
+        self._commit()
 
     def list_fields(self):
         return {

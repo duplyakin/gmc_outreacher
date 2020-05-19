@@ -1,0 +1,160 @@
+тот функционал что сейчас доступен для админа - то есть должен работать только если role='admin'
+
+1. /admin/users/list (POST) - выводит список пользователя.
+request:
+- нет
+
+response:
+- {
+    'code' : -1,
+    'msg' : 'Unknown request',
+    'roles' : ['admin', 'user'],  // Как это использовать смотри следующий запрос
+    'columns' : 
+    'users' : массив пользователей (пользователь = объект)
+}
+
+Нужно отобразить таблицу с пользователями, вот такие поля (то что приходит в columns):
+[
+    {
+        'label' : 'Email',
+        'prop' : 'email'
+    },
+    {
+        'label' : 'Role',
+        'prop' : 'role'
+    },
+    {
+        'label' : 'Registration data',
+        'prop' : 'created'   
+    },
+    {
+        'label' : 'Personal invitation code',
+        'prop' : 'invite_code'   
+    },
+    {
+        'label' : 'Invited by',
+        'prop' : 'invited_by'   
+    }
+]
+
+
+2. /admin/roles/change (POST) - меняет роль пользователя
+
+* В таблице пользователя в 1 пункте просто в одной из колонок сделай кнопку "change role" при нажатии, на которую
+админ выбирает роли из массива roles, которые приходят в запросе 1 (это просто строки)
+
+request:
+_user_id - ID пользователя
+_new_role - новая роль (из спика roles = ['admin', 'user'])
+
+response:
+{
+    'code' : -1,
+    'msg' : 'Unknown request',
+    'user' : Обновленные данные для пользователя
+}
+
+
+3. /admin/google/settings/list (POST) - список всех текущих google settings
+* отобразить в таблице (в первой ячейке делай кнопку edit)
+
+request:
+- нет
+
+response:
+{
+    'code' : -1,
+    'msg' : 'Unknown request',
+    'columns' : // Список колонок для таблицы
+    'google_settings' : массив объектов 
+}
+
+4. /admin/google/settings/get (POST) - получает информаию о конкретном settings 
+request:
+_settings_id - ID настроек
+
+response:
+{
+    'code' : -1,
+    'msg' : 'Unknown request'
+    'settings' : Объект настроек
+}
+
+
+ВНИМАНИЕ!!!! как отображать объект настроек в форме редактирования, если ты заметил, то я НЕ передаю columns в /get
+- Сделай все поля текстовые
+- В цикле иди по всем свойствам объекта (посмотри как тебе объект приходит)
+- И рисуй input, где:
+   * label: это название поля 
+   * value: это значение поля
+
+
+5. /admin/google/settings/edit (POST) - редактирование настроек
+request:
+_settings_id - ID настроек
+_data - новые данные (в формате, который ты получаешь в get выше)
+
+response:
+{
+    'code' : -1,
+    'msg' : 'Unknown request'
+    'settings' : Объект настроек обвновленный
+}
+
+6. /admin/google/settings/fields (POST) - этот запрос вызываешь чтобы получить список полей для ФОРМЫ СОЗДАНИЯ (все поля текстовые)
+request:
+- нет 
+response:
+{
+    'code' : -1,
+    'msg' : 'Unknown request'
+    'columns' : Список текстовых полей, используемых для создания
+}
+
+Вот поля:
+[
+    {
+        'label' : 'Title',
+        'prop' : 'title'
+    },
+    {
+        'label' : 'redirect_uri',
+        'prop' : 'redirect_uri'
+    },
+    {
+        'label' : 'gmail_scopes',
+        'prop' : 'gmail_scopes'   
+    },
+    {
+        'label' : 'gmail_access_type',
+        'prop' : 'gmail_access_type'   
+    },
+    {
+        'label' : 'gmail_include_granted_scopes',
+        'prop' : 'gmail_include_granted_scopes'   
+    },
+    {
+        'label' : 'gmail_api_name',
+        'prop' : 'gmail_api_name'   
+    },
+    {
+        'label' : 'gmail_api_version',
+        'prop' : 'gmail_api_version'   
+    },
+    {
+        'label' : 'active (1 or 0)',
+        'prop' : 'active'   
+    }
+]
+
+
+7. /admin/google/settings/create (POST) - создания настроек
+request:
+_data - новые данные (поля объекта = тому что ты получил в запросе fields)
+
+response:
+{
+    'code' : -1,
+    'msg' : 'Unknown request'
+    'settings' : Объект настроек обвновленный
+}
