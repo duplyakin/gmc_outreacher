@@ -156,9 +156,10 @@ class User(db.Document):
         return state
 
 
-    def _commit(self):
+    def _commit(self, _reload=False):
         self.save()
-        self.reload()
+        if _reload:
+            self.reload()
 
     def __repr__(self):
         return '<User %r>' % (self.email)
@@ -175,7 +176,8 @@ class Credentials(db.Document):
     # 1 - Refreshed (need to update all tasks)
     # -1 - Failed
     status = db.IntField(default=0)
-    
+    error = db.StringField(default='')
+
     medium = db.StringField()
 
     data = db.DictField()
@@ -223,7 +225,7 @@ class Credentials(db.Document):
         
         exist.status = 0
         
-        exist._commit()
+        exist._commit(_reload=True)
 
         return exist
      
@@ -291,7 +293,9 @@ class Credentials(db.Document):
 
     def get_data(self):
         return self.data
-
+    
+    def get_medium(self):
+        return self.medium
 
     def change_limits(self, now):
         self.current_daily_counter = self.current_daily_counter + 1
@@ -305,6 +309,15 @@ class Credentials(db.Document):
         else:
             self.next_action = now + timedelta(seconds=self.limit_interval)        
 
+    def _inc_next_action(seconds, _commit=True):
+        now = datetime.datetime.now()
+
+        self.next_action = now + timedelta(seconds=seconds)
+        self.current_daily_counter = 0
+        
+        if _commit:
+            self._commit()
+
     def _check_for_duplicates(self, data):
         #check duplicates:
         account = data.get('account', '')
@@ -314,7 +327,7 @@ class Credentials(db.Document):
                 error = "Credentials duplicate error for account: {0}".format(account)
                 raise Exception(error)
 
-    def safe_update_credentials(self, credentials_data):
+    def safe_update_credentials(self, credentials_data, _reload=False):
         limit_per_day = credentials_data.get_limit_per_day()
         if limit_per_day:
             self.limit_per_day = limit_per_day
@@ -323,7 +336,7 @@ class Credentials(db.Document):
         if data:
             self.update_data(new_data=data, _commit=False)
         
-        self._commit()
+        self._commit(_reload=_reload)
 
     def update_data(self, new_data, _commit=True):
         if not isinstance(new_data, dict):
@@ -343,6 +356,24 @@ class Credentials(db.Document):
         if _commit:
             self._commit()
     
+    def error(self, error='', delay=None):
+        self.error = error
+        self.status = -1
+
+        if delay is not None and delay > 0 :
+            self._inc_next_action(seconds=delay*NEXT_DAY_SECONDS, _commit=False)
+
+        self._commit()
+
+    def resume(self):
+        self.error = ''
+        self.status = 0
+
+        self._commit()
+
+    def is_refreshed(self):
+        return self.status == 1
+
     def change_status(self, status):
         self.status = status
         self._commit()
@@ -350,9 +381,10 @@ class Credentials(db.Document):
     def warmup(self):
         self.limit_per_day = round(self.limit_per_day * 1.3)
 
-    def _commit(self):
+    def _commit(self, _reload=False):
         self.save()
-        self.reload()
+        if _reload:
+            self.reload()
 
 #### Menu: Teams ####
 #### Manage teams
@@ -374,9 +406,10 @@ class Team(db.Document):
 
         return new_team
 
-    def _commit(self):
+    def _commit(self, _reload=False):
         self.save()
-        self.reload()
+        if _reload:
+            self.reload()
 
 class Campaign(db.Document):
     RESTRICTED_SET_FIELDS = [
@@ -516,20 +549,16 @@ class Campaign(db.Document):
         return new_campaign
     
     @classmethod
-    def get_credentials(cls, campaign_id, funnel_node):
+    def get_credentials_id(cls, campaign_id, funnel_node):
         campaign = cls.objects(id=campaign_id).get()
 
         medium = funnel_node.action.medium
 
-        credentials_dict = {}
         for c in campaign.credentials:
             if c.medium == medium:
-                credentials_dict['id'] = c.id
-                credentials_dict['data'] = c.data
-                credentials_dict['medium'] = medium
-                break
+                return c.id
         
-        return credentials_dict
+        return None
                 
     @classmethod
     def update_campaigns(cls, campaigns):
@@ -544,6 +573,14 @@ class Campaign(db.Document):
             return False
         
         return True
+
+    def get_template_data(self, template_key, medium):
+        templates_for_medium = self.templates.get(medium, '')
+        if not templates_for_medium:
+            return {}
+        
+        template_data = templates_for_medium.get(template_key, {})
+        return template_data
 
     def get_node_template(self, template_key, medium):
         if not template_key:
@@ -648,7 +685,7 @@ class Campaign(db.Document):
             elif field in self.CAN_BE_NULL:
                 self._async_set_field(field_name=field, val=val)
         
-        self._commit()
+        self._commit(_reload=True)
         return True
 
     @classmethod
@@ -671,7 +708,7 @@ class Campaign(db.Document):
             elif field in cls.CAN_BE_NULL:
                 new_campaign._async_set_field(field_name=field, val=val)
 
-        new_campaign._commit()
+        new_campaign._commit(_reload=True)
         return new_campaign
 
 
@@ -681,13 +718,35 @@ class Campaign(db.Document):
         
         return False
 
+    def get_data(self):
+        return self.data
+
+    def get_list_id(self):
+        if not self.data:
+            return None
+
+        return self.data.get('list_id', None)
+    
+    def get_update_existing(self):
+        if not self.data:
+            return False
+
+        return self.data.get('update_existing', False)
+
+    def get_owner_id(self):
+        if not self.owner:
+            return None
+        
+        return self.owner.id
+
     def update_status(self, status):
         self.status = status
         self._commit()
 
-    def _commit(self):
+    def _commit(self, _reload=False):
         self.save()
-        self.reload()
+        if _reload:
+            self.reload()
 
 
 
@@ -786,16 +845,16 @@ class ProspectsList(db.Document):
         new_list.owner = owner_id
         new_list.title = title
 
-        new_list._commit()
+        new_list._commit(_reload=True)
         return new_list
     
     def serialize(self):
         return 0
 
-    def update_data(self, title=None):
+    def update_data(self, title=None, _reload=False):
         if title:
             self.title = title
-            self._commit()
+            self._commit(_reload=_reload)
 
     def safe_delete(self):
         has_prospects = Prospects.objects(assign_to_list=self.id).count()
@@ -804,9 +863,10 @@ class ProspectsList(db.Document):
 
         return self.delete()
 
-    def _commit(self):
+    def _commit(self, _reload=False):
         self.save()
-        self.reload()
+        if _reload:
+            self.reload()
 
 
 class Prospects(db.Document):
@@ -950,7 +1010,7 @@ class Prospects(db.Document):
             if val:
                 new_prospect._async_set_field(field_name=field, val=val)
 
-        new_prospect._commit()
+        new_prospect._commit(_reload=True)
         return new_prospect
 
 
@@ -1091,6 +1151,66 @@ class Prospects(db.Document):
                     prospect._commit()
                     del data
                     break
+    
+    @classmethod
+    def upload_from_list(cls, owner_id, prospects_arr, list_id, update_existing=0):
+        if not prospects_arr:
+            return False
+
+        emails = []
+        linkedins = []
+
+        create_prospects = {}
+        for prospect in prospects_arr:
+            email = prospect.get('email', '')
+            linkedin = prospect.get('linkedin', '')
+            if not email and not linkedin:
+                continue
+            
+            next_prospect = cls.create_prospect(owner_id=owner_id,
+                                                data=prospect, 
+                                                list_id=list_id, 
+                                                commit=False)
+
+            if linkedin:
+                create_prospects[linkedin] = next_prospect
+                linkedins.append(linkedin)
+                continue
+
+            if email:
+                create_prospects[email] = next_prospect
+                emails.append(email)
+                continue
+                    
+        # we have found duplicates
+        if emails or linkedins:
+            duplicates = Prospects.objects(Q(owner=owner_id) & (Q(data__email__in=emails) | Q(data__linkedin__in=linkedins)))
+            if duplicates and len(duplicates):
+                for d in duplicates:
+                    try:
+                        linkedin = d.get_linkedin()
+                        email = d.get_email()
+
+                        key = linkedin
+                        prospect = create_prospects.get(linkedin, None)
+                        if not prospect:
+                            key = email
+                            prospect = create_prospects.get(email, None)
+                        
+                        if prospect:
+                            if update_existing:
+                                new_data = prospect.data
+                                d.update_data_partly(new_data=new_data, list_id=list_id)
+                            del create_prospects[key]
+
+                    except:
+                        pass
+
+            arr = list(create_prospects.values())
+            if arr:
+                cls.objects.insert(arr, load_bulk=False)
+        
+        return True
 
     @classmethod
     def upload(cls, owner_id, csv_with_header, map_to, list_id, update_existing=0):
@@ -1254,23 +1374,42 @@ class Prospects(db.Document):
     def update_prospects(cls, ids, status):
         return cls.objects(id__in=ids).update(status=status)
 
+    def get_data(self):
+        return self.data
+
     def get_email(self):
         return self.data.get('email', '')
+    
+    def get_linkedin(self):
+        return self.data.get('linkedin', '')
 
-    def update_data(self, data):
+    def update_data_partly(self, new_data, list_id, _reload=False):
+        if not new_data:
+            return 
+
+        for k, v in new_data.items():
+            self.data[k] = v
+
+        if list_id:
+            self.assign_to_list = list_id
+
+        self._commit(_reload=_reload)
+
+    def update_data(self, data, _reload=False):
         self._chek_for_duplicates(owner_id=self.owner.id, data=data)
 
         self.data = data
-        self._commit()
+        self._commit(_reload=_reload)
 
     def update_status(self, status):
         self.status = status
 
         self._commit()
 
-    def _commit(self):
+    def _commit(self, _reload=False):
         self.save()
-        self.reload()
+        if _reload:
+            self.reload()
 
 
 class MediumSettings(db.Document):

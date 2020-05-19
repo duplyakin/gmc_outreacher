@@ -6,6 +6,8 @@ from o24.backend.models.shared import TaskQueue, Funnel, Action, AsyncTaskQueue
 from o24.globals import *
 from .models import Priority, TaskLog
 import o24.backend.handlers.jobs_map as jobs_map
+import o24.backend.handlers.trail_handlers as trail_handlers
+
 import datetime
 from mongoengine.queryset.visitor import Q
 
@@ -140,6 +142,31 @@ class Scheduler():
             campaigns_updated.append(campaign)
         
         models.Campaign.update_campaigns(campaigns_updated)
+
+    def trail(self):
+        tasks = TaskQueue.get_trail_tasks()
+        for task in tasks:
+            if task.status == FAILED:
+                error_code = task.get_code()
+                handler = trail_handlers.FAILED_HANDLERS.get(error_code, None)
+                if handler is None:
+                    handler = trail_handlers.FAILED_HANDLERS[TRAIL_UNKNOWN_ERROR]
+                
+                handler(task)
+                continue
+
+            elif task.status == CARRYOUT:
+                action_key = task.action_key
+                handler = trail_handlers.CARRYOUT_HANDLERS.get(action_key, None)
+                if handler is None:
+                    handler = trail_handlers.CARRYOUT_HANDLERS[CARRYOUT_DEFAULT_HANDLER]
+                
+                handler(task)
+                continue
+            else:
+                print("Trail unknown status task.id={0} task.status={1} task.action_key={2}".format(task.id, task.status, task.action_key))
+                continue
+            
 
     def _switch(self, task):
         if task.status != READY:

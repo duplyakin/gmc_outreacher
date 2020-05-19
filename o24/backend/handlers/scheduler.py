@@ -16,12 +16,17 @@ def emit_scheduler():
     try:
         scheduler = Scheduler()
         
+        #handle FAILED and CARRYOUT tasks
+        scheduler.trail()
+
+        #Switch READY tasks to the next stage
         scheduler.plan()
 
+        #Create jobs for all NEW tasks that are ready
         jobs = scheduler.execute()
 
         group_jobs = group(jobs)
-        
+
         return group_jobs.apply_async()
     except Exception as e:
         app.logger.error(".....emit_scheduler Exception:{0}".format(str(e)))

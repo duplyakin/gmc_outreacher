@@ -31,16 +31,13 @@ class Action(db.Document):
         action = cls.objects(key=key).first()
         return action
 
-    def _commit(self):
+    def _commit(self, _reload=False):
         self.save()
-        self.reload()
+        if _reload:
+            self.reload()
     
     def is_true(self, result):
-        if self.action_type == ACTION_NONE:
-            pass
-            #TODO: custom action checks can be implemented
-        else:
-            return result.get('if_true', False)
+        return result.get('if_true', False)
 
 
 class Funnel(db.Document):
@@ -101,6 +98,9 @@ class Funnel(db.Document):
 
         return new_funnel
 
+    def get_template_key(self):
+        return self.template_key
+
     def get_action_key(self):
         return self.action.key
 
@@ -149,9 +149,10 @@ class Funnel(db.Document):
         self._commit()
         
 
-    def _commit(self):
+    def _commit(self, _reload=False):
         self.save()
-        self.reload()
+        if _reload:
+            self.reload()
 
 # How TaskQueue works
 # When the new task created status = NEW
@@ -163,19 +164,15 @@ class TaskQueue(db.Document):
     status = db.IntField(default=NEW)
     ack = db.IntField(default=0)
 
-    credentials_dict = db.DictField()
-    credentials_id = db.ObjectIdField()
-
     input_data = db.DictField()
     result_data = db.DictField()
 
+    credentials_id = db.ObjectIdField()
     prospect_id = db.ObjectIdField(unique=True)
     campaign_id = db.ObjectIdField()
     
     record_type = db.IntField(default=0)
     followup_level = db.IntField(default=0)
-
-    js_action = db.BooleanField(default=False)
 
     def decrypt_password(self, credentials_dict):
         data = credentials_dict.get('data', '')
@@ -188,10 +185,74 @@ class TaskQueue(db.Document):
         
         credentials_dict['password'] = decode_password(password)
 
-    def switch_task(self, next_node):
+    def _fill_input_data(self, campaign_id=None, prospect_id=None, credentials_id=None, template_key=''):
+        self.input_data = {}
+
+        #Input data format:
+        #	credentials_data : {
+        #        email : ‘dsafadsf’
+        #        password: ‘dasfadadsf’	
+        #    }
+        #
+        #    campaign_data: {
+        #        start_url: “,...” // Ты это НЕ используешь,
+        #            pages_total: 100
+        #
+        #        next_url: ‘linkedin.com/search?u=...’  // Тот search URL который надо использовать,
+        #        page_count: 10,
+        #    }
+        #    template_data: {
+        #        title: 'Hello from {company_url}'    
+        #        body: ‘Hi {first_name}! I found your {linkedin} and follow up’’
+        #    }
+        #    prospect_data: {
+        #        first_name: ‘Kirill’
+        #        last_name: ‘Shilov’
+        #        linkedin: ‘linkedin.com/shilov’,
+        #        company_title: ‘howtotoken.com’
+        #        ....
+        #    }
+
+        medium=''
+        if credentials_id:
+            credentials = models.Credentials.objects().get(id=credentials_id)
+            if not credentials:
+                raise Exception("_fill_input_data ERROR: can't find credentials_id={0}".format(credentials_id))
+            
+            self.input_data['credentials_data'] = credentials.get_data() 
+            medium = credentials.get_medium()
+
+        if campaign_id:
+            campaign = models.Campaign.objects().get(id=campaign_id)
+            if not campaign:
+                raise Exception("_fill_input_data ERROR: can't find campaign_id={0}".format(campaign_id))
+            
+            self.input_data['campaign_data'] = campaign.get_data()
+            
+            if template_key:
+                template_data = campaign.get_template_data(template_key=template_key, medium=medium)
+                self.input_data['template_data'] = template_data
+
+        if prospect_id:
+            prospect =  models.Prospects.objects().get(id=prospect_id)
+            if not prospect:
+                raise Exception("_fill_input_data ERROR: can't find prospect_id={0}".format(prospect_id))
+
+            self.input_data['prospect_data'] = prospect.get_data() 
+
+        return self.input_data
+
+    def switch_task(self, next_node, _commit=False):
+        if not next_node:
+            raise Exception("switch_task ERROR: next_node={0} can't be None".format(next_node))
         
-        #init to 0
-        self.current_node = next_node
+        #Switch algo:
+        #1 - Init states
+        #2 - switch current_node pointer
+        #3 - update credentials
+        #4 - _fill_input_data
+
+        #init sta
         self.status = NEW
         self.ack = 0
 
@@ -200,13 +261,21 @@ class TaskQueue(db.Document):
         self.record_type = FOLLOWUP
         self.followup_level = 0
 
-        self.credentials_dict = models.Campaign.get_credentials(self.campaign_id, next_node)
-        #if self.credentials_dict:
-        #    self.decrypt_password(self.credentials_dict)
+        self.current_node = next_node
+        self.action_key = next_node.get_action_key()
 
-        self.credentials_id = self.credentials_dict.get('id', None)
+        self.credentials_id = models.Campaign.get_credentials_id(self.campaign_id, next_node)
+        if not self.credentials_id:
+            raise Exception("Can't find credentials for task.id={0} node_id={1}".format(self.id, next_node.id))
 
-        self.action_key = self.current_node.get_action_key()
+        template_key = next_node.get_template_key()
+        self._fill_input_data(campaign_id=self.campaign_di, 
+                                prospect_id=self.prospect_id, 
+                                credentials_id=self.credentials_id, 
+                                template_key=template_key)
+
+        if _commit:
+            self._commit()
 
     def acknowledge(self):
         self.ack = self.ack + 1
@@ -241,6 +310,22 @@ class TaskQueue(db.Document):
         
         return result
 
+    def get_code(self):
+        return self.result_data.get('code', None)
+
+    def get_campaign(self):
+        if not self.campaign_id:
+            return None
+        
+        return models.Campaign.objects(id=self.campaign_id).get()
+
+    def get_result_data(self):
+        return self.result_data
+
+    def _resume(self):
+        self.status = NEW
+        self._commit()
+
     @classmethod
     def get_task(cls, task_id):
         return cls.objects(id=task_id).get()
@@ -248,6 +333,10 @@ class TaskQueue(db.Document):
     @classmethod
     def get_ready(cls):
         return TaskQueue.objects(status=READY)
+
+    @classmethod
+    def get_trail_tasks(cls):
+        return TaskQueue.objects(Q(status=FAILED) | Q(status=CARRYOUT))
 
     @classmethod
     def get_execute_tasks(cls, do_next, followup_level, now):
@@ -310,22 +399,38 @@ class TaskQueue(db.Document):
         return cls.objects(campaign_id=campaign_id).delete()
 
     @classmethod
-    def create_task(cls, campaign, prospect, test_crededentials_dict=None):
+    def create_task(cls, campaign, prospect, test_crededentials_dict=None, _commit=False):
         new_task = cls()
-        new_task.current_node = campaign.funnel
-        
-        new_task.credentials_dict = models.Campaign.get_credentials(campaign.id, new_task.current_node)
-        new_task.credentials_id = new_task.credentials_dict.get('id', None)
-        new_task.action_key = new_task.current_node.get_action_key()
+
+        _node = campaign.funnel
+
+        new_task.current_node = _node
+
+        new_task.action_key = _node.get_action_key()
+        new_task.credentials_id = models.Campaign.get_credentials_id(campaign.id, _node)
+        if not new_task.credentials_id:
+            raise Exception("create_task ERROR: Can't find credentials for node_id={0}".format(_node.id))
 
         if test_crededentials_dict:
-            new_task.credentials_dict = test_crededentials_dict.get('credentials_dict')
             new_task.credentials_id = test_crededentials_dict.get('credentials_id')
             new_task.action_key = test_crededentials_dict.get('action_key')
 
-        new_task.prospect_id = prospect.id
+        prospect_id = None
+        if prospect:
+            new_task.prospect_id = prospect.id
+            prospect_id = new_task.prospect_id
+
         new_task.campaign_id = campaign.id
         new_task.status = NEW
+
+        template_key = _node.get_template_key()
+        new_task._fill_input_data(campaign_id=campaign.id, 
+                                prospect_id=prospect_id, 
+                                credentials_id=new_task.credentials_id, 
+                                template_key=template_key)
+
+        if _commit:
+            new_task._commit(_reload=True)
 
         return new_task
 
@@ -346,9 +451,10 @@ class TaskQueue(db.Document):
         
         return TaskQueue.objects.insert(tasks, load_bulk=True)
 
-    def _commit(self):
+    def _commit(self, _reload=False):
         self.save()
-        self.reload()
+        if _reload:
+            self.reload()
 
 #We put async tasks here. 
 class AsyncTaskQueue(db.Document):
@@ -383,9 +489,10 @@ class AsyncTaskQueue(db.Document):
         new_task._commit()
         return new_task
 
-    def _commit(self):
+    def _commit(self, _reload=False):
         self.save()
-        self.reload()
+        if _reload:
+            self.reload()
 
 class OpenTracker(db.Document):
     #open, reply

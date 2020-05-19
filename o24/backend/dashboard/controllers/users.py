@@ -72,7 +72,7 @@ def sign_up():
             if not current_user:
                 raise Exception("Error register the User")
             
-            current_user._commit()
+            current_user._commit(_reload=True)
 
             
             result['code'] = 1

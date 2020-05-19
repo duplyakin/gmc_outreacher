@@ -185,8 +185,7 @@ def edit_list():
             if not title:
                 raise Exception("Title can't be empty")
 
-            prospect_list.update_data(title=title)
-            prospect_list.reload()
+            prospect_list.update_data(title=title, _reload=True)
 
             result['code'] = 1
             result['updated'] = prospect_list.to_json()

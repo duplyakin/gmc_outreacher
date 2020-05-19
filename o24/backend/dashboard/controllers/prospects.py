@@ -386,7 +386,7 @@ def edit_prospect():
             if not exist:
                 raise Exception('Prospect does not exist')
 
-            exist.update_data(data=data)
+            exist.update_data(data=data, _reload=True)
 
             result['code'] = 1
             result['updated'] = exist.to_json()

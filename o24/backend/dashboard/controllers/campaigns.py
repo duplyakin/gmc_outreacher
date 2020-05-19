@@ -294,7 +294,6 @@ def edit_campaign():
                 raise Exception("edit_fields can't be empty")  
 
             campaign.async_edit(owner=current_user.id, campaign_data=campaign_data, edit_fields=edit_fields)
-            campaign.reload()
 
             campaign_dict = to_json_deep_dereference(campaign)
 
