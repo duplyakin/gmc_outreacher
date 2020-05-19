@@ -567,6 +567,29 @@ class Campaign(db.Document):
         for c in campaigns:
             c._commit()
 
+    def parsing_switch(self, next_url):
+        is_finished = False
+
+        if self.campaign_type != LINKEDIN_PARSING_CAMPAIGN_TYPE:
+            raise Exception("parsing_switch wrong campaign_type={0}".format(self.campaign_type))
+        
+        pages_total = int(self.data.get('total_pages', 0))
+        interval_pages = int(self.data.get('interval_pages', 0))
+
+        pages_done = int(self.data.get('pages_done', 0))
+        pages_done = pages_done + interval_pages
+
+        #UPDATE DATA - will be pass to handler through input_data
+        self.data['next_url'] = next_url
+        self.data['pages_done'] = pages_done
+
+        if pages_done >= pages_total:
+            is_finished = True
+
+        self._commit()
+
+        return is_finished
+
     def set_linkedin_enrichment_funnel(self):
         funnel_id = shared.Funnel.get_linkedin_enrichment_funnel_id()
         self.funnel = funnel_id
@@ -773,6 +796,34 @@ class Campaign(db.Document):
     def update_status(self, status):
         self.status = status
         self._commit()
+
+    def fork_linkedin_enrichment_campaign(self):
+        if self.campaign_type != LINKEDIN_PARSING_CAMPAIGN_TYPE:
+            raise Exception("fork_linkedin_enrichment_campaign ERROR: wrong campaign_type".format(self.campaign_type))
+        
+        new_campaign = Campaign()
+
+        new_campaign.title = "Linkedin enrichment for {0}".format(self.title)
+        new_campaign.owner = self.owner
+
+        new_campaign.credentials = self.credentials
+
+        new_campaign.funnel = shared.Funnel.get_linkedin_enrichment_funnel_id()
+
+        new_campaign.sending_days = self.sending_days
+        new_campaign.from_hour = self.from_hour
+        new_campaign.to_hour = self.to_hour
+
+        new_campaign.from_minutes = self.from_minutes
+        new_campaign.to_minutes = self.to_minutes
+
+        new_campaign.time_zone = self.time_zone
+
+        new_campaign.status = NEW
+
+        new_campaign._commit()
+
+        return new_campaign
 
     def _commit(self, _reload=False):
         self.save()
@@ -1022,6 +1073,10 @@ class Prospects(db.Document):
         self._chek_for_duplicates(owner_id=owner_id, data=data)
 
         return True
+
+    @classmethod
+    def get_from_list(cls, owner_id, list_id):
+        return cls.objects(owner=owner_id, assign_to_list=list_id)
 
     @classmethod
     def async_create(cls, owner_id, prospect_data, create_fields, restricted_fields=None):
@@ -1414,7 +1469,7 @@ class Prospects(db.Document):
     def get_linkedin(self):
         return self.data.get('linkedin', '')
 
-    def update_data_partly(self, new_data, list_id, _reload=False):
+    def update_data_partly(self, new_data, list_id=None, _reload=False):
         if not new_data:
             return 
 

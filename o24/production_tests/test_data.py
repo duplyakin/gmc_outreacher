@@ -295,7 +295,7 @@ ACTIONS = [
         },
         'medium' : 'email',
         'key' : EMAIL_CHECK_REPLY_ACTION
-    }
+    },
 
     {
         'action_type' : 1,
@@ -337,7 +337,9 @@ FUNNELS = [
     {
         'root' : {
             'key' : LINKEDIN_SEARCH_ACTION,
-            'title' : 'Funnel for linkedin parsing',
+            'funnel_type' : 1,
+            'title' : 'Linkedin Parsing Funnel',
+            'templates_required' : {'dummy' : 1},
             'root' : True,
             'if_true' : FINISHED_ACTION,
             'if_false' : FINISHED_ACTION,
@@ -349,7 +351,9 @@ FUNNELS = [
     {
         'root' : {
             'key' : LINKEDIN_PARSE_PROFILE_ACTION,
-            'title' : 'Funnel for parsing profile data',
+            'funnel_type' : 1,
+            'templates_required' : {'dummy' : 1},
+            'title' : 'Linkedin enrichment funnel',
             'root' : True,
             'if_true' : FINISHED_ACTION,
             'if_false' : FINISHED_ACTION,
