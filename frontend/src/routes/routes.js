@@ -62,6 +62,8 @@ const Accounts = () => import('src/pages/Dashboard/Accounts/accounts.vue')
 const Team = () => import('src/pages/Dashboard/Team/team.vue')
 const Actions = () => import('src/pages/Dashboard/Actions/actions.vue')
 
+// admin
+const UsersList = () => import('src/pages/Dashboard/Admin/users_list.vue')
 
 
 let componentsMenu = {
@@ -192,6 +194,19 @@ let registerPage = {
   component: Register
 }
 
+let adminMenu = {
+  path: '/admin',
+  component: DashboardLayout,
+  redirect: '/admin/users_list',
+  meta: { requiresAuth: true, role: ['admin'] },
+  children: [
+    {
+      path: 'users_list',
+      name: 'Users List',
+      component: UsersList
+    },
+  ]
+}
 
 const routes = [
   componentsMenu,
@@ -200,6 +215,7 @@ const routes = [
   pagesMenu,
   loginPage,
   registerPage,
+  adminMenu,
   {
     meta: { requiresAuth: true },
     path: '/',

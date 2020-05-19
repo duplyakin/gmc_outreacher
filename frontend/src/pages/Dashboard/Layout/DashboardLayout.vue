@@ -16,9 +16,13 @@
         <sidebar-item :link="{name: 'Prospects', icon: 'nc-icon nc-layers-3', path: '/prospects'}"></sidebar-item>
         <sidebar-item :link="{name: 'Prospects List', icon: 'nc-icon nc-single-copy-04', path: '/prospects_list'}"></sidebar-item>
 
-        <div v-if="role='admin'">
+        <div v-if="role==='admin'">
 
         <sidebar-item :link="{name: 'Actions', icon: 'nc-icon nc-tag-content', path: '/admin/actions'}"></sidebar-item>
+
+        <sidebar-item :link="{name: 'Admin', icon: 'nc-icon nc-notes'}">
+          <sidebar-item :link="{name: 'Users list', path: '/admin/users_list'}"></sidebar-item>
+        </sidebar-item>
 
 
         <sidebar-item :link="{name: 'Dashboard', icon: 'nc-icon nc-chart-pie-35', path: '/admin/overview_standart'}"></sidebar-item>
@@ -90,7 +94,7 @@
       }
     },
     mounted() {
-      this.role = this.$store.state.auth.role;
+      this.role = localStorage.getItem('role');
       //console.log('role: ', this.role);
     }
   }

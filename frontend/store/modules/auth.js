@@ -68,6 +68,7 @@ const actions = {
 					localStorage.setItem('token', r.token);
 					localStorage.setItem('email', r.email);
 					localStorage.setItem('role', r.role);
+					console.log("r: ", r);
 					resolve(r)
 				}
 				else {

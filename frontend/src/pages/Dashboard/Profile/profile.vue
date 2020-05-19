@@ -10,8 +10,8 @@
         <p class="info">E-mail</p>
         <p>{{ user_data.email }}</p>
         <div v-if="!user_data.roles">
-          <p class="info">Roles</p>
-          <p>{{ user_data.roles }}</p>
+          <p class="info">Role</p>
+          <p>{{ user_data.role }}</p>
         </div>
         <p class="info">Bonus code for friends</p>
         <p>{{ user_data.invite_code }}</p>
@@ -66,6 +66,7 @@ export default {
             Notification.error({ title: "Error", message: msg });
           } else {
             this.user_data = JSON.parse(r.user);
+            //console.log('user: ', this.user_data)
           }
         })
         .catch(error => {
@@ -78,7 +79,6 @@ export default {
     await this.loadUser();
   },
   created() {
-    //this.loadUser();
   }
 };
 </script>

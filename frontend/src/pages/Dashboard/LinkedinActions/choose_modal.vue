@@ -2,7 +2,7 @@
   <div class="test-modal">
     <card title="Campaign type">
       <div>
-        <p>Select campaign type</p>
+        <p>Select action type</p>
         <div class="col-6">
           <el-select
             class="select-default mb-3"
