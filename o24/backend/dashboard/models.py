@@ -37,8 +37,7 @@ class User(db.Document):
     active = db.BooleanField(default=True)
     current_oauth_state = db.StringField()
 
-    # Relationships
-    roles = db.ListField(db.StringField(), default=[])
+    role = db.StringField(default='user')
 
     created = db.DateTimeField( default=datetime.now() )
 
@@ -134,6 +133,7 @@ class User(db.Document):
             invite_code=data.get('invite_code', '')
         )
 
+        new_user.role = data.get('role', 'user')
         new_user._commit()
         return new_user
     

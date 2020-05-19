@@ -23,9 +23,12 @@ def admin_required(fn):
     @wraps(fn)
     def wrapper(*args, **kwargs):
         verify_jwt_in_request()
-        claims = get_jwt_identity()
-        if claims['roles'] != 'admin':
+        user_id = get_jwt_identity()
+        
+        user = models.User.objects().get(id=user_id)
+        if not user or user.role != 'admin':
             return jsonify(msg='Admins only!'), 403
         else:
+            g.user = user
             return fn(*args, **kwargs)
     return wrapper
