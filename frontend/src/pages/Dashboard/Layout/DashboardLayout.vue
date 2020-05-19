@@ -15,6 +15,8 @@
         <sidebar-item :link="{name: 'Prospects', icon: 'nc-icon nc-layers-3', path: '/prospects'}"></sidebar-item>
         <sidebar-item :link="{name: 'Prospects List', icon: 'nc-icon nc-single-copy-04', path: '/prospects_list'}"></sidebar-item>
 
+        <div v-if="role='admin'">
+
         <sidebar-item :link="{name: 'Actions', icon: 'nc-icon nc-tag-content', path: '/admin/actions'}"></sidebar-item>
 
 
@@ -46,6 +48,8 @@
           <sidebar-item :link="{name: 'Register', path: '/register'}"></sidebar-item>
           <sidebar-item :link="{name: 'Lock Screen Page', path: '/lock'}"></sidebar-item>
         </sidebar-item>
+
+      </div>
       </template>
     </side-bar>
     <div class="main-panel">
@@ -72,12 +76,21 @@
       DashboardContent,
       MobileMenu,
     },
+  data() {
+    return {
+      role: ''
+    }
+  },
     methods: {
       toggleSidebar () {
         if (this.$sidebar.showSidebar) {
           this.$sidebar.displaySidebar(false)
         }
       }
+    },
+    mounted() {
+      this.role = this.$store.state.auth.role;
+      //console.log('role: ', this.role);
     }
   }
 
