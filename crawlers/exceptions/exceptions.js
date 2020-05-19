@@ -31,6 +31,11 @@ const BanError = (message) => ({
   code: ERROR_CODES.BAN_ERROR
 });
 
+const NetworkError = (message) => ({
+  error: new Error(message),
+  code: ERROR_CODES.NETWORK_ERROR
+});
+
 //------Workers-------
 const LoginWorkerError = (message) => ({
   error: new Error(message),
@@ -106,6 +111,7 @@ module.exports = {
   ActionError: ActionError,
   MongoDBError: MongoDBError,
   BanError: BanError,
+  NetworkError: NetworkError,
 
   LoginWorkerError: LoginWorkerError,
   ConnectWorkerError: ConnectWorkerError,

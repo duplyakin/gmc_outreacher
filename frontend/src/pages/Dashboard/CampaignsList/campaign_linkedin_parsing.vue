@@ -10,7 +10,7 @@
         ></el-input>
       </card>
 
-      <card>
+      <card v-if="false">
         <p>Funnel</p>
         <el-select
           class="select-default mb-3"

@@ -21,7 +21,8 @@ const MY_URL = "https://www.linkedin.com/in/grigoriy-polyanitsin/";
         page_count: 2,
       },
       template_data: {
-        template: 'Hi {first_name}, nice to meet you. {first_name} 111 {first{first_name}_name} hi {ololo }',
+        subject: '',
+        body: 'Hi {first_name}, nice to meet you. {first_name} 111 {first{first_name}_name} hi {ololo }',
       },
       prospect_data: {
         first_name: 'Kirill',

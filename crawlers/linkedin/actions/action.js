@@ -33,43 +33,30 @@ class Action {
     return str;
   }
 
-  // do 3 tries to connect URL or goto login
-  async gotoCheckerThree(url) {
-    for (let i = 0; i < 3; i++) {
-      await this.page.goto(url);
-      let current_url = await this.page.url();
-      if (current_url.includes('login') || current_url.includes('signup')) {
-        let loginAction = new LoginAction.LoginAction(this.email, this.password, this.cookies);
-        await loginAction.startBrowser();
-        await loginAction.login();
-      } else {
-        return true;
-      }
-    }
-    return false;
-  }
-
   // do 1 trie to connect URL or goto login
   async gotoChecker(url) {
+    try {
+      await this.page.goto(url);
+      let current_url = await this.page.url();
 
-    await this.page.goto(url);
-    let current_url = await this.page.url();
+      if (current_url !== url) {
+        if (current_url.includes('login') || current_url.includes('signup')) {
 
-    if (current_url !== url) {
-      if (current_url.includes('login') || current_url.includes('signup')) {
+          let loginAction = new LoginAction.LoginAction(this.email, this.password, this.cookies);
+          await loginAction.setContext(this.context);
 
-        let loginAction = new LoginAction.LoginAction(this.email, this.password, this.cookies);
-        await loginAction.setContext(this.context);
-
-        let result = await loginAction.login();
-        if (result) {
-          await this.page.goto(url);
+          let result = await loginAction.login();
+          if (result) {
+            await this.page.goto(url);
+          }
+        } else {
+          console.log('current_url: ', current_url);
+          console.log('url: ', url);
+          throw MyExceptions.BanError('We cann\'t go to page, we got: ' + current_url);
         }
-      } else {
-        console.log('current_url: ', current_url);
-        console.log('url: ', url);
-        throw MyExceptions.BanError('We cann\'t go to page, we got: ' + current_url);
       }
+    } catch (err) {
+      throw MyExceptions.NetworkError('Something wromg with network: ' + err);
     }
   }
 

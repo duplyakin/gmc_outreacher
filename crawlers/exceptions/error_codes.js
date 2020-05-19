@@ -15,6 +15,7 @@ module.exports = {
     SEARCH_WORKER_ERROR: -4070,
     
     BAN_ERROR: -1, //Seems we are banned
+    NETWORK_ERROR: -2, //something wromg with network
     
     LOGIN_ACTION_ERROR: -1010, //On our sid
     LOGIN_ERROR: -1011, //Check credentials

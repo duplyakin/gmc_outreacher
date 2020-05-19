@@ -642,6 +642,15 @@ export default {
         return false;
       }
 
+      var credentials = this.campaign_data.credentials;
+      if (credentials.length == 0) {
+        Notification.error({
+          title: "Error",
+          message: "You need to select account"
+        });
+        return false;
+      }
+
       var funnel_selected = this.campaign_data.funnel._id || "";
       if (!funnel_selected) {
         Notification.error({
@@ -684,7 +693,7 @@ export default {
       this.send_campaign_data();
     },
     send_campaign_data() {
-      /* Add validation here*/
+      /* Add validation here */
 
       if (confirm("Are you sure?")) {
         var path = CAMPAIGNS_API_ADD;

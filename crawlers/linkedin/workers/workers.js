@@ -139,7 +139,7 @@ async function connectWorker(task_id) {
     let cookies = await cookieModel.Cookies.findOne({ username: email });
 
     let url = task.input_data.prospect_data.linkedin;
-    let template = task.input_data.template_data.template;
+    let template = task.input_data.template_data.body;
     let data = task.input_data.prospect_data.template_data;
 
     let prospect_full_name = task.input_data.prospect_data.first_name + ' ' + task.input_data.prospect_data.last_name;
@@ -214,7 +214,7 @@ async function messageWorker(task_id) {
 
     let url = task.input_data.prospect_data.linkedin;
     let data = task.input_data.prospect_data;
-    let template = task.input_data.template_data.template;
+    let template = task.input_data.template_data.body;
 
     // check cookies
     await checkCookies(task_id, cookies);
