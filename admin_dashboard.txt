@@ -87,3 +87,74 @@ response:
 - И рисуй input, где:
    * label: это название поля 
    * value: это значение поля
+
+
+5. /admin/google/settings/edit (POST) - редактирование настроек
+request:
+_settings_id - ID настроек
+_data - новые данные (в формате, который ты получаешь в get выше)
+
+response:
+{
+    'code' : -1,
+    'msg' : 'Unknown request'
+    'settings' : Объект настроек обвновленный
+}
+
+6. /admin/google/settings/fields (POST) - этот запрос вызываешь чтобы получить список полей для ФОРМЫ СОЗДАНИЯ (все поля текстовые)
+request:
+- нет 
+response:
+{
+    'code' : -1,
+    'msg' : 'Unknown request'
+    'columns' : Список текстовых полей, используемых для создания
+}
+
+Вот поля:
+[
+    {
+        'label' : 'Title',
+        'prop' : 'title'
+    },
+    {
+        'label' : 'redirect_uri',
+        'prop' : 'redirect_uri'
+    },
+    {
+        'label' : 'gmail_scopes',
+        'prop' : 'gmail_scopes'   
+    },
+    {
+        'label' : 'gmail_access_type',
+        'prop' : 'gmail_access_type'   
+    },
+    {
+        'label' : 'gmail_include_granted_scopes',
+        'prop' : 'gmail_include_granted_scopes'   
+    },
+    {
+        'label' : 'gmail_api_name',
+        'prop' : 'gmail_api_name'   
+    },
+    {
+        'label' : 'gmail_api_version',
+        'prop' : 'gmail_api_version'   
+    },
+    {
+        'label' : 'active (1 or 0)',
+        'prop' : 'active'   
+    }
+]
+
+
+7. /admin/google/settings/create (POST) - создания настроек
+request:
+_data - новые данные (поля объекта = тому что ты получил в запросе fields)
+
+response:
+{
+    'code' : -1,
+    'msg' : 'Unknown request'
+    'settings' : Объект настроек обвновленный
+}
