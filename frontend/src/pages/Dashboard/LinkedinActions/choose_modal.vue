@@ -56,25 +56,20 @@ export default {
     return {
       campaign_type: {},
       campaign_types: [
-        { label: "Outreach campaign", description: "Email / LinkedIn / Email&LinkedIn outreach campaign." },
         { label: "Linkedin parsing", description: "Parsing LinkedIn prospects (first name, last name, link) by the search limk." },
-        { label: "Linkedin data enreachment", description: "Enreach prospects information from LinkedIn: current prospects job (website and LinkedIn pages)." }
+        { label: "Linkedin data enrichment", description: "Enrich prospects information from LinkedIn: current prospects job (website and LinkedIn pages)." }
       ],
     };
   },
   methods: {
     submit() {
-      if (this.campaign_type.label === "Outreach campaign") {
+      if (this.campaign_type.label === "Linkedin parsing") {
         this.$router.push({
-          path: "campaign_form"
-        });
-      } else if (this.campaign_type.label === "Linkedin parsing") {
-        this.$router.push({
-          path: "campaign_linkedin_parsing"
+          path: "linkedin_parsing"
         });
       } else if (this.campaign_type.label === "Linkedin data enreachment") {
         this.$router.push({
-          path: "campaign_linkedin_enreachment"
+          path: "linkedin_enreachment"
         });
       }
       this.$emit("close");

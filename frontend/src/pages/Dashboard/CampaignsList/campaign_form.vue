@@ -389,6 +389,7 @@ export default {
 
       /*Object data*/
       campaign_data: {
+        campaign_type: 0,
         list_selected: "",
         title: "",
         funnel: {},

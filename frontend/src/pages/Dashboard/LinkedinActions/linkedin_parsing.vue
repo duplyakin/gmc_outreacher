@@ -252,10 +252,8 @@ import {
   Input
 } from "element-ui";
 
-import timezones from "./defaults/timezones";
-import axios from '@/api/axios-auth';;
-
-const MessageEdit = () => import('./messageEdit.vue')
+import timezones from "../CampaignsList/defaults/timezones";
+import axios from '@/api/axios-auth';
 
 const CAMPAIGNS_API_GET = "/campaigns/get";
 const CAMPAIGNS_API_DATA = "/campaigns/data";
@@ -296,6 +294,7 @@ export default {
 
       /*Object data*/
       campaign_data: {
+        campaign_type: 1,
         prospects_list_title: '',
         search_url: '',
         total_pages: 100,

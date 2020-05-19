@@ -4,7 +4,7 @@
 <div class="row">
     <div class="col-4 d-flex align-self-center">
         <h3>
-        <i class="nc-icon nc-bullet-list-67"></i> Campaigns
+        <i class="nc-icon nc-bag"></i> LinkedIn actions
         </h3>
     </div>
     <div class="col-8 d-flex flex-row-reverse align-self-center">
@@ -93,7 +93,7 @@ import { Pagination as LPagination } from "src/components/index";
 
 import axios from '@/api/axios-auth';
 
-//const CampaignForm = () => import('./campaign_form.vue')
+const Campaign_choose = () => import('./choose_modal.vue')
 
 const CAMPAIGNS_API_DATA = '/campaigns/data'
 const CAMPAIGNS_API_LIST = '/campaigns/list';
@@ -104,7 +104,6 @@ const CAMPAIGNS_API_PAUSE = '/campaigns/pause';
 
 export default {
 components: {
-    //CampaignForm,
     LPagination,
     [Select.name]: Select,
     [Option.name]: Option,
@@ -206,9 +205,19 @@ methods: {
         }
     },
     addCampaign() {
-        this.$router.push({
-          path: "campaign_form"
-        });
+        this.$modal.show(
+        Campaign_choose,
+        {
+          valueUpdated: newValue => {
+
+          }
+        },
+        {
+          width: "720",
+          height: "auto",
+          scrollable: true
+        }
+      );
     },
     editCampaign(msg_dict, index) {
         var status = -2;
