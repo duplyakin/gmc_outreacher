@@ -279,7 +279,7 @@ const routes = [
   {
     path: '/admin',
     component: DashboardLayout,
-    meta: { requiresAuth: true, role: 'admin' },
+    meta: { requiresAuth: true, role: ['admin'] },
     children: [
       {
         path: 'overview_standart',

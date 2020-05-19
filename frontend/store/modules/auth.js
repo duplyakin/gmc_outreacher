@@ -9,6 +9,7 @@ axios.create({
 const state = {
 	email: null,
 	token: null,
+	role: null,
 	login_error: '',
 	register_error: ''
 };
@@ -66,6 +67,7 @@ const actions = {
 					commit('auth_user', { email: auth_data.email, token: r.token });
 					localStorage.setItem('token', r.token);
 					localStorage.setItem('email', r.email);
+					localStorage.setItem('role', r.role);
 					resolve(r)
 				}
 				else {
@@ -93,6 +95,7 @@ const actions = {
 					commit('auth_user', { email: auth_data.email, token: r.token });
 					localStorage.setItem('token', r.token);
 					localStorage.setItem('email', r.email);
+					localStorage.setItem('role', r.role);
 					resolve(r)
 				}
 				else {
