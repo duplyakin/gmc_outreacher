@@ -226,7 +226,6 @@ async function messageWorker(task_id) {
     let resCheckMsg = await messageCheckAction.messageCheck();
     await messageCheckAction.closeBrowser();
 
-    let task_status = 1;
     let result = {};
     if (resCheckMsg.message === '') {
       // if no reply - send msg
@@ -235,16 +234,14 @@ async function messageWorker(task_id) {
       let res = await messageAction.message();
       await messageAction.closeBrowser();
 
-      task_status = 5;
       result = {
         code: 0,
         if_true: res,
       };
     } else {
       // else - task finished
-      task_status = 3;
       result = {
-        code: 0,
+        code: 2000,
         if_true: true,
         data: JSON.stringify(resCheckMsg)
       };
@@ -365,13 +362,13 @@ async function messageCheckWorker(task_id) {
     await messageCheckAction.closeBrowser();
 
     let result = {
-      code: 0,
+      code: (res.message === '' ? 0 : 2000),
       if_true: (res.message === '' ? false : true),
       data: JSON.stringify(res)
     };
     console.log('result_data: ', result);
 
-    await task.updateOne({ status: 3, result_data: result }, function (err, res) {
+    await task.updateOne({ status: 5, result_data: result }, function (err, res) {
       if (err) throw MyExceptions.MongoDBError(error_db_save_text + err);
       // updated!
       console.log(success_db_save_text);

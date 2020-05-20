@@ -104,7 +104,7 @@ export default {
           }
         )
         .catch(err => {
-          console.error("login error: ", err);
+          console.error("register error: ", err);
         });
     },
   },

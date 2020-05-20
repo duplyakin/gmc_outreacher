@@ -28,6 +28,7 @@
 <card>
         <div class="col-12">
             <el-table
+            :v-loading="true"
             stripe
             ref="campaigns_data_table"
             style="width: 100%;"
@@ -88,7 +89,7 @@
 </div>
 </template>
 <script>
-import { Notification, Table, TableColumn, Select, Option } from "element-ui";
+import { Notification, Loading, Table, TableColumn, Select, Option } from "element-ui";
 import { Pagination as LPagination } from "src/components/index";
 
 import axios from '@/api/axios-auth';
@@ -280,11 +281,15 @@ methods: {
         }
     },
     deserialize_campaigns(from_data){
-        var pagination_dict = JSON.parse(from_data.pagination);
-        this.$set(this, 'pagination', pagination_dict);
+        if (from_data.pagination){
+            var pagination_dict = JSON.parse(from_data.pagination);
+            this.$set(this, 'pagination', pagination_dict);
+        }
 
-        var columns = JSON.parse(from_data.columns);
-        this.$set(this.list_data, 'columns', columns);
+        if (from_data.columns){
+            var columns = JSON.parse(from_data.columns);
+            this.$set(this.list_data, 'columns', columns);
+        }
 
         if (from_data.campaigns){
             var campaigns = JSON.parse(from_data.campaigns)
@@ -295,6 +300,15 @@ methods: {
 },
 async mounted() {
     //await this.load_data();
+    /* // loading
+    let loadingInstance = Loading.service();
+    this.$nextTick(() => { // Loading should be closed asynchronously
+        loadingInstance.close();
+    });
+    let loading = this.$loading({ fullscreen: true })
+    setTimeout(() => { loading.close() }, 1000)
+    // https://juejin.im/post/5c8e151df265da67eb15fe09
+    */
     await this.load_campaigns();
 }
 };

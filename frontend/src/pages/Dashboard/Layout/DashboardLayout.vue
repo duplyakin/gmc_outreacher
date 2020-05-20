@@ -22,6 +22,8 @@
 
         <sidebar-item :link="{name: 'Admin', icon: 'nc-icon nc-notes'}">
           <sidebar-item :link="{name: 'Users list', path: '/admin/users_list'}"></sidebar-item>
+          <sidebar-item :link="{name: 'Google App Settings', path: '/admin/google_app_settings'}"></sidebar-item>
+          <sidebar-item :link="{name: 'Limits', path: '/admin/limits'}"></sidebar-item>
         </sidebar-item>
 
 

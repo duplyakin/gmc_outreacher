@@ -9,7 +9,7 @@
       <card>
         <p class="info">E-mail</p>
         <p>{{ user_data.email }}</p>
-        <div v-if="!user_data.roles">
+        <div v-if="user_data.role == 'admin'">
           <p class="info">Role</p>
           <p>{{ user_data.role }}</p>
         </div>
@@ -34,7 +34,7 @@ const PROFILE_API_LIST = '/profile';
 export default {
   data() {
     return {
-      user_data: ""
+      user_data: null
     };
   },
   methods: {

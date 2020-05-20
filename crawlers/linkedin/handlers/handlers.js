@@ -13,9 +13,6 @@ async function bullConsumer() {
         case 'linkedin-check-reply':
           await workers.loginWorker(job.data.task_id);
           break;
-        case 'linkedin-visit-profile':
-          await workers.loginWorker(job.data.task_id);
-          break;
         case 'linkedin-connect':
           await workers.connectWorker(job.data.task_id);
           break;
@@ -23,9 +20,18 @@ async function bullConsumer() {
           await workers.messageWorker(job.data.task_id);
           break;
         case 'linkedin-check-accept':
-          await workers.loginWorker(job.data.task_id);
+          await workers.connectCheckWorker(job.data.task_id);
           break;
-
+        case 'linkedin-search':
+          await workers.searchWorker(job.data.task_id);
+          break;
+        case 'linkedin-parse-profile':
+          await workers.scribeWorker(job.data.task_id);
+          break;
+        case 'linkedin-check-reply':
+          await workers.messageCheck(job.data.task_id);
+          break;
+/*
         case 'finished':
           //await workers.loginWorker(job.task);
           break;
@@ -44,14 +50,14 @@ async function bullConsumer() {
         case 'email-check-reply':
           console.log("..... task.action_key: ..... email-check-reply");
           break;
-
+*/
         default:
-          console.log("..... Incorrect task.action_key .....");
+          console.log("..... Incorrect task.action_key .....: ", job.data.action_key);
+          // throw exception ?
       }
     } catch (err) {
       let err_result = {
         code: MyExceptions.HandlerError().code,
-        if_true: false,
         raw: MyExceptions.HandlerError("HandlerError error: " + err).error
       };
       await taskModel.TaskQueue.updateOne({ id: job.data.task_id }, { status: -1, result_data: err_result }, function (err, res) {

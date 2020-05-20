@@ -64,6 +64,8 @@ const Actions = () => import('src/pages/Dashboard/Actions/actions.vue')
 
 // admin
 const UsersList = () => import('src/pages/Dashboard/Admin/users_list.vue')
+const GoogleAppSettings = () => import('src/pages/Dashboard/Admin/google_app_settings.vue')
+const Limits = () => import('src/pages/Dashboard/Admin/limits.vue')
 
 
 let componentsMenu = {
@@ -186,6 +188,16 @@ let adminMenu = {
       path: 'users_list',
       name: 'Users List',
       component: UsersList
+    },
+    {
+      path: 'google_app_settings',
+      name: 'Google App Settings',
+      component: GoogleAppSettings
+    },
+    {
+      path: 'limits',
+      name: 'Limits',
+      component: Limits
     },
   ]
 }
