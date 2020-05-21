@@ -114,11 +114,12 @@
                   size="large"
                   placeholder="Fallback Time Zone"
                   v-model="timezones_selected"
+                  value-key="label"
                 >
                   <el-option
                     v-for="option in timezones_selects"
                     class="select-primary"
-                    :value="option.value"
+                    :value="option"
                     :label="option.label"
                     :key="option.label"
                   ></el-option>

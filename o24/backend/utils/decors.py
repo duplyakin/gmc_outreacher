@@ -9,29 +9,37 @@ def get_token(user):
 def auth_required(fn):
     @wraps(fn)
     def wrapper(*args, **kwargs):
-        verify_jwt_in_request()
-        user_id = get_jwt_identity()
+        try:
+            verify_jwt_in_request()
+            user_id = get_jwt_identity()
         
-        user = models.User.objects().get(id=user_id)
-        
-        if not user:
-            return jsonify(msg='No such user'), 403
-        else:
-            g.user = user
-            return fn(*args, **kwargs)
+            user = models.User.objects().get(id=user_id)
+            
+            if not user:
+                return jsonify(msg='No such user'), 403
+            else:
+                g.user = user
+                return fn(*args, **kwargs)
+        except:
+                return jsonify(msg='No such user'), 403
+  
     return wrapper
 
 
 def admin_required(fn):
     @wraps(fn)
     def wrapper(*args, **kwargs):
-        verify_jwt_in_request()
-        user_id = get_jwt_identity()
-        
-        user = models.User.objects().get(id=user_id)
-        if not user or user.role != 'admin':
-            return jsonify(msg='Admins only!'), 403
-        else:
-            g.user = user
-            return fn(*args, **kwargs)
+        try:
+            verify_jwt_in_request()
+            user_id = get_jwt_identity()
+
+            user = models.User.objects().get(id=user_id)
+            if not user or user.role != 'admin':
+                return jsonify(msg='Admins only!'), 403
+            else:
+                g.user = user
+                return fn(*args, **kwargs)
+        except:
+            return jsonify(msg='No such user'), 403
+
     return wrapper
