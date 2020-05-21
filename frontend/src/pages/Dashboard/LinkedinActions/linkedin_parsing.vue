@@ -10,28 +10,6 @@
         ></el-input>
       </card>
 
-      <card v-if="false">
-        <p>Funnel</p>
-        <el-select
-          class="select-default mb-3"
-          name="Campaign funnel"
-          v-on:change="onChangeFunnel"
-          style="width: 100%;"
-          placeholder="Select funnel"
-          v-model="campaign_data.funnel"
-          value-key="title"
-          :disabled="true"
-        >
-          <el-option
-            class="select-default"
-            v-for="(funnel,index) in list_data.funnels"
-            :key="funnel._id.$oid"
-            :label="funnel.title"
-            :value="funnel"
-          ></el-option>
-        </el-select>
-      </card>
-
       <card>
         <div class="col-6">
           <p>Select Linkedin account</p>
@@ -218,13 +196,13 @@
     <div v-if="test" class="row">
       <div class="col-12">{{ this.campaign_data.credentials }}</div>
       <div class="col-12">
-        <pre>{{ this.modified_fields}}</pre>
+        <pre>modified_fields: {{ this.modified_fields}}</pre>
       </div>
       <div class="col-12">
-        <pre>{{ this.campaign_data}}</pre>
+        <pre>campaign_data: {{ this.campaign_data}}</pre>
       </div>
       <div class="col-12">
-        <pre>{{ this.list_data}}</pre>
+        <pre>list_data: {{ this.list_data}}</pre>
       </div>
     </div>
   </div>
@@ -255,11 +233,11 @@ import {
 import timezones from "../CampaignsList/defaults/timezones";
 import axios from '@/api/axios-auth';
 
-const CAMPAIGNS_API_GET = "/campaigns/linkedin/get";
-const CAMPAIGNS_API_DATA = "/campaigns/linkedin/data";
+const CAMPAIGNS_API_GET = "/campaign/linkedin/get";
+const CAMPAIGNS_API_DATA = "/campaign/linkedin/data";
 
-const CAMPAIGNS_API_ADD = "/campaigns/linkedin/parsing/create";
-const CAMPAIGNS_API_EDIT = "/campaigns/linkedin/edit";
+const CAMPAIGNS_API_ADD = "/campaign/linkedin/parsing/create";
+const CAMPAIGNS_API_EDIT = "/campaign/linkedin/edit";
 
 export default {
   components: {
@@ -272,7 +250,7 @@ export default {
   },
   data() {
     return {
-      test: false,
+      test: true,
 
       action_type: "",
       campaign_id: "",
@@ -288,7 +266,6 @@ export default {
       list_data: {
         credentials: [],
         lists: [],
-        funnels: [],
         columns: []
       },
 
@@ -357,47 +334,8 @@ export default {
         return;
       }
     },
-    _clear_funnel_dependent_data() {
-      this.$set(this.campaign_data, "templates", {
-        email: [],
-        linkedin: []
-      });
-      this.$set(this.campaign_data, "credentials", []);
-      this.email_account_selected = "";
-      this.linkedin_account_selected = "";
-    },
-    onChangeFunnel() {
-      this._clear_funnel_dependent_data();
-
-      var templates_required =
-        this.campaign_data.funnel.templates_required || null;
-      if (templates_required) {
-        var email = templates_required.email || null;
-        if (email) {
-          var email_templates = Object.values(email);
-          /*sort by order field*/
-          email_templates.sort(function(first, second) {
-            return first["order"] - second["order"];
-          });
-
-          this.$set(this.campaign_data.templates, "email", email_templates);
-        }
-
-        var linkedin = templates_required.linkedin || null;
-        if (linkedin) {
-          var linkedin_templates = Object.values(linkedin);
-
-          /*sort by order field*/
-          linkedin_templates.sort(function(first, second) {
-            return first["order"] - second["order"];
-          });
-
-          this.$set(this.campaign_data.templates, "linkedin", linkedin_templates);
-        }
-      }
-    },
     deserialize_data(from_data) {
-      console.log(from_data);
+      console.log('from_data: ', from_data);
       for (var key in from_data) {
         if (this.list_data.hasOwnProperty(key) && from_data[key]) {
           var parsed_data = JSON.parse(from_data[key]);
@@ -415,26 +353,17 @@ export default {
 
       for (var key in campaign_dict) {
         if (this.campaign_data.hasOwnProperty(key) && campaign_dict[key]) {
-          /*Check or validate for custom keys here*/
-          if (key == "templates") {
-            var email_templates = campaign_dict[key].email || null;
-            if (email_templates) {
-              this.$set(this.campaign_data[key], "email", email_templates);
-            }
-
-            var linkedin_templates = campaign_dict[key].linkedin || null;
-            if (linkedin_templates) {
-              this.$set(
-                this.campaign_data[key],
-                "linkedin",
-                linkedin_templates
-              );
-            }
-          } else {
             this.$set(this.campaign_data, key, campaign_dict[key]);
-          }
         }
       }
+
+      var updated_from_hour = campaign_dict.from_hour + ":" + campaign_dict.from_minutes;
+      var updated_to_hour = campaign_dict.to_hour + ":" + campaign_dict.to_minutes;
+
+      this.$set(this.campaign_data, 'from_hour', updated_from_hour);
+      this.$set(this.campaign_data, 'to_hour', updated_to_hour);
+
+      console.log("campaign_data: ", this.campaign_data);
 
       /*Not sure that we need it - but don't want to deal with concurency*/
       if (campaign_json.modified_fields) {
@@ -547,8 +476,6 @@ export default {
       }
     },
     async load_data() {
-      console.log("load_data");
-
       var path = CAMPAIGNS_API_DATA;
       var data = new FormData();
 
@@ -604,11 +531,9 @@ export default {
     this.action_type = this.$route.query.action_type;
     this.campaign_id = this.$route.query.campaign_id || "";
 
-    console.log("mounted with action_type:" + this.action_type + " campaign_id:" + this.campaign_id
-    );
+    console.log("mounted with action_type:" + this.action_type + " campaign_id:" + this.campaign_id);
 
     await this.load_data();
-    this.campaign_data.funnel = {"_id": {"$oid": "5ec10e4652bbd4237a450ba4"}, "title": "Parse linkedin funnel", "templates_required": {"search_url": true}, "template_key": "", "root": true};
 
     if (this.action_type == "edit") {
       await this.load_campaign(this.campaign_id);
@@ -617,18 +542,5 @@ export default {
 };
 </script>
 <style lang="scss">
-.container {
-  display: flex;
-  justify-content: space-around;
-  align-items: flex-start;
-  padding: 10px 20px;
-}
-.interval_text {
-  display: flex;
-  align-items: flex-start;
-  font-size: 15px;
-  font-weight: 100;
-  line-height: 22px;
-  color: rgb(119, 119, 119);
-}
+
 </style>

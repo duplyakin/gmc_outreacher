@@ -10,27 +10,6 @@
         ></el-input>
       </card>
 
-      <card v-if="false">
-        <p>Funnel</p>
-        <el-select
-          class="select-default mb-3"
-          name="Campaign funnel"
-          style="width: 100%;"
-          placeholder="Select funnel"
-          v-model="campaign_data.funnel"
-          value-key="title"
-          :disabled="true"
-        >
-          <el-option
-            class="select-default"
-            v-for="(funnel,index) in list_data.funnels"
-            :key="funnel._id.$oid"
-            :label="funnel.title"
-            :value="funnel"
-          ></el-option>
-        </el-select>
-      </card>
-
       <card>
         <div class="col-6">
           <p>Select Linkedin account</p>
@@ -237,11 +216,11 @@ import {
 import timezones from "../CampaignsList/defaults/timezones";
 import axios from '@/api/axios-auth';
 
-const CAMPAIGNS_API_GET = "/campaigns/linkedin/get";
-const CAMPAIGNS_API_DATA = "/campaigns/linkedin/data";
+const CAMPAIGNS_API_GET = "/campaign/linkedin/get";
+const CAMPAIGNS_API_DATA = "/campaign/linkedin/data";
 
-const CAMPAIGNS_API_ADD = "/campaigns/linkedin/enrichment/create";
-const CAMPAIGNS_API_EDIT = "/campaigns/linkedin/edit";
+const CAMPAIGNS_API_ADD = "/campaign/linkedin/enrichment/create";
+const CAMPAIGNS_API_EDIT = "/campaign/linkedin/edit";
 
 export default {
   components: {
@@ -262,7 +241,7 @@ export default {
       linkedin_account_selected: "",
       timezones_selected: "",
 
-      /*All defaults that you store on client*/
+      /* All defaults that you store on client */
       timezones_selects: timezones,
       modified_fields: {},
 
@@ -270,7 +249,6 @@ export default {
       list_data: {
         credentials: [],
         lists: [],
-        funnels: [],
         columns: []
       },
 
@@ -279,7 +257,6 @@ export default {
         campaign_type: 2,
         list_selected: "",
         title: "",
-        funnel: {},
         credentials: [],
 
         from_hour: "",
@@ -531,12 +508,9 @@ export default {
     this.action_type = this.$route.query.action_type;
     this.campaign_id = this.$route.query.campaign_id || "";
 
-    console.log("mounted with action_type:" + this.action_type + " campaign_id:" + this.campaign_id
-    );
+    console.log("mounted with action_type:" + this.action_type + " campaign_id:" + this.campaign_id);
 
     await this.load_data();
-    this.campaign_data.funnel = {"_id": {"$oid": "5ec10e4652bbd4237a450ba9"}, "title": "Enreach linkedin funnel", "templates_required": {"search_url": true}, "template_key": "", "root": true};
-    //this.campaign_data.funnel = {"_id": {"$oid": "5ec10e4652bbd4237a450ba4"}, "title": "Parse linkedin funnel", "templates_required": {"search_url": true}, "template_key": "", "root": true};
 
     if (this.action_type == "edit") {
       await this.load_campaign(this.campaign_id);
@@ -545,18 +519,5 @@ export default {
 };
 </script>
 <style lang="scss">
-.container {
-  display: flex;
-  justify-content: space-around;
-  align-items: flex-start;
-  padding: 10px 20px;
-}
-.interval_text {
-  display: flex;
-  align-items: flex-start;
-  font-size: 15px;
-  font-weight: 100;
-  line-height: 22px;
-  color: rgb(119, 119, 119);
-}
+
 </style>

@@ -43,11 +43,13 @@
                 :fixed="column.prop === 'title' ? true : false"
                 show-overflow-tooltip>
                 <template slot-scope="scope">
-                    <a @click.prevent="editCampaign(scope.row, scope.$index)" href="#"  v-if="column.prop === 'title'">{{ scope.row[column.prop] }}</a>
+                    <a @click.prevent="editCampaign(scope.row, scope.$index)" href="#" v-if="column.prop === 'title'">{{ scope.row[column.prop] }}</a>
                     <template v-else-if="column.prop === 'status'">{{  status[scope.row[column.prop]] }}</template>
-                    <template v-else> {{ show_data(scope.row, column) }} </template>
+                    <template v-else-if="column.prop === 'funnel' && scope.row[column.prop] !== undefined"> {{ scope.row[column.prop].title }} </template>
+                    <template v-else>{{  scope.row[column.prop] }}</template>
                 </template>
             </el-table-column>
+            
             <el-table-column :min-width="50" fixed="right" label="Action">
                 <template slot-scope="props">
                 <a
@@ -59,6 +61,7 @@
                 </a>
                 </template>
             </el-table-column>
+
             <el-table-column :min-width="50" fixed="right" label="Delete">
                 <template slot-scope="props">
                 <a
@@ -77,7 +80,7 @@
 
         <div v-if="test" class="row">
             <div class="col-12">
-                <pre>{{ this.campaigns_data}}</pre>
+                <pre>{{ this.campaigns_data }}</pre>
             </div>
 
             <div class="col-12">
@@ -95,12 +98,12 @@ import axios from '@/api/axios-auth';
 
 const Campaign_choose = () => import('./choose_modal.vue')
 
-const CAMPAIGNS_API_DATA = '/campaigns/linkedin/data'
-const CAMPAIGNS_API_LIST = '/campaigns/linkedin/list';
+const CAMPAIGNS_API_DATA = '/campaign/linkedin/data'
+const CAMPAIGNS_API_LIST = '/campaign/linkedin/list';
 
-const CAMPAIGNS_API_DELETE = '/campaigns/linkedin/delete';
-const CAMPAIGNS_API_START = '/campaigns/linkedin/start';
-const CAMPAIGNS_API_PAUSE = '/campaigns/linkedin/pause';
+const CAMPAIGNS_API_DELETE = '/campaign/linkedin/delete';
+const CAMPAIGNS_API_START = '/campaign/linkedin/start';
+const CAMPAIGNS_API_PAUSE = '/campaign/linkedin/pause';
 
 export default {
 components: {
@@ -114,7 +117,7 @@ computed: {
 },
 data() {
     return {
-        test : false,
+        test : true,
         status : {
             0 : 'New',
             1 : 'In progress',
@@ -229,7 +232,21 @@ methods: {
             return false;
         }
 
-        this.$router.push({ path: "campaign_edit_form", query: { campaign_id: msg_dict._id.$oid } })
+        if(!msg_dict.funnel) {
+            Notification.error({title: "Error", message: "Empty campaign funnel!"});
+            return false;
+        } else if(!msg_dict.funnel.funnel_type) {
+            Notification.error({title: "Error", message: "Empty campaign funnel_type!"});
+            return false;
+        } 
+
+        if(msg_dict.funnel.funnel_type = 1) {
+            this.$router.push({ path: "linkedin_parsing", query: { campaign_id: msg_dict._id.$oid, action_type: 'edit' }})
+        } else if(msg_dict.funnel.funnel_type = 2) {
+            this.$router.push({ path: "linkedin_enrichment", query: { campaign_id: msg_dict._id.$oid, action_type: 'edit' }})
+        } else {
+            Notification.error({title: "Error", message: "Unknown campaign funnel_type: " + msg_dict.funnel.funnel_type});
+        }
     },
     next_page(){
         var page = 2;
@@ -250,7 +267,7 @@ methods: {
             if (r.code <= 0){
                 var msg = "Error loading campaigns." + r.msg;
                 Notification.error({title: "Error", message: msg});
-            }else{
+            } else {
                 this.deserialize_campaigns(r);
             }
             })
@@ -289,12 +306,12 @@ methods: {
         }
     },
     deserialize_campaigns(from_data){
-        if (form_data.pagination){
+        if (from_data.pagination){
             var pagination_dict = JSON.parse(from_data.pagination);
             this.$set(this, 'pagination', pagination_dict);
         }
 
-        if (form_data.columns){
+        if (from_data.columns){
             var columns = JSON.parse(from_data.columns);
             this.$set(this.list_data, 'columns', columns);
         }

@@ -4,7 +4,7 @@
       <div class="row">
         <div class="col-4 d-flex align-self-center">
           <h3>
-            <i class="nc-icon"></i>Google App Settings
+            <i class="nc-icon"></i>Limits
           </h3>
         </div>
       </div>
