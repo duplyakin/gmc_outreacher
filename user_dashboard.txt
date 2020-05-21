@@ -1,0 +1,11 @@
+1. /change/password (POST) - смена пароля для текущего пользователя (user ID передавать НЕ надо)
+request:
+_old_password - старый пароль
+_new_password - новый пароль 
+
+response:
+{
+    'code' : 
+    'msg' : 
+    'user :
+}

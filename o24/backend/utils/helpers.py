@@ -1,16 +1,45 @@
 from mongoengine.fields import ReferenceField, ListField
 import json
+import html2text
 
+def convert_email_template_to_plain(template):
+    body = template.get('body', None)
+    if not body:
+        return None
+    
+    converter = html2text.HTML2Text()
+    converter.ignore_links = True
+    converter.ignore_images = True
+    converter.ignore_tables = True
+
+    plain_template = template.copy()
+    html_body = plain_template.get('body')
+    
+    plain_body = converter.handle(html_body)
+    if not plain_body:
+        raise Exception("Can't convert html to plain")
+    
+    plain_template['body'] = plain_body
+    return plain_template
+
+#return mapped_templates
 def template_key_dict(js_templates):
     res = {}
 
     email_templates = js_templates.get('email','')
     if email_templates:
         res['email'] = {}
+        plain = {}
         for template in email_templates:
             template_key = template.get('template_key')
             res['email'][template_key] = template
-    
+
+            html = convert_email_template_to_plain(template)
+            if html is not None:
+                plain[template_key] = html
+
+        res['email']['plain'] = plain
+
     linkedin_templates = js_templates.get('linkedin','')
     if linkedin_templates:
         res['linkedin'] = {}
@@ -19,7 +48,7 @@ def template_key_dict(js_templates):
             res['linkedin'][template_key] = template
 
     return res
-
+    
 
 def to_json_deep_dereference(obj, restricted=['owner']):
     obj_dict = json.loads(obj.to_json())

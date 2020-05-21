@@ -2,7 +2,9 @@ import o24.backend.dashboard.models as models
 from o24.globals import *
 from o24.backend import db
 from mongoengine.queryset.visitor import Q
-import datetime
+from datetime import datetime
+import pytz
+
 week_day_map = {
     0 : 'Mon',
     1 : 'Tue',
@@ -30,8 +32,8 @@ month_map = {
 
 
 class MailBox(db.Document):
-    prospect_id = db.ReferenceField(models.Prospects)
-    campaign_id = db.ReferenceField(models.Campaign)
+    prospect_id = db.ReferenceField('Prospects')
+    campaign_id = db.ReferenceField('Campaign')
 
     #it's incremented inside (prospect_id, campaign_id)
     sequence = db.IntField(default=0)
@@ -50,7 +52,7 @@ class MailBox(db.Document):
     # we will use this field to store task meta that this email belongs to 
     task_meta = db.DictField()
 
-    created = db.DateTimeField(default=datetime.datetime.utcnow())
+    created = db.DateTimeField(default=pytz.utc.localize(datetime.utcnow()))
 
     @classmethod
     def add_message(cls, data, task_meta={}, tracker_token='', message_type=1):

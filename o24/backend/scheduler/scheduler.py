@@ -8,7 +8,9 @@ from .models import Priority, TaskLog
 import o24.backend.handlers.jobs_map as jobs_map
 import o24.backend.handlers.trail_handlers as trail_handlers
 
-import datetime
+from datetime import datetime
+import pytz
+
 from mongoengine.queryset.visitor import Q
 
 from o24.exceptions.exception_with_code import ErrorCodeException
@@ -126,7 +128,7 @@ class Scheduler():
     #Refresh next_action for campaigns
     def refresh_limits(self, credential_ids):
         credentials = models.Credentials.list_credentials(credential_ids)
-        now = datetime.datetime.now()
+        now = pytz.utc.localize(datetime.utcnow())
 
         updated = []
         for c in credentials:
@@ -227,6 +229,14 @@ class Scheduler():
         campaign._safe_start()
 
         #campaign.update_status(status=IN_PROGRESS)
+
+    @classmethod
+    def safe_finish_sequence(cls, owner_id, prospects_ids):
+        stopped = TaskQueue.objects(owner_id=owner_id, prospects_id__in=prospects_ids).update(status=FINISHED)    
+
+        return stopped
+
+
     @classmethod
     def safe_unassign_prospects(cls, owner_id, prospects_ids):
         if not owner_id or not prospects_ids:

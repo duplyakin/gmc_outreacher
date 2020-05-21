@@ -73,7 +73,8 @@ class DevConfig(BaseConfig):
     MONGODB_SETTINGS = {
         'db': 'O24Mc-dev',
         'host': '127.0.0.1',
-        'port': 27017
+        'port': 27017,
+        'tz_aware':True
     }
 
 class ProductionConfig(BaseConfig):
@@ -84,7 +85,8 @@ class ProductionConfig(BaseConfig):
     MONGODB_SETTINGS = {
         'db': 'O24Mc-prod',
         'host': '127.0.0.1',
-        'port': 27017
+        'port': 27017,
+        'tz_aware':True
     }
 
 class TestConfig(BaseConfig):
@@ -102,5 +104,6 @@ class TestConfig(BaseConfig):
     MONGODB_SETTINGS = {
         'db': 'O24Mc-test',
         'host': '127.0.0.1',
-        'port': 27017
+        'port': 27017,
+        'tz_aware':True
     }

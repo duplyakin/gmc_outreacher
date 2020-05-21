@@ -168,6 +168,10 @@ def api_response_check(gmail_controller,
 
 
 @celery.task
+def gmail_check_reply(task_id):
+    pass
+
+@celery.task
 def gmail_send_message(task_id):
     
     task = shared.TaskQueue.get_task(task_id)

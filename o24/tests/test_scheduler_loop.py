@@ -14,7 +14,8 @@ from o24.exceptions.exception_with_code import ErrorCodeException
 from o24.exceptions.error_codes import *
 import time
 from celery import shared_task, group, chord
-import datetime
+from datetime import datetime
+import pytz
 
 class TestSchedulerLoop(unittest.TestCase):
     def setUp(self):
@@ -82,7 +83,7 @@ class TestSchedulerLoop(unittest.TestCase):
             current_priority = Priority.get_priority()
             do_next= current_priority.do_next
             followup_level = current_priority.followup_level
-            now = datetime.datetime.now()
+            now = pytz.utc.localize(datetime.utcnow())
             
             print("**** Current time:{0}".format(now))
             tasks_before_execute = TaskQueue.get_execute_tasks(do_next=do_next, followup_level=followup_level, now=now)

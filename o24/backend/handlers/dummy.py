@@ -209,3 +209,21 @@ def dummy_email_check_reply(task_id):
     else:
         task.set_result(result_data)
         task.update_status(status=READY)
+
+@celery.task
+def dummy_delay(task_id):
+    result_data.update({
+        'if_true' : random.choice([True,False])
+    })
+
+    task = shared.TaskQueue.get_task(task_id)
+    if not task:
+        raise Exception("No such task id:{0}".format(task_id))
+    
+    task.acknowledge()
+    
+    if task.last_action():
+        task.finish_task()
+    else:
+        task.set_result(result_data)
+        task.update_status(status=READY)
