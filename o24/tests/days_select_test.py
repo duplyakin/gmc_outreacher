@@ -1,4 +1,6 @@
-import datetime
+from datetime import datetime
+import pytz
+
 from datetime import timedelta
 from pprint import pprint
 
@@ -31,7 +33,7 @@ def days_delta(a, current_day):
 current_day = 3
 #print(days_delta(t_1, current_day))
 
-next_action = datetime.datetime.now() + timedelta(days=1)
+next_action = pytz.utc.localize(datetime.utcnow()) + timedelta(days=1)
 print(next_action)
 next_action = next_action.replace(hour=10, minute=0)
 print(next_action)

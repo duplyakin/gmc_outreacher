@@ -16,6 +16,7 @@ FOLLOWUP=1
 
 #15 hours
 NEXT_DAY_SECONDS = 15 * 60 * 60
+DAY_TO_SECONDS = 24 * 60 * 60
 
 FINISHED_KEYS = ['finished', 'success']
 
@@ -36,6 +37,12 @@ DEFAULT_SENDING_DAYS={
         '6' : False
 }
 
+DEFAULT_TIME_ZONE = {
+        'label': "(GMT+00:00) United Kingdom Time",
+        'value': "Europe/London",
+        'offset': 0
+}
+
 #CAMPAIGN TYPES
 OUTREACH_CAMPAIGN_TYPE = 0
 LINKEDIN_PARSING_CAMPAIGN_TYPE = 1
@@ -44,8 +51,6 @@ LINKEDIN_ENRICHMENT_CAMPAIGN_TYPE = 2
 
 #MEDIUMS
 GMAIL_TYPE = 'gmail'
-
-NON_3RD_PARTY_ACTION_KEYS = ['email-send-message', 'delay-email', 'finished', 'success', 'email-check-reply']
 
 
 #Current actions
@@ -60,10 +65,16 @@ LINKEDIN_CHECK_REPLY_ACTION = 'linkedin-check-reply'
 EMAIL_SEND_MESSAGE_ACTION = 'email-send-message'
 EMAIL_CHECK_REPLY_ACTION = 'email-check-reply'
 
-DELAY_LINKEDIN_ACTION =  'delay-linkedin'
-DELAY_EMAIL_ACTION = 'delay-email'
+DELAY_ACTION = 'delay'
 FINISHED_ACTION = 'finished'
 SUCCESS_ACTION = 'success'
+
+NON_3RD_PARTY_ACTION_KEYS = [EMAIL_SEND_MESSAGE_ACTION,
+                                EMAIL_CHECK_REPLY_ACTION,
+                                DELAY_ACTION,
+                                FINISHED_ACTION,
+                                SUCCESS_ACTION]
+
 
 #CARRYOUT CODES
 CARRYOUT_DEFAULT_HANDLER = 'carryout_default_handler'
@@ -98,3 +109,5 @@ SEARCH_ACTION_ERROR = -1070 #Can't open the next page, need to wait maybe becaus
 
 
 CARRYOUT_SEARCH_ACTION_PAGES_FINISHED = 1000 #we have reached the last page for this search
+SUCCESS_CODE = 2000
+DELAY_FINISHED_CODE = 1001

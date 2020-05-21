@@ -4,7 +4,8 @@ from o24.globals import *
 
 import o24.backend.dashboard.models as models 
 from mongoengine.queryset.visitor import Q
-import datetime
+from datetime import datetime
+import pytz
 
 class Action(db.Document):
     #shared field
@@ -115,6 +116,12 @@ class Funnel(db.Document):
 
         return new_funnel
 
+    def get_delay(self):
+        if not self.data:
+            return None
+
+        return self.data.get('delay', None)
+
     def get_template_key(self):
         return self.template_key
 
@@ -185,6 +192,8 @@ class TaskQueue(db.Document):
     status = db.IntField(default=NEW)
     ack = db.IntField(default=0)
 
+    next_round = db.DateTimeField(default=0)
+
     input_data = db.DictField()
     result_data = db.DictField()
 
@@ -206,10 +215,14 @@ class TaskQueue(db.Document):
         
         credentials_dict['password'] = decode_password(password)
 
-    def _fill_input_data(self, campaign_id=None, prospect_id=None, credentials_id=None, template_key=''):
+    def _fill_input_data(self, funnel_node, campaign_id=None, prospect_id=None, credentials_id=None, template_key=''):
         self.input_data = {}
 
         #Input data format:
+        #   delay : {
+        #       start: now (on create)
+        #       delay: delay
+        #   }
         #	credentials_data : {
         #        email : ‘dsafadsf’
         #        password: ‘dasfadadsf’	
@@ -261,6 +274,20 @@ class TaskQueue(db.Document):
 
             self.input_data['prospect_data'] = prospect.get_data() 
 
+        #CREATE DELAY DATA
+        action_key = funnel_node.get_action_key()
+        if action_key == DELAY_ACTION:
+            delay = campaign.get_delay(template_key=template_key)
+            if delay is None:
+                delay = funnel_node.get_delay()
+                if delay is None:
+                    raise Exception("_fill_input_data ERROR: delay can't be None")
+            
+            now = pytz.utc.localize(datetime.utcnow())
+            self.input_data['delay'] = {
+                'start' : now,
+                'delay_sec' : delay
+            }
         return self.input_data
 
     def switch_task(self, next_node, _commit=False):
@@ -275,6 +302,7 @@ class TaskQueue(db.Document):
 
         #init sta
         self.status = NEW
+        self.next_round = 0
         self.ack = 0
 
         self.result_data = {}
@@ -290,7 +318,8 @@ class TaskQueue(db.Document):
             raise Exception("Can't find credentials for task.id={0} node_id={1}".format(self.id, next_node.id))
 
         template_key = next_node.get_template_key()
-        self._fill_input_data(campaign_id=self.campaign_di, 
+        self._fill_input_data(funnel_node=next_node,
+                                campaign_id=self.campaign_di, 
                                 prospect_id=self.prospect_id, 
                                 credentials_id=self.credentials_id, 
                                 template_key=template_key)
@@ -306,8 +335,8 @@ class TaskQueue(db.Document):
         self.status = status
         self._commit()
     
-    def set_result(self, result):
-        self.result_data = result
+    def set_result(self, result_data):
+        self.result_data = result_data
         self._commit()
 
     def last_action(self):
@@ -349,6 +378,9 @@ class TaskQueue(db.Document):
     def get_result_data(self):
         return self.result_data
 
+    def get_input_data(self):
+        return self.input_data
+
     def _resume(self):
         self.status = NEW
         self._commit()
@@ -361,16 +393,21 @@ class TaskQueue(db.Document):
     def get_ready(cls):
         active_campaigns = models.Campaign.objects(status=IN_PROGRESS).distinct('id')
 
-        return TaskQueue.objects(status=READY, campaign_id__in=active_campaigns)
+        now = pytz.utc.localize(datetime.utcnow())
+        return TaskQueue.objects(status=READY, campaign_id__in=active_campaigns, next_round__lte=now)
 
     @classmethod
     def get_trail_tasks(cls):
+        #next_round__lte=now
         active_campaigns = models.Campaign.objects(status=IN_PROGRESS).distinct('id')
-        return TaskQueue.objects(Q(campaign_id__in=active_campaigns) & (Q(status=FAILED) | Q(status=CARRYOUT)))
+
+        now = pytz.utc.localize(datetime.utcnow())
+        return TaskQueue.objects(Q(next_round__lte=now) & Q(campaign_id__in=active_campaigns) & (Q(status=FAILED) | Q(status=CARRYOUT)))
 
     @classmethod
     def get_execute_tasks(cls, do_next, followup_level, now):
         
+        # next_round__lte=now
         # Which tasks are ready for execution:
         # OUTPUT: list of UNIQUE(credentials_id)
         # REMOVE:
@@ -413,7 +450,9 @@ class TaskQueue(db.Document):
             {"$group" : {"_id": "$credentials_id", "task_id" : { "$first" : "$_id" }}},
         ]
 
-        new_tasks = list(TaskQueue.objects(status=NEW).aggregate(*pipeline))
+        now = pytz.utc.localize(datetime.utcnow())
+
+        new_tasks = list(TaskQueue.objects(status=NEW, next_round__lte=now).aggregate(*pipeline))
         tasks_ids = [x.get('task_id') for x in new_tasks]
 
         execute_tasks = TaskQueue.objects(Q(id__in=tasks_ids))
@@ -452,9 +491,11 @@ class TaskQueue(db.Document):
 
         new_task.campaign_id = campaign.id
         new_task.status = NEW
+        new_task.next_round = 0
 
         template_key = _node.get_template_key()
-        new_task._fill_input_data(campaign_id=campaign.id, 
+        new_task._fill_input_data(funnel_node=_node,
+                                campaign_id=campaign.id, 
                                 prospect_id=prospect_id, 
                                 credentials_id=new_task.credentials_id, 
                                 template_key=template_key)
@@ -538,5 +579,5 @@ class OpenTracker(db.Document):
 
     action_meta = db.DictField()
 
-    created = db.DateTimeField( default=datetime.datetime.now() )
+    created = db.DateTimeField( default=pytz.utc.localize(datetime.utcnow()) )
 

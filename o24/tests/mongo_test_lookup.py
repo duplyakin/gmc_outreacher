@@ -9,8 +9,10 @@ from o24.backend.utils.funnel import construct_funnel
 from o24.globals import *
 from mongoengine.queryset.visitor import Q
 from pprint import pprint
-import datetime
+from datetime import datetime
 from datetime import timedelta
+import pytz
+
 import json
 from bson.json_util import dumps as bson_dumps
 
@@ -161,7 +163,7 @@ class TestLookupQuery(unittest.TestCase):
                                     medium=medium,
                                     new_data=new_data)
                 if 'LIMITED' in cr:
-                    new_cr.next_action = datetime.datetime.now() + timedelta(days=1)
+                    new_cr.next_action = pytz.utc.localize(datetime.utcnow()) + timedelta(days=1)
                     new_cr._commit()
                 self.assertTrue(new_cr, "credentials")
                 credentials_lst.append(new_cr.id)
@@ -182,7 +184,7 @@ class TestLookupQuery(unittest.TestCase):
                 new_campaign._commit()
 
             if c.get('next_action') == False:
-                new_campaign.next_action =  datetime.datetime.now() + timedelta(days=1)
+                new_campaign.next_action =  pytz.utc.localize(datetime.utcnow()) + timedelta(days=1)
                 new_campaign._commit()
             
             for i in range(5):
@@ -229,7 +231,7 @@ class TestLookupQuery(unittest.TestCase):
         do_next = 1
         followup_level = 1
         
-        now = datetime.datetime.now()
+        now = pytz.utc.localize(datetime.utcnow())
         print ("***** now:{0}".format(now))
 
         query = {"$match": {"record_type" : {"$eq" : INTRO} }}

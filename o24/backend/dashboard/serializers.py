@@ -1,5 +1,5 @@
 import json
-from o24.backend.utils.helpers import template_key_dict 
+from o24.backend.utils.helpers import template_key_dict
 from bson.objectid import ObjectId
 
 class JSObject():
@@ -158,6 +158,7 @@ class JSCampaignData(JSObject):
                         mapped_templates = template_key_dict(templates)
                         if not mapped_templates:
                             raise Exception("Wrong templates format")
+
                         templates = mapped_templates
                         setattr(self, attr_name, templates)
                         #print("...Serialized key:{0} value:{1}".format(attr_name, templates))

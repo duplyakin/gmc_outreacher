@@ -12,6 +12,8 @@ from flask import url_for
 import json
 from pprint import pprint
 from bson.objectid import ObjectId
+from datetime import datetime
+import pytz
 
 from o24.backend.google.models import GoogleAppSetting
 from o24.production_tests.create_data import *
@@ -54,6 +56,7 @@ class ProdTestCampaigns(unittest.TestCase):
         print(random_prospects)
 
     def test_1_create_campaign(self):
+        return
         print("....Testing campaigns creation")
         create_data = CREATE_CAMPAIGN
         create_data['title'] = '--test title new campaign ' + ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(20))
@@ -234,8 +237,94 @@ class ProdTestCampaigns(unittest.TestCase):
             json_data = json.loads(r.data)
             pprint(json_data)
 
+    def test_6_datetime(self):
+        campaign = Campaign.objects().first()
+        print("Campaign id: {0}".format(campaign.id))
+
+        #Campaign too late to start today
+        campaign.from_hour = 10
+        campaign.to_hour = 12
+        campaign.time_zone = {
+        'value': "Europe/Moscow"
+        }
+        campaign.sending_days = {
+        '0' : True,
+        '1' : True,
+        '2' : True, 
+        '3' : True,
+        '4' : True,
+        '5' : False,
+        '6' : False
+        }
+        campaign._commit()
+        campaign.set_next_action_on_edit()
+        print("from_interval: {0}".format(campaign.get_from_interval_in_utc()))
+        print("to_interval: {0}".format(campaign.get_to_interval_in_utc()))
+        print("NEXT_ACTION: {0}".format(campaign.next_action))
+
+        #Campaign ok to start today
+        campaign.from_hour = 10
+        campaign.to_hour = 21
+        campaign.time_zone = {
+        'value': "Europe/Moscow"
+        }
+        campaign._commit()
+        campaign.set_next_action_on_edit()
+        print("from_interval: {0}".format(campaign.get_from_interval_in_utc()))
+        print("to_interval: {0}".format(campaign.get_to_interval_in_utc()))
+        print("NEXT_ACTION: {0}".format(campaign.next_action))
+
+        #Campaign too late to start today because of time_zone
+        campaign.from_hour = 10
+        campaign.to_hour = 21
+        campaign.time_zone = {
+        'value': "Asia/Pontianak"
+        }
+        campaign._commit()
+        campaign.set_next_action_on_edit()
+        print("from_interval: {0}".format(campaign.get_from_interval_in_utc()))
+        print("to_interval: {0}".format(campaign.get_to_interval_in_utc()))
+        print("NEXT_ACTION: {0}".format(campaign.next_action))
+        
+        #Interval ok but weekday is False
+        #Campaign ok to start today
+        campaign.from_hour = 10
+        campaign.to_hour = 21
+        campaign.time_zone = {
+        'value': "Europe/Moscow"
+        }
+        campaign.sending_days = {
+        '0' : True,
+        '1' : True,
+        '2' : True, 
+        '3' : False,
+        '4' : False,
+        '5' : False,
+        '6' : False
+        }
+        campaign._commit()
+        campaign.set_next_action_on_edit()
+        print("from_interval: {0}".format(campaign.get_from_interval_in_utc()))
+        print("to_interval: {0}".format(campaign.get_to_interval_in_utc()))
+        print("NEXT_ACTION: {0}".format(campaign.next_action))
 
 
+
+
+        now = pytz.utc.localize(datetime.utcnow())
+        print("Now: {0}".format(now))
+
+        next_action = campaign.next_action
+        print("Next_Action: {0}".format(next_action))
+
+
+        f = campaign.get_from_interval_in_utc()
+        print("From_interval: {0}".format(f))
+
+        t = campaign.get_to_interval_in_utc()
+        print("To interval: {0}".format(t))
+
+    
 def setUpModule():
     print("*** setUpModule:{0}".format(__name__))
 

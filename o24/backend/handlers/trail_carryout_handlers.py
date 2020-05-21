@@ -10,7 +10,18 @@ def default_handler(task):
     if task.status != CARRYOUT:
         raise Exception("WRONG STATUS: default_handler should be called for CARRYOUT status. task.id={0} task.status={1}".format(task.id, task.status))
     
+    result_data = task.get_result_data()
+    if not result_data:
+        raise Exception("default_handler ERROR: wrong result_data:{0}".format(result_data))
+
+    code = result_data.get('code', 0)
+    if code == SUCCESS_CODE:
+        task.update_status(status=FINISHED)
+        #TODO - save reply message
+        return
+
     task.update_status(status=READY)
+    return 
 
 def start_linkedin_enrichment_campaign(task):
     #We have finixhed linkedin_search_action action and need to start enrichment campaign 

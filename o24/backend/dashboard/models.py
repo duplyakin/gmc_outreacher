@@ -3,6 +3,8 @@ from o24.backend import app
 
 from datetime import datetime  
 from datetime import timedelta  
+from pytz import timezone
+import pytz
 
 import uuid
 from mongoengine.queryset.visitor import Q
@@ -39,7 +41,7 @@ class User(db.Document):
 
     role = db.StringField(default='user')
 
-    created = db.DateTimeField( default=datetime.now() )
+    created = db.DateTimeField( default=pytz.utc.localize(datetime.utcnow()) )
 
     invite_code = db.StringField(default='')
     invited_by = db.StringField(default='')
@@ -182,8 +184,8 @@ class Credentials(db.Document):
 
     data = db.DictField()
     
-    last_action = db.DateTimeField(default=datetime.now())
-    next_action = db.DateTimeField(default=datetime.now())
+    last_action = db.DateTimeField(default=pytz.utc.localize(datetime.utcnow()))
+    next_action = db.DateTimeField(default=pytz.utc.localize(datetime.utcnow()))
 
     #limits and schedule
     limit_per_day = db.IntField(default=DEFAULT_PER_DAY_LIMIT)
@@ -306,14 +308,14 @@ class Credentials(db.Document):
         self.last_action = self.next_action
         if self.current_daily_counter >= self.limit_per_day:
             #switch action to the next day
-            self.next_action = now + timedelta(seconds=NEXT_DAY_SECONDS)
+            self.next_action = now + timedelta(days=1)
             self.current_daily_counter = 0
             self.warmup()
         else:
             self.next_action = now + timedelta(seconds=self.limit_interval)        
 
     def _inc_next_action(seconds, _commit=True):
-        now = datetime.datetime.now()
+        now = pytz.utc.localize(datetime.utcnow())
 
         self.next_action = now + timedelta(seconds=seconds)
         self.current_daily_counter = 0
@@ -451,16 +453,16 @@ class Campaign(db.Document):
     from_minutes = db.IntField(default=0)
     to_hour = db.IntField(default=DEFAULT_TO_HOUR)
     to_minutes = db.IntField(default=0)
-    time_zone = db.StringField(default='')
+    time_zone = db.DictField(default=DEFAULT_TIME_ZONE)
 
     templates = db.DictField()
 
     data = db.DictField()
 
-    last_action = db.DateTimeField(default=datetime.now())
-    next_action = db.DateTimeField(default=datetime.now())
+    last_action = db.DateTimeField(default=pytz.utc.localize(datetime.utcnow()))
+    next_action = db.DateTimeField(default=pytz.utc.localize(datetime.utcnow()))
 
-    created = db.DateTimeField( default=datetime.now() )
+    created = db.DateTimeField( default=pytz.utc.localize(datetime.utcnow()) )
 
 
     @classmethod
@@ -629,11 +631,64 @@ class Campaign(db.Document):
         template = templates_for_medium.get(template_key, '')
         return template
 
+    def _convert_campaign_interval_to_utc(self, hour, minute):
+        campaign_tz_title = self.time_zone.get('value', None)
+        if campaign_tz_title is None:
+            raise Exception("Wrong time_zone format for campaign.id={0}".format(self.id))
+        campaign_tz = timezone(campaign_tz_title)
+
+        now = pytz.utc.localize(datetime.utcnow())
+        tz_campaign_time = datetime(year=now.year,
+                                month=now.month,
+                                day=now.day,
+                                hour=hour,
+                                minute=minute,
+                                tzinfo=campaign_tz)
+
+        utc_campaign_time = tz_campaign_time.astimezone(pytz.utc)
+        return utc_campaign_time
+
+    #convert from sending time from CAMPAIGN time zone to UTC
+    def get_from_interval_in_utc(self):
+        return self._convert_campaign_interval_to_utc(hour=self.from_hour,
+                                                        minute=self.from_minutes)
+
+    #convert to sending time from CAMPAIGN time zone to UTC
+    def get_to_interval_in_utc(self):
+        return self._convert_campaign_interval_to_utc(hour=self.to_hour,
+                                                        minute=self.to_minutes)
+
+    def set_next_action_on_edit(self, _commit=True):
+        #If edits happened when the day limit exceed
+        now = pytz.utc.localize(datetime.utcnow())
+
+        #we get from sending time in UTC 
+        #next_action - is offset-aware datetimes
+        next_action = self.get_from_interval_in_utc()
+        start_day = next_action.weekday()
+
+        to_interval = self.get_to_interval_in_utc()
+        too_late = now.hour >= to_interval.hour
+
+        days_delta = 0
+        if too_late or not self.sending_days.get(str(start_day)):
+            days_delta = self.days_delta(start_day)
+
+        self.next_action = next_action + timedelta(days=days_delta)
+
+        if _commit:
+            self._commit()
+        
+        return self.next_action   
+
     def change_limits(self, now):
         current_hour = now.hour
         current_day = now.day
+        
+        utc_to_interval = self.get_to_interval_in_utc()
+        utc_to_hour = utc_to_interval.hour
 
-        if current_hour >= self.to_hour:
+        if current_hour >= utc_to_hour:
             self.last_action = self.next_action
 
             days_delta = self.days_delta(current_day)
@@ -734,6 +789,8 @@ class Campaign(db.Document):
             elif field in self.CAN_BE_NULL:
                 self._async_set_field(field_name=field, val=val)
         
+        self.set_next_action_on_edit(_commit=False)
+
         self._commit(_reload=True)
         return True
 
@@ -758,6 +815,7 @@ class Campaign(db.Document):
             elif field in cls.CAN_BE_NULL:
                 new_campaign._async_set_field(field_name=field, val=val)
 
+        new_campaign.set_next_action_on_edit(_commit=False)
         new_campaign._commit(_reload=True)
         return new_campaign
 
@@ -767,6 +825,32 @@ class Campaign(db.Document):
             return True
         
         return False
+
+    def get_delay(self, template_key):
+        if not self.templates:
+            return None
+        
+        #Try email medium
+        email_templates = self.templates.get('email', {})
+
+        email_template = email_templates.get(template_key, {})
+        if email_template:
+            delay_days = email_template.get('interval', None)
+            if delay_days is not None:
+                delay = delay_days * DAY_TO_SECONDS
+                return delay
+        
+        #Try linkedin medium
+        linkedin_templates = self.templates.get('linkedin', {})
+        
+        linkedin_template = linkedin_templates.get(template_key, {})
+        if linkedin_template:
+            delay_days = linkedin_template.get('interval', None)
+            if delay_days is not None:
+                delay = delay_days * DAY_TO_SECONDS
+                return delay
+
+        return None
 
     def get_data(self):
         return self.data
@@ -838,7 +922,7 @@ class ProspectsList(db.Document):
     
     title = db.StringField()
 
-    created = db.DateTimeField( default=datetime.now() )
+    created = db.DateTimeField( default=pytz.utc.localize(datetime.utcnow()) )
     
     # 0 - just created
     # 1 - in progress
@@ -988,7 +1072,7 @@ class Prospects(db.Document):
     # PULL (4) - Pull the reference from a ListField of references
     assign_to_list = db.ReferenceField('ProspectsList')
 
-    created = db.DateTimeField( default=datetime.now() )
+    created = db.DateTimeField( default=pytz.utc.localize(datetime.utcnow()) )
 
     def serialize(self):
         #we use it for join and showing objects as it is
