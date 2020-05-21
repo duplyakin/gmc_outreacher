@@ -68,7 +68,7 @@ export default {
   computed: {},
   data() {
     return {
-      test: true,
+      test: false,
       pagination: {
         perPage: 0,
         currentPage: 1,
@@ -98,31 +98,6 @@ export default {
 
       return "";
     },
-    delete_user(user_id, row_index) {
-      if (confirm("Are you sure?")) {
-        const path = CAMPAIGNS_API_DELETE;
-
-        var data = new FormData();
-        data.append("_campaign_id", campaign_id);
-
-        const index = row_index;
-        axios
-          .post(path, data)
-          .then(res => {
-            var r = res.data;
-            if (r.code <= 0) {
-              var msg = "Error deleting user " + r.msg;
-              Notification.error({ title: "Error", message: msg });
-            } else {
-              this.load_users();
-            }
-          })
-          .catch(error => {
-            var msg = "Error deleting user " + error;
-            Notification.error({ title: "Error", message: msg });
-          });
-      }
-    },
     editUser(userObj, index) {
       var table = this.$refs["users_data_table"];
       this.$modal.show(
@@ -142,63 +117,27 @@ export default {
         }
       );
     },
-    next_page() {
-      var page = 2;
-      this.load_data(page, 0);
-    },
-    reload_users(event) {
-      return this.load_users(1);
-    },
-    load_users(page = 1) {
+    load_users() {
       const path = USERS_API_LIST;
 
       var data = new FormData();
-      data.append("_page", page);
 
       axios
         .post(path, data)
         .then(res => {
           var r = res.data;
           if (r.code <= 0) {
-            var msg = "Error loading users." + r.msg;
+            var msg = "Error loading users data." + r.msg;
             Notification.error({ title: "Error", message: msg });
           } else {
+            //console.log(r)
             this.deserialize_users(r);
-            //console.
           }
         })
         .catch(error => {
-          var msg = "Error loading users. ERROR: " + error;
+          var msg = "Error loading data. ERROR: " + error;
           Notification.error({ title: "Error", message: msg });
         });
-    },
-    load_data() {
-      const path = CAMPAIGNS_API_DATA;
-
-      var data = new FormData();
-      axios
-        .post(path, data)
-        .then(res => {
-          var r = res.data;
-          if (r.code <= 0) {
-            var msg = "Error loading data " + r.msg;
-            Notification.error({ title: "Error", message: msg });
-          } else {
-            this.deserialize_data(r);
-          }
-        })
-        .catch(error => {
-          var msg = "Error loading data " + error;
-          Notification.error({ title: "Error", message: msg });
-        });
-    },
-    deserialize_data(from_data) {
-      for (var key in from_data) {
-        if (this.list_data.hasOwnProperty(key) && from_data[key]) {
-          var parsed_data = JSON.parse(from_data[key]);
-          this.$set(this.list_data, key, parsed_data);
-        }
-      }
     },
     deserialize_users(from_data) {
       if (from_data.columns) {
@@ -212,15 +151,14 @@ export default {
       }
 
       if (from_data.roles) {
-        var roles = JSON.parse(from_data.users);
+        var roles = from_data.roles;
         this.$set(this.list_data, "roles", roles);
       }
     }
   },
   async mounted() {
-    //await this.load_data();
     await this.load_users();
-    console.log('roles: ', this.list_data )
+    console.log('roles: ', this.list_data)
   }
 };
 </script>

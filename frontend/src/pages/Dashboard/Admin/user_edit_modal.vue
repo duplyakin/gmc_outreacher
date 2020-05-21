@@ -67,7 +67,7 @@ import { Notification, Select, Option } from "element-ui";
 
 import axios from "@/api/axios-auth";
 
-const CHANGE_ROLES_API = "/admin/roles/data";
+const CHANGE_ROLES_API = "/admin/roles/change";
 
 export default {
   components: {
@@ -107,6 +107,7 @@ export default {
             var msg = "Error updating user role." + r.msg;
             Notification.error({ title: "Error", message: msg });
           } else {
+            this.valueUpdated(this.userObj);
             Notification.success({title: "Success", message: "User role changed"});
           }
         })
@@ -129,7 +130,7 @@ export default {
           this.change_role();
       }
       
-      Notification.success({title: "Success", message: "User data changed"});
+      //Notification.success({title: "Success", message: "User data changed"});
       this.$emit("close");
     },
     discard() {
