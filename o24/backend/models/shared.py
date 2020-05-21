@@ -74,8 +74,8 @@ class Funnel(db.Document):
             return funnel.id
 
     @classmethod
-    def async_funnels(cls, owner=None):
-        results = cls.objects(root=True).\
+    def async_funnels(cls, funnel_types=[0,1,2], owner=None):
+        results = cls.objects(root=True, funnel_type__in=funnel_types).\
                 only('id', 'title', 'template_key','templates_required', 'root')
         
         if results:

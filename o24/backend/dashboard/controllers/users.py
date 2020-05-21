@@ -12,12 +12,10 @@ from o24.globals import *
 from flask_cors import CORS
 import json
 import traceback
-from o24.backend.utils.decors import auth_required
+from o24.backend.utils.decors import auth_required, get_token
 from o24.backend.dashboard.serializers import JSUserData
 
 
-def get_token(user):
-    return create_access_token(identity=str(user.id))
 
 @bp_dashboard.route('/sign_in', methods=['POST'])
 def sign_in():
@@ -102,6 +100,45 @@ def profile():
 
     try:
         if request.method == 'POST':
+            result['code'] = 1
+            result['msg'] = 'Success'
+            result['user'] = current_user.to_json()
+    except Exception as e:
+        print(e)
+        traceback.print_exc()
+
+        result['code'] = -1
+        result['msg'] = str(e)
+
+    return jsonify(result)
+
+
+@bp_dashboard.route('/change/password', methods=['POST'])
+@auth_required
+def profile_change_password():
+    current_user = g.user
+
+    result = {
+        'code' : -1,
+        'msg' : 'Unknown request'
+    }
+
+    try:
+        if request.method == 'POST':
+            old_password = request.form.get('_old_password', '')
+            if not old_password:
+                raise Exception("Old password can't be empty")
+
+            new_password = request.form.get('_new_password', '')
+            if not new_password:
+                raise Exception("New password can't be empty")
+            
+            if not current_user:
+                raise Exception("User not found")
+
+            current_user.change_password(old_password=old_password, new_password=new_password)
+            current_user.reload()
+
             result['code'] = 1
             result['msg'] = 'Success'
             result['user'] = current_user.to_json()

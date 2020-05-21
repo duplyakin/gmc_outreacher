@@ -211,3 +211,37 @@ def add_credentials():
             result['msg'] = 'SERVER ERROR: ' + str(e)
 
     return jsonify(result)
+
+
+@bp_dashboard.route('/credentials/refresh', methods=['POST'])
+@auth_required
+def refresh_credentials():
+    current_user = g.user
+
+    result = {
+        'code' : -1,
+        'msg' : '',
+    }
+    if request.method == 'POST':
+        try:
+            credentials_id = request.form.get('_credentials_id','')            
+            if not credentials_id:
+                raise Exception("Bad credentials_id")
+
+            credentials = Credentials.objects(owner=current_user.id, id=credentials_id).first()
+            if not credentials:
+                raise Exception("Credentials don't exist")
+
+            credentials.refresh(_reload=True)
+
+            result['code'] = 1
+            result['credentials'] = credentials.to_json()
+        except Exception as e:
+            #TODO: change to loggin
+            print(e)
+            traceback.print_exc()
+
+            result['msg'] = 'EDIT SERVER ERROR: ' + str(e)
+
+    return jsonify(result)
+

@@ -86,7 +86,7 @@ def data_campaigns():
             if credentials:
                 result['credentials'] = credentials
             
-            funnels = shared.Funnel.async_funnels()
+            funnels = shared.Funnel.async_funnels(funnel_types=[0])
             if funnels:
                 result['funnels'] = funnels
 

@@ -229,6 +229,14 @@ class Scheduler():
         campaign._safe_start()
 
         #campaign.update_status(status=IN_PROGRESS)
+
+    @classmethod
+    def safe_finish_sequence(cls, owner_id, prospects_ids):
+        stopped = TaskQueue.objects(owner_id=owner_id, prospects_id__in=prospects_ids).update(status=FINISHED)    
+
+        return stopped
+
+
     @classmethod
     def safe_unassign_prospects(cls, owner_id, prospects_ids):
         if not owner_id or not prospects_ids:

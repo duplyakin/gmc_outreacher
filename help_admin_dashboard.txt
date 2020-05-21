@@ -158,3 +158,64 @@ response:
     'msg' : 'Unknown request'
     'settings' : Объект настроек обвновленный
 }
+
+
+8. /admin/password/change (POST) - меняет пароль для пользователя
+request:
+_user_id - ID пользователя
+_new_password - Новый пароль
+
+response:
+{
+    'code' : -1,
+    'msg' : 'Unknown request'
+    'user': Объект пользователь 
+    'new_password' = //Новый пароль в открытом виде, можешь его использовать чтобы показать, но он возвращается только из этого метода
+}
+
+9. /admin/login/as (POST) - логиниться от текущего пользователя  (ТЕБУ НУЖНО переписать token в local_storage)
+request:
+_user_id - ID пользователя за которого мы хотим залогиниться
+
+response:
+{
+    'code' : -1,
+    'msg' : 'Unknown request'
+    'token': //токен пользователя (тебе нужно его переписать в local_storage и сделать редирект на /profile, так и произайдет логин)
+}
+
+10. /admin/credentials/list (POST) - получить список credentials для вывода в таблицу
+request:
+нет
+
+response:
+{
+    'code' : -1,
+    'msg' : 'Unknown request',
+    'columns' : // Колонки, которые надо выводить в таблице 
+    'credentials': [] //массив credentials
+}
+
+
+11. /admin/credentials/get (POST) - возвращает объект credentials. Все поля текстовые по аналогии с settings
+request:
+_credentials_id - ID credentials
+
+response:
+{
+        'code' : -1,
+        'msg' : 'Unknown request',
+        'credentials' : //Объект для вывода
+}
+
+12. /admin/credentials/edit (POST) - редактирование credentials, поля проверяются на Сервере
+request:
+_credentials_id - ID credentials
+_credentials_data - Объект с новыми значениями
+
+response:
+{
+        'code' : -1,
+        'msg' : 'Unknown request',
+        'credentials' : //Объект обновленный
+}

@@ -144,6 +144,19 @@ class User(db.Document):
         user = cls.objects(email=email).first()
         return user
 
+    def change_password(self, old_password, new_password):
+        if not old_password or not new_password:
+            raise Exception("Password can't be empty")
+
+        if not check_password_hash(self.password, old_password):
+            raise Exception("Incorrect password")
+        
+        self.password = generate_password_hash(new_password)
+        self._commit()
+
+    def admin_change_password(self, new_password):
+        self.password = generate_password_hash(new_password)
+        self._commit()
 
     def get_oauth_state(self):
         if not self.current_oauth_state or self.current_oauth_state == '':
@@ -251,6 +264,27 @@ class Credentials(db.Document):
             return cls.objects(owner=user_id, data__sender=sender).first()
 
         return None
+
+    @classmethod
+    def admin_async_credentials(cls):
+        db_query = cls.objects()
+
+        #we use it for join and showing objects as it is
+        pipeline = [
+            {"$lookup" : {
+                "from" : "user",
+                "localField" : "owner",
+                "foreignField" : "_id",
+                "as" : "owner"
+            }},
+            { "$unwind" : { "path" : "$owner", "preserveNullAndEmptyArrays": True }},
+        ]
+
+        credentials = list(db_query.aggregate(*pipeline))
+
+        results = bson_dumps(credentials)
+
+        return results
 
     @classmethod
     def async_credentials(cls, owner, page=None, medium=None, per_page=config.CREDENTIALS_PER_PAGE):
@@ -369,6 +403,12 @@ class Credentials(db.Document):
             self._inc_next_action(seconds=delay*NEXT_DAY_SECONDS, _commit=False)
 
         self._commit()
+
+    def refresh(self, _reload=False):
+        self.error = ''
+        self.status = 1
+        
+        self._commit(_reload=_reload)
 
     def resume(self):
         self.error = ''

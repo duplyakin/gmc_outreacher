@@ -508,3 +508,41 @@ def upload_prospects ():
             result['msg'] = 'SERVER ERROR: ' + str(e)
 
     return jsonify(result)
+
+
+@bp_dashboard.route('/prospects/sequence/stop', methods=['POST'])
+@auth_required
+def stop_sequence_for_prospect():
+    current_user = g.user
+
+    result = {
+        'code' : -1,
+        'msg' : '',
+        'stopped' : 0
+    }
+    if request.method == 'POST':
+        try:
+            raw_data = request.form.get('_prospects', '')
+            if not raw_data:
+                raise Exception("Bad _prospects")
+
+            js_data = json.loads(raw_data)
+            if type(js_data) != list:
+                js_data = [js_data]
+
+            ids = [x["_id"]["$oid"] for x in js_data]
+
+            res = scheduler.Scheduler.safe_finish_sequence(owner_id=current_user.id,
+                                                            prospects_ids=ids)
+
+            result['code'] = 1
+            result['stopped'] = res
+        except Exception as e:
+            #TODO: change to loggin
+            print(e)
+            traceback.print_exc()
+
+            result['code'] = -1
+            result['msg'] = 'SERVER ERROR: ' + str(e)
+
+    return jsonify(result)

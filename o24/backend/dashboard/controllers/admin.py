@@ -11,10 +11,12 @@ from o24.backend import db
 from o24.backend import app
 from o24.backend.dashboard import bp_dashboard
 from o24.globals import *
+from datetime import datetime
+import pytz
 
 import json
 import traceback
-from o24.backend.utils.decors import admin_required
+from o24.backend.utils.decors import admin_required, get_token
 
 
 USER_COLUMNS = [
@@ -98,6 +100,33 @@ GOOGLE_SETTINGS_CREATE_FIELDS = [
     }
 ]
 
+CREDENTIALS_TABLE_COLUMNS = [
+    {
+        'label' : 'Owner',
+        'prop' : 'owner'   
+    },
+    {
+        'label' : 'medium',
+        'prop' : 'medium'   
+    },
+    {
+        'label' : 'Status',
+        'prop' : 'status'   
+    },
+    {
+        'label' : 'error',
+        'prop' : 'error'   
+    },
+    {
+        'label' : 'next_action',
+        'prop' : 'next_action'   
+    },
+    {
+        'label' : 'current_daily_counter',
+        'prop' : 'current_daily_counter'   
+    }
+]
+
 
 @bp_dashboard.route('/admin/users/list', methods=['POST'])
 @admin_required
@@ -127,6 +156,50 @@ def admin_users_list():
         result['msg'] = str(e)
 
     return jsonify(result)
+
+@bp_dashboard.route('/admin/password/change', methods=['POST'])
+@admin_required
+def admin_change_user_password():
+    current_user = g.user
+    if current_user.role != 'admin':
+        return jsonify(msg='Permision denied'), 403
+    
+    result = {
+        'code' : -1,
+        'msg' : 'Unknown request'
+    }
+
+    try:
+        if request.method == 'POST':
+            user_id = request.form.get('_user_id','')
+            if not user_id:
+                raise Exception("Bad _user_id")
+
+            user = User.objects(id=user_id).get()
+            if not user:
+                raise Exception("No such user")
+
+            new_password = request.form.get('_new_password','')
+            if not new_password:
+                raise Exception("Password can't be empty")
+
+            
+            user.admin_change_password()
+            user.reload()
+
+            result['code'] = 1
+            result['msg'] = 'Success'
+            result['user'] = user.to_json()
+            result['new_password'] = new_password
+    except Exception as e:
+        print(e)
+        traceback.print_exc()
+
+        result['code'] = -1
+        result['msg'] = str(e)
+
+    return jsonify(result)
+
 
 @bp_dashboard.route('/admin/roles/change', methods=['POST'])
 @admin_required
@@ -321,6 +394,178 @@ def admin_google_settings_create():
             result['code'] = 1
             result['msg'] = 'Success'
             result['settings'] = new_settings.to_json()
+    except Exception as e:
+        print(e)
+        traceback.print_exc()
+
+        result['code'] = -1
+        result['msg'] = str(e)
+
+    return jsonify(result)
+
+
+@bp_dashboard.route('/admin/login/as', methods=['POST'])
+@admin_required
+def admin_login_as_another_user():
+    current_user = g.user
+    if current_user.role != 'admin':
+        return jsonify(msg='Permision denied'), 403
+
+    result = {
+        'code' : -1,
+        'msg' : 'Unknown request'
+    }
+
+    try:
+        if request.method == 'POST':
+            user_id = request.form.get('_user_id', '')
+            if not user_id:
+                raise Exception("Bad _user_id")
+                        
+            user = User.objects(id=user_id).get()
+            if not user:
+                raise Exception("No such user")
+
+            
+            result['code'] = 1
+            result['msg'] = 'Success'
+            result['token'] = get_token(user)
+    except Exception as e:
+        print(e)
+        traceback.print_exc()
+
+        result['code'] = -1
+        result['msg'] = str(e)
+
+    return jsonify(result)
+
+
+@bp_dashboard.route('/admin/credentials/list', methods=['POST'])
+@admin_required
+def admin_list_credentials():
+    current_user = g.user
+
+    result = {
+        'code' : -1,
+        'msg' : 'Unknown request',
+        'columns' : json.dumps(CREDENTIALS_TABLE_COLUMNS)
+    }
+
+    try:
+        if request.method == 'POST':
+            credentials = Credentials.admin_async_credentials()
+            if not credentials:
+                raise Exception("No credentials found")
+            
+            result['code'] = 1
+            result['msg'] = 'Success'
+            result['credentials'] = credentials
+    except Exception as e:
+        print(e)
+        traceback.print_exc()
+
+        result['code'] = -1
+        result['msg'] = str(e)
+
+    return jsonify(result)
+
+
+@bp_dashboard.route('/admin/credentials/get', methods=['POST'])
+@admin_required
+def admin_get_credentials():
+    current_user = g.user
+
+    result = {
+        'code' : -1,
+        'msg' : 'Unknown request',
+    }
+
+    try:
+        if request.method == 'POST':
+            cr_id = request.form.get('_credentials_id', '')
+            if not cr_id:
+                raise Exception("Bad _credentials_id")
+                        
+            credentials = Credentials.objects(id=cr_id).get()
+            if not credentials:
+                raise Exception("Credentials not found")
+
+            result['code'] = 1
+            result['msg'] = 'Success'
+            result['credentials'] = credentials.to_json()
+    except Exception as e:
+        print(e)
+        traceback.print_exc()
+
+        result['code'] = -1
+        result['msg'] = str(e)
+
+    return jsonify(result)
+
+
+@bp_dashboard.route('/admin/credentials/edit', methods=['POST'])
+@admin_required
+def admin_edit_credentials():
+    current_user = g.user
+
+    result = {
+        'code' : -1,
+        'msg' : 'Unknown request',
+    }
+
+    try:
+        if request.method == 'POST':
+            cr_id = request.form.get('_credentials_id', '')
+            if not cr_id:
+                raise Exception("Bad _credentials_id")
+
+            credentials = Credentials.objects(id=cr_id).get()
+            if not credentials:
+                raise Exception("Credentials not found")
+
+            raw_data = request.form.get('_credentials_data', '')
+            if not raw_data:
+                raise Exception("Bad credentials_data")
+            
+            credentials_data = json.loads(raw_data)
+            if not credentials_data:
+                raise Exception("credentials_data can't be empty")
+            
+            # 0 - TEXT
+            # 1 - INT
+            # 2 - DATE
+            allow_fields = {'status' : 1, 
+                            'error' : 0, 
+                            'medium' : 0, 
+                            'next_action' : 2,
+                            'limit_per_day' : 1, 
+                            'limit_per_hour' : 1, 
+                            'limit_interval' : 1,
+                            'current_daily_counter' : 1, 
+                            'current_hourly_counter' : 1
+                            }
+
+            for k,v in credentials_data.items():
+                if k not in allow_fields.keys():
+                    continue
+
+                if v:
+                    is_type = allow_fields.get(k)
+                    if is_type == 1:
+                        v = int(v)
+                    elif is_type == 2:
+                        #2020-05-21T15:14:20.906Z
+                        d_obj = datetime.strptime(v, '%Y-%M-%DT%H:%M:%S')
+                        v = pytz.utc.localize(d_obj)
+                    
+                    setattr(credentials, k, v)
+            
+            credentials._commit(_reload=True)
+
+
+            result['code'] = 1
+            result['msg'] = 'Success'
+            result['credentials'] = credentials.to_json()
     except Exception as e:
         print(e)
         traceback.print_exc()
