@@ -13,3 +13,10 @@ python -m unittest discover -s .\o24\production_tests\ -p "*2_scenaries.py"
 
 #TEST Linkedin campaigns
 python -m unittest o24.production_tests.test_prod_2_scenaries.ProdTestScenaries.test_0_check_linkedin_campaigns_handlers
+
+#TEST Campaign handlers 
+python -m unittest o24.production_tests.test_prod_2_scenaries.ProdTestScenaries.test_1_check_campaigns_handlers
+
+
+#TEST admin handlers
+python -m unittest o24.production_tests.test_prod_2_scenaries.ProdTestScenaries.test_2_check_admin_handlers

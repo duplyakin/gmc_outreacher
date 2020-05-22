@@ -137,6 +137,22 @@ class ProdTestScenaries(unittest.TestCase):
                     error = "ERROR list_campaigns response: MUST show only OUTREACH_CAMPAIGN_TYPE campaigns, but have LINKEDIN campaign.id={0} campaign.title={1}".format(campaign.id, campaign.title)
                     self.assertTrue(False, message)
 
+    def test_2_check_admin_handlers(self):
+        user = User.objects(email=TEST_USER_EMAIL).first()
+
+        client = app.test_client()    
+        with app.test_request_context():
+
+            #CREATE GOOGLE APP SETTINGS
+            SETTINGS_ID = self._admin_google_settings_create(user=user, client=client)
+
+            #EDIT GOOGLE APP SETTINGS
+            #EDIT parse LINKEDIN campaign
+            self._admin_google_settings_edit(user=user, 
+                                        client=client,
+                                        settings_id=SETTINGS_ID)
+
+
     def _delete_linkedin_campaign(self, user, client, campaign_id):
         form_data = {
             '_campaign_id' : campaign_id,
@@ -425,6 +441,34 @@ class ProdTestScenaries(unittest.TestCase):
 
         return added['_id']['$oid']
 
+    def _admin_google_settings_create(self, user, client, req_dict=None):
+        _req_dict = None
+
+        if req_dict:
+            _req_dict = req_dict
+        else:
+            _req_dict = ADMIN_GOOGLE_SETTINGS_CREATE
+            _req_dict['title'] = _req_dict['title'].format(random_num())
+
+        json_create_data = json.dumps(_req_dict)
+        form_data = {
+            '_data' : json_create_data
+        }
+        
+        url = url_for('dashboard.admin_google_settings_create')
+        r = post_with_token(user=user, client=client, url=url, data=form_data)
+
+        response_data = json.loads(r.data)
+        code = response_data['code']
+        msg = response_data['msg']
+        error_message = "msg: {0}".format(msg)
+        self.assertTrue(code == 1, error_message)
+
+    #check campaign type
+        settings = json.loads(response_data['settings'])
+        pprint(settings)
+
+        return settings['_id']['$oid']
 
 
 def setUpModule():

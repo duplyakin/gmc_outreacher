@@ -13,6 +13,7 @@ from o24.backend.dashboard import bp_dashboard
 from o24.globals import *
 from datetime import datetime
 import pytz
+from o24.backend.dashboard.serializers import JSGoogleAppSettingsData
 
 import json
 import traceback
@@ -69,6 +70,10 @@ GOOGLE_SETTINGS_CREATE_FIELDS = [
     {
         'label' : 'Title',
         'prop' : 'title'
+    },
+    {
+        'label' : 'credentials',
+        'prop' : 'credentials'
     },
     {
         'label' : 'redirect_uri',
@@ -327,8 +332,8 @@ def admin_google_settings_edit():
             raw_data = request.form.get('_data','')
             if not raw_data:
                 raise Exception("There is no _data, can't edit")
-            
-            new_data = json.loads(raw_data)
+
+            new_data = JSGoogleAppSettingsData(raw_data=raw_data)
 
             settings.update_data(from_data=new_data)
             settings.reload()
@@ -386,7 +391,7 @@ def admin_google_settings_create():
             if not raw_data:
                 raise Exception("There is no _data, can't edit")
             
-            new_data = json.loads(raw_data)
+            new_data = JSGoogleAppSettingsData(raw_data=raw_data)
 
             new_settings = GoogleAppSetting.create_settings(from_data=new_data)
             new_settings.reload()
