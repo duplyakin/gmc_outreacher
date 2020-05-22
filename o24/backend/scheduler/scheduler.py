@@ -207,7 +207,7 @@ class Scheduler():
 
         #campaign.update_status(status=IN_PROGRESS)
         #create async action for campaign
-        AsyncTaskQueue.create_async_task(campaign_id=campaign.id, input_data=input_data)
+        #AsyncTaskQueue.create_async_task(campaign_id=campaign.id, input_data=input_data)
 
     def pause_campaign(self, campaign):
         if not campaign.inprogress():

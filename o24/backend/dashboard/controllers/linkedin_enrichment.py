@@ -426,9 +426,13 @@ def start_linkedin_campaign():
 
             
             scheduler.Scheduler.safe_start_campaign(owner=current_user.id, campaign=campaign)
+            campaign.reload()
+
+            campaign_dict = to_json_deep_dereference(campaign)
 
             result['code'] = 1
             result['msg'] = 'Success'
+            result['started'] = json.dumps(campaign_dict)
     except Exception as e:
         #TODO: change to loggin
         print(e)
@@ -463,8 +467,13 @@ def pause_linkedin_campaign():
             
             scheduler.Scheduler.safe_pause_campaign(campaign=campaign)
 
+            campaign.reload()
+
+            campaign_dict = to_json_deep_dereference(campaign)
+
             result['code'] = 1
             result['msg'] = 'Success'
+            result['paused'] = json.dumps(campaign_dict)
     except Exception as e:
         #TODO: change to loggin
         print(e)
