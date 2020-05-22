@@ -866,3 +866,42 @@ CAMPAIGN_LINKEDIN_ENRICHMENT_CREATE = {
         "6": False
     }
 }
+
+
+ADMIN_GOOGLE_SETTINGS_CREATE = {
+    'title': 'Create test settings XX-{0}',
+    'credentials': '{"web":{"client_id":"606646624276-qcedt5p3vdad7h6aie2l5s75mg59at7t.apps.googleusercontent.com","project_id":"outreacher24","auth_uri":"https://accounts.google.com/o/oauth2/auth","token_uri":"https://oauth2.googleapis.com/token","auth_provider_x509_cert_url":"https://www.googleapis.com/oauth2/v1/certs","client_secret":"Gn-M_96r8PTML9SQaLxAqqWD","redirect_uris":["http://127.0.0.1:5000/oauth/callback"],"javascript_origins":["http://127.0.0.1:5000"]}}',
+    'redirect_uri': 'http://127.0.0.1:5000/oauth/callback',
+    'gmail_scopes': '["https://mail.google.com/", "https://www.googleapis.com/auth/gmail.send", "https://www.googleapis.com/auth/gmail.modify", "https://www.googleapis.com/auth/gmail.metadata"]',
+    'gmail_access_type': "offline",
+    'gmail_include_granted_scopes': 'true',
+    'gmail_api_name': "gmail",
+    'gmail_api_version': "v1",
+    'active' : "0"
+}
+
+ADMIN_GOOGLE_SETTINGS_EDIT = {
+    'title': 'Edited Create test settings XX-{0}',
+    'credentials': '{"web":{"client_id":"adsfadsfasdfasdfgoogleusercontent.com","project_id":"outreacher24","auth_uri":"https://google.com/o/oauth2/auth","token_uri":"https://oauth2.googleapis.com/token","auth_provider_x509_cert_url":"https://www.googleapis.com/oauth2/v1/certs","client_secret":"Gn-M_96r8PTML9SQaLxAqqWD","redirect_uris":["http://127.0.0.1:5000/oauth/callback"],"javascript_origins":["http://outreacher24.com"]}}',
+    'redirect_uri': 'http://127.0.0.1:5000/oauth',
+    'gmail_scopes': '["https://www.googleapis.com/auth/gmail.modify", "https://www.googleapis.com/auth/gmail.metadata"]',
+    'gmail_access_type': "online",
+    'gmail_include_granted_scopes': 'false',
+    'gmail_api_name': "spreadsheet",
+    'gmail_api_version': "v2",
+    'active' : "1"
+}
+
+
+ADMIN_CREDENTIALS_EDIT = {
+    'status' : '-1', 
+    'error_message' : "Random error text", 
+    'medium' : 'my-test-medium', 
+    'next_action' : "2021-05-22T10:1:2.475Z",
+    'limit_per_day' : "1000", 
+    'limit_per_hour' : "2000", 
+    'limit_interval' : "22020202",
+    'current_daily_counter' : "123", 
+    'current_hourly_counter' : "123"
+}
+

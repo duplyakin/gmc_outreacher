@@ -13,11 +13,12 @@ from o24.backend.dashboard import bp_dashboard
 from o24.globals import *
 from datetime import datetime
 import pytz
+from o24.backend.dashboard.serializers import JSGoogleAppSettingsData
 
 import json
 import traceback
 from o24.backend.utils.decors import admin_required, get_token
-
+from dateutil.parser import parse
 
 USER_COLUMNS = [
     {
@@ -69,6 +70,10 @@ GOOGLE_SETTINGS_CREATE_FIELDS = [
     {
         'label' : 'Title',
         'prop' : 'title'
+    },
+    {
+        'label' : 'credentials',
+        'prop' : 'credentials'
     },
     {
         'label' : 'redirect_uri',
@@ -327,8 +332,8 @@ def admin_google_settings_edit():
             raw_data = request.form.get('_data','')
             if not raw_data:
                 raise Exception("There is no _data, can't edit")
-            
-            new_data = json.loads(raw_data)
+
+            new_data = JSGoogleAppSettingsData(raw_data=raw_data)
 
             settings.update_data(from_data=new_data)
             settings.reload()
@@ -344,6 +349,41 @@ def admin_google_settings_edit():
         result['msg'] = str(e)
 
     return jsonify(result)
+
+
+@bp_dashboard.route('/admin/google/settings/delete', methods=['POST'])
+@admin_required
+def admin_google_settings_delete():
+    current_user = g.user
+
+    result = {
+        'code' : -1,
+        'msg' : 'Unknown request',
+    }
+
+    try:
+        if request.method == 'POST':
+            settings_id = request.form.get('_settings_id','')
+            if not settings_id:
+                raise Exception("Bad _settings_id")
+
+            settings = GoogleAppSetting.objects(id=settings_id).get()
+            if not settings:
+                raise Exception("No such settings")
+
+            settings.delete()
+
+            result['code'] = 1
+            result['msg'] = 'Success'
+    except Exception as e:
+        print(e)
+        traceback.print_exc()
+
+        result['code'] = -1
+        result['msg'] = str(e)
+
+    return jsonify(result)
+
 
 
 @bp_dashboard.route('/admin/google/settings/fields', methods=['POST'])
@@ -386,7 +426,7 @@ def admin_google_settings_create():
             if not raw_data:
                 raise Exception("There is no _data, can't edit")
             
-            new_data = json.loads(raw_data)
+            new_data = JSGoogleAppSettingsData(raw_data=raw_data)
 
             new_settings = GoogleAppSetting.create_settings(from_data=new_data)
             new_settings.reload()
@@ -535,7 +575,7 @@ def admin_edit_credentials():
             # 1 - INT
             # 2 - DATE
             allow_fields = {'status' : 1, 
-                            'error' : 0, 
+                            'error_message' : 0, 
                             'medium' : 0, 
                             'next_action' : 2,
                             'limit_per_day' : 1, 
@@ -555,13 +595,12 @@ def admin_edit_credentials():
                         v = int(v)
                     elif is_type == 2:
                         #2020-05-21T15:14:20.906Z
-                        d_obj = datetime.strptime(v, '%Y-%M-%DT%H:%M:%S')
-                        v = pytz.utc.localize(d_obj)
+                        d_obj = parse(v)
+                        v = d_obj
                     
                     setattr(credentials, k, v)
-            
-            credentials._commit(_reload=True)
 
+            credentials._commit(_reload=True)
 
             result['code'] = 1
             result['msg'] = 'Success'

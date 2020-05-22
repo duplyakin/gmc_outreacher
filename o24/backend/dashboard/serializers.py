@@ -6,7 +6,7 @@ class JSObject():
     ATTR_PREFIX = '_js_'
     RAW_ATTR_PREFIX = '_raw_'
     
-    STR_FIELDS = ['title']
+    STR_FIELDS = ['title', 'gmail_include_granted_scopes', 'active']
 
     def __init__(self, raw_data):
         try:
@@ -126,7 +126,12 @@ class JSProspectData(JSObject):
 
     def data(self):
         return self._custom_attr(attr='data', default={})
-  
+
+class JSGoogleAppSettingsData(JSObject):
+    def __init__(self, raw_data):
+        super().__init__(raw_data)
+
+
 class JSCampaignData(JSObject):
     def __init__(self, raw_data):
         try:

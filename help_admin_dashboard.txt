@@ -219,3 +219,14 @@ response:
         'msg' : 'Unknown request',
         'credentials' : //Объект обновленный
 }
+
+13. /admin/google/settings/delete (POST) - удаление google app settings
+request:
+_settings_id - ID google app settings
+
+response:
+{
+        'code' : -1,
+        'msg' : 'Unknown request',
+}
+

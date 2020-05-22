@@ -20,6 +20,14 @@ class GoogleAppSetting(db.Document):
 
     created = db.DateTimeField( default=datetime.datetime.utcnow )
 
+    PASS_ON_CREATE = ['created']
+    BOOLEAN_FIELDS = ['active']
+    TO_STR = ['gmail_include_granted_scopes']
+
+    @classmethod
+    def get_create_fields(cls):
+        return cls._fields.keys()
+
     @classmethod
     def settings(cls):
         settings = GoogleAppSetting.objects(active=True).first()
@@ -35,49 +43,35 @@ class GoogleAppSetting(db.Document):
 
         new_settings = cls()
 
-        for k,v in from_data.items():
-            if k in ['credentials', 'created']:
-                continue
-            
-            if k == 'active':
-                if v in ['true', 'True', '1']:
-                    new_settings.active = True
-                else:
-                    new_settings.active = False
-                continue
-            
-            setattr(new_settings, k, v)
+        new_settings.update_data(from_data=from_data)
 
-
-        new_settings._commit()
         return new_settings
 
     def update_data(self, from_data):
         if not from_data:
             return
         
-        for k,v in from_data.items():
-            if k in ['credentials', 'created']:
+        create_fields = GoogleAppSetting.get_create_fields()
+
+        for field in create_fields:
+            if field in self.PASS_ON_CREATE:
                 continue
             
-            if k == 'active':
-                if v in ['true', 'True', '1']:
-                    self.active = True
+            val = from_data.get_field(field)
+            if val == '' or val is None:
+                continue 
+
+            if field in self.BOOLEAN_FIELDS:
+                if val in ['true', 'True', '1']:
+                    val = True
                 else:
-                    self.active = False
-                continue
-            
-            setattr(self, k, v)
+                    val = False
+            elif field in self.TO_STR:
+                val = str(val)
+                
+            setattr(self, field, val)
         
         self._commit()
-
-    def list_fields(self):
-        return {
-            'Id' : self.id,
-            'Title' : self.title,
-            'Created at' : self.created,
-            'Active' : self.active
-        }
 
     def _commit(self, _reload=False):
         self.save()

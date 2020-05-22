@@ -38,10 +38,16 @@ COLUMNS = [
 
 modified_fields_on_create = {
     'title' : True,
-    'credentials' : True,
     'time_table' : True,
-    'lists' : False,
-    'data' : True
+    'credentials' : True,
+    'lists' : True,
+    'from_hour' : True,
+    'to_hour' : True,
+    'from_minutes' : True,
+    'to_minutes' : True,
+    'sending_days' : True,
+    'data' : True,
+    'time_zone': True
 }
 
 modified_fields_on_edit = {

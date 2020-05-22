@@ -2,6 +2,8 @@ import unittest
 import os
 import o24.config as config
 from o24.backend.dashboard.models import User, Team, Credentials, Campaign, Prospects, ProspectsList
+from o24.backend.google.models import GoogleAppSetting
+
 from o24.backend import app
 from o24.backend import db
 from o24.backend.models.shared import Action, Funnel
@@ -136,6 +138,36 @@ class ProdTestScenaries(unittest.TestCase):
                 if campaign['campaign_type'] != OUTREACH_CAMPAIGN_TYPE:
                     error = "ERROR list_campaigns response: MUST show only OUTREACH_CAMPAIGN_TYPE campaigns, but have LINKEDIN campaign.id={0} campaign.title={1}".format(campaign.id, campaign.title)
                     self.assertTrue(False, message)
+
+    def test_2_check_admin_handlers(self):
+        user = User.objects(email=TEST_USER_EMAIL).first()
+
+        client = app.test_client()    
+        with app.test_request_context():
+
+            #CREATE GOOGLE APP SETTINGS
+            SETTINGS_ID = self._admin_google_settings_create(user=user, client=client)
+
+            #EDIT GOOGLE APP SETTINGS
+            self._admin_google_settings_edit(user=user, 
+                                        client=client,
+                                        settings_id=SETTINGS_ID)
+
+            #DELETE GOOGLE APP SETTINGS
+            self._admin_google_settings_delete(user=user, 
+                                                client=client, 
+                                                settings_id=SETTINGS_ID)
+
+            #LIST CREDENTIALS
+            LIST_CREDENTIALS = self._admin_credenials_list(user=user, client=client)
+            if not LIST_CREDENTIALS:
+                self.assertTrue(False, "BAD TEST DATA: there is not credentials")
+
+            #get random
+            CR_ID = LIST_CREDENTIALS[0]['_id']['$oid']
+
+            #EDIT CREDENTIALS
+            self._admin_credenials_edit(user=user, client=client, credentials_id=CR_ID)
 
     def _delete_linkedin_campaign(self, user, client, campaign_id):
         form_data = {
@@ -424,6 +456,219 @@ class ProdTestScenaries(unittest.TestCase):
         self.assertTrue(added['funnel']['funnel_type'] == LINKEDIN_PARSING_FUNNEL_TYPE, message)
 
         return added['_id']['$oid']
+
+    def _admin_google_settings_create(self, user, client, req_dict=None):
+        _req_dict = None
+
+        if req_dict:
+            _req_dict = req_dict
+        else:
+            _req_dict = ADMIN_GOOGLE_SETTINGS_CREATE
+            _req_dict['title'] = _req_dict['title'].format(random_num())
+
+        json_create_data = json.dumps(_req_dict)
+        form_data = {
+            '_data' : json_create_data
+        }
+        
+        url = url_for('dashboard.admin_google_settings_create')
+        r = post_with_token(user=user, client=client, url=url, data=form_data)
+
+        response_data = json.loads(r.data)
+        code = response_data['code']
+        msg = response_data['msg']
+        error_message = "msg: {0}".format(msg)
+        self.assertTrue(code == 1, error_message)
+
+    #check campaign type
+        settings = json.loads(response_data['settings'])
+        pprint(settings)
+
+        return settings['_id']['$oid']
+
+    def _admin_google_settings_get(self, user, client, settings_id):
+        #get first
+        form_data = {
+            '_settings_id' : settings_id
+        }
+        url = url_for('dashboard.admin_google_settings_get')
+        r = post_with_token(user=user, client=client, url=url, data=form_data)
+
+        response_data = json.loads(r.data)
+        code = response_data['code']
+        msg = response_data['msg']
+        error_message = "msg: {0}".format(msg)
+        self.assertTrue(code == 1, error_message)
+
+    #check id
+        get_settings = json.loads(response_data['settings'])
+        pprint(get_settings)
+        
+        message = "Get wrong settings id {0}".format(get_settings['_id']['$oid'])
+        self.assertTrue(get_settings['_id']['$oid'] == settings_id, message)
+
+        return get_settings
+
+    def _admin_google_settings_edit(self, user, client, settings_id, req_dict=None):
+
+        settings = self._admin_google_settings_get(user=user, client=client, settings_id=settings_id)        
+
+    #then edit
+        _req_dict = None
+        if req_dict:
+            _req_dict = req_dict
+        else:
+            _req_dict = ADMIN_GOOGLE_SETTINGS_EDIT
+            _req_dict['title'] = _req_dict['title'].format(random_num())
+        
+        json_create_data = json.dumps(_req_dict)
+        form_data = {
+            '_settings_id' : settings['_id']['$oid'],
+            '_data' : json_create_data
+        }
+        
+        url = url_for('dashboard.admin_google_settings_edit')
+        r = post_with_token(user=user, client=client, url=url, data=form_data)
+
+        response_data = json.loads(r.data)
+        code = response_data['code']
+        msg = response_data['msg']
+        error_message = "msg: {0}".format(msg)
+        self.assertTrue(code == 1, error_message)
+
+        updated_settings = json.loads(response_data['settings'])
+        pprint(updated_settings)
+        self.assertTrue(updated_settings['_id']['$oid'] == settings['_id']['$oid'], "Updated settings ID not equal get settings ID")
+        
+        #compare fields
+        for k,v in _req_dict.items():
+            if k == 'active':
+                edited = _req_dict['active']
+                if edited in ['1', 'True', 'true']:
+                    edited = True
+                else:
+                    edited = False
+                self.assertTrue(edited == updated_settings[k], error)
+            elif k == 'credentials' or k == 'gmail_scopes':
+                edited = json.loads(_req_dict[k])
+                updated = updated_settings[k]
+                error = "Error update key:{0} need:{1}  has:{2}".format(k, edited, updated)
+                self.assertTrue(edited == updated, error)
+            else:
+                updated = updated_settings[k]
+                error = "Error update key:{0} need:{1}  has:{2}".format(k, v, updated)
+                self.assertTrue(v == updated, error)
+        
+        return updated_settings
+
+
+    def _admin_google_settings_delete(self, user, client, settings_id):
+        form_data = {
+            '_settings_id' : settings_id,
+        }
+
+        url = url_for('dashboard.admin_google_settings_delete')
+        r = post_with_token(user=user, client=client, url=url, data=form_data)
+
+        response_data = json.loads(r.data)
+        pprint(response_data)
+        code = response_data['code']
+        msg = response_data['msg']
+        error_message = "msg: {0}".format(msg)
+        self.assertTrue(code == 1, error_message)
+    
+    #check deleted
+        deleted = GoogleAppSetting.objects(id=settings_id).first()
+        if deleted:
+            error = "GoogleApp settings didn't deleted still in a database id={0}".format(deleted.id)
+            self.assertTrue(False, error)
+        
+        return True
+
+    def _admin_credenials_list(self, user, client):
+        url = url_for('dashboard.admin_list_credentials')
+        r = post_with_token(user=user, client=client, url=url, data=None)
+
+        response_data = json.loads(r.data)
+        pprint(response_data)
+
+        code = response_data['code']
+        msg = response_data['msg']
+        error_message = "msg: {0}".format(msg)
+        self.assertTrue(code == 1, error_message)
+
+    #check that campaigns are not GENERAL type
+        LIST_CREDENTIALS = json.loads(response_data['credentials'])
+
+        return LIST_CREDENTIALS
+
+    def _admin_credentials_get(self, user, client, credentials_id):
+        #get first
+        form_data = {
+            '_credentials_id' : credentials_id
+        }
+        url = url_for('dashboard.admin_get_credentials')
+        r = post_with_token(user=user, client=client, url=url, data=form_data)
+
+        response_data = json.loads(r.data)
+        code = response_data['code']
+        msg = response_data['msg']
+        error_message = "msg: {0}".format(msg)
+        self.assertTrue(code == 1, error_message)
+
+    #check id
+        get_credentials = json.loads(response_data['credentials'])
+        pprint(get_credentials)
+        
+        message = "Get wrong credentials id {0}".format(get_credentials['_id']['$oid'])
+        self.assertTrue(get_credentials['_id']['$oid'] == credentials_id, message)
+
+        return get_credentials
+
+
+    def _admin_credenials_edit(self, user, client, credentials_id, req_dict=None):
+        credentials = self._admin_credentials_get(user=user, client=client, credentials_id=credentials_id)
+
+    #then edit
+        _req_dict = None
+        if req_dict:
+            _req_dict = req_dict
+        else:
+            _req_dict = ADMIN_CREDENTIALS_EDIT
+        
+        json_create_data = json.dumps(_req_dict)
+        form_data = {
+            '_credentials_id' : credentials['_id']['$oid'],
+            '_credentials_data' : json_create_data
+        }
+        
+        url = url_for('dashboard.admin_edit_credentials')
+        r = post_with_token(user=user, client=client, url=url, data=form_data)
+
+        response_data = json.loads(r.data)
+        code = response_data['code']
+        msg = response_data['msg']
+        error_message = "msg: {0}".format(msg)
+        self.assertTrue(code == 1, error_message)
+
+        updated_credentials = json.loads(response_data['credentials'])
+        pprint(updated_credentials)
+        self.assertTrue(updated_credentials['_id']['$oid'] == credentials['_id']['$oid'], "Updated credentials ID not equal get credentials ID")
+        
+        #compare fields
+        for k,v in _req_dict.items():
+            if k == 'next_action':
+                continue
+            
+            updated = updated_credentials[k]
+            try:
+                v = json.loads(v) 
+            except:
+                pass
+            error = "Error update key:{0} need:{1}  has:{2}".format(k, v, updated)
+            self.assertTrue(v == updated, error)
+        
+        return updated_credentials
 
 
 
