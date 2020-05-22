@@ -890,5 +890,18 @@ ADMIN_GOOGLE_SETTINGS_EDIT = {
     'gmail_api_name': "spreadsheet",
     'gmail_api_version': "v2",
     'active' : "1"
-
 }
+
+
+ADMIN_CREDENTIALS_EDIT = {
+    'status' : '-1', 
+    'error_message' : "Random error text", 
+    'medium' : 'my-test-medium', 
+    'next_action' : "2021-05-22T10:1:2.475Z",
+    'limit_per_day' : "1000", 
+    'limit_per_hour' : "2000", 
+    'limit_interval' : "22020202",
+    'current_daily_counter' : "123", 
+    'current_hourly_counter' : "123"
+}
+

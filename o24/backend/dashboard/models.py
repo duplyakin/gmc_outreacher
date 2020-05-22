@@ -191,7 +191,7 @@ class Credentials(db.Document):
     # 1 - Refreshed (need to update all tasks)
     # -1 - Failed
     status = db.IntField(default=0)
-    error = db.StringField(default='')
+    error_message = db.StringField(default='')
 
     medium = db.StringField()
 
@@ -299,7 +299,7 @@ class Credentials(db.Document):
             query['medium'] = medium
 
         db_query = cls.objects(__raw__=query, medium__in=cls.SHOWED_MEDIUM). \
-                    only('id', 'data', 'status', 'medium', 'limit_per_day', 'last_action', 'next_action', 'current_daily_counter')
+                    only('id', 'data', 'status', 'error_message', 'medium', 'limit_per_day', 'last_action', 'next_action', 'current_daily_counter')
         
         total = db_query.count()
         results = []
@@ -396,7 +396,7 @@ class Credentials(db.Document):
             self._commit()
     
     def error(self, error='', delay=None):
-        self.error = error
+        self.error_message = error
         self.status = -1
 
         if delay is not None and delay > 0 :
@@ -405,13 +405,13 @@ class Credentials(db.Document):
         self._commit()
 
     def refresh(self, _reload=False):
-        self.error = ''
+        self.error_message = ''
         self.status = 1
         
         self._commit(_reload=_reload)
 
     def resume(self):
-        self.error = ''
+        self.error_message = ''
         self.status = 0
 
         self._commit()
