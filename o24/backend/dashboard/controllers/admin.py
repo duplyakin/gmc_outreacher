@@ -184,7 +184,7 @@ def admin_change_user_password():
                 raise Exception("Password can't be empty")
 
             
-            user.admin_change_password()
+            user.admin_change_password(new_password=new_password)
             user.reload()
 
             result['code'] = 1

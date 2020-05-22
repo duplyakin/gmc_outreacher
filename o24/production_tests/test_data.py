@@ -736,3 +736,38 @@ GOOGLE_APP_SETTINGS = [{
 
     'active' : True
 }]
+
+
+
+
+########################################################################
+########################################################################
+###################### REQUESTS TO HANDLERS ############################
+########################################################################
+
+CAMPAIGN_LINKEDIN_PARSING_CREATE = {
+    'title': 'Linkedin parse test campaign - XX-{0}',
+    'list_title' : 'Linkedin parse test list title - XX-{0}',
+    'data' : {
+        'search_url': 'https://linkedin/com?search=&dsfsdf',
+        'total_pages': 100,
+        'interval_pages': 10,
+    },
+    'credentials': [],
+    'from_hour': '10:00',
+    'to_hour': '21:00',
+    'time_zone': {
+        'label': "(GMT+00:00) United Kingdom Time",
+        'value': "Europe/London",
+        'offset': 0
+    },
+    'sending_days': {
+        "0": True,
+        "1": True,
+        "2": True,
+        "3": True,
+        "4": True,
+        "5": False,
+        "6": False
+    }
+}

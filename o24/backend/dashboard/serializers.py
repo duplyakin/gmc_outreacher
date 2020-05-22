@@ -150,6 +150,9 @@ class JSCampaignData(JSObject):
                         except:
                             des_value = value
 
+                    if key == 'time_zone':
+                        print(des_value)
+                        
                     if key == 'title':
                         setattr(self, attr_name, des_value)
                         continue

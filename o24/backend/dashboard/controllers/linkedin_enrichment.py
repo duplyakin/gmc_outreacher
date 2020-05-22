@@ -38,9 +38,9 @@ COLUMNS = [
 
 modified_fields_on_create = {
     'title' : True,
-    'credentials' : True,
+    'credentials' : False,
     'time_table' : True,
-    'lists' : True,
+    'lists' : False,
     'data' : True
 }
 
@@ -54,7 +54,8 @@ modified_fields_on_edit = {
     'from_minutes' : True,
     'to_minutes' : True,
     'sending_days' : True,
-    'data' : True
+    'data' : True,
+    'time_zone': True
 }
 
 @bp_dashboard.route('/campaign/linkedin/data', methods=['POST'])
@@ -175,7 +176,6 @@ def get_linkedin_campaign_by_id():
             result['code'] = 1
             result['msg'] = 'Success' 
             result['campaign'] = json.dumps(campaign_dict)
-            result['modified_fields'] = json.dumps(modified_fields_on_edit)
     except Exception as e:
         #TODO: change to loggin
         print(e)
