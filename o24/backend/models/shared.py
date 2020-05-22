@@ -63,13 +63,13 @@ class Funnel(db.Document):
 
     @classmethod
     def get_linkedin_enrichment_funnel_id(cls):
-        funnel = cls.objects(funnel_type=2).first()
+        funnel = cls.objects(funnel_type=LINKEDIN_ENRICHMENT_FUNNEL_TYPE).first()
         if funnel:
             return funnel.id
 
     @classmethod
     def get_linkedin_parsing_funnel_id(cls):
-        funnel = cls.objects(funnel_type=1).first()
+        funnel = cls.objects(funnel_type=LINKEDIN_PARSING_FUNNEL_TYPE).first()
         if funnel:
             return funnel.id
 

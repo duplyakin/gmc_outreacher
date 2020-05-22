@@ -110,8 +110,10 @@ class TestUsersCampaignsProspects(unittest.TestCase):
             owner = User.get_user(prospect.get('owner'))
             self.assertTrue(owner is not None, "No such user")
 
-            campaign = Campaign.get_campaign(title=prospect.get('assign_to'))
-            self.assertTrue(campaign is not None, "No such campaign title: {0}".format(prospect.get('assign_to')))
+            campaign = None
+            if prospect.get('assign_to', None) is not None:
+                campaign = Campaign.get_campaign(title=prospect.get('assign_to'))
+                self.assertTrue(campaign is not None, "No such campaign title: {0}".format(prospect.get('assign_to')))
 
             amount = prospect.get('amount')
             email_name = prospect.get('email_name')
@@ -133,8 +135,11 @@ class TestUsersCampaignsProspects(unittest.TestCase):
                     'linkedin' : linkedin
                 }
                 
+                campaign_id=None
+                if campaign:
+                    campaign_id = campaign.id
                 new_prospect = Prospects.create_prospect(owner_id=owner.id,
-                                                        campaign_id=campaign.id,
+                                                        campaign_id=campaign_id,
                                                         list_id=list_id,
                                                         data=data)
                 self.assertTrue(new_prospect is not None, "Can't create prospect")

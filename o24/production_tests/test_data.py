@@ -328,7 +328,7 @@ FUNNELS = [
     {
         'root' : {
             'key' : LINKEDIN_SEARCH_ACTION,
-            'funnel_type' : 1,
+            'funnel_type' : LINKEDIN_PARSING_FUNNEL_TYPE,
             'title' : 'Linkedin Parsing Funnel',
             'templates_required' : {'dummy' : 1},
             'root' : True,
@@ -342,7 +342,7 @@ FUNNELS = [
     {
         'root' : {
             'key' : LINKEDIN_PARSE_PROFILE_ACTION,
-            'funnel_type' : 1,
+            'funnel_type' : LINKEDIN_ENRICHMENT_FUNNEL_TYPE,
             'templates_required' : {'dummy' : 1},
             'title' : 'Linkedin enrichment funnel',
             'root' : True,
@@ -674,6 +674,22 @@ LISTS = [
         'title' : 'List-3 1@email.com'
     },
     {
+        'owner' : '1@email.com',
+        'title' : 'assign_to_none_1'
+    },
+    {
+        'owner' : '1@email.com',
+        'title' : 'assign_to_none_2'
+    },
+    {
+        'owner' : '1@email.com',
+        'title' : 'assign_to_none_3'
+    },
+    {
+        'owner' : '1@email.com',
+        'title' : 'assign_to_none_4'
+    },
+    {
         'owner' : '3@email.com',
         'title' : 'List-1 3@email.com'
     },
@@ -704,6 +720,36 @@ PROSPECTS = [
         'email_domain' : '@gmail.ru',
         'assign_to_list' : 'List-2 1@email.com',
     },
+
+    {
+        'owner' : '1@email.com',
+        'amount' : 10,
+        'email_name' : 'kss.shilov',
+        'email_domain' : '@gmail.ru',
+        'assign_to_list' : 'assign_to_none_1',
+    },
+    {
+        'owner' : '1@email.com',
+        'amount' : 10,
+        'email_name' : 'ksss.shilov',
+        'email_domain' : '@gmail.ru',
+        'assign_to_list' : 'assign_to_none_2',
+    },
+    {
+        'owner' : '1@email.com',
+        'amount' : 10,
+        'email_name' : 'kssss.shilov',
+        'email_domain' : '@gmail.ru',
+        'assign_to_list' : 'assign_to_none_3',
+    },
+    {
+        'owner' : '1@email.com',
+        'amount' : 10,
+        'email_name' : 'ksssss.shilov',
+        'email_domain' : '@gmail.ru',
+        'assign_to_list' : 'assign_to_none_4',
+    },
+
     {
         'owner' : '1@email.com',
         'amount' : 10,
@@ -753,6 +799,55 @@ CAMPAIGN_LINKEDIN_PARSING_CREATE = {
         'total_pages': 100,
         'interval_pages': 10,
     },
+    'credentials': [],
+    'from_hour': '10:00',
+    'to_hour': '21:00',
+    'time_zone': {
+        'label': "(GMT+00:00) United Kingdom Time",
+        'value': "Europe/London",
+        'offset': 0
+    },
+    'sending_days': {
+        "0": True,
+        "1": True,
+        "2": True,
+        "3": True,
+        "4": True,
+        "5": False,
+        "6": False
+    }
+}
+
+
+CAMPAIGN_LINKEDIN_EDIT = {
+    'title': 'EDIT - Linkedin parse test campaign - XX-{0}',
+    'data' : {
+        'search_url': 'https://linkedin/com?search=&dsfsdf-new_one-{0}',
+        'total_pages': 103,
+        'interval_pages': 14,
+    },
+    'from_hour': '00:00',
+    'to_hour': '21:45',
+    'time_zone': {
+        'label': "(GMT+07:00) Western Indonesia Time - Pontianak",
+        'value': "Asia/Pontianak",
+        'offset': 420
+    },
+    'sending_days': {
+        "0": False,
+        "1": False,
+        "2": False,
+        "3": True,
+        "4": True,
+        "5": True,
+        "6": False
+    }
+}
+
+
+CAMPAIGN_LINKEDIN_ENRICHMENT_CREATE = {
+    'title': 'Linkedin enrichment test campaign - XX-{0}',
+    'list_selected' : {},
     'credentials': [],
     'from_hour': '10:00',
     'to_hour': '21:00',
