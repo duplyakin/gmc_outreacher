@@ -40,7 +40,7 @@ modified_fields_on_create = {
     'title' : True,
     'credentials' : True,
     'time_table' : True,
-    'lists' : True,
+    'lists' : False,
     'data' : True
 }
 
@@ -54,7 +54,8 @@ modified_fields_on_edit = {
     'from_minutes' : True,
     'to_minutes' : True,
     'sending_days' : True,
-    'data' : True
+    'data' : True,
+    'time_zone': True
 }
 
 @bp_dashboard.route('/campaign/linkedin/data', methods=['POST'])
@@ -73,9 +74,9 @@ def data_linkedin_campaign():
 
     try:        
         if request.method == 'POST':
-            lists = ProspectsList.get_lists(owner=current_user.id)
+            lists = ProspectsList.get_lists_with_prospects_without_campaigns(owner_id=current_user.id)
             if lists:
-                result['lists'] = lists.to_json()
+                result['lists'] = lists
 
             total, credentials = Credentials.async_credentials(owner=current_user.id, medium='linkedin')
             if credentials:
@@ -175,7 +176,6 @@ def get_linkedin_campaign_by_id():
             result['code'] = 1
             result['msg'] = 'Success' 
             result['campaign'] = json.dumps(campaign_dict)
-            result['modified_fields'] = json.dumps(modified_fields_on_edit)
     except Exception as e:
         #TODO: change to loggin
         print(e)
@@ -258,8 +258,10 @@ def create_linkedin_enrichment_campaign():
     }
     if request.method == 'POST':
         try:
-            raw_data = request.form['_add_campaign']
-            
+            raw_data = request.form.get('_add_campaign', '')
+            if not raw_data:
+                raise Exception("_add_campaign can't be empty")
+ 
             campaign_data = JSCampaignData(raw_data=raw_data)
 
             credentials = campaign_data.credentials()
@@ -330,12 +332,19 @@ def edit_linkedin_campaign():
 
             if campaign.inprogress():
                 raise Exception("Campaign in progress: stop progress first")
-
-            modified_fields = json.loads(request.form['_modified_fields'])
+            
+            raw_fields = request.form.get('_modified_fields', '')
+            if not raw_fields:
+                raise Exception("_modified_fields can't be empty")
+            
+            modified_fields = json.loads(raw_fields)
             if not modified_fields:
                 raise Exception("_modified_fields missed: don't know what to modify")
 
-            raw_data = request.form['_add_campaign']
+            raw_data = request.form.get('_add_campaign', '')
+            if not raw_data:
+                raise Exception("Edit error: _add_campaign can't be empty")
+
             campaign_data = JSCampaignData(raw_data=raw_data)
 
             edit_fields = [k for k, v in modified_fields.items() if v]
@@ -417,9 +426,13 @@ def start_linkedin_campaign():
 
             
             scheduler.Scheduler.safe_start_campaign(owner=current_user.id, campaign=campaign)
+            campaign.reload()
+
+            campaign_dict = to_json_deep_dereference(campaign)
 
             result['code'] = 1
             result['msg'] = 'Success'
+            result['started'] = json.dumps(campaign_dict)
     except Exception as e:
         #TODO: change to loggin
         print(e)
@@ -454,8 +467,13 @@ def pause_linkedin_campaign():
             
             scheduler.Scheduler.safe_pause_campaign(campaign=campaign)
 
+            campaign.reload()
+
+            campaign_dict = to_json_deep_dereference(campaign)
+
             result['code'] = 1
             result['msg'] = 'Success'
+            result['paused'] = json.dumps(campaign_dict)
     except Exception as e:
         #TODO: change to loggin
         print(e)

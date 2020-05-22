@@ -467,7 +467,7 @@ class Campaign(db.Document):
         'created'
     ]
 
-    CAN_BE_NULL = ['from_hour', 'to_hour', 'from_minutes', 'to_minutes', 'status', 'campaign_type']
+    CAN_BE_NULL = ['from_hour', 'to_hour', 'from_minutes', 'to_minutes', 'status']
 
     @classmethod
     def get_create_fields(cls):
@@ -534,7 +534,8 @@ class Campaign(db.Document):
                 'data' : 1,
                 'title' : 1,
                 'credentials' : 1,
-                'funnel' : 1
+                'funnel' : 1,
+                'campaign_type' : 1
             }}
         ]
 
@@ -842,7 +843,7 @@ class Campaign(db.Document):
         new_campaign = cls()
         new_campaign.owner = owner
         new_campaign.campaign_type = campaign_type
-
+        
         new_campaign._validate_campaign_data(owner=owner, campaign_data=campaign_data, changed_fields=create_fields)
 
         for field in create_fields:
@@ -891,6 +892,9 @@ class Campaign(db.Document):
                 return delay
 
         return None
+
+    def get_funnel_type(self):
+        return self.funnel.funnel_type
 
     def get_data(self):
         return self.data
@@ -1023,6 +1027,18 @@ class ProspectsList(db.Document):
         sz = bson_dumps(lists)
         return sz
 
+    @classmethod
+    def get_lists_with_prospects_without_campaigns(cls, owner_id):
+        lists_refs = Prospects.objects(owner=owner_id, assign_to=None).distinct('assign_to_list')
+        if not lists_refs:
+            return []
+        
+        
+        list_ids = [l.id for l in lists_refs]
+        lists = cls.objects(owner=owner_id, id__in=list_ids)
+
+        results = lists.to_json()
+        return results
 
     @classmethod
     def async_lists(cls, owner_id, page=1):
