@@ -194,7 +194,7 @@ def add_credentials():
                                                                 limit_per_day=credentials_data.get_limit_per_day())
             elif credentials_type == 'gmail/gsuite':
                 result['code'] = 1
-                result['redirect'] = url_for('dashboard.dashboard_oauth_button')
+                result['redirect'] = url_for('dashboard.dashboard_oauth_button', user_id=current_user.id)
                 
                 return jsonify(result)
             else:

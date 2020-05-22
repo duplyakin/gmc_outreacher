@@ -18,6 +18,7 @@ const mutations = {
 	auth_user(state, user_data) {
 		state.email = user_data.email;
 		state.token = user_data.token;
+		state.user_id = user_data.user_id;
 
 		state.login_error = '';
 		state.register_error = '';
@@ -25,6 +26,7 @@ const mutations = {
 	clear_auth_data(state) {
 		state.email = null;
 		state.token = null;
+		state.user_id = null;
 
 		state.login_error = '';
 		state.register_error = '';
@@ -68,6 +70,8 @@ const actions = {
 					localStorage.setItem('token', r.token);
 					localStorage.setItem('email', r.email);
 					localStorage.setItem('role', r.role);
+					localStorage.setItem('user_id', r.user_id);
+
 					console.log("r: ", r);
 					resolve(r)
 				}
@@ -97,6 +101,8 @@ const actions = {
 					localStorage.setItem('token', r.token);
 					localStorage.setItem('email', r.email);
 					localStorage.setItem('role', r.role);
+					localStorage.setItem('user_id', r.user_id);
+
 					resolve(r)
 				}
 				else {
