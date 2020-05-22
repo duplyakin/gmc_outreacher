@@ -38,7 +38,7 @@ COLUMNS = [
 
 modified_fields_on_create = {
     'title' : True,
-    'credentials' : False,
+    'credentials' : True,
     'time_table' : True,
     'lists' : False,
     'data' : True
