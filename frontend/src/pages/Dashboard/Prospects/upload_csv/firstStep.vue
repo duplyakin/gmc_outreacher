@@ -5,7 +5,7 @@
         {{ error_message }}
     </div>
     <div class="row">
-    <div class="col-12">
+    <div class="col-12 text-center">
             <el-upload
             action=""
             :multiple="false" 

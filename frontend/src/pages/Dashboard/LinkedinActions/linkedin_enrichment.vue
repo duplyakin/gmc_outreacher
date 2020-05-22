@@ -256,7 +256,6 @@ export default {
 
       /*Object data*/
       campaign_data: {
-        campaign_type: 2,
         list_selected: "",
         title: "",
         credentials: [],

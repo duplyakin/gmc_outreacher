@@ -33,8 +33,20 @@
                         <template slot-scope="scope">
                             <a @click.prevent="editAccount(scope.row, scope.$index)" href="#"  v-if="column.prop === 'account'">{{ scope.row.data[column.prop] }}</a>
                             <template v-else-if="column.prop === 'status'">{{  status[scope.row[column.prop]] }}</template>
+                            <template v-else-if="column.prop === 'error_message'"><div class="red">{{ show_data(scope.row, column) }}</div> </template>
                             <template v-else> {{ show_data(scope.row, column) }} </template>
                         </template>
+                </el-table-column>
+                <el-table-column :min-width="50" fixed="right" label="Refresh">
+                    <template slot-scope="props">
+                    <a
+                        v-tooltip.top-center="'Refresh'"
+                        class="btn-info btn-simple btn-link"
+                        @click.prevent="refreshCredentials(props.row._id.$oid, props.$index)"
+                    >
+                        <i class="fa fa-refresh"></i>
+                    </a>
+                    </template>
                 </el-table-column>
                 <el-table-column :min-width="50" fixed="right" label="Delete">
                     <template slot-scope="props">
@@ -67,7 +79,6 @@
     import axios from '@/api/axios-auth';
 
     const O24Pagination = () => import('src/components/O24Pagination.vue')
-    const O24NotificationMessage = () => import('src/components/O24Notification.vue')
     const AccountEdit = () => import('./accountEdit.vue')
     const AccountAdd = () => import('./accountAdd.vue')
 
@@ -75,11 +86,11 @@
     const CREDENTIALS_API_EDIT = '/credentials/edit';
     const CREDENTIALS_API_DELETE = '/credentials/delete';
     const CREDENTIALS_API_ADD = '/credentials/add';
+    const CREDENTIALS_API_REFRESH = '/credentials/refresh';
 
 
     export default {
     components: {
-        O24NotificationMessage,
         O24Pagination,
         AccountEdit,
         AccountAdd,
@@ -136,6 +147,32 @@
             });
 
         },
+        refreshCredentials(credentials_id, row_index) {
+            const current_index = row_index;
+            const _table = this.$refs.accounts_data_table;
+
+            const path = CREDENTIALS_API_REFRESH;
+
+            var data = new FormData();
+            data.append('_credentials_id', credentials_id);
+
+            axios.post(path, data)
+            .then((res) => {
+                var r = res.data;
+                if (r.code > 0) {
+                    this.$set(this.accounts_data.credentials, current_index, JSON.parse(r.credentials));
+                    _table.$forceUpdate();
+                    Notification.success({title: "Success", message: "Account refreshed"});
+                } else {
+                    var msg = 'Server Error loading credentials ' + r.msg;
+                    Notification.error({title: "Error", message: msg});
+                }
+            })
+            .catch((error) => {
+                var msg = 'Error loading credentials ' + error;
+                Notification.error({title: "Error", message: msg});
+            });
+        },
         editAccount(account_dict, row_index) {
 
         const current_index = row_index;
@@ -148,18 +185,13 @@
             valueUpdated:(newValue) => {
                 this.$set(this.accounts_data.credentials, current_index, newValue);
                 _table.$forceUpdate();
-                this.$notify(
-                {
-                    component: O24NotificationMessage,
-                    message: 'Edit Success',
-                    icon: 'nc-icon nc-bulb-63',
-                    type: 'success'
-                })
+                Notification.success({title: "Success", message: "Account changed"});
             }
             },
             {
             width: '720',
-            height: 'auto'
+            height: 'auto',
+            scrollable: true
             })
         },
         delete_credentials(credentials_id, row_index){
@@ -191,19 +223,14 @@
             this.$modal.show(AccountAdd, {
             api_url : CREDENTIALS_API_ADD,
             valueUpdated:(newValue) => {
-                this.$notify(
-                {
-                    component: O24NotificationMessage,
-                    message: 'Account added success',
-                    icon: 'nc-icon nc-bulb-63',
-                    type: 'success'
-                });
+                Notification.success({title: "Success", message: "Account added"});
                 this.loadCredentials();
             }
             },
             {
                 width: '720',
-                height: 'auto'
+                height: 'auto',
+                scrollable: true
             })
         },
         show_data(scope_row, column){
@@ -231,4 +258,7 @@
     }
 </script>
 <style>
+.red {
+color: red;
+}
 </style>

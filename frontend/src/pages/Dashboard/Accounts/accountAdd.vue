@@ -41,7 +41,13 @@
                         label="Linkedin password"
                         class="mb-3"
                         v-model="model.data.password"/>
-                </div>     
+                </div>
+                <div class="col-12">
+                    <fg-input name="linkedin_li_at"
+                        label="Linkedin li_at cookie *"
+                        class="mb-3"
+                        v-model="model.data.li_at"/>
+                </div>          
                 <div class="col-12">
                     <fg-input name="limits_per_day"
                     label="Limits per day"
@@ -88,7 +94,8 @@ export default {
                 data :{
                     account : '',
                     login : '',
-                    password : ''
+                    password : '',
+                    li_at: ''
                 }
             }
         }
@@ -100,10 +107,11 @@ export default {
                 Notification.error({title: "Error", message: "Select account type"});
                 return false;
             } else if (this.model.credentials_type == 'linkedin') {
-                if ( (this.model.data.login == '') || 
-                    (this.model.data.password == '') ||
-                    (this.model.data.account == '')){
-                    Notification.error({title: "Error", message: "Input your linkedin account, login and password"});
+                if(this.model.data.account == '') {
+                    Notification.error({title: "Error", message: "Input your linkedin account"});
+                    return false;
+                } else if (((this.model.data.login == '') || (this.model.data.password == '')) && (this.model.data.li_at == '')) {
+                    Notification.error({title: "Error", message: "Input your login and password or li_at cookie"});
                     return false;
                 }
             }

@@ -8,8 +8,10 @@
     <div class="row text-center">
         <div class="col-12">
         <label for="update_existing_checkbox" class="form-check-label">
-            <input :value="model._update_existing" @change="toggleUpdateExisting" id="update_existing_checkbox" type="checkbox" class="form-check-input">
-                <span class="form-check-sign"></span>Update existing if duplicates found
+            <div class="container"> 
+                <div><input :value="model._update_existing" @change="toggleUpdateExisting" id="update_existing_checkbox" type="checkbox" class="form-check-input"></div>
+                <div class="red"> Update existing if duplicates found </div> 
+            </div>
         </label>
         <br>
     </div>
@@ -203,9 +205,18 @@ export default {
 }
 </script>
 <style>
-.second-step{
+.second-step {
     width: 100%;
     margin: 10px, 10px, 10px, 10px;
     overflow: auto;
+}
+.container {
+  display: flex;
+  justify-content: space-around;
+  align-items: flex-start;
+  padding: 10px 20px;
+}
+.red {
+    color: red;
 }
 </style>

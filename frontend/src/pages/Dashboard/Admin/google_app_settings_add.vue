@@ -120,7 +120,7 @@ export default {
         Upload,
         {
           valueUpdated: newValue => {
-            this.$set(this.current_settings, 'credentials', newValue); // ? file format
+            this.$set(this.current_settings, 'credentials', newValue); // TODO: ? file format
           }
         },
         {

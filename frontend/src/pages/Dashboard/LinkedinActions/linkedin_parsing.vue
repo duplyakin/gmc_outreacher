@@ -273,7 +273,6 @@ export default {
 
       /*Object data*/
       campaign_data: {
-        campaign_type: 1,
         list_title: '',
         data: {
             search_url: '',

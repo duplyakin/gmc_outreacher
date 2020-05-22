@@ -12,12 +12,14 @@
         <button @click.prevent="assignProspects" type="button" class="btn btn-default btn-success mx-1">Assign Campaign</button>
         <button @click.prevent="listAddProspects" type="button" class="btn btn-default btn-success mx-1">Add to list</button>
         <button @click.prevent="listRemoveProspects" type="button" class="btn btn-default btn-success mx-1">Remove from list</button>
+        <button @click.prevent="stopSequenceProspects" type="button" class="btn btn-wd btn-danger mx-1">Stop sequence</button>
         <button @click.prevent="deleteProspects" type="button" class="btn btn-wd btn-danger mx-1">Delete</button>
         </div>
         
         <div v-if="multipleSelection.length == 0">
         <button @click.prevent="addProspect" type="button" class="btn btn-default btn-success mx-1">Add manually</button>
-        <button @click.prevent="uploadProspect" type="button" class="btn btn-default btn-success mx-1">Upload</button>
+        <button @click.prevent="uploadProspect" type="button" class="btn btn-default btn-success mx-1">Upload CSV</button>
+        <button @click.prevent="load_prospects" type="button" class="btn btn-default btn-success mx-1">Reload</button>
         </div>
     
     </div>
@@ -187,6 +189,8 @@ const PROSPECTS_API_LIST = '/prospects/list';
 const PROSPECTS_API_EDIT = '/prospects/edit';
 const PROSPECTS_API_CREATE = '/prospects/create';
 const PROSPECTS_API_DELETE = '/prospects/remove';
+const PROSPECTS_SEQUENCE_STOP_API = '/prospects/sequence/stop';
+
 const PROSPECTS_API_UNASSIGN = '/prospects/campaign/unassign';
 const PROSPECTS_API_ASSIGN = '/prospects/campaign/assign';
 const PROSPECTS_API_UPLOAD = '/prospects/upload';
@@ -424,13 +428,8 @@ methods: {
             api_url : PROSPECTS_API_UPLOAD,
             lists: this.list_data.lists,
             valueUpdated:(uploaded) => {
-                this.$notify(
-                {
-                    component: NotificationMessage,
-                    message: 'Prospect uploaded Success. The data will be available soon. Update the page in 10 seconds',
-                    icon: 'nc-icon nc-bulb-63',
-                    type: 'success'
-                })
+                this.load_prospects();
+                Notification.success({title: "Success", message: "Upload could take some time, please wait and press RELOAD"});
             }
             },
             {
@@ -447,13 +446,7 @@ methods: {
             action: 'create',
             api_url : PROSPECTS_API_CREATE,
             valueUpdated:(newValue) => {
-                this.$notify(
-                {
-                    component: NotificationMessage,
-                    message: 'Prospect created Success',
-                    icon: 'nc-icon nc-bulb-63',
-                    type: 'success'
-                })
+                Notification.success({title: "Success", message: "Prospect created"});
                 this.load_prospects();   
             }
             },
@@ -475,13 +468,7 @@ methods: {
             valueUpdated:(newValue) => {
                 this.$set(this.prospects_data.prospects, current_index, newValue);
                 _table.$forceUpdate();
-                this.$notify(
-                {
-                    component: NotificationMessage,
-                    message: 'Updated Success',
-                    icon: 'nc-icon nc-bulb-63',
-                    type: 'success'
-                })
+                Notification.success({title: "Success", message: "Updated"});
             }
             },
             {
@@ -512,16 +499,8 @@ methods: {
                             var msg = "Error " + r.msg;
                             Notification.error({title: "Error", message: msg});
                         }else{
-                        this.$notify(
-                        {
-                            component: NotificationMessage,
-                            message: 'Added to list success',
-                            icon: 'nc-icon nc-bulb-63',
-                            type: 'success'
-                        });
-
-                        this.load_prospects();
-                        
+                            Notification.success({title: "Success", message: "Added to list"});
+                            this.load_prospects();            
                         }
                     })
                     .catch((error) => {
@@ -555,14 +534,7 @@ methods: {
                     var msg = "Error code: " + r.msg;
                     Notification.error({title: "Error", message: msg});
                 }else{
-                    this.$notify(
-                    {
-                        component: NotificationMessage,
-                        message: 'Removed success',
-                        icon: 'nc-icon nc-bulb-63',
-                        type: 'success'
-                    });
-
+                    Notification.success({title: "Success", message: "Removed"});
                     this.load_prospects();
                 }
             })
@@ -592,16 +564,8 @@ methods: {
                         var msg = "Error " + r.msg;
                         Notification.error({title: "Error", message: msg});
                         }else{
-                        this.$notify(
-                        {
-                            component: NotificationMessage,
-                            message: 'Assign success',
-                            icon: 'nc-icon nc-bulb-63',
-                            type: 'success'
-                        });
-
-                        this.load_prospects();
-                        
+                            Notification.success({title: "Success", message: "Assigned"});
+                            this.load_prospects();
                         }
                     })
                     .catch((error) => {
@@ -632,14 +596,8 @@ methods: {
             var msg = "Error " + r.msg;
             Notification.error({title: "Error", message: msg});
             }else{
-            this.$notify(
-            {
-                component: NotificationMessage,
-                message: 'Unassign success',
-                icon: 'nc-icon nc-bulb-63',
-                type: 'success'
-            });
-            this.load_prospects();
+                Notification.success({title: "Success", message: "Unassigned"});
+                this.load_prospects();
             }
         })
         .catch((error) => {
@@ -648,6 +606,31 @@ methods: {
         });
 
     }
+    },
+    stopSequenceProspects() {
+        if (confirm("Stop sequence for this prospects?")) {
+
+            const path = PROSPECTS_SEQUENCE_STOP_API;
+
+            var data = new FormData();
+            data.append('_prospects', JSON.stringify(this.multipleSelection));
+
+            axios.post(path, data)
+            .then((res) => {
+                var r = res.data;
+                if (r.code <= 0){
+                var msg = "Error stopping sequence for prospects " + r.msg;
+                Notification.error({title: "Error", message: msg});
+                } else {
+                    Notification.success({title: "Success", message: "Sequence stopped"});
+                    this.load_prospects();
+                }
+            })
+            .catch((error) => {
+                var msg = "Error stopping sequence for prospects " + error;
+                Notification.error({title: "Error", message: msg});
+            });
+        }
     },
     deleteProspects(){
     if (confirm("Are you sure? This action CAN'T be undone")){
@@ -663,14 +646,8 @@ methods: {
             var msg = "Error deleting prospects " + r.msg;
             Notification.error({title: "Error", message: msg});
             }else{
-            this.$notify(
-            {
-                component: NotificationMessage,
-                message: 'Delete success',
-                icon: 'nc-icon nc-bulb-63',
-                type: 'success'
-            });
-            this.load_prospects();
+                Notification.success({title: "Success", message: "Deleteed"});
+                this.load_prospects();
             }
         })
         .catch((error) => {

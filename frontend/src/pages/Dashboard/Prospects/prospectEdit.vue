@@ -92,8 +92,8 @@ export default {
     methods: {
         submitProspectData(){
            const path = this.api_url;
-            if (this.prospect_data.data.email == ''){
-                Notification.error({title: "Error", message: "Email can't be empty"});
+            if (this.prospect_data.data.email == '' && this.prospect_data.data.linkedin == ''){
+                Notification.error({title: "Error", message: "Email and Linkedin can't be empty"});
                 return false;
             }
             
