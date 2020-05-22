@@ -69,6 +69,10 @@ class User(db.Document):
         self.invited_by = invited_by
 
     @classmethod
+    def get_by_state(cls, state):
+        return cls.objects(current_oauth_state=state).first()
+
+    @classmethod
     def register(cls, user_data):
         email = user_data.get_email()
         password = user_data.get_password()
@@ -158,10 +162,9 @@ class User(db.Document):
         self.password = generate_password_hash(new_password)
         self._commit()
 
-    def get_oauth_state(self):
-        if not self.current_oauth_state or self.current_oauth_state == '':
-            self.current_oauth_state = self._generate_ouath_state()
-            self._commit()
+    def new_oauth_state(self):
+        self.current_oauth_state = self._generate_ouath_state()
+        self._commit()
         
         return self.current_oauth_state
 

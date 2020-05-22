@@ -37,11 +37,13 @@ def sign_in():
                 raise Exception("Authentication error")
 
             
-            
+            session['user_id'] = str(current_user.id)
+
             result['code'] = 1
             result['msg'] = 'Success'
             result['token'] = get_token(current_user)
             result['role'] = current_user.role
+            result['user_id'] = str(current_user.id)
     except Exception as e:
         print(e)
         traceback.print_exc()
@@ -73,11 +75,14 @@ def sign_up():
             
             current_user._commit(_reload=True)
 
-            
+            session['user_id'] = str(current_user.id)
+
             result['code'] = 1
             result['msg'] = 'Success'
             result['token'] = get_token(current_user)
             result['role'] = current_user.role
+            result['user_id'] = str(current_user.id)
+
     except Exception as e:
         print(e)
         traceback.print_exc()
