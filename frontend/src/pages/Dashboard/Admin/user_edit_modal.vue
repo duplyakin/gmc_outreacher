@@ -68,6 +68,9 @@ import { Notification, Select, Option } from "element-ui";
 import axios from "@/api/axios-auth";
 
 const CHANGE_ROLES_API = "/admin/roles/change";
+const CHANGE_USER_PASSWORD_API = "/admin/password/change";
+const LOGIN_AS_USER_API = "/admin/login/as";
+
 
 export default {
   components: {
@@ -87,10 +90,56 @@ export default {
   },
   methods: {
     change_user() {
-        //
+      const path = LOGIN_AS_USER_API;
+
+      var data = new FormData();
+      data.append("_user_id", this.userObj._id.$oid);
+
+      axios
+        .post(path, data)
+        .then(res => {
+          var r = res.data;
+          if (r.code <= 0) {
+            var msg = "Error changing user." + r.msg;
+            Notification.error({ title: "Error", message: msg });
+          } else {
+            localStorage.setItem('token', r.token); // maybe here we should call dispatch to catch Promises
+            localStorage.setItem('role', this.userObj.role);
+
+            this.$emit("close");
+            this.$router.push('login');
+            
+            Notification.success({title: "Success", message: "User changed"});
+          }
+        })
+        .catch(error => {
+          var msg = "Error changing user. ERROR: " + error;
+          Notification.error({ title: "Error", message: msg });
+        });
     },
     change_password() {
-      //
+      const path = CHANGE_USER_PASSWORD_API;
+
+      var data = new FormData();
+      data.append("_user_id", this.userObj._id.$oid);
+      data.append("_new_password", this.password);
+
+      axios
+        .post(path, data)
+        .then(res => {
+          var r = res.data;
+          if (r.code <= 0) {
+            var msg = "Error updating user password." + r.msg;
+            Notification.error({ title: "Error", message: msg });
+          } else {
+            this.valueUpdated(this.userObj);
+            Notification.success({title: "Success", message: "User password changed"});
+          }
+        })
+        .catch(error => {
+          var msg = "Error updating user password. ERROR: " + error;
+          Notification.error({ title: "Error", message: msg });
+        });
     },
     change_role() {
       const path = CHANGE_ROLES_API;
@@ -130,7 +179,6 @@ export default {
           this.change_role();
       }
       
-      //Notification.success({title: "Success", message: "User data changed"});
       this.$emit("close");
     },
     discard() {

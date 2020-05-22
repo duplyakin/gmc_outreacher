@@ -1,4 +1,5 @@
 const DashboardLayout = () => import('src/pages/Dashboard/Layout/DashboardLayout.vue')
+//import DashboardLayout from 'src/pages/Dashboard/Layout/DashboardLayout.vue'
 // GeneralViews
 const NotFound = () => import('src/pages/GeneralViews/NotFoundPage.vue')
 // Dashboard pages
@@ -65,6 +66,7 @@ const Actions = () => import('src/pages/Dashboard/Actions/actions.vue')
 // admin
 const UsersList = () => import('src/pages/Dashboard/Admin/users_list.vue')
 const GoogleAppSettings = () => import('src/pages/Dashboard/Admin/google_app_settings.vue')
+const GoogleAppSettingsAdd = () => import('src/pages/Dashboard/Admin/google_app_settings_add.vue')
 const Limits = () => import('src/pages/Dashboard/Admin/limits.vue')
 
 
@@ -178,6 +180,13 @@ let registerPage = {
   component: Register
 }
 
+let loginAdminPage = {
+  path: '/admin/login',
+  name: 'Login',
+  redirect: '/login',
+  component: Login
+}
+
 let adminMenu = {
   path: '/admin',
   component: DashboardLayout,
@@ -195,6 +204,11 @@ let adminMenu = {
       component: GoogleAppSettings
     },
     {
+      path: 'google_app_settings_add',
+      name: 'Google App Settings',
+      component: GoogleAppSettingsAdd
+    },
+    {
       path: 'limits',
       name: 'Limits',
       component: Limits
@@ -209,6 +223,7 @@ const routes = [
   loginPage,
   registerPage,
   adminMenu,
+  loginAdminPage,
   {
     meta: { requiresAuth: true, role: 'user' },
     path: '/',

@@ -34,7 +34,7 @@ const PROFILE_API_LIST = '/profile';
 export default {
   data() {
     return {
-      user_data: null
+      user_data: {}
     };
   },
   methods: {

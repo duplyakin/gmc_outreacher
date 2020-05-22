@@ -10,7 +10,7 @@
         ></el-input>
       </card>
 
-      <card>
+      <card v-if="modified_fields['credentials']">
         <div class="col-6">
           <p>Select Linkedin account</p>
           <el-select
@@ -34,7 +34,7 @@
         </div>
       </card>
 
-      <card>
+      <card v-if="modified_fields['lists']">
         <p>Select prospects list to enreach (required)</p>
         <el-select
           class="select-default mb-3"
@@ -97,11 +97,12 @@
                   size="large"
                   placeholder="Fallback Time Zone"
                   v-model="timezones_selected"
+                  value-key="label"
                 >
                   <el-option
                     v-for="option in timezones_selects"
                     class="select-primary"
-                    :value="option.value"
+                    :value="option"
                     :label="option.label"
                     :key="option.label"
                   ></el-option>
@@ -179,15 +180,16 @@
     <div v-if="test" class="row">
       <div class="col-12">{{ this.campaign_data.credentials }}</div>
       <div class="col-12">
-        <pre>{{ this.modified_fields}}</pre>
+        <pre>modified_fields: {{ this.modified_fields}}</pre>
       </div>
       <div class="col-12">
-        <pre>{{ this.campaign_data}}</pre>
+        <pre>campaign_data: {{ this.campaign_data}}</pre>
       </div>
       <div class="col-12">
-        <pre>{{ this.list_data}}</pre>
+        <pre>list_data: {{ this.list_data}}</pre>
       </div>
     </div>
+
   </div>
 </template>
 <script>
@@ -233,7 +235,7 @@ export default {
   },
   data() {
     return {
-      test: false,
+      test: true,
 
       action_type: "",
       campaign_id: "",
@@ -331,22 +333,18 @@ export default {
 
       for (var key in campaign_dict) {
         if (this.campaign_data.hasOwnProperty(key) && campaign_dict[key]) {
-          /*Check or validate for custom keys here*/
-          if (key == "templates") {
-            var email_templates = campaign_dict[key].email || null;
-            if (email_templates) {
-              this.$set(this.campaign_data[key], "email", email_templates);
-            }
-
-            var linkedin_templates = campaign_dict[key].linkedin || null;
-            if (linkedin_templates) {
-              this.$set(this.campaign_data[key], "linkedin", linkedin_templates);
-            }
-          } else {
             this.$set(this.campaign_data, key, campaign_dict[key]);
-          }
         }
       }
+
+      var updated_from_hour = campaign_dict.from_hour + ":" + campaign_dict.from_minutes;
+      var updated_to_hour = campaign_dict.to_hour + ":" + campaign_dict.to_minutes;
+
+      this.$set(this.campaign_data, 'from_hour', updated_from_hour);
+      this.$set(this.campaign_data, 'to_hour', updated_to_hour);
+      this.timezones_selected = this.campaign_data.time_zone;
+
+      console.log("campaign_data: ", this.campaign_data);
 
       /*Not sure that we need it - but don't want to deal with concurency*/
       if (campaign_json.modified_fields) {
@@ -367,7 +365,7 @@ export default {
         return false;
       }
 
-      if (this.campaign_data.list_selected == "") {
+      if (this.campaign_data.list_selected == "" && this.modified_fields['lists']) {
         Notification.error({
           title: "Error",
           message: "You need to select prospects list"

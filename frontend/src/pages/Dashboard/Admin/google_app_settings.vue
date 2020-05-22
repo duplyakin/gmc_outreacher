@@ -9,14 +9,14 @@
         </div>
 
         <div class="col-8 d-flex flex-row-reverse align-self-center">
-    <div>
-        <button
-            @click.prevent="addSettings"
-            type="button"
-            class="btn btn-default btn-success mx-1"
-        >Add Settings</button>
-    </div>
-    </div>
+          <div>
+              <button
+                  @click.prevent="addSettings"
+                  type="button"
+                  class="btn btn-default btn-success mx-1"
+              >Add Settings</button>
+          </div>
+        </div>
       </div>
     </card>
 
@@ -66,7 +66,7 @@ import axios from "@/api/axios-auth";
 const GOOGLE_SETTINGS_API_LIST = "/admin/google/settings/list";
 
 const SettingsEdit = () => import("./google_app_settings_edit_modal.vue");
-const SettingsAdd = () => import("./google_app_settings_add_modal.vue");
+//const SettingsAdd = () => import("./google_app_settings_add_modal.vue");
 
 export default {
   components: {
@@ -128,19 +128,7 @@ export default {
       );
     },
     addSettings() {
-        this.$modal.show(
-        SettingsAdd,
-        {
-          valueUpdated: newValue => {
-            this.load_settings();
-          }
-        },
-        {
-          width: "720",
-          height: "auto",
-          scrollable: true
-        }
-      );
+        this.$router.push('google_app_settings_add');
     },
     load_settings() {
       const path = GOOGLE_SETTINGS_API_LIST;

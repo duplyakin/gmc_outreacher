@@ -1,16 +1,24 @@
 <template>
-  <div class="test-modal">
-    <card title="Google App Settings - Edit">
+  <div>
+    <card title="Google App Settings - Create">
+        <div>
+            <button
+                @click.prevent="uploadCredentials"
+                type="button"
+                class="btn btn-default btn-success mx-1"
+            >Upload Credentials</button>
+        </div>
+
       <div>
 
-        <div class="col-12" v-for="(value, key) in current_settings">
-        <p>{{ key }}</p>
+        <div class="col-12" v-for="column in columns">
+        <p>{{ column.label }}</p>
         <fg-input>
               <textarea
                 class="form-control"
                 placeholder="Enter new value"
                 rows="1"
-                v-model="current_settings[key]"
+                v-model="current_settings[column.prop]"
               ></textarea>
         </fg-input>
         </div>
@@ -30,8 +38,8 @@
 
       </div>
 
-    <div v-if="true" class="row">
-      <div class="col-12">{{ this.current_settings }}</div>
+    <div v-if="false" class="row">
+      <div class="col-12">{{ this.columns }}</div>
     </div>
 
     </card>
@@ -43,30 +51,28 @@ import { Notification, Select, Option } from "element-ui";
 
 import axios from "@/api/axios-auth";
 
-// edit
-const GET_SETTINGS_API = "/admin/google/settings/get";
-const EDIT_SETTINGS_API = "/admin/google/settings/edit";
+const Upload = () => import('./upload_credentials.vue')
+
+// add
+const FIELDS_SETTINGS_API = "/admin/google/settings/fields";
+const CREATE_SETTINGS_API = "/admin/google/settings/create";
 
 export default {
   components: {
     [Select.name]: Select,
     [Option.name]: Option,
   },
-  props: {
-    settingsId: String,
-    valueUpdated: Function,
-  },
   data() {
     return {
+        columns: [],
         current_settings: {},
     };
   },
   methods: {
-    edit_settings() {
-      const path = EDIT_SETTINGS_API;
+    create_settings() {
+      const path = CREATE_SETTINGS_API;
 
       var data = new FormData();
-      data.append("_settings_id", this.settingsId);
       data.append("_data", JSON.stringify(this.current_settings));
 
       axios
@@ -74,22 +80,21 @@ export default {
         .then(res => {
           var r = res.data;
           if (r.code <= 0) {
-            var msg = "Error updating settings." + r.msg;
+            var msg = "Error create settings." + r.msg;
             Notification.error({ title: "Error", message: msg });
           } else {
-            Notification.success({title: "Success", message: "Settings changed"});
+            Notification.success({title: "Success", message: "Settings created"});
           }
         })
         .catch(error => {
-          var msg = "Error updating settings. ERROR: " + error;
+          var msg = "Error create settings. ERROR: " + error;
           Notification.error({ title: "Error", message: msg });
         });
     },
     load_settings() {
-      const path = GET_SETTINGS_API;
+      const path = FIELDS_SETTINGS_API;
 
       var data = new FormData();
-      data.append('_settings_id', this.settingsId);
 
       axios
         .post(path, data)
@@ -99,7 +104,10 @@ export default {
             var msg = "Error loading settings." + r.msg;
             Notification.error({ title: "Error", message: msg });
           } else {
-            this.current_settings = JSON.parse(r.settings);
+            //console.log(r)
+            if(r.columns) {
+              this.columns = JSON.parse(r.columns);
+            }
           }
         })
         .catch(error => {
@@ -107,9 +115,25 @@ export default {
           Notification.error({ title: "Error", message: msg });
         });
     },
+    uploadCredentials() {
+      this.$modal.show(
+        Upload,
+        {
+          valueUpdated: newValue => {
+            this.$set(this.current_settings, 'credentials', newValue); // ? file format
+          }
+        },
+        {
+          width: "720",
+          height: "auto",
+          scrollable: true
+        }
+      );
+    },
     submit() {
-      this.edit_settings();
+      this.create_settings();
       console.log(this.current_settings);
+
       this.$emit("close");
     },
     discard() {
@@ -117,7 +141,7 @@ export default {
     }
   },
   created() {
-    this.load_settings();
+      this.load_settings();
   }
 };
 </script>

@@ -10,7 +10,7 @@
         ></el-input>
       </card>
 
-      <card>
+      <card v-if="modified_fields['credentials']">
         <div class="col-6">
           <p>Select Linkedin account</p>
           <el-select
@@ -34,7 +34,7 @@
         </div>
       </card>
 
-      <card>
+      <card v-if="modified_fields['lists']">
         <p>Prospects list title</p>
         <el-input
           :disabled="!modified_fields['title']"
@@ -206,6 +206,7 @@
         <pre>list_data: {{ this.list_data}}</pre>
       </div>
     </div>
+    
   </div>
 </template>
 <script>
@@ -363,6 +364,7 @@ export default {
 
       this.$set(this.campaign_data, 'from_hour', updated_from_hour);
       this.$set(this.campaign_data, 'to_hour', updated_to_hour);
+      this.timezones_selected = this.campaign_data.time_zone;
 
       console.log("campaign_data: ", this.campaign_data);
 
@@ -385,7 +387,7 @@ export default {
         return false;
       }
 
-      if (this.campaign_data.list_title == "") {
+      if (this.campaign_data.list_title == "" && this.modified_fields['lists']) {
         Notification.error({
           title: "Error",
           message: "You need to enter prospects list title"
@@ -410,16 +412,9 @@ export default {
         return false;
       }
 
-      if (
-        this.campaign_data.from_hour == "" ||
-        this.campaign_data.to_hour == "" ||
-        this.timezones_selected == ""
-      ) {
-        Notification.error({
-          title: "Error",
-          message: "Please select Delivery time"
-        });
-        return false;
+      if (this.campaign_data.from_hour == "" || this.campaign_data.to_hour == "" || this.timezones_selected == "") {
+          Notification.error({title: "Error", message: "Please select Delivery time"});
+          return false;
       } else {
         this.campaign_data.time_zone = this.timezones_selected;
       }
@@ -467,6 +462,7 @@ export default {
               Notification.error({ title: "Error", message: msg });
             } else {
               Notification.success({ title: "Success", message: "Action created" });
+              console.log("campaign_data: ", this.campaign_data);
               this.$router.push({ path: "linkedin_actions" });
             }
           })
