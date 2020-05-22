@@ -1,5 +1,5 @@
 В o24 поддерживаем requirements.txt:
-pipreqs --encoding=utf8 .   //Make this command from o24 folder
+pipreqs --force --encoding=utf8 .   //Make this command from o24 folder
 НЕ
 pip freeze > requirements.txt
 
