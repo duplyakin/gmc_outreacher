@@ -45,6 +45,10 @@ COLUMNS = [
     {
         'label' : 'Actions done today',
         'prop' : 'current_daily_counter'
+    },
+    {
+        'label' : 'Error message',
+        'prop' : 'error_message'
     }
 ]
 
