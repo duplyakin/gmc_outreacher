@@ -102,7 +102,7 @@ export default {
         plugins: [
           "advlist autolink lists link image charmap print preview anchor",
           "searchreplace visualblocks code fullscreen",
-          "insertdatetime media table paste code help wordcount"
+          "insertdatetime media table paste code help wordcount autoresize"
         ],
         toolbar:
           "undo redo | formatselect | bold italic backcolor | \
@@ -140,6 +140,14 @@ export default {
     submitData() {
       if (!this.template) {
         Notification.error({title: "Error", message: "Template can't be empty"});
+        return false;
+      }
+      if (this.template_type == "email" && (this.template.subject == '' || this.template.body == '')) {
+        Notification.error({title: "Error", message: "Subject and body can't be empty"});
+        return false;
+      }
+      if (this.template_type == "linkedin" && this.template.message == '') {
+        Notification.error({title: "Error", message: "Message can't be empty"});
         return false;
       }
       if (confirm("Are you sure?")) {

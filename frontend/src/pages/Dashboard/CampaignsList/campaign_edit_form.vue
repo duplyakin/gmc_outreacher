@@ -100,6 +100,27 @@
                         </div>
                         </div>
                     </div>
+                      <div class="row">
+                        <div class="col-6">
+                            <h4 class="title">Fallback Time Zone</h4>
+                            <el-select
+                            class="select-primary"
+                            name="Fallback Time Zone"
+                            size="large"
+                            placeholder="Fallback Time Zone"
+                            v-model="timezones_selected"
+                            value-key="label"
+                            >
+                            <el-option
+                                v-for="option in timezones_selects"
+                                class="select-primary"
+                                :value="option"
+                                :label="option.label"
+                                :key="option.label"
+                            ></el-option>
+                            </el-select>
+                        </div>
+                      </div>
                     </card>
                 </div>
                 <h4 class="title">Days Preference</h4>
@@ -216,12 +237,15 @@ export default {
     },
     data() {
         return {
-            test : false,
+            test : true,
             campaign_id : '',
             
             test_response : '',
 
+            timezones_selected: "",
+
             /*All defaults that you store on client*/
+            timezones_selects: timezones,
             modified_fields : {},
 
             email_table_columns : [
@@ -273,6 +297,7 @@ export default {
                 
                 from_hour: "",
                 to_hour: "",
+                time_zone: "",
                 sending_days: {
                     "0": true,
                     "1": true,
@@ -411,20 +436,24 @@ export default {
 
             this.$set(this.campaign_data, 'from_hour', updated_from_hour);
             this.$set(this.campaign_data, 'to_hour', updated_to_hour);
+            this.timezones_selected = this.campaign_data.time_zone;
+
+            //console.log("campaign_dict:", campaign_dict);
 
 
-                        /*Not sure that we need it - but don't want to deal with concurency*/
+            /*Not sure that we need it - but don't want to deal with concurency*/
             if (campaign_json.modified_fields){
                 var modified_fields = JSON.parse(campaign_json.modified_fields);
                 this.$set(this, 'modified_fields', modified_fields);
             }
-            console.log(this.campaign_data);
+            //console.log(this.campaign_data);
+            //console.log("modified_fields:", modified_fields);
         },
         
         
         serialize_campaign(){
             /*If need any modifications then do it here*/
-            console.log(this.campaign_data);
+            //console.log("campaign_data: ", this.campaign_data);
             return JSON.stringify(this.campaign_data);
         },
         save_changes(){
@@ -435,11 +464,12 @@ export default {
             }
 
 
-            if (this.campaign_data.from_hour == '' ||
-                this.campaign_data.to_hour == ''){
-                    Notification.error({title: "Error", message: "Please select Delivery time"});
-                    return false;
-                }
+            if (this.campaign_data.from_hour == "" || this.campaign_data.to_hour == "" || this.timezones_selected == "") {
+                Notification.error({title: "Error", message: "Please select Delivery time"});
+                return false;
+            } else {
+                this.campaign_data.time_zone = this.timezones_selected;
+            }
             
             var days_selected = false;
             for (var key in this.campaign_data.sending_days){
@@ -457,7 +487,7 @@ export default {
             this.send_campaign_data();
         },
         send_campaign_data(){
-            /* Add validation here*/
+            /* Add validation here */
 
             if (confirm("Are you sure?")) {
                 var path = CAMPAIGNS_API_EDIT;
@@ -468,13 +498,15 @@ export default {
                 data.append('_campaign_id', this.campaign_id);
                 data.append('_modified_fields', JSON.stringify(this.modified_fields));
                 
+                //console.log("serialized_campaign_data: ", serialized_campaign_data);
 
                 axios
                 .post(path, data)
                 .then(res => {
                     var r = res.data;
                     if (r.code <= 0) {
-                        var msg = "Save campaign error: " + r.msg + " code:" + r.code;
+                        //console.log("R: ", r);
+                        var msg = "Save campaign error: " + r.msg + " code: " + r.code;
                         Notification.error({title: "Error", message: msg});
                     } else {
                         this.$router.push({ path: "campaigns_new"});
@@ -499,7 +531,7 @@ export default {
             .then(res => {
                 var r = res.data;
                 if (r.code <= 0) {
-                    var msg = "Error loading data " + r.msg + " code:" + r.code;
+                    var msg = "Error loading data " + r.msg + " code: " + r.code;
                     Notification.error({title: "Error", message: msg});
                 } else {
                     this.deserialize_data(r);
@@ -528,7 +560,7 @@ export default {
             .then(res => {
                 var r = res.data;
                 if (r.code <= 0) {
-                    var msg = "Error loading campaign " + r.msg + " code:" + r.code;
+                    var msg = "Error loading campaign " + r.msg + " code: " + r.code;
                     Notification.error({title: "Error", message: msg});
                 } else {
                     this.deserialize_campaign(r);
