@@ -358,6 +358,7 @@ FUNNELS = [
         'root' : {
             'key' : 'email-send-message',
             'title' : 'Email only 4 emails sequence',
+            'funnel_type' : GENERAL_FUNNEL_TYPE,
             'template_key' : 'intro_email',
             'root' : True,
             'templates_required' : {
@@ -476,6 +477,7 @@ FUNNELS = [
         'root' : {
             'key' : 'linkedin-connect',
             'title' : 'Linkedin + email funnel',
+            'funnel_type' : GENERAL_FUNNEL_TYPE,
             'root' : True,
             'templates_required' : {
                 'email' : {
@@ -905,3 +907,132 @@ ADMIN_CREDENTIALS_EDIT = {
     'current_hourly_counter' : "123"
 }
 
+CAMPAIGNS_CREATE = {
+    'list_selected': {},
+    'title': "Create test campaign XX-{0}",
+    'funnel': {},
+    'credentials': [],
+    'templates': {
+        'email': [
+            {
+                'title' : 'Intro email',
+                'template_key' : 'intro_email',
+                'order' : 0
+            },
+            {
+                'title' : 'Follow up email - 1',
+                'template_key' : 'email_followup_1',
+                'order' : 1,
+                'subject': 'Hello this is me',
+                'body' : '''
+<!DOCTYPE html>
+<html>
+<head>
+</head>
+<body>
+Hi {{first_name''}}<br /><br />My name is Kirill - I'm a blockchain developer and writer. Since early 2017 I’ve worked hard to become the top blockchain contributor for Hacker Noon - you can check my signature for published topics and my Linkedin and Hacker Noon profiles.<br /><br />With my team, 2020 marks the launch of a new global blockchain PR project - and I’d love <strong>if {{url}} would join us.</strong> <br /><br />During 2020 I will ask blockchain founders for their predictions on the blockchain industry - 2 questions per month, 24 total (you can participate once, or each time, your choice). <br /><br />All answers will be published as a Roundup topic on Hacker Noon and other top-tier crypto publications. At the end of 2020, those answers that were the closest with their predictions to the actual situation will be featured on the main page of Hacker Noon.<br /><br />Also, there is a weekly format where we will explain your project’s key news and distribute it throughout many major channels: 4M+ Hacker Noon website + 40K newsletter and Cryptopanic’s 400K trader community.<br /><br /><br /><span style="color: #e74c3c;"><strong>March 2020 - PR opportunities:</strong></span><br />1. <strong>Hackernoon.com Roundup</strong> - “<span style="color: #e74c3c;">Which top 3 industries will dominate blockchain tech utilization by the end of 2020, why?</span>“<br />      * Deadline for sending a <span style="text-decoration: underline;"><span style="color: #e74c3c; text-decoration: underline;">quote - March 16</span></span>.<br />      * Managing <span style="color: #e74c3c;">fee: $220</span> <br /><br />2. <strong>Hackernoon.com Weekly Matter</strong> - Weekly news published on the front page of Hackernoon where our team will explain your project’s news and tell the audience why it matters to your industry. <br />       * Deadline for sending your news — <span style="text-decoration: underline;"><span style="color: #e74c3c; text-decoration: underline;">each week by Thursday</span></span> (the nearest: March 5, then March 12)<br />       * Managing <span style="color: #e74c3c;">fee: $250</span><br /><br />3. <strong>AmbCrypto.com Roundup article</strong> - “How can blockchain improve online businesses in 2020? (Tell us about your niche)”<br />       * Deadline for sending your <span style="text-decoration: underline;"><span style="color: #e74c3c; text-decoration: underline;">quote - March 23</span></span><br />       * Managing <span style="color: #e74c3c;">fee: $190</span><br /><br />If you participate in 2 or more formats there will be a 20% discount.<br /><br />If you are interested in one or both of these formats and need to know the statistics of the previous sessions, just let me know and I’ll send them your way.<br /><br />P.S.<br />If you’re not interested, just let me know.<br />For faster communication we could chat on <span style="color: #e74c3c;">telegram: ksshilov</span><br /><br /><br />Thanks,<br />Kirill Shilov,<br />Hackernoon.com contributor (https://hackernoon.com/@ks.shilov)<br />Telegram: @ksshilov<br />Linkedin: https://www.linkedin.com/in/kirill-shilov-25aa8630/
+</body>
+</html>
+'''
+            },
+            {
+                'title' : 'Follow up email - 2',
+                'template_key' : 'email_followup_2',
+                'order' : 2
+            },
+        ],
+        'linkedin': [
+            {
+                'title' : 'Intro linkedin message',
+                'template_key' : 'intro_linkedin',
+                'order' : 0
+            },
+            {
+                'title' : 'Follow up linkedin - 1',
+                'template_key' : 'linkedin_followup_1',
+                'order' : 1
+            }
+        ]
+    },
+    'from_hour': "10:23",
+    'to_hour': "21:00",
+    'time_zone': {
+        'label': "(GMT+00:00) United Kingdom Time",
+        'value': "Europe/London",
+        'offset': 0
+    },
+
+    'sending_days': {
+        "0": True,
+        "1": True,
+        "2": True,
+        "3": True,
+        "4": True,
+        "5": False,
+        "6": False
+    }
+}
+
+
+CAMPAIGNS_EDIT = {
+    'title': "EDIT Create test campaign XX-{0}",
+    'templates': {
+        'email': [
+            {
+                'title' : 'Intro email',
+                'template_key' : 'intro_email',
+                'order' : 0
+            },
+            {
+                'title' : 'Follow up email - 1',
+                'template_key' : 'email_followup_1',
+                'order' : 1,
+                'subject': 'Hello this is me',
+                'body' : '''
+<!DOCTYPE html>
+<html>
+<head>
+</head>
+<body>
+Hi {{first_name}}<br /><br />If you are interested in participating in our PR project, you’re in luck! We still have time.<br /><br /><br /><span style="color: #e74c3c; font-size: 16px;"><strong>Here are the upcoming events:</strong></span><br />1. <strong>Hackernoon.com Roundup</strong> - “<span style="color: #e74c3c;">Which top 3 industries will dominate blockchain tech utilization by the end of 2020, why?</span>“<br />      * Deadline for sending a <span style="text-decoration: underline;"><span style="color: #e74c3c; text-decoration: underline;">quote - March 16</span></span>.<br />      * Managing <span style="color: #e74c3c;">fee: $220 </span><br /><br />2. <strong>Hackernoon.com Weekly Matter</strong> - Weekly news published on the front page of Hackernoon where our team will explain your project’s news and tell the audience why it matters to your industry. <br />       * Deadline for sending your news — <span style="color: #e74c3c;">each week by Thursday</span> (the nearest: March 5, then March 12)<br />       * Managing <span style="color: #e74c3c;">fee: $250</span><br /><br />3. <strong>AmbCrypto.com Roundup article</strong> - “<span style="color: #e74c3c;">How can blockchain improve online businesses in 2020? (Tell us about your niche)</span>”<br />       * Deadline for sending your <span style="color: #e74c3c;">quote - March 23</span><br />       * Managing <span style="color: #e74c3c;">fee: $190</span><br /><br />If you participate in 2 or more formats there will be a 20% discount.<br /><br />If you’d like to participate just let me know and I’ll be in touch.<br /><br />P.S.<br />For faster communication we could chat on <span style="color: #e74c3c;">telegram: ksshilov</span><br /><br /><br />Thanks,<br />Kirill Shilov,<br />Hackernoon.com contributor (https://hackernoon.com/@ks.shilov)<br />Telegram: @ksshilov<br />Linkedin: https://www.linkedin.com/in/kirill-shilov-25aa8630/
+</body>
+</html>
+'''
+            },
+            {
+                'title' : 'Follow up email - 2',
+                'template_key' : 'email_followup_2',
+                'order' : 2
+            },
+        ],
+        'linkedin': [
+            {
+                'title' : 'Intro linkedin message',
+                'template_key' : 'intro_linkedin',
+                'order' : 0
+            },
+            {
+                'title' : 'Follow up linkedin - 1',
+                'template_key' : 'linkedin_followup_1',
+                'order' : 1
+            }
+        ]
+    },
+    'from_hour': "00:00",
+    'to_hour': "18:01",
+    'time_zone': {
+        'label': "(GMT+07:00) Western Indonesia Time - Pontianak",
+        'value': "Asia/Pontianak",
+        'offset': 420
+    },
+    'sending_days': {
+        "0": False,
+        "1": False,
+        "2": True,
+        "3": False,
+        "4": True,
+        "5": True,
+        "6": False
+    }
+
+}
