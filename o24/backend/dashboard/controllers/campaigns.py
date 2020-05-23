@@ -288,7 +288,10 @@ def edit_campaign():
             if not modified_fields:
                 raise Exception("_modified_fields missed: don't know what to modify")
 
-            raw_data = request.form['_add_campaign']
+            raw_data = request.form.get('_add_campaign', '')
+            if not raw_data:
+                raise Exception("_add_campaign missed: don't know what to modify")
+            
             campaign_data = JSCampaignData(raw_data=raw_data)
 
             edit_fields = [k for k, v in modified_fields.items() if v]

@@ -21,6 +21,26 @@ response:
     'columns' : 
 }
 
+
+ПОЛЯ КОТОРЫЕ СОЗДАЕМ:
+modified_fields = {
+    'title' : True,
+    'time_table' : True,
+    'credentials' : True,
+    'lists' : True,
+    'from_hour' : True,
+    'to_hour' : True,
+    'from_minutes' : True,
+    'to_minutes' : True,
+    'sending_days' : True,
+    'data' : True,
+    'search_url': True,
+    'total_pages': True,
+    'interval_pages': True,
+    'time_zone': True
+}
+
+
 2. /campaign/linkedin/list (POST)
 request:
 - _page
@@ -47,6 +67,25 @@ response:
     'campaign' : '',  // Здесь будет кампания
     'modified_fields': 
 }
+
+ПОЛЯ ДЛЯ РЕДАКТИРОВАНИЯ
+modified_fields = {
+    'title' : True,
+    'time_table' : True,
+    'credentials' : False,
+    'lists' : False,
+    'from_hour' : True,
+    'to_hour' : True,
+    'from_minutes' : True,
+    'to_minutes' : True,
+    'sending_days' : True,
+    'data' : True,
+    'search_url': False,
+    'total_pages': True,
+    'interval_pages': True,
+    'time_zone': True
+}
+
 
 
 4. /campaign/linkedin/parsing/create (POST)  - ЭТИМ ЗАПРОСОМ СОЗДАЕШЬ КАМПАНИЮ ТИПА "1 - Linkedin Parse campaign"

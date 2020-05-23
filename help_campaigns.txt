@@ -20,6 +20,18 @@ result = {
 СЦЕНАРИЙ ИСПОЛЬЗОВАНИЯ:
 Всегда теперь когда тебе надо создавать кампанию делаешь вызов сначала к /campaigns/data и получаешь все данные для создания
 
+ПОЛЯ КОТОРЫЕ ИСПОЛЬЗУЮТСЯ ПРИ СОЗДАНИИ:
+modified_fields_on_create = {
+    'title' : True,
+    'funnel' : True,
+    'credentials' : True,
+    'templates' : True,
+    'time_table' : True,
+    'lists' : True,
+    'time_zone' : True
+}
+
+
 
 2. /campaigns/list
 Этот запрос _create больше не поддерживает. Все остальное осталось без изменений.
@@ -64,6 +76,24 @@ result = {
     'campaign' : '',
     'modified_fields': {}  // Здест будут поля отмечанные True и False, к редактированию разрещены только те что True
 }
+
+
+ПОЛЯ КОТОРЫЕ ИСПОЛЬЗУЮТСЯ ПРИ РЕДАКТИРОВАНИИ:
+modified_fields_on_edit = {
+    'title' : True,
+    'templates' : True,
+    'time_table' : True,
+    'funnel' : False,
+    'credentials' : False,
+    'lists' : False,
+    'from_hour' : True,
+    'to_hour' : True,
+    'from_minutes' : True,
+    'to_minutes' : True,
+    'sending_days' : True,
+    'time_zone' : True
+}
+
 
 
 4. /campaigns/create

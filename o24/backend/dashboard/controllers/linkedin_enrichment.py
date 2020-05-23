@@ -47,6 +47,9 @@ modified_fields_on_create = {
     'to_minutes' : True,
     'sending_days' : True,
     'data' : True,
+    'search_url': True,
+    'total_pages': True,
+    'interval_pages': True,
     'time_zone': True
 }
 
@@ -61,6 +64,9 @@ modified_fields_on_edit = {
     'to_minutes' : True,
     'sending_days' : True,
     'data' : True,
+    'search_url': False,
+    'total_pages': True,
+    'interval_pages': True,
     'time_zone': True
 }
 

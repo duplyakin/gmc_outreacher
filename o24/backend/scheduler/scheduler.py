@@ -232,7 +232,7 @@ class Scheduler():
 
     @classmethod
     def safe_finish_sequence(cls, owner_id, prospects_ids):
-        stopped = TaskQueue.objects(owner_id=owner_id, prospects_id__in=prospects_ids).update(status=FINISHED)    
+        stopped = TaskQueue.objects(prospect_id__in=prospects_ids).update(status=FINISHED)    
 
         return stopped
 

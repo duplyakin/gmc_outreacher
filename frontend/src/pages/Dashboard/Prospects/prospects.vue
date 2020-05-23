@@ -2,10 +2,10 @@
 <div>
 <card>
 <div class="row">
-    <div class="col-4 d-flex align-self-center">
+    <div class="col-2 d-flex align-self-center">
         <span font-><h3><i class="nc-icon nc-layers-3"></i> Prospects</h3></span>
     </div>
-    <div class="col-8 d-flex flex-row-reverse align-self-center">
+    <div class="col-10 d-flex flex-row-reverse align-self-center">
 
         <div v-if="multipleSelection.length > 0">
         <button @click.prevent="unassignProspects" type="button" class="btn btn-default btn-success mx-1">Unassign Campaign</button>
@@ -19,7 +19,7 @@
         <div v-if="multipleSelection.length == 0">
         <button @click.prevent="addProspect" type="button" class="btn btn-default btn-success mx-1">Add manually</button>
         <button @click.prevent="uploadProspect" type="button" class="btn btn-default btn-success mx-1">Upload CSV</button>
-        <button @click.prevent="load_prospects" type="button" class="btn btn-default btn-success mx-1">Reload</button>
+        <button @click.prevent="reload_prospects" type="button" class="btn btn-default btn-success mx-1">Reload</button>
         </div>
     
     </div>
@@ -396,6 +396,9 @@ methods: {
                 var msg = "Error loading data. ERROR: " + error;
                 Notification.error({title: "Error", message: msg});
             });
+    },
+    reload_prospects(event){
+        this.load_prospects();
     },
     load_prospects(page=1){
         const path = PROSPECTS_API_LIST;

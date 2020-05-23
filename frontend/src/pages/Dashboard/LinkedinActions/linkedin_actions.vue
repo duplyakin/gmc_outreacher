@@ -240,9 +240,9 @@ methods: {
             return false;
         } 
 
-        if(msg_dict.funnel.funnel_type = 1) {
+        if(msg_dict.campaign_type == 1) {
             this.$router.push({ path: "linkedin_parsing", query: { campaign_id: msg_dict._id.$oid, action_type: 'edit' }})
-        } else if(msg_dict.funnel.funnel_type = 2) {
+        } else if(msg_dict.campaign_type == 2) {
             this.$router.push({ path: "linkedin_enrichment", query: { campaign_id: msg_dict._id.$oid, action_type: 'edit' }})
         } else {
             Notification.error({title: "Error", message: "Unknown campaign funnel_type: " + msg_dict.funnel.funnel_type});
