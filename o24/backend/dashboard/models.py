@@ -589,7 +589,8 @@ class Campaign(db.Document):
         new_campaign.data = data.get('data')
 
         new_campaign.status = NEW
-
+    
+        new_campaign.set_next_action_on_edit(_commit=False)
         new_campaign._commit()
         return new_campaign
     

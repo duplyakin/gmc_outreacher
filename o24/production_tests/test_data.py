@@ -917,7 +917,9 @@ CAMPAIGNS_CREATE = {
             {
                 'title' : 'Intro email',
                 'template_key' : 'intro_email',
-                'order' : 0
+                'order' : 0,
+                'subject' : 'Some subject',
+                'body' : 'Some body on create'
             },
             {
                 'title' : 'Follow up email - 1',
@@ -938,19 +940,23 @@ Hi {{first_name''}}<br /><br />My name is Kirill - I'm a blockchain developer an
             {
                 'title' : 'Follow up email - 2',
                 'template_key' : 'email_followup_2',
-                'order' : 2
+                'order' : 2,
+                'subject' : 'Some subject - 2',
+                'body' : 'Some body on create - 2'
             },
         ],
         'linkedin': [
             {
                 'title' : 'Intro linkedin message',
                 'template_key' : 'intro_linkedin',
-                'order' : 0
+                'order' : 0,
+                'message' : 'Some linkedin message'
             },
             {
                 'title' : 'Follow up linkedin - 1',
                 'template_key' : 'linkedin_followup_1',
-                'order' : 1
+                'order' : 1,
+                'message' : 'Some linkedin message - 2'
             }
         ]
     },
@@ -981,7 +987,9 @@ CAMPAIGNS_EDIT = {
             {
                 'title' : 'Intro email',
                 'template_key' : 'intro_email',
-                'order' : 0
+                'order' : 0,
+                'subject' : 'Some subject on Edit',
+                'body' : 'Some body on Edit'
             },
             {
                 'title' : 'Follow up email - 1',
@@ -1002,19 +1010,23 @@ Hi {{first_name}}<br /><br />If you are interested in participating in our PR pr
             {
                 'title' : 'Follow up email - 2',
                 'template_key' : 'email_followup_2',
-                'order' : 2
+                'order' : 2,
+                'subject' : 'Some subject on Edit - 2',
+                'body' : 'Some body on Edit - 2'
             },
         ],
         'linkedin': [
             {
                 'title' : 'Intro linkedin message',
                 'template_key' : 'intro_linkedin',
-                'order' : 0
+                'order' : 0,
+                'message' : 'Linkedin message on Edit'
             },
             {
                 'title' : 'Follow up linkedin - 1',
                 'template_key' : 'linkedin_followup_1',
-                'order' : 1
+                'order' : 1,
+                'message' : 'Linkedin message on Edit - 2'
             }
         ]
     },

@@ -645,7 +645,13 @@ export default {
       }
 
       var credentials = this.campaign_data.credentials;
-      if (credentials.length == 0) {
+      var need_accounts = 1;
+      if ( (this.campaign_data.templates.email && this.campaign_data.templates.email.length > 0) && 
+          (this.campaign_data.templates.linkedin && this.campaign_data.templates.linkedin.length > 0)){
+        need_accounts = 2;
+      }
+
+      if (credentials.length < need_accounts) {
         Notification.error({
           title: "Error",
           message: "You need to select account"
@@ -662,6 +668,7 @@ export default {
         return false;
       }
 
+      console.log(this.timezones_selected);
       if (
         this.campaign_data.from_hour == "" ||
         this.campaign_data.to_hour == "" ||

@@ -23,7 +23,7 @@ def convert_email_template_to_plain(template):
     return plain_template
 
 #return mapped_templates
-def template_key_dict(js_templates):
+def template_key_dict(js_templates, _validate=True):
     res = {}
 
     email_templates = js_templates.get('email','')
@@ -34,6 +34,18 @@ def template_key_dict(js_templates):
             template_key = template.get('template_key')
             if template_key:
                 res['email'][template_key] = template
+
+                if _validate:
+                    subject = template.get('subject', '')
+                    if not subject:
+                        message = "Email Subject can't be empty, template:{0}".format(template.get('title', template_key))
+                        raise Exception(message)
+
+                    body = template.get('body', '')
+                    if not body:
+                        message = "Email Body can't be empty, template:{0}".format(template.get('title', template_key))
+                        raise Exception(message)
+
 
                 html = convert_email_template_to_plain(template)
                 if html is not None:
@@ -47,6 +59,12 @@ def template_key_dict(js_templates):
         for template in linkedin_templates:
             template_key = template.get('template_key')
             res['linkedin'][template_key] = template
+            
+            if _validate:
+                linkedin_message = template.get('message', '')
+                if not linkedin_message:
+                    message = "Linkedin message can't be empty, template:{0}".format(template.get('title', template_key))
+                    raise Exception(message)
 
     return res
     
