@@ -37,13 +37,13 @@
       <card v-if="modified_fields['lists']">
         <p>Prospects list title</p>
         <el-input
-          :disabled="!modified_fields['title']"
+          :disabled="!modified_fields['lists']"
           placeholder="Input prospects list title"
           v-model="campaign_data.list_title"
         ></el-input>
       </card>
 
-      <card>
+      <card v-if="modified_fields['search_url']">
         <p>Search url</p>
         <el-input
           :disabled="!modified_fields['search_url']"
@@ -52,18 +52,18 @@
         ></el-input>
       </card>
 
-      <card>
+      <card v-if="modified_fields['total_pages'] || modified_fields['interval_pages']">
       <p>LinkedIn pages settings</p>
       <div class="container">
             <p class="interval_text">Total pages required</p>
-            <div class="col-3">
+            <div class="col-3" v-if="modified_fields['total_pages']">
               <fg-input label>
-                <el-input-number v-model="campaign_data.data.total_pages" placeholder="ex: 1.00" :min="1" :max="8000000000"></el-input-number>
+                <el-input-number v-model="campaign_data.data.total_pages" placeholder="ex: 100.00" :min="1" :max="100000000"></el-input-number>
               </fg-input>
             </div>
             <p class="interval_text">Number of pages for iteration (10 recommended)</p>
 
-            <div class="col-3">
+            <div class="col-3" v-if="modified_fields['interval_pages']">
               <fg-input label>
                 <el-input-number v-model="campaign_data.data.interval_pages" placeholder="ex: 10.00" :min="1" :max="1000"></el-input-number>
               </fg-input>
@@ -252,7 +252,7 @@ export default {
   },
   data() {
     return {
-      test: true,
+      test: false,
 
       action_type: "",
       campaign_id: "",
