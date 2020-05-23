@@ -235,7 +235,7 @@ export default {
   },
   data() {
     return {
-      test: true,
+      test: false,
 
       action_type: "",
       campaign_id: "",

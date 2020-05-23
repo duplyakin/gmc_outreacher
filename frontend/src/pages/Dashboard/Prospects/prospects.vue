@@ -2,10 +2,10 @@
 <div>
 <card>
 <div class="row">
-    <div class="col-2 d-flex align-self-center">
+    <div class="col-3 d-flex align-self-center">
         <span font-><h3><i class="nc-icon nc-layers-3"></i> Prospects</h3></span>
     </div>
-    <div class="col-10 d-flex flex-row-reverse align-self-center">
+    <div class="col-9 d-flex flex-row-reverse align-self-center">
 
         <div v-if="multipleSelection.length > 0">
         <button @click.prevent="unassignProspects" type="button" class="btn btn-default btn-success mx-1">Unassign Campaign</button>
