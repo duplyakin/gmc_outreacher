@@ -15,7 +15,6 @@
 
         <sidebar-item :link="{name: 'Prospects List', icon: 'nc-icon nc-single-copy-04', path: '/prospects_list'}"></sidebar-item>
 
-        <sidebar-item :link="{name: 'Team', icon: 'nc-icon nc-badge', path: '/team'}"></sidebar-item>
         <sidebar-item :link="{name: 'Profile', icon: 'nc-icon nc-circle-09', path: '/profile'}"></sidebar-item>
 
         <div v-if="role==='admin'">

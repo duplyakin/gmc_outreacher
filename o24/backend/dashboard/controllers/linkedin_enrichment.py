@@ -86,9 +86,9 @@ def data_linkedin_campaign():
 
     try:        
         if request.method == 'POST':
-            lists = ProspectsList.get_lists_with_prospects_without_campaigns(owner_id=current_user.id)
+            lists = ProspectsList.get_lists(owner=current_user.id)
             if lists:
-                result['lists'] = lists
+                result['lists'] = lists.to_json()
 
             total, credentials = Credentials.async_credentials(owner=current_user.id, medium='linkedin')
             if credentials:
