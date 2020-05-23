@@ -509,7 +509,7 @@ export default {
                         var msg = "Save campaign error: " + r.msg + " code: " + r.code;
                         Notification.error({title: "Error", message: msg});
                     } else {
-                        this.$router.push({ path: "campaigns_new"});
+                        this.$router.push({ path: "campaigns"});
                     }
                 })
                 .catch(error => {

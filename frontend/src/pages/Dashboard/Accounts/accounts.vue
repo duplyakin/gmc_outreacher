@@ -6,8 +6,8 @@
             <span font-><h3><i class="nc-icon nc-single-02"></i> Accounts</h3></span>
         </div>
         <div class="col-8 d-flex flex-row-reverse align-self-center">
-            <button @click.prevent="addAccount" type="button" class="btn btn-default btn-success mx-1">Add account</button>
             <button @click.prevent="loadCredentials" type="button" class="btn btn-default btn-success mx-1">Reload</button>
+            <button @click.prevent="addAccount" type="button" class="btn btn-default btn-success mx-1">Add account</button>
         </div>
 
     </div>

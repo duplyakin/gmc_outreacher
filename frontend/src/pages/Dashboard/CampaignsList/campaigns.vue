@@ -18,7 +18,7 @@
             @click.prevent="reload_campaigns"
             type="button"
             class="btn btn-default btn-success mx-1"
-        >Reload campaigns</button>
+        >Reload</button>
 
     </div>
     </div>

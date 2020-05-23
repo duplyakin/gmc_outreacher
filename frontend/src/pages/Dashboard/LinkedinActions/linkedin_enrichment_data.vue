@@ -35,44 +35,27 @@
       </card>
 
       <card v-if="modified_fields['lists']">
-        <p>Prospects list title</p>
-        <el-input
-          :disabled="!modified_fields['title']"
-          placeholder="Input prospects list title"
-          v-model="campaign_data.list_title"
-        ></el-input>
-      </card>
-
-      <card>
-        <p>Search url</p>
-        <el-input
-          :disabled="!modified_fields['search_url']"
-          placeholder="ex: https://www.linkedin.com/search/results/all/?keywords=company&origin=GLOBAL_SEARCH_HEADER&page=97"
-          v-model="campaign_data.data.search_url"
-        ></el-input>
-      </card>
-
-      <card>
-      <p>LinkedIn pages settings</p>
-      <div class="container">
-            <p class="interval_text">Total pages required</p>
-            <div class="col-3">
-              <fg-input label>
-                <el-input-number v-model="campaign_data.data.total_pages" placeholder="ex: 1.00" :min="1" :max="8000000000"></el-input-number>
-              </fg-input>
-            </div>
-            <p class="interval_text">Number of pages for iteration (10 recommended)</p>
-
-            <div class="col-3">
-              <fg-input label>
-                <el-input-number v-model="campaign_data.data.interval_pages" placeholder="ex: 10.00" :min="1" :max="1000"></el-input-number>
-              </fg-input>
-            </div>
-          </div>
+        <p>Select prospects list to enreach (required)</p>
+        <el-select
+          class="select-default mb-3"
+          style="width: 100%;"
+          placeholder="Select prospects list"
+          v-model="campaign_data.list_selected"
+          value-key="title"
+          :disabled="!modified_fields['lists']"
+        >
+          <el-option
+            class="select-default"
+            v-for="(list,index) in list_data.lists"
+            :key="list._id.$oid"
+            :label="list.title"
+            :value="list"
+          ></el-option>
+        </el-select>
       </card>
 
       <card v-if="modified_fields['time_table']">
-        <h5 class="text-center">Search time with respect to prospect's timezone</h5>
+        <h5 class="text-center">Enreach time with respect to prospect's timezone</h5>
         <div class="extended-forms">
           <card>
             <div class="col-12">
@@ -206,7 +189,7 @@
         <pre>list_data: {{ this.list_data}}</pre>
       </div>
     </div>
-    
+
   </div>
 </template>
 <script>
@@ -238,7 +221,7 @@ import axios from '@/api/axios-auth';
 const CAMPAIGNS_API_GET = "/campaign/linkedin/get";
 const CAMPAIGNS_API_DATA = "/campaign/linkedin/data";
 
-const CAMPAIGNS_API_ADD = "/campaign/linkedin/parsing/create";
+const CAMPAIGNS_API_ADD = "/campaign/linkedin/enrichment/create";
 const CAMPAIGNS_API_EDIT = "/campaign/linkedin/edit";
 
 export default {
@@ -260,7 +243,7 @@ export default {
       linkedin_account_selected: "",
       timezones_selected: "",
 
-      /*All defaults that you store on client*/
+      /* All defaults that you store on client */
       timezones_selects: timezones,
       modified_fields: {},
 
@@ -273,12 +256,7 @@ export default {
 
       /*Object data*/
       campaign_data: {
-        list_title: '',
-        data: {
-            search_url: '',
-            total_pages: 100,
-            interval_pages: 10,
-        },
+        list_selected: "",
         title: "",
         credentials: [],
 
@@ -336,7 +314,7 @@ export default {
       }
     },
     deserialize_data(from_data) {
-      console.log('from_data: ', from_data);
+      console.log(from_data);
       for (var key in from_data) {
         if (this.list_data.hasOwnProperty(key) && from_data[key]) {
           var parsed_data = JSON.parse(from_data[key]);
@@ -386,18 +364,10 @@ export default {
         return false;
       }
 
-      if (this.campaign_data.list_title == "" && this.modified_fields['lists']) {
+      if (this.campaign_data.list_selected == "" && this.modified_fields['lists']) {
         Notification.error({
           title: "Error",
-          message: "You need to enter prospects list title"
-        });
-        return false;
-      }
-
-      if (this.campaign_data.data.search_url == "") {
-        Notification.error({
-          title: "Error",
-          message: "You need to enter search url"
+          message: "You need to select prospects list"
         });
         return false;
       }
@@ -411,9 +381,16 @@ export default {
         return false;
       }
 
-      if (this.campaign_data.from_hour == "" || this.campaign_data.to_hour == "" || this.timezones_selected == "") {
-          Notification.error({title: "Error", message: "Please select Delivery time"});
-          return false;
+      if (
+        this.campaign_data.from_hour == "" ||
+        this.campaign_data.to_hour == "" ||
+        this.timezones_selected == ""
+      ) {
+        Notification.error({
+          title: "Error",
+          message: "Please select Delivery time"
+        });
+        return false;
       } else {
         this.campaign_data.time_zone = this.timezones_selected;
       }
@@ -461,7 +438,6 @@ export default {
               Notification.error({ title: "Error", message: msg });
             } else {
               Notification.success({ title: "Success", message: "Campaign saved" });
-              console.log("campaign_data: ", this.campaign_data);
               this.$router.push({ path: "linkedin_enrichment" });
             }
           })
@@ -472,6 +448,8 @@ export default {
       }
     },
     async load_data() {
+      console.log("load_data");
+
       var path = CAMPAIGNS_API_DATA;
       var data = new FormData();
 

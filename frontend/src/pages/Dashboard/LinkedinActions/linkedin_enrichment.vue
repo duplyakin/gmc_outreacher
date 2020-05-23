@@ -1,520 +1,330 @@
 <template>
-  <div>
-    <card>
-      <card>
-        <p>Campaign title (required)</p>
-        <el-input
-          :disabled="!modified_fields['title']"
-          placeholder="Input campaign title"
-          v-model="campaign_data.title"
-        ></el-input>
-      </card>
-
-      <card v-if="modified_fields['credentials']">
-        <div class="col-6">
-          <p>Select Linkedin account</p>
-          <el-select
-            class="select-default mb-3"
-            style="width: 100%;"
-            placeholder="Select linkedin account"
-            v-on:change="onChangeLinkedinCredentials"
-            v-model="linkedin_account_selected"
-            value-key="data.account"
-            :disabled="!modified_fields['credentials']"
-          >
-            <el-option
-              class="select-default"
-              v-for="(account,index) in list_data.credentials"
-              v-if="account.medium == 'linkedin'"
-              :key="account._id.$oid"
-              :label="account.data.account"
-              :value="account"
-            ></el-option>
-          </el-select>
-        </div>
-      </card>
-
-      <card v-if="modified_fields['lists']">
-        <p>Select prospects list to enreach (required)</p>
-        <el-select
-          class="select-default mb-3"
-          style="width: 100%;"
-          placeholder="Select prospects list"
-          v-model="campaign_data.list_selected"
-          value-key="title"
-          :disabled="!modified_fields['lists']"
-        >
-          <el-option
-            class="select-default"
-            v-for="(list,index) in list_data.lists"
-            :key="list._id.$oid"
-            :label="list.title"
-            :value="list"
-          ></el-option>
-        </el-select>
-      </card>
-
-      <card v-if="modified_fields['time_table']">
-        <h5 class="text-center">Enreach time with respect to prospect's timezone</h5>
-        <div class="extended-forms">
-          <card>
-            <div class="col-12">
-              <div class="row">
-                <div class="col-lg-6">
-                  <h4 class="title">From</h4>
-                  <el-time-select
-                    name="From time"
-                    v-model="campaign_data.from_hour"
-                    :picker-options="{
-                        start: '00:00',
-                        step: '00:15',
-                        end: '23:59'
-                    }"
-                    placeholder="Select time"
-                  ></el-time-select>
-                </div>
-                <div class="col-lg-6">
-                  <h4 class="title">Till</h4>
-                  <el-time-select
-                    name="Till time has to be after FROM time"
-                    v-model="campaign_data.to_hour"
-                    :picker-options="{
-                        start: '00:00',
-                        step: '00:15',
-                        end: '23:59'
-                    }"
-                    placeholder="Select time"
-                  ></el-time-select>
-                </div>
-              </div>
-            </div>
-            <div class="row">
-              <div class="col-6">
-                <h4 class="title">Fallback Time Zone</h4>
-                <el-select
-                  class="select-primary"
-                  name="Fallback Time Zone"
-                  size="large"
-                  placeholder="Fallback Time Zone"
-                  v-model="timezones_selected"
-                  value-key="label"
-                >
-                  <el-option
-                    v-for="option in timezones_selects"
-                    class="select-primary"
-                    :value="option"
-                    :label="option.label"
-                    :key="option.label"
-                  ></el-option>
-                </el-select>
-              </div>
-            </div>
-          </card>
-        </div>
-        <h4 class="title">Days Preference</h4>
-        <div class="row">
-          <div class="col-12">
-            <card title="Select sending days">
-              <div class="btn-group">
-                <button
-                  type="button"
-                  ref="day_0"
-                  @click="toggleDay('day_0')"
-                  v-bind:class="{ 'btn btn-default' : true, 'btn-success': campaign_data.sending_days['0'] }"
-                >Mon</button>
-                <button
-                  type="button"
-                  ref="day_1"
-                  @click="toggleDay('day_1')"
-                  v-bind:class="{ 'btn btn-default' : true, 'btn-success': campaign_data.sending_days['1'] }"
-                >Tue</button>
-                <button
-                  type="button"
-                  ref="day_2"
-                  @click="toggleDay('day_2')"
-                  v-bind:class="{ 'btn btn-default' : true, 'btn-success': campaign_data.sending_days['2'] }"
-                >Wed</button>
-                <button
-                  type="button"
-                  ref="day_3"
-                  @click="toggleDay('day_3')"
-                  v-bind:class="{ 'btn btn-default' : true, 'btn-success': campaign_data.sending_days['3'] }"
-                >Thu</button>
-                <button
-                  type="button"
-                  ref="day_4"
-                  @click="toggleDay('day_4')"
-                  v-bind:class="{ 'btn btn-default' : true, 'btn-success': campaign_data.sending_days['4'] }"
-                >Fri</button>
-                <button
-                  type="button"
-                  ref="day_5"
-                  @click="toggleDay('day_5')"
-                  v-bind:class="{ 'btn btn-default' : true, 'btn-success': campaign_data.sending_days['5'] }"
-                >Sat</button>
-                <button
-                  type="button"
-                  ref="day_6"
-                  @click="toggleDay('day_6')"
-                  v-bind:class="{ 'btn btn-default' : true, 'btn-success': campaign_data.sending_days['6'] }"
-                >Sun</button>
-              </div>
-            </card>
-          </div>
-        </div>
-      </card>
-
-        <div class="row">
-          <div class="col-12 d-flex flex-row-reverse">
-            <button
-              @click.prevent="save_changes"
-              type="button"
-              class="btn btn-default btn-success mx-1"
-            >Save Changes</button>
-            <!--  <button type="button" class="btn btn-outline btn-wd btn-danger">Discard</button> -->
-          </div>
-        </div>
-
-    </card>
-
-    <div v-if="test" class="row">
-      <div class="col-12">{{ this.campaign_data.credentials }}</div>
-      <div class="col-12">
-        <pre>modified_fields: {{ this.modified_fields}}</pre>
-      </div>
-      <div class="col-12">
-        <pre>campaign_data: {{ this.campaign_data}}</pre>
-      </div>
-      <div class="col-12">
-        <pre>list_data: {{ this.list_data}}</pre>
-      </div>
+<div>
+<card>
+<div class="row">
+    <div class="col-4 d-flex align-self-center">
+        <h3>
+        <i class="nc-icon nc-bag"></i> LinkedIn Enrichment
+        </h3>
     </div>
+    <div class="col-8 d-flex flex-row-reverse align-self-center">
+    <div>
+        <button
+            @click.prevent="addCampaign"
+            type="button"
+            class="btn btn-default btn-success mx-1"
+        >Create campaign</button>
+        <button
+            @click.prevent="reload_campaigns"
+            type="button"
+            class="btn btn-default btn-success mx-1"
+        >Reload</button>
 
-  </div>
+    </div>
+    </div>
+</div>
+</card>
+
+<card>
+        <div class="col-12">
+            <el-table
+            stripe
+            ref="campaigns_data_table"
+            style="width: 100%;"
+            :data="campaigns_data.campaigns"
+            max-height="500"
+            border
+            >
+            <el-table-column
+                v-for="(column,index) in list_data.columns"
+                :key="index"
+                :prop="column.prop"
+                :label="column.label"
+                :fixed="column.prop === 'title' ? true : false"
+                show-overflow-tooltip>
+                <template slot-scope="scope">
+                    <a @click.prevent="editCampaign(scope.row, scope.$index)" href="#" v-if="column.prop === 'title'">{{ scope.row[column.prop] }}</a>
+                    <template v-else-if="column.prop === 'status'">{{  status[scope.row[column.prop]] }}</template>
+                    <template v-else-if="column.prop === 'funnel' && scope.row[column.prop] !== undefined"> {{ scope.row[column.prop].title }} </template>
+                    <template v-else>{{  scope.row[column.prop] }}</template>
+                </template>
+            </el-table-column>
+            
+            <el-table-column :min-width="50" fixed="right" label="Action">
+                <template slot-scope="props">
+                <a
+                    class="btn-simple btn-link"
+                    @click.prevent="make_action(props.row, props.$index)"
+                    href="#"
+                >
+                    {{ props.row.status == 1 ? 'Pause' : 'Start' }}
+                </a>
+                </template>
+            </el-table-column>
+
+            <el-table-column :min-width="50" fixed="right" label="Delete">
+                <template slot-scope="props">
+                <a
+                    v-tooltip.top-center="'Delete'"
+                    class="btn-danger btn-simple btn-link"
+                    @click.prevent="delete_campaign(props.row._id.$oid, props.$index)"
+                >
+                    <i class="fa fa-times"></i>
+                </a>
+                </template>
+            </el-table-column>
+            </el-table>
+        </div>
+
+        </card>
+
+        <div v-if="test" class="row">
+            <div class="col-12">
+                <pre>{{ this.campaigns_data }}</pre>
+            </div>
+
+            <div class="col-12">
+                {{ this.list_data }}
+            </div>
+        </div>
+
+</div>
 </template>
 <script>
-import {
-  drop,
-  every,
-  forEach,
-  some,
-  get,
-  isArray,
-  map,
-  set,
-  findIndex
-} from "lodash";
+import { Notification, Table, TableColumn, Select, Option } from "element-ui";
+import { Pagination as LPagination } from "src/components/index";
 
-import {
-  Notification,
-  Table,
-  TimeSelect,
-  TableColumn,
-  Select,
-  Option,
-  Input
-} from "element-ui";
-
-import timezones from "../CampaignsList/defaults/timezones";
 import axios from '@/api/axios-auth';
 
-const CAMPAIGNS_API_GET = "/campaign/linkedin/get";
-const CAMPAIGNS_API_DATA = "/campaign/linkedin/data";
+const Campaign_choose = () => import('./choose_modal.vue')
 
-const CAMPAIGNS_API_ADD = "/campaign/linkedin/enrichment/create";
-const CAMPAIGNS_API_EDIT = "/campaign/linkedin/edit";
+const CAMPAIGNS_API_DATA = '/campaign/linkedin/data'
+const CAMPAIGNS_API_LIST = '/campaign/linkedin/list';
+
+const CAMPAIGNS_API_DELETE = '/campaign/linkedin/delete';
+const CAMPAIGNS_API_START = '/campaign/linkedin/start';
+const CAMPAIGNS_API_PAUSE = '/campaign/linkedin/pause';
 
 export default {
-  components: {
-    [Input.name]: Input,
+components: {
+    LPagination,
     [Select.name]: Select,
     [Option.name]: Option,
     [Table.name]: Table,
-    [TableColumn.name]: TableColumn,
-    [TimeSelect.name]: TimeSelect
-  },
-  data() {
+    [TableColumn.name]: TableColumn
+},
+computed: {
+},
+data() {
     return {
-      test: true,
-
-      action_type: "",
-      campaign_id: "",
-
-      linkedin_account_selected: "",
-      timezones_selected: "",
-
-      /* All defaults that you store on client */
-      timezones_selects: timezones,
-      modified_fields: {},
-
-      /* All lists that we need to select */
-      list_data: {
-        credentials: [],
-        lists: [],
-        columns: []
-      },
-
-      /*Object data*/
-      campaign_data: {
-        list_selected: "",
-        title: "",
-        credentials: [],
-
-        from_hour: "",
-        to_hour: "",
-        time_zone: "",
-        sending_days: {
-          "0": true,
-          "1": true,
-          "2": true,
-          "3": true,
-          "4": true,
-          "5": false,
-          "6": false
+        test : false,
+        status : {
+            0 : 'New',
+            1 : 'In progress',
+            2 : 'On Pause',
+           '-1' : 'Failed',
+           '-2' : 'Unknown'
+        },
+        pagination : {
+                perPage : 0,
+                currentPage : 1,
+                perPageOptions: [5, 10, 25, 50],
+                total : 0
+        },
+        list_data : {
+            columns : [],
+        },
+        campaigns_data : {
+            campaigns : []
         }
-      }
     };
-  },
-  methods: {
-    toggleDay(ref) {
-      var btn = this.$refs[ref];
-      if (!btn) {
-        return false;
-      }
+},
+methods: {
+    make_action(campaign, index){
+        var path = CAMPAIGNS_API_START;
+        if (campaign.status == 1){
+            path = CAMPAIGNS_API_PAUSE;
+        }
+        if (confirm("Are you sure?")) {
+            var data = new FormData();
+            data.append("_campaign_id", campaign._id.$oid);
 
-      var index = ref.split("_")[1];
+            const row_index = index;
+            axios
+                .post(path, data)
+                .then(res => {
+                var r = res.data;
+                if (r.code <= 0) {
+                    var msg = "Action error " + r.msg;
+                    Notification.error({title: "Error", message: msg});
+                } else {
+                    this.load_campaigns();
+                }
+                })
+                .catch(error => {
+                    var msg = "Action error " + error;
+                    Notification.error({title: "Error", message: msg});
+                });
+        }
+    },
+    show_data(scope_row, column){
+        var data = column.data || '';
+        if (data){
+            return scope_row.data[column.prop] || '';
+        }else{
+            var field = column.field || '';
+            if (field){
+                return scope_row[column.prop][field] || '';
+            }else{
+                return scope_row[column.prop] || '';
+            }
+        }
 
-      this.campaign_data.sending_days[index] = !this.campaign_data.sending_days[
-        index
-      ];
-      return true;
+        return '';
     },
-    onChangeEmailCredentials(new_credentials) {
-      return this.onChangeCredentials("email", new_credentials);
+    delete_campaign(campaign_id, row_index){
+        if (confirm("Are you sure?")) {
+            const path = CAMPAIGNS_API_DELETE;
+
+            var data = new FormData();
+            data.append("_campaign_id", campaign_id);
+
+            const index = row_index;
+            axios
+                .post(path, data)
+                .then(res => {
+                var r = res.data;
+                if (r.code <= 0) {
+                    var msg = "Error deleting campaign " + r.msg;
+                    Notification.error({title: "Error", message: msg});
+                } else {
+                    this.load_campaigns();
+                }
+                })
+                .catch(error => {
+                    var msg = "Error deleting campaign " + error;
+                    Notification.error({title: "Error", message: msg});
+                });
+        }
     },
-    onChangeLinkedinCredentials(new_credentials) {
-      return this.onChangeCredentials("linkedin", new_credentials);
+    addCampaign() {
+        this.$modal.show(
+        Campaign_choose,
+        {
+          valueUpdated: newValue => {
+
+          }
+        },
+        {
+          width: "720",
+          height: "auto",
+          scrollable: true
+        }
+      );
     },
-    onChangeCredentials(medium, new_credentials) {
-      if (this.campaign_data.credentials.length <= 0) {
-        this.campaign_data.credentials.push(new_credentials);
-        return;
-      } else {
-        let _medium = medium;
-        var index = findIndex(this.campaign_data.credentials, function(el) {
-          return el.medium == _medium;
-        });
-        if (index >= 0) {
-          this.campaign_data.credentials.splice(index, 1, new_credentials);
+    editCampaign(msg_dict, index) {
+        var status = -2;
+        if (msg_dict.hasOwnProperty('status')){
+            status = msg_dict['status'];
+        }
+        if (status == -2 || status == 1){
+            Notification.error({title: "Error", message: "Pause campaign for edit, current status: " + status});
+            return false;
+        }
+
+        if(!msg_dict.campaign_type) {
+            Notification.error({title: "Error", message: "Empty campaign_type!"});
+            return false;
+        } 
+
+        if(msg_dict.campaign_type == 1) {
+            this.$router.push({ path: "linkedin_parsing", query: { campaign_id: msg_dict._id.$oid, action_type: 'edit' }})
+        } else if(msg_dict.campaign_type == 2) {
+            this.$router.push({ path: "linkedin_enrichment_data", query: { campaign_id: msg_dict._id.$oid, action_type: 'edit' }})
         } else {
-          /*Should never happened*/
-          this.campaign_data.credentials.push(new_credentials);
+            Notification.error({title: "Error", message: "Unknown campaign_type: " + msg_dict.campaign_type});
         }
-        return;
-      }
     },
-    deserialize_data(from_data) {
-      console.log(from_data);
-      for (var key in from_data) {
-        if (this.list_data.hasOwnProperty(key) && from_data[key]) {
-          var parsed_data = JSON.parse(from_data[key]);
-          this.$set(this.list_data, key, parsed_data);
-        }
-      }
-      /*Not sure that we need it - but don't want to deal with concurency*/
-      if (from_data.modified_fields && this.action_type != "edit") {
-        var modified_fields = JSON.parse(from_data.modified_fields);
-        this.$set(this, "modified_fields", modified_fields);
-      }
+    next_page(){
+        var page = 2;
+        this.load_data(page,0);
     },
-    deserialize_campaign(campaign_json) {
-      var campaign_dict = JSON.parse(campaign_json.campaign);
-
-      for (var key in campaign_dict) {
-        if (this.campaign_data.hasOwnProperty(key) && campaign_dict[key]) {
-            this.$set(this.campaign_data, key, campaign_dict[key]);
-        }
-      }
-
-      var updated_from_hour = campaign_dict.from_hour + ":" + campaign_dict.from_minutes;
-      var updated_to_hour = campaign_dict.to_hour + ":" + campaign_dict.to_minutes;
-
-      this.$set(this.campaign_data, 'from_hour', updated_from_hour);
-      this.$set(this.campaign_data, 'to_hour', updated_to_hour);
-      this.timezones_selected = this.campaign_data.time_zone;
-
-      console.log("campaign_data: ", this.campaign_data);
-
-      /*Not sure that we need it - but don't want to deal with concurency*/
-      if (campaign_json.modified_fields) {
-        var modified_fields = JSON.parse(campaign_json.modified_fields);
-        this.$set(this, "modified_fields", modified_fields);
-      }
+    reload_campaigns(event){
+        return this.load_campaigns(1);
     },
+    load_campaigns(page=1){
+        const path = CAMPAIGNS_API_LIST;
 
-    serialize_campaign() {
-      /*If need any modifications then do it here*/
-
-      return JSON.stringify(this.campaign_data);
-    },
-    save_changes() {
-      /*Simple validation */
-      if (this.campaign_data.title == "") {
-        Notification.error({ title: "Error", message: "Title can't be empty" });
-        return false;
-      }
-
-      if (this.campaign_data.list_selected == "" && this.modified_fields['lists']) {
-        Notification.error({
-          title: "Error",
-          message: "You need to select prospects list"
-        });
-        return false;
-      }
-
-      var credentials = this.campaign_data.credentials;
-      if (credentials.length == 0) {
-        Notification.error({
-          title: "Error",
-          message: "You need to select account"
-        });
-        return false;
-      }
-
-      if (
-        this.campaign_data.from_hour == "" ||
-        this.campaign_data.to_hour == "" ||
-        this.timezones_selected == ""
-      ) {
-        Notification.error({
-          title: "Error",
-          message: "Please select Delivery time"
-        });
-        return false;
-      } else {
-        this.campaign_data.time_zone = this.timezones_selected;
-      }
-
-      var days_selected = false;
-      for (var key in this.campaign_data.sending_days) {
-        if (this.campaign_data.sending_days[key] == true) {
-          days_selected = true;
-          break;
-        }
-      }
-
-      if (!days_selected) {
-        Notification.error({
-          title: "Error",
-          message: "Sending days can't be emtpy"
-        });
-        return false;
-      }
-
-      this.send_campaign_data();
-    },
-    send_campaign_data() {
-      /* Add validation here*/
-
-      if (confirm("Are you sure?")) {
-        var path = CAMPAIGNS_API_ADD;
         var data = new FormData();
+        data.append('_page', page);
 
-        var serialized_campaign_data = this.serialize_campaign();
-        data.append("_add_campaign", serialized_campaign_data);
+        axios.post(path, data)
+        .then((res) => {
+            var r = res.data;
+            if (r.code <= 0){
+                var msg = "Error loading campaigns." + r.msg;
+                Notification.error({title: "Error", message: msg});
+            } else {
+                this.deserialize_campaigns(r);
+            }
+            })
+            .catch((error) => {
+                var msg = "Error loading campaigns. ERROR: " + error;
+                Notification.error({title: "Error", message: msg});
+            });
 
-        if (this.action_type == "edit") {
-          path = CAMPAIGNS_API_EDIT;
-          data.append("_campaign_id", this.campaign_id);
-          data.append("_modified_fields", JSON.stringify(this.modified_fields));
-        }
+    },
+    load_data(){
+        const path = CAMPAIGNS_API_DATA;
 
+        var data = new FormData();
         axios
-          .post(path, data)
-          .then(res => {
+            .post(path, data)
+            .then(res => {
             var r = res.data;
             if (r.code <= 0) {
-              var msg = "Save campaign error: " + r.msg + " code:" + r.code;
-              Notification.error({ title: "Error", message: msg });
+                var msg = "Error loading data " + r.msg;
+                Notification.error({title: "Error", message: msg});
             } else {
-              Notification.success({ title: "Success", message: "Action created" });
-              this.$router.push({ path: "linkedin_actions" });
+                this.deserialize_data(r);
             }
-          })
-          .catch(error => {
-            var msg = "Save campaign ERROR: " + error;
-            Notification.error({ title: "Error", message: msg });
-          });
-      }
+            })
+            .catch(error => {
+                var msg = "Error loading data " + error;
+                Notification.error({title: "Error", message: msg});
+            });
     },
-    async load_data() {
-      console.log("load_data");
-
-      var path = CAMPAIGNS_API_DATA;
-      var data = new FormData();
-
-      axios
-        .post(path, data)
-        .then(res => {
-          var r = res.data;
-          if (r.code <= 0) {
-            var msg = "Error loading data " + r.msg + " code:" + r.code;
-            Notification.error({ title: "Error", message: msg });
-          } else {
-            this.deserialize_data(r);
-          }
-        })
-        .catch(error => {
-          var msg = "Error loading data. ERROR: " + error;
-          Notification.error({ title: "Error", message: msg });
-        });
+    deserialize_data(from_data){
+        for (var key in from_data){
+            if (this.list_data.hasOwnProperty(key) && from_data[key]){
+                var parsed_data = JSON.parse(from_data[key])
+                this.$set(this.list_data, key, parsed_data);
+            }
+        }
     },
-    async load_campaign(campaign_id = "") {
-      console.log("load_campaign id:" + campaign_id);
+    deserialize_campaigns(from_data){
+        if (from_data.pagination){
+            var pagination_dict = JSON.parse(from_data.pagination);
+            this.$set(this, 'pagination', pagination_dict);
+        }
 
-      if (campaign_id === "") {
-        Notification.error({
-          title: "Error",
-          message: "ERROR loading campaign: ID can't be empty"
-        });
-        return;
-      }
+        if (from_data.columns){
+            var columns = JSON.parse(from_data.columns);
+            this.$set(this.list_data, 'columns', columns);
+        }
+        
+        if (from_data.campaigns){
+            var campaigns = JSON.parse(from_data.campaigns)
+            this.$set(this.campaigns_data, 'campaigns', campaigns);
+        }
+    },
 
-      var path = CAMPAIGNS_API_GET;
-      var data = new FormData();
-      data.append("_campaign_id", campaign_id);
-
-      axios
-        .post(path, data)
-        .then(res => {
-          var r = res.data;
-          if (r.code <= 0) {
-            var msg = "Error loading campaign " + r.msg + " code:" + r.code;
-            Notification.error({ title: "Error", message: msg });
-          } else {
-            this.deserialize_campaign(r);
-          }
-        })
-        .catch(error => {
-          var msg = "Error loading campaign. ERROR: " + error;
-          Notification.error({ title: "Error", message: msg });
-        });
-    }
-  },
-  async mounted() {
-    this.action_type = this.$route.query.action_type;
-    this.campaign_id = this.$route.query.campaign_id || "";
-
-    console.log("mounted with action_type:" + this.action_type + " campaign_id:" + this.campaign_id);
-
-    await this.load_data();
-
-    if (this.action_type == "edit") {
-      await this.load_campaign(this.campaign_id);
-    }
-  }
+},
+async mounted() {
+    //await this.load_data();
+    await this.load_campaigns();
+}
 };
 </script>
-<style lang="scss">
-
+<style>
 </style>

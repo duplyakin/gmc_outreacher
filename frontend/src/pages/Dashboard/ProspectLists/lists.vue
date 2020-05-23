@@ -18,7 +18,7 @@
             @click.prevent="load_lists"
             type="button"
             class="btn btn-default btn-success mx-1"
-        >Reload Lists</button>
+        >Reload</button>
 
     </div>
     </div>

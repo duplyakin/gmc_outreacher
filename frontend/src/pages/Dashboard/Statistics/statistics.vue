@@ -13,7 +13,7 @@
               @click.prevent="load_data(1,1)"
               type="button"
               class="btn btn-default btn-success mx-1"
-            >Reload table</button>
+            >Reload</button>
           </div>
         </div>
       </div>

@@ -69,7 +69,7 @@ export default {
         });
       } else if (this.campaign_type.label === "Linkedin data enrichment") {
         this.$router.push({
-          path: "linkedin_enrichment"
+          path: "linkedin_enrichment_data"
         });
       }
       this.$emit("close");

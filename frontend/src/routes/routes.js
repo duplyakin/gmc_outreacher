@@ -49,9 +49,9 @@ const CampaignsList = () => import('src/pages/Dashboard/CampaignsList/campaigns.
 const CampaignForm = () => import('src/pages/Dashboard/CampaignsList/campaign_form.vue')
 const CampaignEditForm = () => import('src/pages/Dashboard/CampaignsList/campaign_edit_form.vue')
 
-const LinkedinActions = () => import('src/pages/Dashboard/LinkedinActions/linkedin_actions.vue')
-const LinkedinParsing = () => import('src/pages/Dashboard/LinkedinActions/linkedin_parsing.vue')
 const LinkedinEnrichment = () => import('src/pages/Dashboard/LinkedinActions/linkedin_enrichment.vue')
+const LinkedinParsing = () => import('src/pages/Dashboard/LinkedinActions/linkedin_parsing.vue')
+const LinkedinEnrichmentData = () => import('src/pages/Dashboard/LinkedinActions/linkedin_enrichment_data.vue')
 
 const ProspectLists = () => import('src/pages/Dashboard/ProspectLists/lists.vue')
 
@@ -245,25 +245,22 @@ const routes = [
         name: 'Help',
         component: Help
       },
+
       {
         path: 'prospects',
         name: 'Prospects',
         component: Prospects
       },
       {
-        path: 'campaigns',
-        name: 'Campaigns List',
-        component: CampaignsList
-      },
-      {
-        path: 'linkedin_actions',
-        name: 'LinkedIn actions',
-        component: LinkedinActions
-      },
-      {
         path: 'prospects_list',
         name: 'Prospect Lists',
         component: ProspectLists
+      },
+
+      {
+        path: 'campaigns',
+        name: 'Campaigns List',
+        component: CampaignsList
       },
       {
         path: 'campaign_form',
@@ -271,20 +268,27 @@ const routes = [
         component: CampaignForm
       },
       {
+        path: 'campaign_edit_form',
+        name: 'Campaign Edit Form',
+        component: CampaignEditForm
+      },
+
+      {
+        path: 'linkedin_enrichment',
+        name: 'LinkedIn Enrichment',
+        component: LinkedinEnrichment
+      },
+      {
         path: 'linkedin_parsing',
         name: 'Campaign Linkedin Parsing',
         component: LinkedinParsing
       },
       {
-        path: 'linkedin_enrichment',
-        name: 'Campaign Linkedin Enrichment',
-        component: LinkedinEnrichment
+        path: 'linkedin_enrichment_data',
+        name: 'Campaign Linkedin Enrichment Data',
+        component: LinkedinEnrichmentData
       },
-      {
-        path: 'campaign_edit_form',
-        name: 'Campaign Edit Form',
-        component: CampaignEditForm
-      },
+
       {
         path: 'accounts',
         name: 'Accounts',
