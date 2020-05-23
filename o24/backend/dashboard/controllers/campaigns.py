@@ -78,9 +78,9 @@ def data_campaigns():
 
     try:        
         if request.method == 'POST':
-            lists = ProspectsList.get_lists(owner=current_user.id)
+            lists = ProspectsList.get_lists_with_prospects_without_campaigns(owner_id=current_user.id)
             if lists:
-                result['lists'] = lists.to_json()
+                result['lists'] = lists
 
             total, credentials = Credentials.async_credentials(owner=current_user.id)
             if credentials:
@@ -212,7 +212,9 @@ def create_campaign():
     }
     if request.method == 'POST':
         try:
-            raw_data = request.form['_add_campaign']
+            raw_data = request.form.get('_add_campaign', '')
+            if not raw_data:
+                raise Exception("There is no _add_campaign")
             
             campaign_data = JSCampaignData(raw_data=raw_data)
 
@@ -283,8 +285,13 @@ def edit_campaign():
 
             if campaign.inprogress():
                 raise Exception("Campaign in progress: stop progress first")
+            
+            raw_modified_fields = request.form.get('_modified_fields', '')
+            if not raw_modified_fields:
+                raise Exception("Bad _modified_fields")
 
-            modified_fields = json.loads(request.form['_modified_fields'])
+
+            modified_fields = json.loads(raw_modified_fields)
             if not modified_fields:
                 raise Exception("_modified_fields missed: don't know what to modify")
 
@@ -373,9 +380,12 @@ def start_campaign():
 
             
             scheduler.Scheduler.safe_start_campaign(owner=current_user.id, campaign=campaign)
+            campaign.reload()
+            campaign_dict = to_json_deep_dereference(campaign)
 
             result['code'] = 1
             result['msg'] = 'Success'
+            result['campaign'] = json.dumps(campaign_dict)
     except Exception as e:
         #TODO: change to loggin
         print(e)
@@ -409,9 +419,12 @@ def pause_campaign():
 
             
             scheduler.Scheduler.safe_pause_campaign(campaign=campaign)
+            campaign.reload()
+            campaign_dict = to_json_deep_dereference(campaign)
 
             result['code'] = 1
             result['msg'] = 'Success'
+            result['campaign'] = json.dumps(campaign_dict)
     except Exception as e:
         #TODO: change to loggin
         print(e)

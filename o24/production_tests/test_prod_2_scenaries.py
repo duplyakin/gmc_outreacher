@@ -23,7 +23,13 @@ from o24.backend.utils.decors import get_token
 import string
 import random
 
+import o24.backend.scheduler.scheduler as scheduler
+
+
 TEST_USER_EMAIL = '1@email.com'
+
+def get_current_user():
+    return User.objects(email=TEST_USER_EMAIL).first()
 
 def random_num(stringLength=10):
     letters = string.ascii_lowercase
@@ -121,23 +127,26 @@ class ProdTestScenaries(unittest.TestCase):
 
         client = app.test_client()    
         with app.test_request_context():
- #LIST OUTREACH campaigns
-            url = url_for('dashboard.list_campaigns')
-            r = post_with_token(user=user, client=client, url=url, data=None)
+    #LIST OUTREACH campaigns
+            self._campaigns_list(user=user, client=client)
+    
+    #CREATE OUTREACH campaign
+            CAMPAIGN_ID = self._campaigns_create(user=user, client=client)
 
-            response_data = json.loads(r.data)
-            pprint(response_data)
-            code = response_data['code']
-            msg = response_data['msg']
-            error_message = "msg: {0}".format(msg)
-            self.assertTrue(code == 1, error_message)
+    #EDIT OUTREACH campaign
+            self._campaigns_edit(user=user, 
+                                client=client,
+                                campaign_id=CAMPAIGN_ID)
 
-        #check that campaigns are GENERAL type ONLY
-            campaigns = json.loads(response_data['campaigns'])
-            for campaign in campaigns:
-                if campaign['campaign_type'] != OUTREACH_CAMPAIGN_TYPE:
-                    error = "ERROR list_campaigns response: MUST show only OUTREACH_CAMPAIGN_TYPE campaigns, but have LINKEDIN campaign.id={0} campaign.title={1}".format(campaign.id, campaign.title)
-                    self.assertTrue(False, message)
+    #START OUTREACH campaign
+            self._campaigns_start(user=user, client=client, campaign_id=CAMPAIGN_ID)
+
+    #PAUSE OUTREACH campaign
+            self._campaigns_pause(user=user, client=client, campaign_id=CAMPAIGN_ID)
+
+    #UNASSIGN prospects and DELETE campaign
+            self._campaigns_delete(user=user, client=client, campaign_id=CAMPAIGN_ID)
+
 
     def test_2_check_admin_handlers(self):
         user = User.objects(email=TEST_USER_EMAIL).first()
@@ -168,6 +177,329 @@ class ProdTestScenaries(unittest.TestCase):
 
             #EDIT CREDENTIALS
             self._admin_credenials_edit(user=user, client=client, credentials_id=CR_ID)
+    
+    def _campaigns_delete(self, user, client, campaign_id):
+        response_data = self._campaigns_get(user=user, client=client, campaign_id=campaign_id)
+
+        #UNASSIGN_PROSPECTS
+        get_campaign = json.loads(response_data['campaign'])
+        campaign_id = get_campaign['_id']['$oid']
+
+        db_campaign = Campaign.objects(id=campaign_id).first()
+        if not db_campaign:
+            message = "NEVER HAPPENED: there is no such campaign in database id:{0}".format(campaign_id)
+            self.assertTrue(False, message)
+        
+        #TODO - change to request
+        db_prospects = Prospects.get_prospects(campaign_id=db_campaign.id)
+        if db_prospects:
+            #UNASSIGN BEFORE DELETE
+            current_user = get_current_user()
+
+            ids = [p.id for p in db_prospects]
+            scheduler.Scheduler.safe_unassign_prospects(owner_id=current_user.id,
+                                                            prospects_ids=ids)
+
+        form_data = {
+            '_campaign_id' : campaign_id,
+        }
+
+        url = url_for('dashboard.delete_campaign')
+        r = post_with_token(user=user, client=client, url=url, data=form_data)
+
+        response_data = json.loads(r.data)
+        pprint(response_data)
+        code = response_data['code']
+        msg = response_data['msg']
+        error_message = "msg: {0}".format(msg)
+        self.assertTrue(code == 1, error_message)
+    
+    #check deleted
+        deleted = Campaign.objects(id=campaign_id).first()
+        if deleted:
+            error = "Campaign didn't deleted still in a database id={0}".format(deleted.id)
+            self.assertTrue(False, error)
+        
+        return True
+
+
+    def _campaigns_pause(self, user, client, campaign_id):
+        form_data = {
+            '_campaign_id' : campaign_id,
+        }
+
+        url = url_for('dashboard.pause_campaign')
+        r = post_with_token(user=user, client=client, url=url, data=form_data)
+
+        response_data = json.loads(r.data)
+        pprint(response_data)
+        code = response_data['code']
+        msg = response_data['msg']
+        error_message = "msg: {0}".format(msg)
+        self.assertTrue(code == 1, error_message)
+
+        started = json.loads(response_data['campaign'])
+        error = "Wrong campaign started  need id:{0}  has id:{1}".format(campaign_id, started['_id']['$oid'])
+        self.assertTrue(started['_id']['$oid'] == campaign_id, error)
+
+        error = "Campaign didn't started status={0}".format(started['status'])
+        self.assertTrue(started['status'] == PAUSED, error)
+
+        return started
+
+
+    def _campaigns_start(self, user, client, campaign_id):
+        form_data = {
+            '_campaign_id' : campaign_id,
+        }
+
+        url = url_for('dashboard.start_campaign')
+        r = post_with_token(user=user, client=client, url=url, data=form_data)
+
+        response_data = json.loads(r.data)
+        pprint(response_data)
+        code = response_data['code']
+        msg = response_data['msg']
+        error_message = "msg: {0}".format(msg)
+        self.assertTrue(code == 1, error_message)
+
+        started = json.loads(response_data['campaign'])
+        error = "Wrong campaign started  need id:{0}  has id:{1}".format(campaign_id, started['_id']['$oid'])
+        self.assertTrue(started['_id']['$oid'] == campaign_id, error)
+
+        error = "Campaign didn't started status={0}".format(started['status'])
+        self.assertTrue(started['status'] == IN_PROGRESS, error)
+
+        return started
+
+
+    def _campaigns_list(self, user, client):
+        url = url_for('dashboard.list_campaigns')
+        r = post_with_token(user=user, client=client, url=url, data=None)
+
+        response_data = json.loads(r.data)
+        pprint(response_data)
+        code = response_data['code']
+        msg = response_data['msg']
+        error_message = "msg: {0}".format(msg)
+        self.assertTrue(code == 1, error_message)
+
+    #check that campaigns are GENERAL type ONLY
+        campaigns = json.loads(response_data['campaigns'])
+        for campaign in campaigns:
+            if campaign['campaign_type'] != OUTREACH_CAMPAIGN_TYPE:
+                error = "ERROR list_campaigns response: MUST show only OUTREACH_CAMPAIGN_TYPE campaigns, but have LINKEDIN campaign.id={0} campaign.title={1}".format(campaign.id, campaign.title)
+                self.assertTrue(False, message)
+
+        return campaigns
+
+    def _campaigns_data(self, user, client):
+        #get data first        
+        url = url_for('dashboard.data_campaigns')
+        r = post_with_token(user=user, client=client, url=url, data=None)
+
+        response_data = json.loads(r.data)
+        pprint(response_data)
+        code = response_data['code']
+        msg = response_data['msg']
+        error_message = "msg: {0}".format(msg)
+        self.assertTrue(code == 1, error_message)
+
+        try:
+            funnels = json.loads(response_data['funnels'])
+            
+            #CHECK THAT FUNNELS of OUTREACH TYPE ONLY
+            for funnel in funnels:
+                if funnel['funnel_type'] != GENERAL_FUNNEL_TYPE:
+                    message = "_campaings_data ERROR: shour response only with GENERAL_FUNNEL_TYPE but has:{0}".format(funnel['funnel_type'])
+                    self.assertTrue(False, message)
+                    break
+        except Exception as e:
+            message = "BAD TEST DATA _campaings_data: there are no funnels for campaigns: {0}".format(str(e))
+            self.assertTrue(False, message)
+
+
+        try:
+            lists = json.loads(response_data['lists'])
+        except Exception as e:
+            message = "BAD TEST DATA _campaings_data: there are no prospect lists for campaigns: {0}".format(str(e))
+            self.assertTrue(False, message)
+
+        try:
+            credentials = json.loads(response_data['credentials'])
+        except Exception as e:
+            message = "BAD TEST DATA _campaings_data: there are no credentials for campaigns: {0}".format(str(e))
+            self.assertTrue(False, message)
+
+        try:
+            modified_fields = json.loads(response_data['modified_fields'])
+        except Exception as e:
+            message = "BAD TEST DATA _campaings_data: there are no modified_fields for campaigns: {0}".format(str(e))
+            self.assertTrue(False, message)
+
+        try:
+            columns = json.loads(response_data['columns'])
+        except Exception as e:
+            message = "BAD TEST DATA _campaings_data: there are no columns for campaigns: {0}".format(str(e))
+            self.assertTrue(False, message)
+
+
+        return response_data
+
+    def _campaigns_get(self, user, client, campaign_id):
+    #get first
+        form_data = {
+            '_campaign_id' : campaign_id
+        }
+        url = url_for('dashboard.get_campaign_by_id')
+        r = post_with_token(user=user, client=client, url=url, data=form_data)
+
+        response_data = json.loads(r.data)
+        code = response_data['code']
+        msg = response_data['msg']
+        error_message = "msg: {0}".format(msg)
+        self.assertTrue(code == 1, error_message)
+
+    #check campaign id
+        get_campaign = json.loads(response_data['campaign'])
+        pprint(get_campaign)
+        
+        modified_fields = json.loads(response_data['modified_fields'])
+        self.assertTrue(modified_fields, "returned empty modified fields")
+
+        
+        message = "Get wrong campaign id {0}".format(get_campaign['_id']['$oid'])
+        self.assertTrue(get_campaign['_id']['$oid'] == campaign_id, message)
+
+        return response_data
+
+    def _campaigns_edit(self, user, client, campaign_id, req_dict=None):
+
+        response_data = self._campaigns_get(user=user, client=client, campaign_id=campaign_id)        
+
+        modified_fields = response_data['modified_fields']
+        get_campaign = json.loads(response_data['campaign'])
+
+    #then edit
+        _req_dict = None
+        if req_dict:
+            _req_dict = req_dict
+        else:
+            _req_dict = CAMPAIGNS_EDIT
+            _req_dict['title'] = _req_dict['title'].format(random_num())
+        
+        json_create_data = json.dumps(_req_dict)
+        form_data = {
+            '_campaign_id' : get_campaign['_id']['$oid'],
+            '_add_campaign' : json_create_data,
+            '_modified_fields' : modified_fields
+        }
+        
+        url = url_for('dashboard.edit_campaign')
+        r = post_with_token(user=user, client=client, url=url, data=form_data)
+
+        response_data = json.loads(r.data)
+        code = response_data['code']
+        msg = response_data['msg']
+        error_message = "msg: {0}".format(msg)
+        self.assertTrue(code == 1, error_message)
+
+        updated_campaign = json.loads(response_data['updated'])
+        pprint(updated_campaign)
+        self.assertTrue(updated_campaign['_id']['$oid'] == get_campaign['_id']['$oid'], "Updated campaign ID not equal get campaign ID")
+        
+        #compare fields
+        for k,v in _req_dict.items():
+            if k == 'templates':
+                continue
+
+            if k == 'from_hour' or k == 'to_hour':
+                v = int(v.split(':')[0])
+
+            u_v = updated_campaign[k]
+            error = "Error update key:{0} need:{1}  has:{2}".format(k, v, u_v)
+            self.assertTrue(v == u_v, error)
+        
+        return updated_campaign
+
+
+    def _campaigns_create(self, user, client, req_dict=None):
+        
+        response_data = self._campaigns_data(user=user, client=client)
+
+        funnels = json.loads(response_data['funnels'])
+        #select funnels with both mediums
+        with_funnel = None
+        for f in funnels:
+            root = f.get('root', '')
+            if root:
+                templates = f.get('templates_required', '')
+                
+                email = templates.get('email', '')
+                linkedin = templates.get('linkedin', '')
+                
+                if email and linkedin:
+                    with_funnel = f
+                    break
+
+        if with_funnel is None:
+            self.assertTrue(False, "BAD TEST DATA: can't find funnel with 2 mediums")
+
+        credentials = json.loads(response_data['credentials'])
+        #select credentials for 2 mediums
+        with_linkedin = None
+        with_email = None
+        for c in credentials:
+            if c.get('medium') == 'email':
+                with_email = c
+            elif c.get('medium') == 'linkedin':
+                with_linkedin = c
+
+
+            if with_email and with_linkedin:
+                break
+
+        if with_linkedin is None or with_email is None:
+            self.assertTrue(False, "BAD TEST DATA: can't find credentials for 2 mediums")
+
+
+        _req_dict = None
+        if req_dict:
+            _req_dict = req_dict
+        else:
+            _req_dict = CAMPAIGNS_CREATE
+            _req_dict['title'] = _req_dict['title'].format(random_num())
+            _req_dict['credentials'].append(with_linkedin)
+            _req_dict['credentials'].append(with_email)
+
+            _req_dict['funnel'] = with_funnel
+
+            lists = json.loads(response_data['lists'])
+            _req_dict['list_selected'] = lists[0]
+
+        json_create_data = json.dumps(_req_dict)
+        form_data = {
+            '_add_campaign' : json_create_data,
+        }
+        
+        url = url_for('dashboard.create_campaign')
+        r = post_with_token(user=user, client=client, url=url, data=form_data)
+
+        response_data = json.loads(r.data)
+        code = response_data['code']
+        msg = response_data['msg']
+        error_message = "msg: {0}".format(msg)
+        self.assertTrue(code == 1, error_message)
+
+    #check campaign type
+        added = json.loads(response_data['added'])
+        pprint(added)
+        message = "Created wrong campaigntype {0}".format(added['campaign_type'])
+        self.assertTrue(added['campaign_type'] == OUTREACH_CAMPAIGN_TYPE, message)
+        
+        return added['_id']['$oid']
+
+
 
     def _delete_linkedin_campaign(self, user, client, campaign_id):
         form_data = {

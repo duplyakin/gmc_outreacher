@@ -32,13 +32,14 @@ def template_key_dict(js_templates):
         plain = {}
         for template in email_templates:
             template_key = template.get('template_key')
-            res['email'][template_key] = template
+            if template_key:
+                res['email'][template_key] = template
 
-            html = convert_email_template_to_plain(template)
-            if html is not None:
-                plain[template_key] = html
+                html = convert_email_template_to_plain(template)
+                if html is not None:
+                    plain[template_key] = html
 
-        res['email']['plain'] = plain
+        res['plain'] = plain
 
     linkedin_templates = js_templates.get('linkedin','')
     if linkedin_templates:

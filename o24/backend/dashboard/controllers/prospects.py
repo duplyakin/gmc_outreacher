@@ -291,7 +291,9 @@ def unassign_prospect():
     }
     if request.method == 'POST':
         try:
-            raw_data = request.form['_unassign']
+            raw_data = request.form.get('_unassign', '')
+            if not raw_data:
+                raise Exception("Bad _unassign parameter")
 
             js_data = json.loads(raw_data)
             if type(js_data) != list:
