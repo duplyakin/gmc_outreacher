@@ -61,7 +61,7 @@ let taskQueueSchema = new Schema({
 
   credentials_dict : Object,
 
-  credentials_id : Number,
+  credentials_id : mongoose.ObjectId,
 
   result_data : Object,
 

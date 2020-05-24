@@ -4,8 +4,8 @@ const action = require(__dirname + '/action.js');
 const MyExceptions = require(__dirname + '/../.././exceptions/exceptions.js');
 
 class MessageCheckAction extends action.Action {
-  constructor(email, password, cookies, url) {
-    super(email, password, cookies);
+  constructor(email, password, cookies, credentials_id, url) {
+    super(email, password, cookies, credentials_id);
 
     // CONNECT URL
     this.url = url;

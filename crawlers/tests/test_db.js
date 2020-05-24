@@ -14,7 +14,8 @@ const MY_URL = "https://www.linkedin.com/in/grigoriy-polyanitsin/";
     input_data: {
       credentials_data: {
         email: "grinnbob@rambler.ru",
-        password: "linked123",
+        password: "",
+        li_at: "AQEDARcxwXEBb18zAAABcflw5z8AAAFyHX1rP00AVzV1p6dd9IpqrPbIfjq5ajRuaeHm8ZvSGYaQccRo1fX80kr0WHCDWLOvuPfz-uiAn-dw631pZyHV2ZdU66bPPX4J--EXfE0IxqwMYTi8bIiWfL8U"
       },
       campaign_data: {
         next_url: SEARCH_URL,
@@ -30,8 +31,11 @@ const MY_URL = "https://www.linkedin.com/in/grigoriy-polyanitsin/";
         company_title: 'howtotoken.com',
         linkedin: CONNECT_URL,
       }
-    }
+    },
+    credentials_id: '507f1f77bcf86cd799439011',
   };
+
+  //task = JSON.stringify(task);
 
   //await workers.loginWorker(task);
   await workers.searchWorker(task);

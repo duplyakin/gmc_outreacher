@@ -4,8 +4,8 @@ const action = require(__dirname + '/action.js');
 const MyExceptions = require(__dirname + '/../.././exceptions/exceptions.js');
 
 class SearchAction extends action.Action {
-  constructor(email, password, cookies, searchUrl, page_count) {
-    super(email, password, cookies);
+  constructor(email, password, cookies, credentials_id, searchUrl, page_count) {
+    super(email, password, cookies, credentials_id);
 
     this.searchUrl = searchUrl;
     this.page_count = page_count;

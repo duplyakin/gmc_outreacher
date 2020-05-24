@@ -3,11 +3,11 @@ let mongoose = mongooseConnect.mongoose;
 let Schema = mongoose.Schema;
 
 let cookiesSchema = new Schema({
-    username : String,
+    credentials_id : mongoose.ObjectId,
 
     expires : Number,
 
-    data : Object,
+    data : Array,
 });
 
 module.exports = {

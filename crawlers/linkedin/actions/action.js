@@ -4,10 +4,11 @@ const LoginAction = require(__dirname + '/loginAction.js');
 const MyExceptions = require(__dirname + '/../.././exceptions/exceptions.js');
 
 class Action {
-  constructor(email, password, cookies) {
+  constructor(email, password, cookies, credentials_id) {
     this.email = email;
     this.password = password;
     this.cookies = cookies;
+    this.credentials_id = credentials_id;
   }
 
   async startBrowser() {
@@ -36,13 +37,14 @@ class Action {
   // do 1 trie to connect URL or goto login
   async gotoChecker(url) {
     try {
+      //console.log(url)
       await this.page.goto(url);
       let current_url = await this.page.url();
 
       if (current_url !== url) {
         if (current_url.includes('login') || current_url.includes('signup')) {
 
-          let loginAction = new LoginAction.LoginAction(this.email, this.password, this.cookies);
+          let loginAction = new LoginAction.LoginAction(this.email, this.password, this.cookies, this.credentials_id);
           await loginAction.setContext(this.context);
 
           let result = await loginAction.login();

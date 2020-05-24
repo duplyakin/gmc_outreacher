@@ -5,8 +5,8 @@ const action = require(__dirname + '/action.js');
 const MyExceptions = require(__dirname + '/../.././exceptions/exceptions.js');
 
 class ConnectCheckAction extends action.Action {
-  constructor(email, password, cookies, prospect_full_name) {
-    super(email, password, cookies);
+  constructor(email, password, cookies, credentials_id, prospect_full_name) {
+    super(email, password, cookies, credentials_id);
 
     this.prospect_full_name = prospect_full_name;
   }
