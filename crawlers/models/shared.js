@@ -17,11 +17,25 @@ let actionSchema = new Schema({
 
 let funnelSchema = new Schema({
     action : {
-      type: Schema.Types.ObjectId,
+      type: mongoose.ObjectId,
       ref: 'Action',
     },
 
     paramters : Object,
+
+    funnel_type : {
+      type: Number,
+      default: 0,
+    },
+
+    title : String,
+
+    templates_required : Object,
+
+    template_key : {
+      type: String,
+      default: '',
+    },
 
     root : {
       type: Boolean,
@@ -38,12 +52,12 @@ let funnelSchema = new Schema({
       default: null,
     },
 
-    template : Object,
+    data : Object,
 });
 
 let taskQueueSchema = new Schema({
   current_node : {
-    type: Schema.Types.ObjectId,
+    type: mongoose.ObjectId,
     ref: 'Funnel',
   },
 
@@ -59,18 +73,23 @@ let taskQueueSchema = new Schema({
     default: 0,
   },
 
-  credentials_dict : Object,
+  next_round : {
+    type: Date,
+    default: 0,
+  },
 
-  credentials_id : mongoose.ObjectId,
+  input_data : Object,
 
   result_data : Object,
 
+  credentials_id : mongoose.ObjectId,
+
   prospect_id : {
-    type: Number,
+    type: mongoose.ObjectId,
     unique: true,
   },
 
-  campaign_id : Number,
+  campaign_id : mongoose.ObjectId,
 
   record_type : {
     type: Number,
@@ -81,36 +100,29 @@ let taskQueueSchema = new Schema({
     type: Number,
     default: 0,
   },
-
+/*
   js_action : {
     type: Boolean,
     default: false,
   },
+  */
 });
 
-let asyncActionsSchema = new Schema({
-  // open, reply
-  action_type : Number,
+let asyncTaskQueueSchema = new Schema({
+  campaign_id : {
+    type: mongoose.ObjectId,
+    unique: true,
+  },
+  
+  input_data : Object,
 
-  count : Number,
-
-  // email, linkedin, twitter
-  medium : String,
-
-  // based on medium, check different tables: Mailbox, Linkedin, Twitter
-  ref : Number,
-
-  action_meta : Object,
-
-  created : {
-    type: Date,
-    default: Date.now,
-  }
+  result_data : Object,
+  
 });
 
 module.exports = {
    Action : mongoose.model('Action', actionSchema),
    Funnel : mongoose.model('Funnel', funnelSchema),
    TaskQueue : mongoose.model('TaskQueue', taskQueueSchema),
-   AsyncActions : mongoose.model('AsyncActions', asyncActionsSchema),
+   AsyncTaskQueue : mongoose.model('AsyncActions', asyncTaskQueueSchema),
 }

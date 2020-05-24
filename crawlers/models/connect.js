@@ -1,7 +1,7 @@
 // Импортировать модуль mongoose
 var mongoose = require(__dirname + '/../node_modules/mongoose');
 // Установим подключение по умолчанию
-var mongoDB = 'mongodb://127.0.0.1/my_database';
+var mongoDB = 'mongodb://127.0.0.1:27017/O24Mc-test'; // TODO: add TEST/PROD connection
 
 mongoose.connect(mongoDB, function (err) {
  if (err) throw err;

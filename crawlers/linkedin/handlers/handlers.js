@@ -52,8 +52,7 @@ async function bullConsumer() {
           break;
 */
         default:
-          console.log("..... Incorrect task.action_key .....: ", job.data.action_key);
-          // throw exception ?
+          break;
       }
     } catch (err) {
       let err_result = {
@@ -72,7 +71,7 @@ async function bullConsumer() {
 async function taskStatusListener() {
   // start cron every minute
   cron.schedule("* * * * *", () => {
-    let tasks = await taskModel.TaskQueue.find({ status: 1, js_action: true }, function (err, res) {
+    let tasks = await taskModel.TaskQueue.find({ status: 1 }, function (err, res) {
       if (err) throw MyExceptions.MongoDBError('MongoDB find err: ' + err);
     });
     if (Array.isArray(tasks) && tasks.length !== 0) {

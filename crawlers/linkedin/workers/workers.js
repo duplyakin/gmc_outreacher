@@ -74,11 +74,12 @@ function serialize_data(task_data, task) {
 }
 
 
+// todo: delete it...
 async function loginWorker(task_id) {
   try {
-    /*let task = await taskModel.TaskQueue.findOne({ id: task_id }, function (err, res) {
+    let task = await taskModel.TaskQueue.findOne({ id: task_id }, function (err, res) {
       if (err) throw MyExceptions.MongoDBError('MongoDB find TASK err: ' + err);
-    });*/
+    });
     let task = task_id.input_data;
     let credentials_id = task_id.credentials_id;
 
