@@ -27,6 +27,7 @@ module.exports.SKIP_PHONE_BTN_SELECTOR = '.secondary-action';
 
 // message
 module.exports.WRITE_MSG_BTN_SELECTOR = '.message-anywhere-button.pv-s-profile-actions.pv-s-profile-actions--message';
+module.exports.WRITE_MSG_BTN_DISABLED_SELECTOR = '.artdeco-button.artdeco-button--2.artdeco-button--secondary.ember-view';
 module.exports.CLOSE_MSG_BOX_SELECTOR = '.msg-overlay-bubble-header';
 module.exports.MSG_BOX_SELECTOR = '.msg-form__msg-content-container';
 module.exports.SEND_MSG_BTN_SELECTOR = '.msg-form__send-button';

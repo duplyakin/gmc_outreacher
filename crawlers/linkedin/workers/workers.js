@@ -77,9 +77,10 @@ function serialize_data(task_data, task) {
 // todo: delete it...
 async function loginWorker(task_id) {
   try {
+    /*
     let task = await taskModel.TaskQueue.findOne({ id: task_id }, function (err, res) {
       if (err) throw MyExceptions.MongoDBError('MongoDB find TASK err: ' + err);
-    });
+    });*/
     let task = task_id.input_data;
     let credentials_id = task_id.credentials_id;
 
@@ -173,13 +174,14 @@ async function loginWorker(task_id) {
   }
 }
 
+
 async function searchWorker(task_id) {
   try {
-    /*let task = await taskModel.TaskQueue.findOne({ id: task_id }, function (err, res) {
+    let task = await taskModel.TaskQueue.findOne({ id: task_id }, function (err, res) {
       if (err) throw MyExceptions.MongoDBError('MongoDB find err: ' + err);
-    });*/
-    let task = task_id.input_data;
-    let credentials_id = task_id.credentials_id;
+    });
+    task = task.input_data;
+    let credentials_id = task.credentials_id;
 
     let task_data = {
       credentials_data: {
@@ -235,13 +237,14 @@ async function searchWorker(task_id) {
   }
 }
 
+
 async function connectWorker(task_id) {
   try {
-    /*let task = await taskModel.TaskQueue.findOne({ id: task_id }, function (err, res) {
+    let task = await taskModel.TaskQueue.findOne({ id: task_id }, function (err, res) {
       if (err) throw MyExceptions.MongoDBError('MongoDB find err: ' + err);
-    });*/
-    let task = task_id.input_data;
-    let credentials_id = task_id.credentials_id;
+    });
+    task = task.input_data;
+    let credentials_id = task.credentials_id;
 
     let task_data = {
       credentials_data: {
@@ -323,11 +326,11 @@ async function connectWorker(task_id) {
 
 async function messageWorker(task_id) {
   try {
-    /*let task = await taskModel.TaskQueue.findOne({ id: task_id }, function (err, res) {
+    let task = await taskModel.TaskQueue.findOne({ id: task_id }, function (err, res) {
       if (err) throw MyExceptions.MongoDBError('MongoDB find err: ' + err);
-    });*/
-    let task = task_id.input_data;
-    let credentials_id = task_id.credentials_id;
+    });
+    task = task.input_data;
+    let credentials_id = task.credentials_id;
 
     let task_data = {
       credentials_data: {
@@ -413,11 +416,11 @@ async function messageWorker(task_id) {
 
 async function scribeWorker(task_id) {
   try {
-    /*let task = await taskModel.TaskQueue.findOne({ id: task_id }, function (err, res) {
+    let task = await taskModel.TaskQueue.findOne({ id: task_id }, function (err, res) {
       if (err) throw MyExceptions.MongoDBError('MongoDB find err: ' + err);
-    });*/
-    let task = task_id.input_data;
-    let credentials_id = task_id.credentials_id;
+    });
+    task = task.input_data;
+    let credentials_id = task.credentials_id;
 
     let task_data = {
       credentials_data: {
@@ -480,13 +483,11 @@ async function scribeWorker(task_id) {
 
 async function messageCheckWorker(task_id) {
   try {
-    /*let task = await taskModel.TaskQueue.findOne({ id: task_id }, function (err, res) {
+    let task = await taskModel.TaskQueue.findOne({ id: task_id }, function (err, res) {
       if (err) throw MyExceptions.MongoDBError('MongoDB find err: ' + err);
-    });*/
-    let task = task_id.input_data;
-    let credentials_id = task_id.credentials_id;
-
-    let url = task.input_data.prospect_data.linkedin;
+    });
+    task = task.input_data;
+    let credentials_id = task.credentials_id;
 
     let task_data = {
       credentials_data: {
@@ -549,11 +550,11 @@ async function messageCheckWorker(task_id) {
 
 async function connectCheckWorker(task_id) {
   try {
-    /*let task = await taskModel.TaskQueue.findOne({ id: task_id }, function (err, res) {
+    let task = await taskModel.TaskQueue.findOne({ id: task_id }, function (err, res) {
       if (err) throw MyExceptions.MongoDBError('MongoDB find err: ' + err);
-    });*/
-    let task = task_id.input_data;
-    let credentials_id = task_id.credentials_id;
+    });
+    task = task.input_data;
+    let credentials_id = task.credentials_id;
 
     let task_data = {
       credentials_data: {

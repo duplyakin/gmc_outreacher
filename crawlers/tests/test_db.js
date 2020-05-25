@@ -2,7 +2,7 @@ const workers = require(__dirname + '/../linkedin/workers/workers.js');
 
 
 const SEARCH_URL = "https://www.linkedin.com/search/results/all/?keywords=acronis&origin=GLOBAL_SEARCH_HEADER&page=97";
-const CONNECT_URL = "https://www.linkedin.com/in/kirill-shilov-25aa8630/";
+const CONNECT_URL = "https://www.linkedin.com/in/bersheva/";
 const MY_URL = "https://www.linkedin.com/in/grigoriy-polyanitsin/";
 
 // test running
@@ -23,11 +23,11 @@ const MY_URL = "https://www.linkedin.com/in/grigoriy-polyanitsin/";
       },
       template_data: {
         subject: '',
-        body: 'Hi {first_name}, nice to meet you. {first_name} 111 {first{first_name}_name} hi {ololo }',
+        body: 'Hi {first_name}, nice to meet you.',
       },
       prospect_data: {
-        first_name: 'Kirill',
-        last_name: 'Shilov',
+        first_name: 'Olga',
+        last_name: '',
         company_title: 'howtotoken.com',
         linkedin: CONNECT_URL,
       }

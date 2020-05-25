@@ -30,7 +30,7 @@ class ScribeAction extends action.Action {
     }, selector);
 
     if (link === null || typeof link === undefined) {
-      console.log("..... link-null: .....", link)
+      //console.log("..... link-null: .....", link)
       return result;
     }
     result.company_linkedin_page = link;
@@ -51,12 +51,12 @@ class ScribeAction extends action.Action {
 
     //console.log("..... link: .....", link)
     if (job_link === undefined || job_link === null) {
-      console.log("..... job_link not found: .....", job_link)
-      console.log("..... result: .....", result);
+      //console.log("..... job_link not found: .....", job_link)
+      //console.log("..... result: .....", result);
       return result;
     }
     result.company_url = job_link;
-    console.log("..... result: .....", result);
+    //console.log("..... result: .....", result);
     return result;
   }
 }

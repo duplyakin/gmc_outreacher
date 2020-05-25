@@ -17,14 +17,22 @@ class MessageAction extends action.Action {
 
     const page = await this.context.newPage();  // feature (critical)
     await page.goto(this.url);
+
     //TODO: add logic for 'closed' for message accounts
 
-    // close messages box !!! (not critical here, but XZ ETOT LINKED)
-    await page.waitFor(1000);  // wait linkedIn loading process
-    await page.click(selectors.CLOSE_MSG_BOX_SELECTOR);
-    await page.waitFor(1000);  // wait linkedIn loading process
+    try {
+      // close messages box !!! (not critical here, but XZ ETOT LINKED)
+      await page.waitFor(1000);  // wait linkedIn loading process
+      await page.click(selectors.CLOSE_MSG_BOX_SELECTOR);
+      await page.waitFor(1000);  // wait linkedIn loading process
+    } catch (err) {
+      console.log("..... CLOSE_MSG_BOX_SELECTOR not found .....")
+    }
 
-    await page.click(selectors.WRITE_MSG_BTN_SELECTOR);
+    if (await this.page.$(selectors.WRITE_MSG_BTN_SELECTOR) === null) {
+      console.log('You can\'t write messages to ' + this.url);
+      return false; 
+    }
 
     await page.waitForSelector(selectors.MSG_BOX_SELECTOR, { timeout: 5000 });
     await page.click(selectors.MSG_BOX_SELECTOR);

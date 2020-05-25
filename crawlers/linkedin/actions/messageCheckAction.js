@@ -14,12 +14,21 @@ class MessageCheckAction extends action.Action {
   async messageCheck() {
     await super.gotoChecker(this.url);
 
-    await this.page.waitForSelector(selectors.WRITE_MSG_BTN_SELECTOR, { timeout: 5000 });
+    try {
+      // close messages box !!! (critical here)
+      await this.page.waitFor(1000);  // wait linkedIn loading process
+      await this.page.click(selectors.CLOSE_MSG_BOX_SELECTOR);
+      await this.page.waitFor(1000);  // wait linkedIn loading process
+    } catch (err) {
+      console.log("..... CLOSE_MSG_BOX_SELECTOR not found .....")
+    }
 
-    // close messages box !!! (critical here)
-    await this.page.waitFor(1000);  // wait linkedIn loading process
-    await this.page.click(selectors.CLOSE_MSG_BOX_SELECTOR);
-    await this.page.waitFor(1000);  // wait linkedIn loading process
+    if (await this.page.$(selectors.WRITE_MSG_BTN_SELECTOR) === null) {
+      console.log('You can\'t write messages to ' + this.url);
+      return { message: '' }; // TODO: send (code = ...) here in result_data
+    }
+
+    await this.page.waitForSelector(selectors.WRITE_MSG_BTN_SELECTOR, { timeout: 5000 });
 
     await this.page.click(selectors.WRITE_MSG_BTN_SELECTOR);
     let mySelectors = {
