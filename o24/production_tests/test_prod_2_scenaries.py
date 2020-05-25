@@ -113,7 +113,7 @@ class ProdTestScenaries(unittest.TestCase):
             self._campaigns_edit(user=user, 
                                 client=client,
                                 campaign_id=CAMPAIGN_ID)
-
+                                
     #START OUTREACH campaign
             self._campaigns_start(user=user, client=client, campaign_id=CAMPAIGN_ID)
 
@@ -460,7 +460,7 @@ class ProdTestScenaries(unittest.TestCase):
             
             if not list_selected:
                 self.assertTrue(False, "BROKEN TEST DATA: There is no lists with free prospects for this user")
-                
+
             _req_dict['list_selected'] = list_selected
 
         json_create_data = json.dumps(_req_dict)

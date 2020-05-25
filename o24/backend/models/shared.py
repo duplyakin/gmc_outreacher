@@ -5,6 +5,7 @@ from o24.globals import *
 import o24.backend.dashboard.models as models 
 from mongoengine.queryset.visitor import Q
 from datetime import datetime
+from dateutil.parser import parse
 import pytz
 
 class Action(db.Document):
@@ -192,7 +193,7 @@ class TaskQueue(db.Document):
     status = db.IntField(default=NEW)
     ack = db.IntField(default=0)
 
-    next_round = db.DateTimeField(default=0)
+    next_round = db.DateTimeField(default=parse("1980-05-25T16:31:37.436Z"))
 
     input_data = db.DictField()
     result_data = db.DictField()
@@ -349,16 +350,6 @@ class TaskQueue(db.Document):
         self.status = FINISHED
         self._commit()
 
-    def get_email_data(self):
-        result = {}
-        prospect = models.Prospects.objects(id=self.prospect_id).get()
-        campaign = models.Campaign.objects(id=self.campaign_id).get()
-
-        result['template'] = campaign.get_node_template(template_key=self.current_node.template_key,
-                                                        medium='email')
-        result['email_to'] = prospect.get_email()
-        
-        return result
 
     def get_code(self):
         return self.result_data.get('code', None)

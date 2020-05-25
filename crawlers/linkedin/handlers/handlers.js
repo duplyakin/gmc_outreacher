@@ -70,12 +70,12 @@ async function bullConsumer() {
 
 async function taskStatusListener() {
   // start cron every minute
-  cron.schedule("* * * * *", () => {
+  cron.schedule("* * * * *", async () => {
     let tasks = await taskModel.TaskQueue.find({ status: 1 }, function (err, res) {
       if (err) throw MyExceptions.MongoDBError('MongoDB find err: ' + err);
     });
     if (Array.isArray(tasks) && tasks.length !== 0) {
-      tasks.forEach((task) => {
+      tasks.forEach(async (task) => {
         let data = {
           task_id: task.id,
           action_key: task.action_key,

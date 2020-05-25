@@ -212,6 +212,9 @@ class Credentials(db.Document):
     current_daily_counter = db.IntField(default=0)
     current_hourly_counter = db.IntField(default=0) #NOT USED
 
+    #FOR test purpose only
+    test_title = db.StringField(default='')
+
     @classmethod
     def ready_ids(cls, utc_now):
         #ids = [p.get('_id') for p in cls.objects(next_action__lte=utc_now).only('id').all().as_pymongo()]
@@ -660,6 +663,14 @@ class Campaign(db.Document):
             return {}
         
         template_data = templates_for_medium.get(template_key, {})
+        
+        #check if plain exist
+        plain = self.templates.get('plain', None)
+        if plain:
+            plain_for_key = plain.get(template_key, None)
+            if plain_for_key:
+                template_data['plain'] = plain_for_key
+
         return template_data
 
     def get_node_template(self, template_key, medium):

@@ -16,7 +16,7 @@ def random_num(stringLength=10):
     letters = string.ascii_lowercase
     return ''.join(random.choice(letters) for i in range(stringLength))
 
-def post_with_token(user, client, url, data):
+def post_with_token(user, client, url, data, follow_redirects=False):
     token = get_token(user)
     headers = {
         'Authorization': 'Bearer {0}'.format(token)
@@ -26,8 +26,8 @@ def post_with_token(user, client, url, data):
     
     r = None
     if data:        
-        r = client.post(url, data=data, content_type='multipart/form-data', headers=headers, follow_redirects=False)
+        r = client.post(url, data=data, content_type='multipart/form-data', headers=headers, follow_redirects=follow_redirects)
     else:
-        r = client.post(url, content_type='multipart/form-data', headers=headers, follow_redirects=False)
+        r = client.post(url, content_type='multipart/form-data', headers=headers, follow_redirects=follow_redirects)
 
     return r

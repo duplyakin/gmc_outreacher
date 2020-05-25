@@ -116,3 +116,4 @@ SEARCH_ACTION_ERROR = -1070 #Can't open the next page, need to wait maybe becaus
 CARRYOUT_SEARCH_ACTION_PAGES_FINISHED = 1000 #we have reached the last page for this search
 SUCCESS_CODE = 2000
 DELAY_FINISHED_CODE = 1001
+EMAIL_HAS_RESPONSE = 10000

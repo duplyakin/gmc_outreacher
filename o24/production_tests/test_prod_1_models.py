@@ -56,6 +56,22 @@ class TestUsersCampaignsProspects(unittest.TestCase):
                                         new_data=new_data)
                 self.assertTrue(new_credentials is not None, "new_credentials is None")
 
+        test_credentials = TEST_CREDENTIALS
+        for k,v in test_credentials.items():
+            owner = User.get_user(v.get('owner'))
+            self.assertEqual(owner.email, v.get('owner'), "Wrong user email")
+
+            medium = v.get('medium')
+            new_data = v.get('data')
+            new_credentials = Credentials.create_credentials(owner=owner,
+                                    medium=medium,
+                                    new_data=new_data)
+            self.assertTrue(new_credentials is not None, "new_credentials is None")
+            
+            new_credentials.test_title = k
+            new_credentials._commit()
+
+
         actions = ACTIONS
         for action in actions:
             new_action = Action.create_action(action)
@@ -83,20 +99,27 @@ class TestUsersCampaignsProspects(unittest.TestCase):
 
             mediums = campaign.get('medium')
             credentials = []
-            for medium in mediums:
-                cred = Credentials.get_credentials(user_id=db_user.id,
-                                                            medium=medium)
-                self.assertTrue(cred is not None, "credentials is None")
+            
+            custom_credentials = campaign.get('credentials', None)
+            if custom_credentials:
+                cred = Credentials.objects(test_title=custom_credentials).first()
+                if not cred:
+                    error_message = "BAD TEST DATA: can't find credentials with test_title={0}".format(custom_credentials)
+                    self.assertTrue(False, error_message)
                 credentials.append(cred.id)
+
+            else:
+                for medium in mediums:
+                    cred = Credentials.get_credentials(user_id=db_user.id,
+                                                                medium=medium)
+                    self.assertTrue(cred is not None, "credentials is None")
+                    credentials.append(cred.id)
             
             data = {}
             data['funnel'] = funnel.id
             data['credentials'] = credentials
             data['title'] = campaign.get('title','')
             data['data'] = {
-                'funnel_title': funnel.title,
-                'prospects_list' : '',
-                'account' : ''
             }
 
             new_campaign = Campaign.create_campaign(data, owner=db_user.id)
