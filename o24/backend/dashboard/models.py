@@ -1270,8 +1270,6 @@ class Prospects(db.Document):
             else:
                 prod_data[key] = val
         
-        new_prospect.data = prod_data
-
         #DEPRECATED FIELDS USED BY TEST - need to remove
         if campaign_id:
             new_prospect.assign_to = campaign_id

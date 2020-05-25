@@ -73,7 +73,14 @@ class TestUsersCampaignsProspects(unittest.TestCase):
 
             funnel = Funnel.get_random()
             self.assertTrue(funnel is not None, "can't get_random funnel")
-            
+
+            funnel_title = campaign.get('funnel', None)
+            if funnel_title:
+                funnel = Funnel.objects(title=funnel_title).first()
+                message = "can't get funnel by title:{0}".format(funnel_title)
+                self.assertTrue(funnel is not None, message)
+
+
             mediums = campaign.get('medium')
             credentials = []
             for medium in mediums:
@@ -115,38 +122,52 @@ class TestUsersCampaignsProspects(unittest.TestCase):
                 campaign = Campaign.get_campaign(title=prospect.get('assign_to'))
                 self.assertTrue(campaign is not None, "No such campaign title: {0}".format(prospect.get('assign_to')))
 
-            amount = prospect.get('amount')
-            email_name = prospect.get('email_name')
-            email_domain = prospect.get('email_domain')
-            email = email_name + email_domain
-            
-            l = prospect.get('assign_to_list', '')
-            prospects_list = ProspectsList.objects(owner=owner.id, title=l).first()
-
-
-            list_id = None
-            if prospects_list:
-                list_id = prospects_list.id
-            count = 1
-            for i in range(amount):
-                linkedin = 'http://linkedin.com/u'+ email_name + str(count)
-                data = {
-                    'email' : email,
-                    'linkedin' : linkedin
-                }
+            amount = prospect.get('amount', None)
+            if amount:
+                email_name = prospect.get('email_name')
+                email_domain = prospect.get('email_domain')
+                email = email_name + email_domain
                 
-                campaign_id=None
-                if campaign:
-                    campaign_id = campaign.id
+                l = prospect.get('assign_to_list', '')
+                prospects_list = ProspectsList.objects(owner=owner.id, title=l).first()
+
+
+                list_id = None
+                if prospects_list:
+                    list_id = prospects_list.id
+                count = 1
+                for i in range(amount):
+                    linkedin = 'http://linkedin.com/u'+ email_name + str(count)
+                    data = {
+                        'email' : email,
+                        'linkedin' : linkedin
+                    }
+                    
+                    campaign_id=None
+                    if campaign:
+                        campaign_id = campaign.id
+                    new_prospect = Prospects.create_prospect(owner_id=owner.id,
+                                                            campaign_id=campaign_id,
+                                                            list_id=list_id,
+                                                            data=data)
+                    self.assertTrue(new_prospect is not None, "Can't create prospect")
+
+                    email = email_name + '+' + str(count) + email_domain
+                    count = count + 1
+            else:
+                l = prospect.get('assign_to_list', '')
+                prospects_list = ProspectsList.objects(owner=owner.id, title=l).first()
+
+                list_id = None
+                if prospects_list:
+                    list_id = prospects_list.id
+                
+                data = prospect.get('data')
                 new_prospect = Prospects.create_prospect(owner_id=owner.id,
-                                                        campaign_id=campaign_id,
+                                                        campaign_id=campaign.id,
                                                         list_id=list_id,
                                                         data=data)
-                self.assertTrue(new_prospect is not None, "Can't create prospect")
-
-                email = email_name + '+' + str(count) + email_domain
-                count = count + 1
-
+     
 
         for setting in GOOGLE_APP_SETTINGS:
             s = GoogleAppSetting()

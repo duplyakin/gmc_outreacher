@@ -14,25 +14,15 @@ from pprint import pprint
 from bson.objectid import ObjectId
 
 from o24.backend.google.models import GoogleAppSetting
-from o24.production_tests.create_data import *
 
-ERRORS = [
-    {
-        "status" : -1
-    }
-]
+from o24.production_tests.test_data import *
+from o24.production_tests.utils import *
 
-class SchedulerTest(unittest.TestCase):
+
+class RealSequenceTest(unittest.TestCase):
     def setUp(self):
         pass
 
-    def test_0_errors(self):
-        while True:
-
-            #Here we handle IN_PROGRESS and set ERRORS
-            tasks = TaskQueue.objects(status=IN_PROGRESS)
-            for task in tasks:
-                task.status = -1
 
 
 def setUpModule():
@@ -44,9 +34,6 @@ def setUpModule():
     settings = config.MONGODB_SETTINGS
     db_name = settings.get('db', None)
     assert db_name == "O24Mc-test", "ERROR: db_name. db_name={0}".format(db_name)
-
-    #drop_database()
-    #create_models()
 
 if __name__ == '__main__':
     unittest.main()

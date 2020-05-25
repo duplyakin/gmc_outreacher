@@ -19,37 +19,13 @@ import pytz
 from o24.globals import *
 
 from o24.production_tests.test_data import *
+from o24.production_tests.utils import *
+
+
 from o24.backend.utils.decors import get_token
 import string
 import random
-
 import o24.backend.scheduler.scheduler as scheduler
-
-
-TEST_USER_EMAIL = '1@email.com'
-
-def get_current_user():
-    return User.objects(email=TEST_USER_EMAIL).first()
-
-def random_num(stringLength=10):
-    letters = string.ascii_lowercase
-    return ''.join(random.choice(letters) for i in range(stringLength))
-
-def post_with_token(user, client, url, data):
-    token = get_token(user)
-    headers = {
-        'Authorization': 'Bearer {0}'.format(token)
-    }
-    print("Sending request to url:{0}".format(url))
-    pprint(data)
-    
-    r = None
-    if data:        
-        r = client.post(url, data=data, content_type='multipart/form-data', headers=headers, follow_redirects=False)
-    else:
-        r = client.post(url, content_type='multipart/form-data', headers=headers, follow_redirects=False)
-
-    return r
 
 
 class ProdTestScenaries(unittest.TestCase):
@@ -475,7 +451,17 @@ class ProdTestScenaries(unittest.TestCase):
             _req_dict['funnel'] = with_funnel
 
             lists = json.loads(response_data['lists'])
-            _req_dict['list_selected'] = lists[0]
+
+            list_selected = None
+            for l in lists:
+                if 'assign_to_none' in l.get('title'):
+                    list_selected = l
+                    break
+            
+            if not list_selected:
+                self.assertTrue(False, "BROKEN TEST DATA: There is no lists with free prospects for this user")
+                
+            _req_dict['list_selected'] = list_selected
 
         json_create_data = json.dumps(_req_dict)
         form_data = {
@@ -709,7 +695,15 @@ class ProdTestScenaries(unittest.TestCase):
         if linkedin_credentials is None:
             self.assertTrue(False, "BROKEN TEST DATA: There is no linkedin credentials for this user")
 
-        list_selected = lists[0]
+        list_selected = None
+        for l in lists:
+            if 'assign_to_none' in l.get('title'):
+                list_selected = l
+                break
+        
+        if not list_selected:
+            self.assertTrue(False, "BROKEN TEST DATA: There is no lists with free prospects for this user")
+   
     
     #now create
         if req_dict:
@@ -1013,9 +1007,6 @@ def setUpModule():
     settings = config.MONGODB_SETTINGS
     db_name = settings.get('db', None)
     assert db_name == "O24Mc-test", "ERROR: db_name. db_name={0}".format(db_name)
-
-    #drop_database()
-    #create_models()
 
 if __name__ == '__main__':
     unittest.main()

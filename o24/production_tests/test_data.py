@@ -644,7 +644,12 @@ CAMPAIGNS = [
         'owner' : '1@email.com',
         'medium' : ['linkedin', 'email', 'special-medium']
     },
-
+    {
+        'title' : 'real_test',
+        'owner' : '1@email.com',
+        'medium' : ['linkedin', 'email', 'special-medium'],
+        'funnel' : 'Linkedin + email funnel'
+    },
     {
         'title' : 'campaign-11',
         'owner' : '1@email.com',
@@ -663,6 +668,10 @@ CAMPAIGNS = [
 ]
 
 LISTS = [
+    {
+        'owner' : '1@email.com',
+        'title' : 'real_test_list'
+    },
     {
         'owner' : '1@email.com',
         'title' : 'List-1 1@email.com'
@@ -714,6 +723,60 @@ PROSPECTS = [
         'email_domain' : '@yandex.ru',
         'assign_to_list' : 'List-1 1@email.com'
     },
+
+    #### REAL DATA
+    {
+        'owner' : '1@email.com',
+        'assign_to' : 'real_test',
+        'data' : {
+            'email' : 'ks.shilov+1@gmail.com',
+            'linkedin' : 'https://www.linkedin.com/in/kirill-shilov-25aa8630/',
+            'first_name' : 'Kirill',
+            'company' : 'outreacher24',
+            'url' : 'outreacher24.com'
+        },
+        'assign_to_list' : 'real_test_list'
+    },
+    {
+        'owner' : '1@email.com',
+        'assign_to' : 'real_test',
+        'data' : {
+            'email' : '2400394@gmail.com',
+            'linkedin' : 'https://www.linkedin.com/in/alexander-savinkin-3ba99614/',
+            'first_name' : 'Alexander',
+            'company' : 'outreacher24',
+            'url' : 'outreacher24.com'
+        },
+        'assign_to_list' : 'real_test_list'
+    },
+    {
+        'owner' : '1@email.com',
+        'assign_to' : 'real_test',
+        'data' : {
+            'email' : 'grinnbob@rambler.ru',
+            'linkedin' : 'https://www.linkedin.com/in/grigoriy-polyanitsin/',
+            'first_name' : 'Grigory',
+            'company' : 'outreacher24',
+            'url' : 'outreacher24.com'
+        },
+        'assign_to_list' : 'real_test_list'
+    },
+    {
+        'owner' : '1@email.com',
+        'assign_to' : 'real_test',
+        'data' : {
+            'email' : 'grifon12358@gmail.com',
+            'linkedin' : 'https://www.linkedin.com/in/grigoriy-polyanitsin/',
+            'first_name' : 'Grigory',
+            'last_name' : 'Pol',
+            'company' : 'outreacher24',
+            'url' : 'outreacher24.com'
+        },
+        'assign_to_list' : 'real_test_list'
+    },
+    #### END OF REAL DATA
+
+    
     {
         'owner' : '1@email.com',
         'amount' : 10,
