@@ -20,3 +20,15 @@ python -m unittest o24.production_tests.test_prod_2_scenaries.ProdTestScenaries.
 
 #TEST admin handlers
 python -m unittest o24.production_tests.test_prod_2_scenaries.ProdTestScenaries.test_2_check_admin_handlers
+
+
+
+#TEST sequences
+python -m unittest discover -s .\o24\production_tests\ -p "*3_carefull_real_sequence.py"
+
+#TEST email handler
+python -m unittest o24.production_tests.test_prod_3_carefull_real_sequence.RealSequenceTest.test_1_email_handlers
+
+
+#TEST linkedin handler
+python -m unittest o24.production_tests.test_prod_3_carefull_real_sequence.RealSequenceTest.test_1_linkedin_handlers

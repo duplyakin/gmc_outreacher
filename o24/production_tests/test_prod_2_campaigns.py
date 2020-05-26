@@ -336,7 +336,6 @@ def setUpModule():
     assert db_name == "O24Mc-test", "ERROR: db_name. db_name={0}".format(db_name)
 
     #drop_database()
-    #create_models()
 
 if __name__ == '__main__':
     unittest.main()

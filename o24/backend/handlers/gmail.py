@@ -9,54 +9,90 @@ import o24.backend.models.shared as shared
 
 from o24.backend.gmail.controller import GmailController
 from o24.backend.models.inbox.mailbox import MailBox
+from o24.backend.utils.templates import *
 
-def email_data_extract(gmail_controller, task):
-    data = {
-        'email_to' : '',
-        'subject' : '',
-        'plain_version' : '',
-        'html_version' : ''
-    }
+def construct_message(task, gmail_controller, mailbox):
+    input_data = task.get_input_data()
+    if not input_data:
+        raise Exception("input_data error: can't construct message")
 
-    send_to_data = task.get_email_data()
+    template_data = input_data.get('template_data', None)
+    if not template_data:
+        raise Exception("template_data error: can't construct message")
 
-    email_to = send_to_data.get('email_to')
-    template = send_to_data.get('template')
+    prospect_data = input_data.get('prospect_data', None)
+    if not prospect_data:
+        raise Exception("prospect_data error: can't construct message")
 
-    subject = gmail_controller.inser_tags(template.get('subject'))
-    plain_version = gmail_controller.inser_tags(template.get('plain'))
+    subject = template_data.get('subject', None)
+    if not subject:
+        raise Exception("no subject: can't construct message")
+
+    body_html = template_data.get('body', None)
+    if not body_html:
+        raise Exception("no body: can't construct message")
     
-    html_version = gmail_controller.inser_tags(template.get('html'))
-    html_version = gmail_controller.insert_images(html_version)
+    plain = template_data.get('plain', None)
+    if not plain:
+        raise Exception("no plain version of email: can't construct message")
+    
+    body_plain = plain.get('body', None)
+    if not body_plain:
+        raise Exception("Plain body can't be empty")
 
-    data['email_to'] = email_to
-    data['subject'] = subject
-    data['plain_version'] = plain_version
-    data['html_version'] = html_version
-
-    return data
-
-def send_via_smtp(gmail_controller, 
-                    task, 
-                    propspect_id,
-                    campaign_id,
-                    parent_mailbox):
-    result_data = {}
     email_from = gmail_controller.current_email()
+    if not email_from:
+        raise Exception("email_from can't be empty")
 
-    send_to_data = email_data_extract(gmail_controller, task)
+    email_to = prospect_data.get('email', '')
+    if not email_to:
+        raise Exception("prospect doesn't have email: check your data")
+
+    #INSERT TAGS
+    subject = insert_tags(subject, prospect_data)
+    body_html = insert_tags(body_html, prospect_data)
+    body_plain = insert_tags(body_plain, prospect_data)
+
 
     message, trail = gmail_controller.create_multipart_message( 
                                                 email_from=email_from,
-                                                email_to=send_to_data.get('email_to'),
-                                                subject=send_to_data.get('subject'),
-                                                plain_version=send_to_data.get('plain_version'),
-                                                html_version=send_to_data.get('html_version'),
-                                                parent_mailbox=parent_mailbox)
+                                                email_to=email_to,
+                                                subject=subject,
+                                                plain_version=body_plain,
+                                                html_version=body_html,
+                                                parent_mailbox=mailbox)
+
+    return email_from, \
+            email_to, \
+            subject, \
+            body_html, \
+            body_plain, \
+            message, \
+            trail
+
+def send_via_smtp(gmail_controller, 
+                    task, 
+                    prospect_id,
+                    campaign_id,
+                    parent_mailbox):
+    result_data = {
+        'code' : 0
+    }
+
+    email_from, \
+    email_to, \
+    subject, \
+    body_html, \
+    body_plain, \
+    message, \
+    trail = construct_message(task=task, 
+                                        gmail_controller=gmail_controller, 
+                                        mailbox=parent_mailbox)
+
 
     msgId, message = gmail_controller.add_header_msgId(message)
 
-    res = gmail_controller.send_message(email_to=send_to_data.get('email_to'),
+    res = gmail_controller.send_message(email_to=email_to,
                                         message=message)
 
     if res:
@@ -73,8 +109,8 @@ def send_via_smtp(gmail_controller,
                 prospect_id, 
                 campaign_id, 
                 msgId,
-                plain_text=send_to_data.get('plain_version'),
-                html_text=send_to_data.get('html_version'),
+                plain_text=body_plain,
+                html_text=body_html,
                 trail=trail,
                 mailbox_reply_to_id=mailbox_reply_to_id)
 
@@ -94,27 +130,24 @@ def send_via_smtp(gmail_controller,
 
 def send_via_api(gmail_controller,
                     task, 
-                    propspect_id,
+                    prospect_id,
                     campaign_id,
                     parent_mailbox):
     
-    email_from = gmail_controller.current_email()
-
-    send_to_data = email_data_extract(gmail_controller, task)
-    
-
-    message, trail = gmail_controller.create_multipart_message( 
-                                    email_from=email_from,
-                                    email_to=send_to_data.get('email_to'),
-                                    subject=send_to_data.get('subject'),
-                                    plain_version=send_to_data.get('plain_version'),
-                                    html_version=send_to_data.get('html_version'),
-                                    parent_mailbox=parent_mailbox)
+    email_from, 
+    email_to,
+    subject,
+    body_html,
+    body_plain,
+    message,
+    trail = construct_message(task=task, 
+                                        gmail_controller=gmail_controller, 
+                                        mailbox=parent_mailbox)
 
     raw_message = gmail_controller.add_gmail_api_meta(message=message,
                                                     parent_mailbox=parent_mailbox)
     
-    api_res = gmail_controller.send_message(email_to=send_to_data.get('email_to'), 
+    api_res = gmail_controller.send_message(email_to=email_to, 
                                             message=raw_message)
 
     mailbox_reply_to_id = ''
@@ -126,8 +159,8 @@ def send_via_api(gmail_controller,
                     prospect_id=prospect_id, 
                     campaign_id=campaign_id, 
                     msgId='',
-                    plain_text=send_to_data.get('plain_version'),
-                    html_text=send_to_data.get('html_version'),
+                    plain_text=body_plain,
+                    html_text=body_html,
                     trail = trail, 
                     api_res = api_res,
                     mailbox_reply_to_id=mailbox_reply_to_id)
@@ -154,17 +187,17 @@ def send_via_api(gmail_controller,
 
 def smtp_response_check(gmail_controller, 
                     task, 
-                    propspect_id,
+                    prospect_id,
                     campaign_id,
                     parent_mailbox):
-    pass
+    return None
 
 def api_response_check(gmail_controller,
                     task, 
-                    propspect_id,
+                    prospect_id,
                     campaign_id,
                     parent_mailbox):
-    pass
+    return None
 
 
 @celery.task
@@ -173,72 +206,88 @@ def gmail_check_reply(task_id):
 
 @celery.task
 def gmail_send_message(task_id):
-    
-    task = shared.TaskQueue.get_task(task_id)
-    if not task:
-        raise Exception("No such task id:{0}".format(task_id))
-    
-    task.acknowledge()
-
-    propspect_id = task.propspect_id
-    campaign_id = task.campaign_id
-    data = task.credentials_dict.get('data', '')
-    if not data:
-        raise Exception("No data for task_id:{0}".format(task_id))
-
-    credentials = data.get('credentials', '')
-    email = data.get('email', '')
-    if not email:
-        raise Exception("Can't find email for credentials task_id:{0}".format(task_id))
-
-    sender = data.get('sender', '')
-    smtp = False
-    if sender == 'smtp':
-        smtp = True
-
-    gmail_controller = GmailController(email=email,
-                                        credentials=credentials,
-                                        smtp=smtp)
-
-    parent_mailbox = Mailbox.get_parent(prospect_id=propspect_id, campaign_id=propspect_id)
-    if not parent_mailbox:
-        parent_mailbox = None
-
-
     result_data = {
         'if_true' : False,
+        'code' : -1,
         'error' : 'Unknown Error'
     }
     response = None
+
     try:
+        task = shared.TaskQueue.get_task(task_id)
+        if not task:
+            raise Exception("No such task id:{0}".format(task_id))
+        
+        task.acknowledge()
+
+        prospect_id = task.prospect_id
+        campaign_id = task.campaign_id
+        input_data = task.get_input_data()
+        if not input_data:
+            raise Exception("INPUT_DATA ERROR: No input_data for task_id:{0}".format(task_id))
+        
+        credentials_data = input_data.get('credentials_data', '')
+        if not credentials_data:
+            raise Exception("INPUT_DATA.CREDENTIALS_DATA ERROR: No credentials_data for task_id:{0}".format(task_id))
+        
+        email = credentials_data.get('email', '')
+        if not email:
+            raise Exception("Can't find email for credentials task_id:{0}".format(task_id))
+
+        sender = credentials_data.get('sender', '')
+        if not sender:
+            raise Exception("Can't find sender for credentials task_id:{0}".format(task_id))
+    
+        smtp = False
+        if sender == 'smtp':
+            smtp = True
+
+        access_credentials = credentials_data.get('credentials', '')
+        if not access_credentials:
+            raise Exception("Can't find access_credentials for credentials task_id:{0}".format(task_id))
+
+
+        gmail_controller = GmailController(email=email,
+                                            credentials=access_credentials,
+                                            smtp=smtp)
+
+        parent_mailbox = MailBox.get_parent(prospect_id=prospect_id, campaign_id=prospect_id)
+        if not parent_mailbox:
+            parent_mailbox = None
+
+
         if smtp:
             response = smtp_response_check(gmail_controller, 
                                         task, 
-                                        propspect_id=propspect_id, 
+                                        prospect_id=prospect_id, 
                                         campaign_id=campaign_id, 
                                         parent_mailbox=parent_mailbox)
             if not response:
                 result_data = send_via_smtp(gmail_controller, 
                                             task, 
-                                            propspect_id=propspect_id, 
+                                            prospect_id=prospect_id, 
                                             campaign_id=campaign_id, 
                                             parent_mailbox=parent_mailbox)
         else:
             response = api_response_check(gmail_controller, 
                                         task,
-                                        propspect_id=propspect_id,
+                                        prospect_id=prospect_id,
                                         campaign_id=campaign_id, 
                                         parent_mailbox=parent_mailbox)
             if not response:
                 result_data = send_via_api(gmail_controller, 
                                             task,
-                                            propspect_id=propspect_id,
+                                            prospect_id=prospect_id,
                                             campaign_id=campaign_id, 
                                             parent_mailbox=parent_mailbox)
 
     except Exception as e:
+        print(e)
+        traceback.print_exc()
+
         result_data = {
-            'error' : str(e)
+            'error' : str(e),
+            'code' : -1
         }
         
         task.set_result(result_data)
@@ -248,10 +297,14 @@ def gmail_send_message(task_id):
     if not response:
         task.set_result(result_data)
         if result_data.get('if_true', False):
-            task.update_status(status=READY)
+            task.update_status(status=CARRYOUT)
         else:
             task.update_status(status=FAILED)
     else:
-        #TODO: set task as FINISHED success
-        pass
+        result_data = {
+            'code' : EMAIL_HAS_RESPONSE
+        }
+        task.set_result(result_data)
+        task.update_status(status=CARRYOUT)
+
     return

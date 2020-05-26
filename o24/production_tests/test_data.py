@@ -219,6 +219,41 @@ TEAMS = [
     }
 ]
 
+TEST_CREDENTIALS = {
+    'test_email_handlers' : {
+        'owner' : '1@email.com',
+        'title' : 'test_email_handlers',
+        'medium' : 'email',
+        'data' : {
+               "email" : "ks.shilov@gmail.com",
+                "account" : "ks.shilov@gmail.com",
+                "credentials" : {
+                        "token" : "ya29.a0AfH6SMCeBPkFvS4bb2zH8rCylKsEsiAhz3DuZZ_p5A9qP7MmMTrb2ck2gwqjEqb_RMi7Ww6VQ5wZczeZ2rzHpL1-0DRTq3AJ_5w9w_6EMwhUM0vErMpBw1voV1ypZ-an7j6U1Yb3emtdWTvTKWNSN3v4htzcrPuXO6Nt",
+                        "refresh_token" : "null",
+                        "token_uri" : "https://oauth2.googleapis.com/token",
+                        "client_id" : "606646624276-qcedt5p3vdad7h6aie2l5s75mg59at7t.apps.googleusercontent.com",
+                        "client_secret" : "Gn-M_96r8PTML9SQaLxAqqWD",
+                        "scopes" : [
+                                "https://mail.google.com/",
+                                "https://www.googleapis.com/auth/gmail.send",
+                                "https://www.googleapis.com/auth/gmail.modify",
+                                "https://www.googleapis.com/auth/gmail.metadata"
+                        ]
+                },
+                "sender" : "smtp"
+        }
+    },
+    'test_linkedin_handlers' : {
+        'owner' : '1@email.com',
+        'title' : 'test_linkedin_handlers',
+        'medium' : 'linkedin',
+        'data' : {
+            'email' : 'clients@boostlabs.co.uk',
+            'password' : '!@£$%^'
+        }
+    }
+}
+
 # 0 - Actions with limit
 # 1 - Delays
 # 2 - Sync Events
@@ -238,7 +273,6 @@ ACTIONS = [
         'medium' : 'linkedin',
         'key' : LINKEDIN_PARSE_PROFILE_ACTION 
     },
-
     {
         'action_type' : 0,
         'data' : {
@@ -332,6 +366,52 @@ FUNNELS = [
             'title' : 'Linkedin Parsing Funnel',
             'templates_required' : {'dummy' : 1},
             'root' : True,
+            'if_true' : FINISHED_ACTION,
+            'if_false' : FINISHED_ACTION,
+        },
+        FINISHED_ACTION : {
+            'key' : FINISHED_ACTION
+        }
+    },
+    {
+        'root' : {
+            'key' : EMAIL_SEND_MESSAGE_ACTION,
+            'title' : 'test_email_handler_funnel',
+            'funnel_type' : GENERAL_FUNNEL_TYPE,
+            'template_key' : 'intro_email',
+            'root' : True,
+            'templates_required' : {
+                'email' : {
+                    'intro_email' : {
+                        'title' : 'Intro email',
+                        'template_key' : 'intro_email',
+                        'order' : 0
+                    },
+                }
+            },
+            'if_true' : FINISHED_ACTION,
+            'if_false' : FINISHED_ACTION,
+        },
+        FINISHED_ACTION : {
+            'key' : FINISHED_ACTION
+        } 
+    },
+    {
+        'root' : {
+            'key' : LINKEDIN_SEND_MESSAGE_ACTION,
+            'title' : 'test_linkedin_handler_funnel',
+            'funnel_type' : GENERAL_FUNNEL_TYPE,
+            'template_key' : 'intro_linkedin',
+            'root' : True,
+            'templates_required' : {
+                'linkedin' : {
+                    'intro_linkedin' : {
+                        'title' : 'Intro linkedin message',
+                        'template_key' : 'intro_linkedin',
+                        'order' : 0
+                    }
+                }
+            },
             'if_true' : FINISHED_ACTION,
             'if_false' : FINISHED_ACTION,
         },
@@ -644,7 +724,25 @@ CAMPAIGNS = [
         'owner' : '1@email.com',
         'medium' : ['linkedin', 'email', 'special-medium']
     },
+    {
+        'title' : 'test_email_handler_campaign',
+        'owner' : '1@email.com',
+        'funnel' : 'test_email_handler_funnel',
+        'credentials' : 'test_email_handlers'
+    },
+    {
+        'title' : 'test_linkedin_handler_campaign',
+        'owner' : '1@email.com',
+        'funnel' : 'test_linkedin_handler_funnel',
+        'credentials' : 'test_linkedin_handlers'
+    },
 
+    {
+        'title' : 'real_test',
+        'owner' : '1@email.com',
+        'medium' : ['linkedin', 'email', 'special-medium'],
+        'funnel' : 'Linkedin + email funnel'
+    },
     {
         'title' : 'campaign-11',
         'owner' : '1@email.com',
@@ -663,6 +761,10 @@ CAMPAIGNS = [
 ]
 
 LISTS = [
+    {
+        'owner' : '1@email.com',
+        'title' : 'real_test_list'
+    },
     {
         'owner' : '1@email.com',
         'title' : 'List-1 1@email.com'
@@ -714,6 +816,83 @@ PROSPECTS = [
         'email_domain' : '@yandex.ru',
         'assign_to_list' : 'List-1 1@email.com'
     },
+
+    #### REAL DATA
+    {
+        'owner' : '1@email.com',
+        'assign_to' : 'test_email_handler_campaign',
+        'data' : {
+            'email' : 'ks.shilov+1@gmail.com',
+            'linkedin' : 'https://www.linkedin.com/in/kirill-shilov-25aa8630/',
+            'first_name' : 'Kirill',
+            'company' : 'Outreacher24',
+            'url' : 'outreacher24.com'
+        },
+        'assign_to_list' : 'real_test_list'
+    },
+    {
+        'owner' : '1@email.com',
+        'assign_to' : 'test_linkedin_handler_campaign',
+        'data' : {
+            'email' : 'ks.shilov+3@gmail.com',
+            'linkedin' : 'https://www.linkedin.com/in/kirill-shilov-25aa8630/',
+            'first_name' : 'Kirill',
+            'company' : 'outreacher24',
+            'url' : 'outreacher24.com'
+        },
+        'assign_to_list' : 'real_test_list'
+    },
+    {
+        'owner' : '1@email.com',
+        'assign_to' : 'real_test',
+        'data' : {
+            'email' : '2400394@gmail.com',
+            'linkedin' : 'https://www.linkedin.com/in/alexander-savinkin-3ba99614/',
+            'first_name' : 'Alexander',
+            'company' : 'outreacher24',
+            'url' : 'outreacher24.com'
+        },
+        'assign_to_list' : 'real_test_list'
+    },
+    {
+        'owner' : '1@email.com',
+        'assign_to' : 'real_test',
+        'data' : {
+            'email' : 'grinnbob@rambler.ru',
+            'linkedin' : 'https://www.linkedin.com/in/grigoriy-polyanitsin/',
+            'first_name' : 'Grigory',
+            'company' : 'outreacher24',
+            'url' : 'outreacher24.com'
+        },
+        'assign_to_list' : 'real_test_list'
+    },
+    {
+        'owner' : '1@email.com',
+        'assign_to' : 'real_test',
+        'data' : {
+            'email' : 'grifon12358@gmail.com',
+            'linkedin' : 'https://www.linkedin.com/in/grigoriy-polyanitsin/',
+            'first_name' : 'Grigory',
+            'last_name' : 'Pol',
+            'company' : 'outreacher24',
+            'url' : 'outreacher24.com'
+        },
+        'assign_to_list' : 'real_test_list'
+    },
+    {
+        'owner' : '1@email.com',
+        'assign_to' : 'real_test',
+        'data' : {
+            'email' : 'Clients@boostlabs.co.uk',
+            'linkedin' : 'https://www.linkedin.com/in/barry-magennis-768a0a1aa/',
+            'first_name' : 'Barry',
+            'company' : 'Boostlabs',
+            'url' : 'boostlabs.co.uk'
+        }
+    },
+    #### END OF REAL DATA
+
+    
     {
         'owner' : '1@email.com',
         'amount' : 10,
@@ -932,7 +1111,7 @@ CAMPAIGNS_CREATE = {
 <head>
 </head>
 <body>
-Hi {{first_name''}}<br /><br />My name is Kirill - I'm a blockchain developer and writer. Since early 2017 I’ve worked hard to become the top blockchain contributor for Hacker Noon - you can check my signature for published topics and my Linkedin and Hacker Noon profiles.<br /><br />With my team, 2020 marks the launch of a new global blockchain PR project - and I’d love <strong>if {{url}} would join us.</strong> <br /><br />During 2020 I will ask blockchain founders for their predictions on the blockchain industry - 2 questions per month, 24 total (you can participate once, or each time, your choice). <br /><br />All answers will be published as a Roundup topic on Hacker Noon and other top-tier crypto publications. At the end of 2020, those answers that were the closest with their predictions to the actual situation will be featured on the main page of Hacker Noon.<br /><br />Also, there is a weekly format where we will explain your project’s key news and distribute it throughout many major channels: 4M+ Hacker Noon website + 40K newsletter and Cryptopanic’s 400K trader community.<br /><br /><br /><span style="color: #e74c3c;"><strong>March 2020 - PR opportunities:</strong></span><br />1. <strong>Hackernoon.com Roundup</strong> - “<span style="color: #e74c3c;">Which top 3 industries will dominate blockchain tech utilization by the end of 2020, why?</span>“<br />      * Deadline for sending a <span style="text-decoration: underline;"><span style="color: #e74c3c; text-decoration: underline;">quote - March 16</span></span>.<br />      * Managing <span style="color: #e74c3c;">fee: $220</span> <br /><br />2. <strong>Hackernoon.com Weekly Matter</strong> - Weekly news published on the front page of Hackernoon where our team will explain your project’s news and tell the audience why it matters to your industry. <br />       * Deadline for sending your news — <span style="text-decoration: underline;"><span style="color: #e74c3c; text-decoration: underline;">each week by Thursday</span></span> (the nearest: March 5, then March 12)<br />       * Managing <span style="color: #e74c3c;">fee: $250</span><br /><br />3. <strong>AmbCrypto.com Roundup article</strong> - “How can blockchain improve online businesses in 2020? (Tell us about your niche)”<br />       * Deadline for sending your <span style="text-decoration: underline;"><span style="color: #e74c3c; text-decoration: underline;">quote - March 23</span></span><br />       * Managing <span style="color: #e74c3c;">fee: $190</span><br /><br />If you participate in 2 or more formats there will be a 20% discount.<br /><br />If you are interested in one or both of these formats and need to know the statistics of the previous sessions, just let me know and I’ll send them your way.<br /><br />P.S.<br />If you’re not interested, just let me know.<br />For faster communication we could chat on <span style="color: #e74c3c;">telegram: ksshilov</span><br /><br /><br />Thanks,<br />Kirill Shilov,<br />Hackernoon.com contributor (https://hackernoon.com/@ks.shilov)<br />Telegram: @ksshilov<br />Linkedin: https://www.linkedin.com/in/kirill-shilov-25aa8630/
+Hi {first_name}<br /><br />My name is Kirill - I'm a blockchain developer and writer. Since early 2017 I’ve worked hard to become the top blockchain contributor for Hacker Noon - you can check my signature for published topics and my Linkedin and Hacker Noon profiles.<br /><br />With my team, 2020 marks the launch of a new global blockchain PR project - and I’d love <strong>if {{url}} would join us.</strong> <br /><br />During 2020 I will ask blockchain founders for their predictions on the blockchain industry - 2 questions per month, 24 total (you can participate once, or each time, your choice). <br /><br />All answers will be published as a Roundup topic on Hacker Noon and other top-tier crypto publications. At the end of 2020, those answers that were the closest with their predictions to the actual situation will be featured on the main page of Hacker Noon.<br /><br />Also, there is a weekly format where we will explain your project’s key news and distribute it throughout many major channels: 4M+ Hacker Noon website + 40K newsletter and Cryptopanic’s 400K trader community.<br /><br /><br /><span style="color: #e74c3c;"><strong>March 2020 - PR opportunities:</strong></span><br />1. <strong>Hackernoon.com Roundup</strong> - “<span style="color: #e74c3c;">Which top 3 industries will dominate blockchain tech utilization by the end of 2020, why?</span>“<br />      * Deadline for sending a <span style="text-decoration: underline;"><span style="color: #e74c3c; text-decoration: underline;">quote - March 16</span></span>.<br />      * Managing <span style="color: #e74c3c;">fee: $220</span> <br /><br />2. <strong>Hackernoon.com Weekly Matter</strong> - Weekly news published on the front page of Hackernoon where our team will explain your project’s news and tell the audience why it matters to your industry. <br />       * Deadline for sending your news — <span style="text-decoration: underline;"><span style="color: #e74c3c; text-decoration: underline;">each week by Thursday</span></span> (the nearest: March 5, then March 12)<br />       * Managing <span style="color: #e74c3c;">fee: $250</span><br /><br />3. <strong>AmbCrypto.com Roundup article</strong> - “How can blockchain improve online businesses in 2020? (Tell us about your niche)”<br />       * Deadline for sending your <span style="text-decoration: underline;"><span style="color: #e74c3c; text-decoration: underline;">quote - March 23</span></span><br />       * Managing <span style="color: #e74c3c;">fee: $190</span><br /><br />If you participate in 2 or more formats there will be a 20% discount.<br /><br />If you are interested in one or both of these formats and need to know the statistics of the previous sessions, just let me know and I’ll send them your way.<br /><br />P.S.<br />If you’re not interested, just let me know.<br />For faster communication we could chat on <span style="color: #e74c3c;">telegram: ksshilov</span><br /><br /><br />Thanks,<br />Kirill Shilov,<br />Hackernoon.com contributor (https://hackernoon.com/@ks.shilov)<br />Telegram: @ksshilov<br />Linkedin: https://www.linkedin.com/in/kirill-shilov-25aa8630/
 </body>
 </html>
 '''
@@ -995,14 +1174,14 @@ CAMPAIGNS_EDIT = {
                 'title' : 'Follow up email - 1',
                 'template_key' : 'email_followup_1',
                 'order' : 1,
-                'subject': 'Hello this is me',
+                'subject': 'Hello {first_name} this is me',
                 'body' : '''
 <!DOCTYPE html>
 <html>
 <head>
 </head>
 <body>
-Hi {{first_name}}<br /><br />If you are interested in participating in our PR project, you’re in luck! We still have time.<br /><br /><br /><span style="color: #e74c3c; font-size: 16px;"><strong>Here are the upcoming events:</strong></span><br />1. <strong>Hackernoon.com Roundup</strong> - “<span style="color: #e74c3c;">Which top 3 industries will dominate blockchain tech utilization by the end of 2020, why?</span>“<br />      * Deadline for sending a <span style="text-decoration: underline;"><span style="color: #e74c3c; text-decoration: underline;">quote - March 16</span></span>.<br />      * Managing <span style="color: #e74c3c;">fee: $220 </span><br /><br />2. <strong>Hackernoon.com Weekly Matter</strong> - Weekly news published on the front page of Hackernoon where our team will explain your project’s news and tell the audience why it matters to your industry. <br />       * Deadline for sending your news — <span style="color: #e74c3c;">each week by Thursday</span> (the nearest: March 5, then March 12)<br />       * Managing <span style="color: #e74c3c;">fee: $250</span><br /><br />3. <strong>AmbCrypto.com Roundup article</strong> - “<span style="color: #e74c3c;">How can blockchain improve online businesses in 2020? (Tell us about your niche)</span>”<br />       * Deadline for sending your <span style="color: #e74c3c;">quote - March 23</span><br />       * Managing <span style="color: #e74c3c;">fee: $190</span><br /><br />If you participate in 2 or more formats there will be a 20% discount.<br /><br />If you’d like to participate just let me know and I’ll be in touch.<br /><br />P.S.<br />For faster communication we could chat on <span style="color: #e74c3c;">telegram: ksshilov</span><br /><br /><br />Thanks,<br />Kirill Shilov,<br />Hackernoon.com contributor (https://hackernoon.com/@ks.shilov)<br />Telegram: @ksshilov<br />Linkedin: https://www.linkedin.com/in/kirill-shilov-25aa8630/
+Hi {first_name}<br /><br />If you are interested in participating in our PR project, you’re in luck! We still have time.<br /><br /><br /><span style="color: #e74c3c; font-size: 16px;"><strong>Here are the upcoming events:</strong></span><br />1. <strong>Hackernoon.com Roundup</strong> - “<span style="color: #e74c3c;">Which top 3 industries will dominate blockchain tech utilization by the end of 2020, why?</span>“<br />      * Deadline for sending a <span style="text-decoration: underline;"><span style="color: #e74c3c; text-decoration: underline;">quote - March 16</span></span>.<br />      * Managing <span style="color: #e74c3c;">fee: $220 </span><br /><br />2. <strong>Hackernoon.com Weekly Matter</strong> - Weekly news published on the front page of Hackernoon where our team will explain your project’s news and tell the audience why it matters to your industry. <br />       * Deadline for sending your news — <span style="color: #e74c3c;">each week by Thursday</span> (the nearest: March 5, then March 12)<br />       * Managing <span style="color: #e74c3c;">fee: $250</span><br /><br />3. <strong>AmbCrypto.com Roundup article</strong> - “<span style="color: #e74c3c;">How can blockchain improve online businesses in 2020? (Tell us about your niche)</span>”<br />       * Deadline for sending your <span style="color: #e74c3c;">quote - March 23</span><br />       * Managing <span style="color: #e74c3c;">fee: $190</span><br /><br />If you participate in 2 or more formats there will be a 20% discount.<br /><br />If you’d like to participate just let me know and I’ll be in touch.<br /><br />P.S.<br />For faster communication we could chat on <span style="color: #e74c3c;">telegram: ksshilov</span><br /><br /><br />Thanks,<br />Kirill Shilov,<br />Hackernoon.com contributor (https://hackernoon.com/@ks.shilov)<br />Telegram: @ksshilov<br />Linkedin: https://www.linkedin.com/in/kirill-shilov-25aa8630/
 </body>
 </html>
 '''
@@ -1046,5 +1225,4 @@ Hi {{first_name}}<br /><br />If you are interested in participating in our PR pr
         "5": True,
         "6": False
     }
-
 }
