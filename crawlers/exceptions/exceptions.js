@@ -1,4 +1,4 @@
-const ERROR_CODES = require(__dirname + '/error_codes.js');
+const ERROR_CODES = require('./error_codes.js');
 
 //Define exceptions.
 const UnknownError = (message) => ({

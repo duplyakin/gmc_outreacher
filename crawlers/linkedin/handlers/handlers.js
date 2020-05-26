@@ -1,9 +1,9 @@
-const { bull_workers } = require(__dirname + '/./bullWorkersSettings.js');
-const taskModel = require(__dirname + "/../.././models/shared.js");
-const workers = require(__dirname + '/.././workers/workers.js');
-const cron = require(__dirname + '/../node-cron');
+const { bull_workers } = require('./bullWorkersSettings.js');
+const taskModel = require("./../../models/shared.js");
+const workers = require('./../workers/workers.js');
+const cron = require('./../../node_modules/node-cron');
 
-const MyExceptions = require(__dirname + '/../.././exceptions/exceptions.js');
+const MyExceptions = require('./../../exceptions/exceptions.js');
 
 
 async function bullConsumer() {
@@ -70,12 +70,12 @@ async function bullConsumer() {
 
 async function taskStatusListener() {
   // start cron every minute
-  cron.schedule("* * * * *", () => {
+  cron.schedule("* * * * *", async () => {
     let tasks = await taskModel.TaskQueue.find({ status: 1 }, function (err, res) {
       if (err) throw MyExceptions.MongoDBError('MongoDB find err: ' + err);
     });
     if (Array.isArray(tasks) && tasks.length !== 0) {
-      tasks.forEach((task) => {
+      tasks.forEach(async (task) => {
         let data = {
           task_id: task.id,
           action_key: task.action_key,

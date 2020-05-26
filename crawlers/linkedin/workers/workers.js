@@ -1,8 +1,8 @@
 const modules = require('../modules.js');
-const cookieModel = require(__dirname + "/../.././models/models.js");
-const taskModel = require(__dirname + "/../.././models/shared.js");
+const cookieModel = require("./../../models/models.js");
+const taskModel = require("./../../models/shared.js");
 
-const MyExceptions = require(__dirname + '/../.././exceptions/exceptions.js');
+const MyExceptions = require('../.././exceptions/exceptions.js');
 const error_db_save_text = "........ERROR MONGODB: update TASK failed: ";
 const success_db_save_text = "........SUCCSESS MONGODB: result_data added........";
 

@@ -1,7 +1,7 @@
-const selectors = require(__dirname + "/.././selectors");
-const action = require(__dirname + '/action.js');
+const selectors = require("./../selectors");
+const action = require('./action.js');
 
-const MyExceptions = require(__dirname + '/../.././exceptions/exceptions.js');
+const MyExceptions = require('./../../exceptions/exceptions.js');
 
 class MessageCheckAction extends action.Action {
   constructor(email, password, cookies, credentials_id, url) {

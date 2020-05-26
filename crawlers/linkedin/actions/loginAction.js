@@ -1,10 +1,10 @@
-const selectors = require(__dirname + "/.././selectors");
-const links = require(__dirname + "/.././links");
-const cookieModel = require(__dirname + "/../.././models/models.js");
-const action = require(__dirname + '/action.js');
-const puppeteer = require(__dirname + "/./../../node_modules/puppeteer");
+const selectors = require("./../selectors");
+const links = require("./../links");
+const cookieModel = require("./../../models/models.js");
+const action = require('./action.js');
+const puppeteer = require("./../../node_modules/puppeteer");
 
-const MyExceptions = require(__dirname + '/../.././exceptions/exceptions.js');
+const MyExceptions = require('./../../exceptions/exceptions.js');
 
 class LoginAction extends action.Action {
   constructor(email, password, cookies, credentials_id) {
@@ -12,8 +12,8 @@ class LoginAction extends action.Action {
   }
 
   async startBrowser() {
-    this.browser = await puppeteer.launch({ headless: false }); // test mode
-    //this.browser = await puppeteer.launch();
+    //this.browser = await puppeteer.launch({ headless: false }); // test mode
+    this.browser = await puppeteer.launch();
     this.context = await this.browser.createIncognitoBrowserContext();
     this.page = await this.context.newPage();
 

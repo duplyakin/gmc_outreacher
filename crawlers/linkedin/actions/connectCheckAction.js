@@ -1,8 +1,8 @@
-const selectors = require(__dirname + "/.././selectors");
-const links = require(__dirname + "/.././links");
-const action = require(__dirname + '/action.js');
+const selectors = require("./../selectors");
+const links = require("./../links");
+const action = require('./action.js');
 
-const MyExceptions = require(__dirname + '/../.././exceptions/exceptions.js');
+const MyExceptions = require('./../../exceptions/exceptions.js');
 
 class ConnectCheckAction extends action.Action {
   constructor(email, password, cookies, credentials_id, prospect_full_name) {

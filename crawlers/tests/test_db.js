@@ -1,4 +1,4 @@
-const workers = require(__dirname + '/../linkedin/workers/workers.js');
+const workers = require('./../linkedin/workers/workers.js');
 
 
 const SEARCH_URL = "https://www.linkedin.com/search/results/all/?keywords=acronis&origin=GLOBAL_SEARCH_HEADER&page=97";

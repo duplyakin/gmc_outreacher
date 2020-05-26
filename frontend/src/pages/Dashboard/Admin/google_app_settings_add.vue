@@ -29,11 +29,6 @@
             v-on:click="submit"
             class="btn btn-outline btn-wd btn-success mx-1"
           >Save</button>
-          <button
-            v-on:click="discard"
-            type="discard"
-            class="btn btn-outline btn-wd btn-danger"
-          >Discard</button>
         </div>
 
       </div>
