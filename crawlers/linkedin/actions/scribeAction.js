@@ -1,7 +1,7 @@
-const selectors = require("./../selectors");
+const selectors = require("../selectors");
 const action = require('./action.js');
 
-const MyExceptions = require('./../../exceptions/exceptions.js');
+const MyExceptions = require('../../exceptions/exceptions.js');
 
 class ScribeAction extends action.Action {
   constructor(email, password, cookies, credentials_id, url) {
