@@ -1,5 +1,9 @@
+<<<<<<< HEAD
 //const Bull = require('/../.././bull');
 const Bull = require(__dirname + '/../../node_modules/./bull');
+=======
+const Bull = require('bull');
+>>>>>>> origin/scraper
 
 const redis = {
   host: '127.0.0.1',

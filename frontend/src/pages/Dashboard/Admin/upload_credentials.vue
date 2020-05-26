@@ -13,7 +13,7 @@
             :limit="1"
             :on-exceed="handleExceed"
             :auto-upload = "false"
-            :file-list="model.file_list"
+            :file-list="file_list"
 
             :http-request="addFile"
             :before-remove="beforeRemove"
@@ -28,7 +28,7 @@
                     Your file must contain something with credentials
                     <br>
                     [Maximum Upload File Size: 5MB or 10,000 rows]
-                    {{this.model.file}}
+                    {{this.file}}
             </div>
             </el-upload> 
     </div>
@@ -62,9 +62,10 @@ export default {
     },
     data () {
         return {
-            model : {
-                file : {},
-            },
+            file : {},
+            file_data: null,
+            file_list: [],
+
             error : false,
             error_message : 'File required',
             max_size : 5*1024*1024,
@@ -83,7 +84,7 @@ export default {
     },
     beforeRemove(file, fileList){
         if (confirm(`Remove file: ${ file.name } ?`)){
-            this.model.file = {};
+            this.file = {};
             fileList.pop();
             return true;
         }
@@ -95,7 +96,7 @@ export default {
         if(!isValid) {
             fileList.pop();
         } else {
-            this.model.file = file;
+            this.file = file;
         }
     },
     _checkValid(file){
@@ -131,15 +132,38 @@ export default {
 
         return true;
     },
+    /* CSV file loading methods */
+    _load() {
+        const _this = this;
+        this._readFile(_this.file, (output) => {
+           _this.file_data = output;
+        });
+    },
+    _readFile(file, callback) {
+        if (file) {
+            let reader = new FileReader();
+            reader.readAsText(file, "UTF-8");
+            reader.onload = function (evt) {
+                callback(evt.target.result);
+            };
+            reader.onerror = function () {
+                this.error = true;
+                this.error_message = 'File reading error';
+            };
+        }
+    },
     submit() {
-      var isValid = this._checkValid(this.model.file);
+      var isValid = this._checkValid(this.file);
 
       if (!isValid) {
           Notification.error({ title: "Error", message: this.error_message });
           return;
       }
 
-      this.valueUpdated(this.model.file);
+      this._load();
+      console.log('file: ', this.file_data);
+
+      this.valueUpdated(this.file_data);
       Notification.success({ title: "Success", message: 'File credentials uploaded' });  
       this.$emit("close");
     },

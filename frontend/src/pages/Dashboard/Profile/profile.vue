@@ -19,6 +19,11 @@
 
       <button
         type="button"
+        @click.prevent="change_password"
+        class="btn btn-fill btn-info btn-round btn-wd"
+      >Change password</button>
+      <button
+        type="button"
         @click.prevent="onLogout"
         class="btn btn-fill btn-info btn-round btn-wd"
       >Logout</button>
@@ -29,6 +34,8 @@
 import axios from "@/api/axios-auth";
 import { Notification, Table, TableColumn, Select, Option } from "element-ui";
 
+const Change_password_modal = () => import('./change_password_modal.vue')
+
 const PROFILE_API_LIST = '/profile';
 
 export default {
@@ -38,6 +45,20 @@ export default {
     };
   },
   methods: {
+    change_password() {
+      this.$modal.show(
+        Change_password_modal,
+        {
+          valueUpdated: newValue => {
+          }
+        },
+        {
+          width: "400",
+          height: "auto",
+          scrollable: true
+        }
+      );
+    },
     onLogout() {
       var _this = this;
       this.$store.dispatch("auth/logout").then(
@@ -77,6 +98,7 @@ export default {
   },
   async mounted() {
     await this.loadUser();
+    //console.log(this.user_data)
   },
   created() {
   }

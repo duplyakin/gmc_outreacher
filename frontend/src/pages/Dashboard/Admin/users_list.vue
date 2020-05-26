@@ -111,7 +111,7 @@ export default {
           }
         },
         {
-          width: "720",
+          width: "400",
           height: "auto",
           scrollable: true
         }

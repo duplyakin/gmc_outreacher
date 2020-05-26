@@ -1,4 +1,4 @@
-const handlers = require(__dirname + '/linkedin/handlers/handlers.js');
+const handlers = require('./linkedin/handlers/handlers.js');
 
 (async () => {
     console.log("..... init started: .....", __filename);

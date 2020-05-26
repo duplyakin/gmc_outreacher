@@ -3,7 +3,7 @@
     <card title="User card">
       <div>
         <p> {{ userObj.email }} </p>
-        <div class="col-6">
+        <div class="col-10">
         <p>Select user role</p>
           <el-select
             class="select-default mb-3"
@@ -21,7 +21,7 @@
           </el-select>
         </div>
 
-        <div class="col-6">
+        <div class="col-10">
         <p>Change user password</p>
         <fg-input>
               <textarea
@@ -34,7 +34,7 @@
         </fg-input>
         </div>
 
-        <div class="col-6">
+        <div class="col-10">
         <p>Login as this user</p>
         <button
             type="submit"

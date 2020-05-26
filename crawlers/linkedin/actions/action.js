@@ -1,7 +1,7 @@
-const puppeteer = require(__dirname + "/./../../node_modules/puppeteer");
-const LoginAction = require(__dirname + '/loginAction.js');
+const puppeteer = require("puppeteer");
+const LoginAction = require('./loginAction.js');
 
-const MyExceptions = require(__dirname + '/../.././exceptions/exceptions.js');
+const MyExceptions = require('./../../exceptions/exceptions.js');
 
 class Action {
   constructor(email, password, cookies, credentials_id) {
@@ -12,8 +12,8 @@ class Action {
   }
 
   async startBrowser() {
-    this.browser = await puppeteer.launch({ headless: false }); // test mode
-    //this.browser = await puppeteer.launch();
+    //this.browser = await puppeteer.launch({ headless: false }); // test mode
+    this.browser = await puppeteer.launch();
     this.context = await this.browser.createIncognitoBrowserContext();
     this.page = await this.context.newPage();
     await this.page.setCookie(...this.cookies);

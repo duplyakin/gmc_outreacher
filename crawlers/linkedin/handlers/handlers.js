@@ -1,9 +1,9 @@
-const { bull_workers } = require(__dirname + '/./bullWorkersSettings.js');
-const taskModel = require(__dirname + "/../.././models/shared.js");
-const workers = require(__dirname + '/.././workers/workers.js');
-const cron = require(__dirname + '/../node-cron');
+const { bull_workers } = require('./bullWorkersSettings.js');
+const taskModel = require("./../../models/shared.js");
+const workers = require('./../workers/workers.js');
+const cron = require('node-cron');
 
-const MyExceptions = require(__dirname + '/../.././exceptions/exceptions.js');
+const MyExceptions = require('./../../exceptions/exceptions.js');
 
 
 async function bullConsumer() {
