@@ -16,6 +16,7 @@ from email.utils import formatdate
 class o24SMTP(yagmail.SMTP):
     @staticmethod
     def get_oauth_string(user, oauth2_info):
+        #TODO implement refresh token
         access_token = oauth2_info.get('token')
 
         auth_string = 'user=%s\1auth=Bearer %s\1\1' % (user, access_token)

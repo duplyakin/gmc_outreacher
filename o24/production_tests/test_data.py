@@ -1066,8 +1066,8 @@ ADMIN_GOOGLE_SETTINGS_EDIT = {
     'credentials': '{"web":{"client_id":"adsfadsfasdfasdfgoogleusercontent.com","project_id":"outreacher24","auth_uri":"https://google.com/o/oauth2/auth","token_uri":"https://oauth2.googleapis.com/token","auth_provider_x509_cert_url":"https://www.googleapis.com/oauth2/v1/certs","client_secret":"Gn-M_96r8PTML9SQaLxAqqWD","redirect_uris":["http://127.0.0.1:5000/oauth/callback"],"javascript_origins":["http://outreacher24.com"]}}',
     'redirect_uri': 'http://127.0.0.1:5000/oauth',
     'gmail_scopes': '["https://www.googleapis.com/auth/gmail.modify", "https://www.googleapis.com/auth/gmail.metadata"]',
-    'gmail_access_type': "online",
-    'gmail_include_granted_scopes': 'false',
+    'gmail_access_type': "offline",
+    'gmail_include_granted_scopes': 'true',
     'gmail_api_name': "spreadsheet",
     'gmail_api_version': "v2",
     'active' : "1"

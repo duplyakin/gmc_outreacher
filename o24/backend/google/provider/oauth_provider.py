@@ -23,6 +23,7 @@ class GoogleOauthProvider():
         
         auth_url, state = flow.authorization_url(
                 access_type=access_type,
+                prompt='consent',
                 include_granted_scopes=include_granted_scopes)
         
         return auth_url, state
