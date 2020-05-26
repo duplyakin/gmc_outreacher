@@ -1,4 +1,4 @@
-const puppeteer = require("./../../node_modules/puppeteer");
+const puppeteer = require("puppeteer");
 const LoginAction = require('./loginAction.js');
 
 const MyExceptions = require('./../../exceptions/exceptions.js');

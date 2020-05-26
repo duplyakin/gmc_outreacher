@@ -2,7 +2,7 @@ const selectors = require("./../selectors");
 const links = require("./../links");
 const cookieModel = require("./../../models/models.js");
 const action = require('./action.js');
-const puppeteer = require("./../../node_modules/puppeteer");
+const puppeteer = require("puppeteer");
 
 const MyExceptions = require('./../../exceptions/exceptions.js');
 

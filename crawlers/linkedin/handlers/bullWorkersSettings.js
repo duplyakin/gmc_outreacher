@@ -1,4 +1,4 @@
-const Bull = require('./../../node_modules/bull');
+const Bull = require('bull');
 
 const redis = {
   host: '127.0.0.1',

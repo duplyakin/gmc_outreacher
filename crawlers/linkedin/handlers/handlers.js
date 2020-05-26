@@ -1,7 +1,7 @@
 const { bull_workers } = require('./bullWorkersSettings.js');
 const taskModel = require("./../../models/shared.js");
 const workers = require('./../workers/workers.js');
-const cron = require('./../../node_modules/node-cron');
+const cron = require('node-cron');
 
 const MyExceptions = require('./../../exceptions/exceptions.js');
 
