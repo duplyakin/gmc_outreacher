@@ -18,6 +18,9 @@ class GmailController():
         self.credentials = credentials
         self.email = email
 
+        #TODO - check credentials and update
+
+
         self.provider = gmail_api_provider.GmailApiProvider(credentials)
 
         self.smtp = smtp   
@@ -149,24 +152,6 @@ class GmailController():
 
         return msg_id, message
 
-    #NOT USED
-    def _get_payload(self, message):
-        text = ''
-        html = ''
-        references = message.get(name='References', failobj='')
-
-        for part in message.walk():
-            content_type = part.get(name='content-type')
-            if 'text/plain' in content_type:
-                text = part.get_payload()
-            elif 'text/html' in content_type:
-                html = part.get_payload()
-            
-            if text and html:
-                break 
-
-        return text, html, references
-
     def construct_data(self,
                         message, 
                         prospect_id, 
@@ -223,10 +208,3 @@ class GmailController():
             return self.provider.send_message(message=message)
 
         return {'Error' : 'Something went wrong'}
-    
-    def insert_tags(self, text):
-        return text
-    
-    def insert_images(self, text):
-        return text
-

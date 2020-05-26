@@ -32,3 +32,8 @@ python -m unittest o24.production_tests.test_prod_3_carefull_real_sequence.RealS
 
 #TEST linkedin handler
 python -m unittest o24.production_tests.test_prod_3_carefull_real_sequence.RealSequenceTest.test_1_linkedin_handlers
+
+
+
+#TEST Google Oauth
+python -m unittest o24.production_tests.test_prod_10_oauth.OauthTest.test_0_gmail_token
