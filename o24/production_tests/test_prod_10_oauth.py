@@ -30,25 +30,9 @@ import re
 class OauthTest(unittest.TestCase):
     def setUp(self):
         self.user = User.objects(email=TEST_USER_EMAIL).first()
-        
-        """Setup the test driver and create test users"""
-        self.driver = webdriver.Firefox()
-        self.driver.get(self.get_server_url())
-    
-    def test_0_gmail_token(self):
-        response = urllib.urlopen(self.get_server_url())
-        #client = app.test_client()    
-        #with app.test_request_context():
-        #    self._credentials_get(user=self.user, client=client)
-        
-
-    def _credentials_get(self, user, client):
-        url = url_for('dashboard.dashboard_oauth_button')
-        r = post_with_token(user=user, client=client, url=url, data=None, follow_redirects=True)
-
-        response_data = json.loads(r.data)
-
-
+            
+    def test_0_gmail_refresh(self):
+        pass
 
 def setUpModule():
     print("*** setUpModule:{0}".format(__name__))

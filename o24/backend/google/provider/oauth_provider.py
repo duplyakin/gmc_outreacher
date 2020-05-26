@@ -1,10 +1,12 @@
 #import google.oauth2.credentials
 import google_auth_oauthlib.flow
 
+import o24.backend.dashboard.models as models
 from o24.backend.google.models import GoogleAppSetting
 from o24.backend.utils.data import credentials_to_dict
 
 import o24.backend.google.provider.gmail_api_provider as gmail_api_provider   #remove then
+from datetime import datetime
 
 from google.auth.transport.requests import Request
 import google.oauth2.credentials
@@ -12,6 +14,27 @@ import google.oauth2.credentials
 class GoogleOauthProvider():
     def __init__(self):
         self.settings = GoogleAppSetting.settings()
+    
+    @classmethod
+    def check_and_update_credentials(cls, credentials_id):
+        credentials = models.Credentials.objects(id=credentials_id).first()
+        if not credentials:
+            message = "There is no such credentials for id={0}".format(credentials_id)
+            raise Exception(message)
+
+        raw_credentials, expiry = credentials.get_auth_credentials()
+        if not raw_credentials:
+            raise Exception('check_and_update_credentials ERROR: there is no raw_credentials , in get_auth_credentials')
+        
+        res = raw_credentials
+        
+        this = cls()
+        updated_credentials, expiry = this.manual_refresh_credentials(credentials=raw_credentials, expiry=expiry)
+        if updated_credentials:
+            credentials.update_auth_credentials(new_credentials=updated_credentials, expiry=expiry)
+            res = updated_credentials
+
+        return res
 
     def get_gmail_auth_url(self, current_state):
         scopes = self.settings.gmail_scopes
@@ -40,6 +63,7 @@ class GoogleOauthProvider():
             raise Exception("flow.fetch_token error")
 
         access_credentials = credentials_to_dict(flow.credentials)
+        expiry = flow.credentials.expiry
 
         #receive user profile first
         api_provider = gmail_api_provider.GmailApiProvider(access_credentials)
@@ -49,16 +73,21 @@ class GoogleOauthProvider():
             raise Exception("Can't receive user's profile")
 
 
-        return access_credentials, email
+        return access_credentials, email, expiry
     
-    def manual_refresh_credentials(self, credentials):
+    def manual_refresh_credentials(self, credentials, expiry):
         credentials_obj = google.oauth2.credentials.Credentials(**credentials)
 
-        credentials_obj.refresh(Request())
+        #need to have naive datetime
+        expiry = expiry.replace(tzinfo=None)
+        credentials_obj.expiry = expiry
 
-        access_credentials = credentials_to_dict(credentials_obj)
-
-        return access_credentials
+        if credentials_obj and credentials_obj.expired:
+            credentials_obj.refresh(Request())
+            access_credentials = credentials_to_dict(credentials_obj)
+            return access_credentials, credentials_obj.expiry
+        else:
+            return None, None
 
     def valid_state(self, state, current_state):
         if state != current_state:

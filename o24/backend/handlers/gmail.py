@@ -222,6 +222,11 @@ def gmail_send_message(task_id):
 
         prospect_id = task.prospect_id
         campaign_id = task.campaign_id
+        credentials_id = task.credentials_id
+        if not credentials_id:
+            raise Exception("gmail_send_message ERROR: credentials_id can't be None for task_id:{0}".format(task_id))
+
+
         input_data = task.get_input_data()
         if not input_data:
             raise Exception("INPUT_DATA ERROR: No input_data for task_id:{0}".format(task_id))
@@ -249,6 +254,7 @@ def gmail_send_message(task_id):
 
         gmail_controller = GmailController(email=email,
                                             credentials=access_credentials,
+                                            credentials_id=credentials_id,
                                             smtp=smtp)
 
         parent_mailbox = MailBox.get_parent(prospect_id=prospect_id, campaign_id=prospect_id)

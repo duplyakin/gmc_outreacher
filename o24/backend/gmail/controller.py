@@ -1,5 +1,6 @@
 import o24.backend.google.provider.gmail_api_provider as gmail_api_provider
 import o24.backend.google.provider.gmail_smtp_provider as gmail_smtp_provider
+import o24.backend.google.provider.oauth_provider as oauth_provider
 
 import o24.backend.models.inbox.mailbox as mailbox
 from email.mime.multipart import MIMEMultipart
@@ -14,12 +15,13 @@ import uuid
 from bs4 import BeautifulSoup
 
 class GmailController():
-    def __init__(self, email, credentials, smtp=False):
+    def __init__(self, email, credentials, credentials_id, smtp=False):
         self.credentials = credentials
+        self.credentials_id = credentials_id
         self.email = email
 
         #TODO - check credentials and update
-
+        credentials = oauth_provider.GoogleOauthProvider.check_and_update_credentials(credentials_id=credentials_id)
 
         self.provider = gmail_api_provider.GmailApiProvider(credentials)
 

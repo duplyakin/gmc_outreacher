@@ -62,7 +62,7 @@ def dashboard_oauth_callback():
     if not provider.valid_state(state, current_state):
         raise GoogleOauthError("session ouath_state and user state are not equal")
 
-    access_credentials, email = provider.set_gmail_auth_credentials(request.url, current_state)
+    access_credentials, email, expiry = provider.set_gmail_auth_credentials(request.url, current_state)
 
     GMAIL_TYPE = 'api'
     if '@gmail.com' in email:
@@ -73,6 +73,7 @@ def dashboard_oauth_callback():
         'email' : email,
         'account' : email,
         'credentials' : access_credentials,
+        'expiry' : expiry,
         'sender' : GMAIL_TYPE
     }
     Credentials.create_credentials(owner=current_user.id,

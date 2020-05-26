@@ -416,6 +416,17 @@ class Credentials(db.Document):
         
         self._commit(_reload=_reload)
 
+    def get_auth_credentials(self):
+        credentials = self.data.get('credentials', None)
+        expiry = self.data.get('expiry', None)
+        return credentials, expiry
+        
+    def update_auth_credentials(self, new_credentials, expiry):
+        self.data['credentials'] = new_credentials
+        self.data['expiry'] = expiry
+
+        self._commit()
+
     def resume(self):
         self.error_message = ''
         self.status = 0
@@ -436,6 +447,7 @@ class Credentials(db.Document):
         self.save()
         if _reload:
             self.reload()
+
 
 #### Menu: Teams ####
 #### Manage teams
