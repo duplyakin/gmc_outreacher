@@ -45,17 +45,16 @@ class GmailApiProvider():
                 raise            
 
     def get_user_profile(self, user_id='me'):
-        response = self.service.users().getProfile(userId=user_id).execute()
+        request = self.service.users().getProfile(userId=user_id) 
+        response = self._safe_execute(request=request)
         return response
 
     def send_message(self, message, user_id='me'):
-        try:
-            message = (self.service.users().messages().send(userId=user_id, body=message)
-               .execute())
+        request = self.service.users().messages().send(userId=user_id, body=message)
 
-            return message
-        except errors.HttpError as error:
-            print("An error occurred: {0}".format(error))
+        message = self._safe_execute(request=request)
+
+        return message
 
 
 
@@ -101,7 +100,10 @@ class GmailApiProvider():
         return profile['emailAddress']
 
     def list_labels(self, user_id='me'):
-        response = self.service.users().labels().list(userId=user_id).execute()
+        request = self.service.users().labels().list(userId=user_id)
+        
+        response = self._safe_execute(request=request)
+
         return response['labels']
         
     def list_messages_with_labels_history(self, user_id, label_id, history_id, historyTypes="messageAdded"):
@@ -109,19 +111,22 @@ class GmailApiProvider():
             app.logger.debug('.........list_messages_with_labels_history not possible for empty label_ids:{1} user_id:{0}'.format(user_id, label_ids))
             raise Exception("Can't list_messages_with_labels_history for empty label_ids")
 
-        history = self.service.users().history().list(userId=user_id,
+        request = self.service.users().history().list(userId=user_id,
                                                 labelId=label_id,
                                                 startHistoryId=history_id,
-                                                historyTypes=historyTypes).execute()
+                                                historyTypes=historyTypes)
+
+        history = self._safe_execute(request=request)
 
         changes = history['history'] if 'history' in history else []
         while 'nextPageToken' in history:
             page_token = history['nextPageToken']
-            history = self.service.users().history().list(userId=user_id,
+            request = self.service.users().history().list(userId=user_id,
                                                     labelId=label_id,
                                                     startHistoryId=history_id,
                                                     historyTypes=historyTypes,
-                                                    pageToken=page_token).execute()
+                                                    pageToken=page_token)
+            history = self._safe_execute(request=request)
             if 'history' in history:
                 changes.extend(history['history'])
             else:
@@ -134,17 +139,21 @@ class GmailApiProvider():
             app.logger.debug('.........list_messages_with_labels not possible for empty label_ids:{1} user_id:{0}'.format(user_id, label_ids))
             raise Exception("Can't list_messages_with_labels for empty label_ids")
 
-        response = self.service.users().messages().list(userId=user_id,
-                                                labelIds=label_ids).execute()
+        request = self.service.users().messages().list(userId=user_id,
+                                                labelIds=label_ids)
+        
+        response = self._safe_execute(request=request)
         messages = []
         if 'messages' in response:
             messages.extend(response['messages'])
 
         while 'nextPageToken' in response:
             page_token = response['nextPageToken']
-            response = self.service.users().messages().list(userId=user_id,
+            request = self.service.users().messages().list(userId=user_id,
                                                         labelIds=label_ids,
-                                                        pageToken=page_token).execute()
+                                                        pageToken=page_token)
+
+            response = self._safe_execute(request=request)
             if 'messages' in response:
                 messages.extend(response['messages'])
             else:
@@ -154,16 +163,20 @@ class GmailApiProvider():
 
 
     def list_messages_matching_query(self, query='', user_id='me'):
-        response = self.service.users().messages().list(userId=user_id,
-                                                q=query).execute()
+        request = self.service.users().messages().list(userId=user_id,
+                                                q=query)
+
+        response = self._safe_execute(request=request)
         messages = []
         if 'messages' in response:
             messages.extend(response['messages'])
 
         while 'nextPageToken' in response:
             page_token = response['nextPageToken']
-            response = self.service.users().messages().list(userId=user_id, q=query,
-                                                pageToken=page_token).execute()
+            request = self.service.users().messages().list(userId=user_id, q=query,
+                                                pageToken=page_token)
+            
+            response = self._safe_execute(request=request)
             if 'messages' in response:
                 messages.extend(response['messages'])
             else:
@@ -191,9 +204,11 @@ class GmailApiProvider():
 
 
     def get_mime_message(self, msg_id, user_id='me', format='full'):
-            message = self.service.users().messages().get(userId=user_id, 
+            request = self.service.users().messages().get(userId=user_id, 
                                                         id=msg_id,
-                                                        format=format).execute()
+                                                        format=format)
+
+            message = self._safe_execute(request=request)
 
             msg_str = base64.urlsafe_b64decode(message['raw']).decode()
 
@@ -202,10 +217,14 @@ class GmailApiProvider():
             return mime_msg
 
     def watch(self, user_id, request):
-        response = self.service.users().watch(userId=user_id, 
-                                                body=request).execute()
+        request = self.service.users().watch(userId=user_id, 
+                                                body=request)
+
+        response = self._safe_execute(request=request)
         return response
   
     def stop_watch(self, user_id):
-        response = self.service.users().stop(userId=user_id).execute()
+        request = self.service.users().stop(userId=user_id)
+        
+        response = self._safe_execute(request=request)
         return response
