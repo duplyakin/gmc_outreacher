@@ -18,7 +18,7 @@ class LoginAction extends action.Action {
     this.page = await this.context.newPage();
 
     if (this.cookies != undefined && this.cookies != null) {
-      //console.log(this.cookies)
+      console.log(this.cookies)
       await this.page.setCookie(...this.cookies);
     }
   }

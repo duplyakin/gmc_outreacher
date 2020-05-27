@@ -1,5 +1,6 @@
 const modules = require('../modules.js');
-const models = require("../../models/shared.js");
+const models_shared = require("../../models/shared.js");
+const models = require("../../models/models_shared.js");
 
 const MyExceptions = require('../../exceptions/exceptions.js');
 const error_db_save_text = "........ERROR MONGODB: update TASK failed: ";
@@ -7,6 +8,8 @@ const success_db_save_text = "........SUCCSESS MONGODB: result_data added.......
 
 
 async function get_cookies(email, password, li_at, credentials_id) {
+  console.log('.......typeof..credentials_id........ ', typeof credentials_id)
+  console.log('.........credentials_id........ ', credentials_id)
 
   let cookies = await models.Cookies.findOne({ credentials_id: credentials_id }, function (err, res) {
     if (err) throw MyExceptions.MongoDBError('MongoDB find COOKIE err: ' + err);
@@ -23,7 +26,7 @@ async function get_cookies(email, password, li_at, credentials_id) {
       await loginAction.login();
       await loginAction.closeBrowser();
 
-      cookies = await cookieModel.Cookies.findOne({ credentials_id: credentials_id }, function (err, res) {
+      cookies = await models.Cookies.findOne({ credentials_id: credentials_id }, function (err, res) {
         if (err) throw MyExceptions.MongoDBError('MongoDB find COOKIE err: ' + err);
       }); 
     }
@@ -54,10 +57,17 @@ async function get_cookies(email, password, li_at, credentials_id) {
     await loginAction.login();
     await loginAction.closeBrowser();
 
-    cookies = await cookieModel.Cookies.findOne({ credentials_id: credentials_id }, function (err, res) {
+    cookies = await models.Cookies.findOne({ credentials_id: credentials_id }, function (err, res) {
       if (err) throw MyExceptions.MongoDBError('MongoDB find COOKIE err: ' + err);
     });
-    return cookies.data;
+
+    if(cookies !== null) {
+      return cookies.data;
+    } else {
+      return null;
+    }
+
+    
   }
 }
 
@@ -77,7 +87,7 @@ function serialize_data(task_data, task) {
 async function loginWorker(task_id) {
   try {
     /*
-    let task = await models.TaskQueue.findOne({ id: task_id }, function (err, res) {
+    let task = await models_shared.TaskQueue.findOne({ id: task_id }, function (err, res) {
       if (err) throw MyExceptions.MongoDBError('MongoDB find TASK err: ' + err);
     });*/
     let task = task_id.input_data;
@@ -178,7 +188,7 @@ async function searchWorker(task_id) {
   let status = -1; 
   let result_data = {};
   try {
-    let task = await models.TaskQueue.findOneAndUpdate({ _id: task_id, ack: 0 }, { ack: 1 }, { new: true });
+    let task = await models_shared.TaskQueue.findOneAndUpdate({ _id: task_id, ack: 0 }, { ack: 1 }, { new: true });
     if (!task) {
       console.log("..... task not found or locked: .....");
       return;
@@ -212,6 +222,8 @@ async function searchWorker(task_id) {
    
   } catch (err) {
 
+    console.log( err.stack )
+
     if (err.code !== undefined && err.code !== null) {
       result_data = {
         code: err.code,
@@ -227,7 +239,7 @@ async function searchWorker(task_id) {
 
   } finally {
     console.log("RES: ", result_data);
-    await models.TaskQueue.findOneAndUpdate({ _id: task_id }, { ack: 0, status: status, result_data: result_data }, { new: true });
+    await models_shared.TaskQueue.findOneAndUpdate({ _id: task_id }, { ack: 0, status: status, result_data: result_data }, { new: true });
   }
 }
 
@@ -236,7 +248,7 @@ async function connectWorker(task_id) {
   let status = -1; 
   let result_data = {};
   try {
-    let task = await models.TaskQueue.findOneAndUpdate({ _id: task_id, ack: 0 }, { ack: 1 }, { new: true });
+    let task = await models_shared.TaskQueue.findOneAndUpdate({ _id: task_id, ack: 0 }, { ack: 1 }, { new: true });
     if (!task) {
       console.log("..... task not found or locked: .....");
       return;
@@ -309,7 +321,7 @@ async function connectWorker(task_id) {
 
   } finally {
     console.log("RES: ", result_data);
-    await models.TaskQueue.findOneAndUpdate({ _id: task_id }, { ack: 0, status: status, result_data: result_data }, { new: true });
+    await models_shared.TaskQueue.findOneAndUpdate({ _id: task_id }, { ack: 0, status: status, result_data: result_data }, { new: true });
   }
 }
 
@@ -318,7 +330,7 @@ async function messageWorker(task_id) {
   let status = -1; 
   let result_data = {};
   try {
-    let task = await models.TaskQueue.findOneAndUpdate({ _id: task_id, ack: 0 }, { ack: 1 }, { new: true });
+    let task = await models_shared.TaskQueue.findOneAndUpdate({ _id: task_id, ack: 0 }, { ack: 1 }, { new: true });
     if (!task) {
       console.log("..... task not found or locked: .....");
       return;
@@ -392,7 +404,7 @@ async function messageWorker(task_id) {
 
   } finally {
     console.log("RES: ", result_data);
-    await models.TaskQueue.findOneAndUpdate({ _id: task_id }, { ack: 0, status: status, result_data: result_data }, { new: true });
+    await models_shared.TaskQueue.findOneAndUpdate({ _id: task_id }, { ack: 0, status: status, result_data: result_data }, { new: true });
   }
 }
 
@@ -401,7 +413,7 @@ async function scribeWorker(task_id) {
   let status = -1; 
   let result_data = {};
   try {
-    let task = await models.TaskQueue.findOneAndUpdate({ _id: task_id, ack: 0 }, { ack: 1 }, { new: true });
+    let task = await models_shared.TaskQueue.findOneAndUpdate({ _id: task_id, ack: 0 }, { ack: 1 }, { new: true });
     if (!task) {
       console.log("..... task not found or locked: .....");
       return;
@@ -454,7 +466,7 @@ async function scribeWorker(task_id) {
 
   } finally {
     console.log("RES: ", result_data);
-    await models.TaskQueue.findOneAndUpdate({ _id: task_id }, { ack: 0, status: status, result_data: result_data }, { new: true });
+    await models_shared.TaskQueue.findOneAndUpdate({ _id: task_id }, { ack: 0, status: status, result_data: result_data }, { new: true });
   }
 }
 
@@ -463,7 +475,7 @@ async function messageCheckWorker(task_id) {
   let status = -1; 
   let result_data = {};
   try {
-    let task = await models.TaskQueue.findOneAndUpdate({ _id: task_id, ack: 0 }, { ack: 1 }, { new: true });
+    let task = await models_shared.TaskQueue.findOneAndUpdate({ _id: task_id, ack: 0 }, { ack: 1 }, { new: true });
     if (!task) {
       console.log("..... task not found or locked: .....");
       return;
@@ -516,7 +528,7 @@ async function messageCheckWorker(task_id) {
 
   } finally {
     console.log("RES: ", result_data);
-    await models.TaskQueue.findOneAndUpdate({ _id: task_id }, { ack: 0, status: status, result_data: result_data }, { new: true });
+    await models_shared.TaskQueue.findOneAndUpdate({ _id: task_id }, { ack: 0, status: status, result_data: result_data }, { new: true });
   }
 }
 
@@ -525,7 +537,7 @@ async function connectCheckWorker(task_id) {
   let status = -1; 
   let result_data = {};
   try {
-    let task = await models.TaskQueue.findOneAndUpdate({ _id: task_id, ack: 0 }, { ack: 1 }, { new: true });
+    let task = await models_shared.TaskQueue.findOneAndUpdate({ _id: task_id, ack: 0 }, { ack: 1 }, { new: true });
     if (!task) {
       console.log("..... task not found or locked: .....");
       return;
@@ -582,7 +594,7 @@ async function connectCheckWorker(task_id) {
 
   } finally {
     console.log("RES: ", result_data);
-    await models.TaskQueue.findOneAndUpdate({ _id: task_id }, { ack: 0, status: status, result_data: result_data }, { new: true });
+    await models_shared.TaskQueue.findOneAndUpdate({ _id: task_id }, { ack: 0, status: status, result_data: result_data }, { new: true });
   }
 }
 
