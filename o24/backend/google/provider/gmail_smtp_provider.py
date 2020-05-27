@@ -2,6 +2,7 @@ import base64
 import email
 import uuid
 import o24.config as config
+from o24.globals import *
 
 import base64
 import yagmail
@@ -11,7 +12,9 @@ from email.mime.base import MIMEBase
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from email.utils import formatdate
-
+import traceback
+import o24.backend.google.provider.oauth_provider as oauth_provider
+from o24.exceptions.exception_with_code import ErrorCodeException
 
 class o24SMTP(yagmail.SMTP):
     @staticmethod
@@ -44,10 +47,17 @@ class o24SMTP(yagmail.SMTP):
         
 
 class GmailSmtpProvider():
-    def __init__(self, email, credentials):
+    def __init__(self, email, credentials, credentials_id):
         self.credentials = credentials
         self.email = email
-        self.smtp_client = o24SMTP(user=email,
+        self.credentials_id = credentials_id
+
+        self._refresh_credentials()
+    
+    def _refresh_credentials(self):
+        self.credentials = oauth_provider.GoogleOauthProvider.check_and_update_credentials(credentials_id=self.credentials_id)
+
+        self.smtp_client = o24SMTP(user=self.email,
                                     host=config.GMAIL_SMTP_HOST,
                                     port=config.GMAIL_SMTP_PORT,
                                     smtp_starttls=True,
@@ -73,8 +83,22 @@ class GmailSmtpProvider():
 
 
     def send_message(self, email_to, message):
-        res = self.smtp_client.send(to=email_to,
-                                    contents=message)
+        for i in range(2):
+            try:
+                res = self.smtp_client.send(to=email_to,
+                                            contents=message)
 
-        self.smtp_client.close()
-        return res
+                self.smtp_client.close()
+                return res
+            except Exception as e:
+                print(e)
+                traceback.print_exc()
+
+                if (hasattr(e, 'smtp_code')):
+                    if i <= 0 and e.smtp_code == SMTP_AUTH_ERROR:
+                        self._refresh_credentials()
+                        continue
+                    else:
+                        raise ErrorCodeException(error_code=e.smtp_code, message=str(e))
+                
+                raise

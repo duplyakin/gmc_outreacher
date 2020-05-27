@@ -2,14 +2,47 @@ from apiclient import errors
 import base64
 import email
 from o24.backend import app
+from o24.globals import *
 from apiclient import errors
 import base64
 import email
 from o24.backend.google.service.api import GoogleApiService
+import o24.backend.google.provider.oauth_provider as oauth_provider
+from o24.exceptions.exception_with_code import ErrorCodeException
+
+import traceback
 
 class GmailApiProvider():
-    def __init__(self, credentials):
-        self.service = GoogleApiService.build_gmail_api_service(credentials)
+    def __init__(self, credentials, credentials_id):
+        self.credentials_id = credentials_id
+        self.credentials = credentials
+
+        self._refresh_credentials()    
+    
+    def _refresh_credentials(self):
+        self.credentials = oauth_provider.GoogleOauthProvider.check_and_update_credentials(credentials_id=self.credentials_id)
+
+        self.service = GoogleApiService.build_gmail_api_service(self.credentials)
+
+    def _safe_execute(self, request):
+        for i in range(2):
+            try:
+                return request.execute()
+            except Exception as e:
+                print(e)
+                traceback.print_exc()
+
+                if type(e) == errors.HttpError:
+                    if (len(e.args) > 0):
+                        code = e.args[0].get('status', -1)
+                        
+                        if i <= 0 and code == 401:
+                            self._refresh_credentials()
+                            continue
+                        else:
+                            raise ErrorCodeException(error_code=code, message=str(e))
+                
+                raise            
 
     def get_user_profile(self, user_id='me'):
         response = self.service.users().getProfile(userId=user_id).execute()
@@ -141,18 +174,20 @@ class GmailApiProvider():
 
     def get_message_data(self, msg_id, user_id='me', format='metadata', metadataHeaders=[]):
         message = ''
+
+        request = None
         if metadataHeaders:
-            message = self.service.users().messages().get(userId=user_id, 
+            request = self.service.users().messages().get(userId=user_id, 
                                                     id=msg_id,
                                                     format=format,
-                                                    metadataHeaders=metadataHeaders).execute()
+                                                    metadataHeaders=metadataHeaders)
 
         else:
-            message = self.service.users().messages().get(userId=user_id, 
+            request = self.service.users().messages().get(userId=user_id, 
                                                     id=msg_id,
-                                                    format=format).execute()
+                                                    format=format)
 
-        return message
+        return self._safe_execute(request=request)
 
 
     def get_mime_message(self, msg_id, user_id='me', format='full'):

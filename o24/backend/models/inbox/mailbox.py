@@ -82,7 +82,11 @@ class MailBox(db.Document):
     
     @classmethod
     def get_parent(cls, prospect_id, campaign_id):
-        return cls.objects(Q(prospect_id=prospect_id) & Q(campaign_id=campaign_id)).order_by('-sequence').first()
+        parent = cls.objects(Q(prospect_id=prospect_id) & Q(campaign_id=campaign_id)).order_by('-sequence').first()
+        if not parent:
+            return None
+        
+        return parent
 
     @classmethod
     #msgId - Global goole msgId 

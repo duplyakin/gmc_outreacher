@@ -23,9 +23,7 @@ def dummy_linkedin_check_reply(task_id):
     task = shared.TaskQueue.get_task(task_id)
     if not task:
         raise Exception("No such task id:{0}".format(task_id))
-    
-    task.acknowledge()
-    
+        
     if task.last_action():
         task.finish_task()
     else:
@@ -42,9 +40,7 @@ def dummy_linkedin_visit_profile(task_id):
     task = shared.TaskQueue.get_task(task_id)
     if not task:
         raise Exception("No such task id:{0}".format(task_id))
-    
-    task.acknowledge()
-    
+        
     if task.last_action():
         task.finish_task()
     else:
@@ -62,9 +58,7 @@ def dummy_linkedin_connect(task_id):
     task = shared.TaskQueue.get_task(task_id)
     if not task:
         raise Exception("No such task id:{0}".format(task_id))
-    
-    task.acknowledge()
-    
+        
     if task.last_action():
         task.finish_task()
     else:
@@ -81,9 +75,7 @@ def dummy_linkedin_send_message(task_id):
     task = shared.TaskQueue.get_task(task_id)
     if not task:
         raise Exception("No such task id:{0}".format(task_id))
-    
-    task.acknowledge()
-    
+        
     if task.last_action():
         task.finish_task()
     else:
@@ -101,9 +93,7 @@ def dummy_email_send_message(task_id):
     task = shared.TaskQueue.get_task(task_id)
     if not task:
         raise Exception("No such task id:{0}".format(task_id))
-    
-    task.acknowledge()
-    
+        
     if task.last_action():
         task.finish_task()
     else:
@@ -121,9 +111,7 @@ def dummy_delay(task_id):
     task = shared.TaskQueue.get_task(task_id)
     if not task:
         raise Exception("No such task id:{0}".format(task_id))
-    
-    task.acknowledge()
-    
+        
     if task.last_action():
         task.finish_task()
     else:
@@ -141,9 +129,7 @@ def dummy_finished(task_id):
     task = shared.TaskQueue.get_task(task_id)
     if not task:
         raise Exception("No such task id:{0}".format(task_id))
-    
-    task.acknowledge()
-    
+        
     if task.last_action():
         task.finish_task()
     else:
@@ -161,9 +147,7 @@ def dummy_success(task_id):
     task = shared.TaskQueue.get_task(task_id)
     if not task:
         raise Exception("No such task id:{0}".format(task_id))
-    
-    task.acknowledge()
-    
+        
     if task.last_action():
         task.finish_task()
     else:
@@ -181,9 +165,7 @@ def dummy_linkedin_check_accept(task_id):
     task = shared.TaskQueue.get_task(task_id)
     if not task:
         raise Exception("No such task id:{0}".format(task_id))
-    
-    task.acknowledge()
-    
+        
     if task.last_action():
         task.finish_task()
     else:
@@ -201,9 +183,7 @@ def dummy_email_check_reply(task_id):
     task = shared.TaskQueue.get_task(task_id)
     if not task:
         raise Exception("No such task id:{0}".format(task_id))
-    
-    task.acknowledge()
-    
+        
     if task.last_action():
         task.finish_task()
     else:
@@ -219,9 +199,7 @@ def dummy_delay(task_id):
     task = shared.TaskQueue.get_task(task_id)
     if not task:
         raise Exception("No such task id:{0}".format(task_id))
-    
-    task.acknowledge()
-    
+        
     if task.last_action():
         task.finish_task()
     else:

@@ -34,8 +34,6 @@ def delay_handler(task_id):
     if not task:
         raise Exception("delay_handler ERROR: No such task id:{0}".format(task_id))
     
-    task.acknowledge()
-
     input_data = task.get_input_data()
     if not input_data:
         raise Exception("delay_handler ERROR: wrong input_data:{0}".format(input_data))
