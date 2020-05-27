@@ -248,8 +248,8 @@ TEST_CREDENTIALS = {
         'title' : 'test_linkedin_handlers',
         'medium' : 'linkedin',
         'data' : {
-            'email' : 'clients@boostlabs.co.uk',
-            'password' : '!@£$%^'
+            'email' : 'grinnbob@rambler.ru',
+            'password' : 'linkedin123'
         }
     }
 }
