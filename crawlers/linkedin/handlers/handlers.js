@@ -1,9 +1,9 @@
 const { bull_workers } = require('./bullWorkersSettings.js');
-const taskModel = require("./../../models/shared.js");
-const workers = require('./../workers/workers.js');
+const models = require("../../models/shared.js");
+const workers = require('../workers/workers.js');
 const cron = require('node-cron');
 
-const MyExceptions = require('./../../exceptions/exceptions.js');
+const actionKeys = require('./actionKeys.js');
 
 
 async function bullConsumer() {
@@ -31,26 +31,26 @@ async function bullConsumer() {
         case 'linkedin-check-reply':
           await workers.messageCheck(job.data.task_id);
           break;
-/*
-        case 'finished':
-          //await workers.loginWorker(job.task);
-          break;
-        case 'success':
-          //await workers.loginWorker(job.task);
-          break;
-        case 'delay-linkedin':
-          console.log("..... task.action_key: ..... delay-linkedin");
-          break;
-        case 'email-send-message':
-          console.log("..... task.action_key: ..... email-send-message");
-          break;
-        case 'delay-email':
-          console.log("..... task.action_key: ..... delay-email");
-          break;
-        case 'email-check-reply':
-          console.log("..... task.action_key: ..... email-check-reply");
-          break;
-*/
+        /*
+                case 'finished':
+                  //await workers.loginWorker(job.task);
+                  break;
+                case 'success':
+                  //await workers.loginWorker(job.task);
+                  break;
+                case 'delay-linkedin':
+                  console.log("..... task.action_key: ..... delay-linkedin");
+                  break;
+                case 'email-send-message':
+                  console.log("..... task.action_key: ..... email-send-message");
+                  break;
+                case 'delay-email':
+                  console.log("..... task.action_key: ..... delay-email");
+                  break;
+                case 'email-check-reply':
+                  console.log("..... task.action_key: ..... email-check-reply");
+                  break;
+        */
         default:
           break;
       }
@@ -59,7 +59,7 @@ async function bullConsumer() {
         code: MyExceptions.HandlerError().code,
         raw: MyExceptions.HandlerError("HandlerError error: " + err).error
       };
-      await taskModel.TaskQueue.updateOne({ id: job.data.task_id }, { status: -1, result_data: err_result }, function (err, res) {
+      await models.TaskQueue.updateOne({ id: job.data.task_id }, { status: -1, result_data: err_result }, function (err, res) {
         if (err) throw MyExceptions.MongoDBError('MongoDB save err: ' + err);
         // updated!
         console.log(success_db_save_text);
@@ -71,9 +71,10 @@ async function bullConsumer() {
 async function taskStatusListener() {
   // start cron every minute
   cron.schedule("* * * * *", async () => {
-    let tasks = await taskModel.TaskQueue.find({ status: 1 }, function (err, res) {
-      if (err) throw MyExceptions.MongoDBError('MongoDB find err: ' + err);
+    let tasks = await models.TaskQueue.find({ status: 1, action_key: { $in: actionKeys.action_keys }}, function (err, res) {
+      if (err) throw MyExceptions.MongoDBError('MongoDB find TASKs err: ' + err);
     });
+
     if (Array.isArray(tasks) && tasks.length !== 0) {
       tasks.forEach(async (task) => {
         let data = {
@@ -83,8 +84,9 @@ async function taskStatusListener() {
         await bull_workers.add(data);
       });
 
-      console.log('this message logs every minute - TASKs ADDED in queue');
+      console.log('CRON log - TASKs ADDED in queue');
     }
+    console.log('this message logs every minute - CRON is active');
   });
 }
 

@@ -14,8 +14,6 @@ class SearchAction extends action.Action {
   async search() {
     await super.gotoChecker(this.searchUrl);
 
-    await this.page.waitForSelector(selectors.SEARCH_ELEMENT_SELECTOR, { timeout: 5000 });
-
     let currentPage = 1;
     let result_data = {
       code: 0,
@@ -25,13 +23,16 @@ class SearchAction extends action.Action {
         link: this.searchUrl
       }
     };
-    let mySelectors = {
-      selector1: selectors.SEARCH_ELEMENT_SELECTOR,
-      selector2: selectors.LINK_SELECTOR,
-      selector3: selectors.FULL_NAME_SELECTOR,
-    };
-
+    
     try {
+      await this.page.waitForSelector(selectors.SEARCH_ELEMENT_SELECTOR, { timeout: 5000 });
+
+      let mySelectors = {
+        selector1: selectors.SEARCH_ELEMENT_SELECTOR,
+        selector2: selectors.LINK_SELECTOR,
+        selector3: selectors.FULL_NAME_SELECTOR,
+      };
+
       while (currentPage <= this.page_count) {
         let newData = await this.page.evaluate((mySelectors) => {
 

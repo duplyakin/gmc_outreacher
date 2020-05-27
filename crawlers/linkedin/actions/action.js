@@ -12,8 +12,8 @@ class Action {
   }
 
   async startBrowser() {
-    //this.browser = await puppeteer.launch({ headless: false }); // test mode
-    this.browser = await puppeteer.launch();
+    this.browser = await puppeteer.launch({ headless: false }); // test mode
+    //this.browser = await puppeteer.launch();
     this.context = await this.browser.createIncognitoBrowserContext();
     this.page = await this.context.newPage();
     await this.page.setCookie(...this.cookies);
@@ -58,6 +58,7 @@ class Action {
         }
       }
     } catch (err) {
+      // TODO: check, if it BanError
       throw MyExceptions.NetworkError('Something wromg with network: ' + err);
     }
   }

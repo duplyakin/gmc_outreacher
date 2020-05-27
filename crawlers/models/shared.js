@@ -56,10 +56,6 @@ let funnelSchema = new Schema({
 });
 
 let taskQueueSchema = new Schema({
-  current_node : {
-    type: mongoose.ObjectId,
-    ref: 'Funnel',
-  },
 
   action_key : String,
 
@@ -68,45 +64,18 @@ let taskQueueSchema = new Schema({
     default: 0, // NEW
   },
 
-  ack : {
-    type: Number,
-    default: 0,
-  },
-
-  next_round : {
-    type: Date,
-    default: 0,
-  },
-
   input_data : Object,
 
   result_data : Object,
 
   credentials_id : mongoose.ObjectId,
 
-  prospect_id : {
-    type: mongoose.ObjectId,
-    unique: true,
-  },
-
-  campaign_id : mongoose.ObjectId,
-
-  record_type : {
+  ack : {
     type: Number,
     default: 0,
   },
 
-  followup_level : {
-    type: Number,
-    default: 0,
-  },
-/*
-  js_action : {
-    type: Boolean,
-    default: false,
-  },
-  */
-});
+}, { collection: 'task_queue' } );
 
 let asyncTaskQueueSchema = new Schema({
   campaign_id : {

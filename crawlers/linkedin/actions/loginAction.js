@@ -98,7 +98,7 @@ class LoginAction extends action.Action {
 
       } else {
         // update cookie_obj info
-        await cookie_obj.updateOne({ expires: newExpires, data: newCookies }, function (err, res) {
+        await cookieModel.Cookies.findOneAndUpdate({ credentials_id: this.credentials_id }, { expires: newExpires, data: newCookies }, function (err, res) {
           if (err) throw MyExceptions.MongoDBError('MongoDB update COOKIE err: ' + err);
           // updated!
           console.log('........updated in mongoDB.......');
