@@ -1,6 +1,6 @@
 const modules = require('../modules.js');
 const models_shared = require("../../models/shared.js");
-const models = require("../../models/models_shared.js");
+const models = require("../../models/models.js");
 
 const MyExceptions = require('../../exceptions/exceptions.js');
 const error_db_save_text = "........ERROR MONGODB: update TASK failed: ";
@@ -31,12 +31,16 @@ async function get_cookies(email, password, li_at, credentials_id) {
       }); 
     }
 
-    return cookies.data;
+    if(cookies !== null) {
+      return cookies.data;
+    } else {
+      return null;
+    }
 
   } else {
     // cookies not defined
     let cookies_data = null;
-    if (li_at !== '') {
+    if (li_at !== '' && li_at != undefined && li_at != null) {
       cookies_data = [{
         name : "li_at",
         value : li_at,
@@ -66,8 +70,6 @@ async function get_cookies(email, password, li_at, credentials_id) {
     } else {
       return null;
     }
-
-    
   }
 }
 
@@ -306,6 +308,8 @@ async function connectWorker(task_id) {
 
   } catch (err) {
 
+    console.log( err.stack )
+
     if (err.code !== undefined && err.code !== null) {
       result_data = {
         code: err.code,
@@ -389,6 +393,8 @@ async function messageWorker(task_id) {
     
   } catch (err) {
 
+    console.log( err.stack )
+
     if (err.code !== undefined && err.code !== null) {
       result_data = {
         code: err.code,
@@ -451,6 +457,8 @@ async function scribeWorker(task_id) {
 
   } catch (err) {
 
+    console.log( err.stack )
+
     if (err.code !== undefined && err.code !== null) {
       result_data = {
         code: err.code,
@@ -512,6 +520,8 @@ async function messageCheckWorker(task_id) {
     status = 5;
 
   } catch (err) {
+
+    console.log( err.stack )
 
     if (err.code !== undefined && err.code !== null) {
       result_data = {
@@ -578,6 +588,8 @@ async function connectCheckWorker(task_id) {
     status = 5;
 
   } catch (err) {
+
+    console.log( err.stack )
 
     if (err.code !== undefined && err.code !== null) {
       result_data = {

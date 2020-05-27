@@ -12,13 +12,13 @@ class LoginAction extends action.Action {
   }
 
   async startBrowser() {
-    //this.browser = await puppeteer.launch({ headless: false }); // test mode
-    this.browser = await puppeteer.launch();
+    this.browser = await puppeteer.launch({ headless: false }); // test mode
+    //this.browser = await puppeteer.launch();
     this.context = await this.browser.createIncognitoBrowserContext();
     this.page = await this.context.newPage();
 
     if (this.cookies != undefined && this.cookies != null) {
-      console.log(this.cookies)
+      //console.log('cooooookiieeeess: ', this.cookies)
       await this.page.setCookie(...this.cookies);
     }
   }
