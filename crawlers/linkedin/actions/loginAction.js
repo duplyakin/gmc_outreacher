@@ -93,8 +93,8 @@ class LoginAction {
         cookie_obj.data = new_cookie;
         await cookie_obj.save();*/
 
-        await models.Cookies.updateOne({ credentials_id: this.credentials_id }, { expires: new_expires, data: new_cookie }, function (err, res) {
-            if (err) throw MyExceptions.MongoDBError('MongoDB find COOKIE err: ' + err);
+        await models.Cookies.updateOne({ credentials_id: this.credentials_id }, { expires: new_expires, data: new_cookie }, { upsert: true }, function (err, res) {
+            if (err) throw MyExceptions.MongoDBError('MongoDB find COOKIE err: ' + err); // add ...
         });
 
     }
@@ -131,6 +131,10 @@ class LoginAction {
 
     async login_with_li_at() {
         let domain_var = await this._get_domain();
+        if(domain_var == null || domain_var == '.' || domain_var == '') {
+            console.log('Never happend: domain_var is bad.')
+            return;
+        }
         let cookies_data = [{
             name : "li_at",
             value : this.li_at,
@@ -156,7 +160,6 @@ class LoginAction {
 
         let current_url = await this.page.url();
         if (current_url === links.START_PAGE_LINK) {
-            await this._update_cookie();
             return true;
         }
 
@@ -168,6 +171,7 @@ class LoginAction {
         // check - if we logged
         let logged = await this.is_logged();
         if (logged) {
+            await this._update_cookie();
             await this.page.close();
             return logged;
         }
@@ -178,6 +182,7 @@ class LoginAction {
             logged = await this.is_logged();
 
             if (logged) {
+                await this._update_cookie();
                 await this.page.close();
                 return logged;
             }
@@ -195,6 +200,7 @@ class LoginAction {
             throw new Error('Can\'t login.');
         }
 
+        await this._update_cookie();
         await this.page.close();
         return logged;
     }

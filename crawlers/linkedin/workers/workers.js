@@ -38,15 +38,6 @@ function check_expired(cookies) {
 }
 
 
-function get_val_0(target, name, default_val = null) {
-  return target.hasOwnProperty(name) ? target[name] : default_val;
-}  
-
-function get_val(target, name) {
-    return target[name];
-}  
-
-
 function serialize_data(input_data) {
   if (!input_data){
     throw new Error ('SERIALIZATION error: input_data can’t be empty');
@@ -54,10 +45,10 @@ function serialize_data(input_data) {
     
   let task_data = {};
     
-  task_data['credentials_data'] = get_val(input_data, 'credentials_data', {})
-  task_data['campaign_data'] = get_val(input_data, 'campaign_data', {})
-  task_data['template_data'] = get_val(input_data, 'template_data', {})
-  task_data['prospect_data'] = get_val(input_data, 'prospect_data', {})
+  task_data['credentials_data'] = input_data.credentials_data;
+  task_data['campaign_data'] = input_data.campaign_data;
+  task_data['template_data'] = input_data.template_data;
+  task_data['prospect_data'] = input_data.prospect_data;
     
   return task_data;
 }
@@ -67,6 +58,8 @@ async function searchWorker(task_id) {
   let status = -1; 
   let result_data = {};
   let task = null;
+
+  let browser = null;
   try {
     task = await models_shared.TaskQueue.findOneAndUpdate({ _id: task_id, ack: 0 }, { ack: 1 }, { new: true });
     if (task == null) {
@@ -74,11 +67,11 @@ async function searchWorker(task_id) {
       return;
     }
 
-    let credentials_id = get_val(task, 'credentials_id');
+    let credentials_id = task.credentials_id;
     if (!credentials_id) {
       throw new Error ('there is no task.credentials_id');
     }
-    let input_data = get_val(task, 'input_data');
+    let input_data = task.input_data;
     if (!input_data) {
       throw new Error ('there is no task.input_data');
     }
@@ -88,10 +81,10 @@ async function searchWorker(task_id) {
     let cookies = await get_cookies(task_data.credentials_data.email, task_data.credentials_data.password, task_data.credentials_data.li_at, credentials_id);
 
     // start work
-    let searchAction = new modules.searchAction.SearchAction(task_data.credentials_data.email, task_data.credentials_data.password, task_data.credentials_data.li_at, cookies, credentials_id, task_data.campaign_data.next_url, task_data.campaign_data.page_count);
-    await searchAction.startBrowser();
+    searchAction = new modules.searchAction.SearchAction(task_data.credentials_data.email, task_data.credentials_data.password, task_data.credentials_data.li_at, cookies, credentials_id, task_data.campaign_data.next_url, task_data.campaign_data.page_count);
+    browser = await searchAction.startBrowser();
     result_data = await searchAction.search();
-    await searchAction.closeBrowser();
+    browser = await searchAction.closeBrowser();
 
     status = result_data.code >= 0 ? 5 : -1;  // if we got some exception (BAN?), we have to save results before catch Error and send task status -1
    
@@ -117,6 +110,11 @@ async function searchWorker(task_id) {
     if(task !== null) {
       await models_shared.TaskQueue.findOneAndUpdate({ _id: task_id }, { ack: 0, status: status, result_data: result_data }, { new: true });
     }
+
+    if(browser !== null) {
+      browser.disconnect();
+      browser.close();
+    }
   }
 }
 
@@ -125,6 +123,8 @@ async function connectWorker(task_id) {
   let status = -1; 
   let result_data = {};
   let task = null;
+
+  let browser = null;
   try {
     task = await models_shared.TaskQueue.findOneAndUpdate({ _id: task_id, ack: 0 }, { ack: 1 }, { new: true });
     if (task == null) {
@@ -132,11 +132,11 @@ async function connectWorker(task_id) {
       return;
     }
 
-    let credentials_id = get_val(task, 'credentials_id');
+    let credentials_id = task.credentials_id;
     if (!credentials_id) {
       throw new Error ('there is no task.credentials_id');
     }
-    let input_data = get_val(task, 'input_data');
+    let input_data = task.input_data;
     if (!input_data) {
       throw new Error ('there is no task.input_data');
     }
@@ -149,17 +149,17 @@ async function connectWorker(task_id) {
     // start work
     // check connect
     let connectCheckAction = new modules.connectCheckAction.ConnectCheckAction(task_data.credentials_data.email, task_data.credentials_data.password, task_data.credentials_data.li_at, cookies, credentials_id, prospect_full_name);
-    await connectCheckAction.startBrowser();
+    browser = await connectCheckAction.startBrowser();
     let resCheck = await connectCheckAction.connectCheck();
-    await connectCheckAction.closeBrowser();
+    browser = await connectCheckAction.closeBrowser();
 
     let res = false;
     if (!resCheck) {
       // connect if not connected
       let connectAction = new modules.connectAction.ConnectAction(task_data.credentials_data.email, task_data.credentials_data.password, task_data.credentials_data.li_at, cookies, credentials_id, task_data.prospect_data.linkedin, task_data.template_data.message, task_data.prospect_data);
-      await connectAction.startBrowser();
+      browser = await connectAction.startBrowser();
       res = await connectAction.connect();
-      await connectAction.closeBrowser();
+      browser = await connectAction.closeBrowser();
     } else {
       res = true;
       //throw MyExceptions.ConnectActionError('Connect is already connected: ' + err);
@@ -193,6 +193,11 @@ async function connectWorker(task_id) {
     if(task !== null) {
       await models_shared.TaskQueue.findOneAndUpdate({ _id: task_id }, { ack: 0, status: status, result_data: result_data }, { new: true });
     }
+    
+    if(browser !== null) {
+      browser.disconnect();
+      browser.close();
+    }
   }
 }
 
@@ -201,6 +206,8 @@ async function messageWorker(task_id) {
   let status = -1; 
   let result_data = {};
   let task = null;
+
+  let browser = null;
   try {
     task = await models_shared.TaskQueue.findOneAndUpdate({ _id: task_id, ack: 0 }, { ack: 1 }, { new: true });
     if (task == null) {
@@ -208,11 +215,11 @@ async function messageWorker(task_id) {
       return;
     }
 
-    let credentials_id = get_val(task, 'credentials_id');
+    let credentials_id = task.credentials_id;
     if (!credentials_id) {
       throw new Error ('there is no task.credentials_id');
     }
-    let input_data = get_val(task, 'input_data');
+    let input_data = task.input_data;
     if (!input_data) {
       throw new Error ('there is no task.input_data');
     }
@@ -223,16 +230,16 @@ async function messageWorker(task_id) {
     // start work
     // check reply
     let messageCheckAction = new modules.messageCheckAction.MessageCheckAction(task_data.credentials_data.email, task_data.credentials_data.password, task_data.credentials_data.li_at, cookies, credentials_id, task_data.prospect_data.linkedin);
-    await messageCheckAction.startBrowser();
+    browser = await messageCheckAction.startBrowser();
     let resCheckMsg = await messageCheckAction.messageCheck();
-    await messageCheckAction.closeBrowser();
+    browser = await messageCheckAction.closeBrowser();
 
     if (resCheckMsg.message === '') {
       // if no reply - send msg
       let messageAction = new modules.messageAction.MessageAction(task_data.credentials_data.email, task_data.credentials_data.password, task_data.credentials_data.li_at, cookies, credentials_id, task_data.prospect_data.linkedin, task_data.prospect_data, task_data.template_data.message);
-      await messageAction.startBrowser();
+      browser = await messageAction.startBrowser();
       let res = await messageAction.message();
-      await messageAction.closeBrowser();
+      browser = await messageAction.closeBrowser();
 
       result_data = {
         code: 0,
@@ -270,6 +277,11 @@ async function messageWorker(task_id) {
     if(task !== null) {
       await models_shared.TaskQueue.findOneAndUpdate({ _id: task_id }, { ack: 0, status: status, result_data: result_data }, { new: true });
     }
+
+    if(browser !== null) {
+      browser.disconnect();
+      browser.close();
+    }
   }
 }
 
@@ -278,6 +290,8 @@ async function scribeWorker(task_id) {
   let status = -1; 
   let result_data = {};
   let task = null;
+
+  let browser = null;
   try {
     task = await models_shared.TaskQueue.findOneAndUpdate({ _id: task_id, ack: 0 }, { ack: 1 }, { new: true });
     if (task == null) {
@@ -285,11 +299,11 @@ async function scribeWorker(task_id) {
       return;
     }
 
-    let credentials_id = get_val(task, 'credentials_id');
+    let credentials_id = task.credentials_id;
     if (!credentials_id) {
       throw new Error ('there is no task.credentials_id');
     }
-    let input_data = get_val(task, 'input_data');
+    let input_data = task.input_data;
     if (!input_data) {
       throw new Error ('there is no task.input_data');
     }
@@ -299,9 +313,9 @@ async function scribeWorker(task_id) {
 
     // start work
     let scribeAction = new modules.scribeAction.ScribeAction(task_data.credentials_data.email, task_data.credentials_data.password, task_data.credentials_data.li_at, cookies, credentials_id, task_data.prospect_data.linkedin);
-    await scribeAction.startBrowser();
+    browser = await scribeAction.startBrowser();
     let res = await scribeAction.scribe();
-    await scribeAction.closeBrowser();
+    browser = await scribeAction.closeBrowser();
 
     result_data = {
       code: 0,
@@ -332,6 +346,11 @@ async function scribeWorker(task_id) {
     if(task !== null) {
       await models_shared.TaskQueue.findOneAndUpdate({ _id: task_id }, { ack: 0, status: status, result_data: result_data }, { new: true });
     }
+
+    if(browser !== null) {
+      browser.disconnect();
+      browser.close();
+    }
   }
 }
 
@@ -340,6 +359,8 @@ async function messageCheckWorker(task_id) {
   let status = -1; 
   let result_data = {};
   let task = null;
+
+  let browser = null;
   try {
     task = await models_shared.TaskQueue.findOneAndUpdate({ _id: task_id, ack: 0 }, { ack: 1 }, { new: true });
     if (task == null) {
@@ -347,11 +368,11 @@ async function messageCheckWorker(task_id) {
       return;
     }
 
-    let credentials_id = get_val(task, 'credentials_id');
+    let credentials_id = task.credentials_id;
     if (!credentials_id) {
       throw new Error ('there is no task.credentials_id');
     }
-    let input_data = get_val(task, 'input_data');
+    let input_data = task.input_data;
     if (!input_data) {
       throw new Error ('there is no task.input_data');
     }
@@ -361,9 +382,9 @@ async function messageCheckWorker(task_id) {
 
     // start work
     let messageCheckAction = new modules.messageCheckAction.MessageCheckAction(task_data.credentials_data.email, task_data.credentials_data.password, task_data.credentials_data.li_at, cookies, credentials_id, task_data.prospect_data.linkedin);
-    await messageCheckAction.startBrowser();
+    browser = await messageCheckAction.startBrowser();
     let res = await messageCheckAction.messageCheck();
-    await messageCheckAction.closeBrowser();
+    browser = await messageCheckAction.closeBrowser();
 
     result_data = {
       code: (res.message === '' ? 0 : 2000),
@@ -394,6 +415,11 @@ async function messageCheckWorker(task_id) {
     if(task !== null) {
       await models_shared.TaskQueue.findOneAndUpdate({ _id: task_id }, { ack: 0, status: status, result_data: result_data }, { new: true });
     }
+
+    if(browser !== null) {
+      browser.disconnect();
+      browser.close();
+    }
   }
 }
 
@@ -402,6 +428,8 @@ async function connectCheckWorker(task_id) {
   let status = -1; 
   let result_data = {};
   let task = null;
+
+  let browser = null;
   try {
     task = await models_shared.TaskQueue.findOneAndUpdate({ _id: task_id, ack: 0 }, { ack: 1 }, { new: true });
     if (task == null) {
@@ -409,11 +437,11 @@ async function connectCheckWorker(task_id) {
       return;
     }
 
-    let credentials_id = get_val(task, 'credentials_id');
+    let credentials_id = task.credentials_id;
     if (!credentials_id) {
       throw new Error ('there is no task.credentials_id');
     }
-    let input_data = get_val(task, 'input_data');
+    let input_data = task.input_data;
     if (!input_data) {
       throw new Error ('there is no task.input_data');
     }
@@ -425,9 +453,9 @@ async function connectCheckWorker(task_id) {
 
     // start work
     let connectCheckAction = new modules.connectCheckAction.ConnectCheckAction(task_data.credentials_data.email, task_data.credentials_data.password, task_data.credentials_data.li_at, cookies, credentials_id, prospect_full_name);
-    await connectCheckAction.startBrowser();
+    browser = await connectCheckAction.startBrowser();
     let res = await connectCheckAction.connectCheck();
-    await connectCheckAction.closeBrowser();
+    browser = await connectCheckAction.closeBrowser();
 
     result_data = {
       code: 0,
@@ -456,6 +484,11 @@ async function connectCheckWorker(task_id) {
     console.log("RES: ", result_data);
     if(task !== null) {
       await models_shared.TaskQueue.findOneAndUpdate({ _id: task_id }, { ack: 0, status: status, result_data: result_data }, { new: true });
+    }
+
+    if(browser !== null) {
+      browser.disconnect();
+      browser.close();
     }
   }
 }

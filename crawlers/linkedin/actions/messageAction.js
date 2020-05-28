@@ -43,7 +43,7 @@ class MessageAction extends action.Action {
     await page.waitForSelector(selectors.SEND_MSG_BTN_SELECTOR, { timeout: 5000 });
     await page.waitFor(1000); // wait untill SEND button become active
     await page.click(selectors.SEND_MSG_BTN_SELECTOR);
-    await page.waitFor(100000); // to see result
+    //await page.waitFor(100000); // to see result
 
     return true;
   }

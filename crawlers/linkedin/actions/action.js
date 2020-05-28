@@ -22,11 +22,14 @@ class Action {
 
     //console.log('cooooookiieeeess: ', this.cookies)
     await this.page.setCookie(...this.cookies);
+
+    return this.browser;
   }
 
   async closeBrowser() {
     this.browser.disconnect();
     this.browser.close();
+    return null;
   }
 
   formatMessage(template, data) {
