@@ -4,8 +4,8 @@ const action = require('./action.js');
 const MyExceptions = require('../../exceptions/exceptions.js');
 
 class MessageCheckAction extends action.Action {
-  constructor(email, password, cookies, credentials_id, url) {
-    super(email, password, cookies, credentials_id);
+  constructor(email, password, li_at, cookies, credentials_id, url) {
+    super(email, password, li_at, cookies, credentials_id);
 
     // CONNECT URL
     this.url = url;
@@ -20,7 +20,7 @@ class MessageCheckAction extends action.Action {
       await this.page.click(selectors.CLOSE_MSG_BOX_SELECTOR);
       await this.page.waitFor(1000);  // wait linkedIn loading process
     } catch (err) {
-      console.log("..... CLOSE_MSG_BOX_SELECTOR not found .....")
+      console.log("..... CLOSE_MSG_BOX_SELECTOR not found .....");
     }
 
     if (await this.page.$(selectors.WRITE_MSG_BTN_SELECTOR) === null) {
@@ -42,11 +42,11 @@ class MessageCheckAction extends action.Action {
     }, mySelectors);
 
     if (lastSender.res === this.url) {
-      console.log("..... new message: .....", lastSender)
+      //console.log("..... new message: .....", lastSender);
       return { message: lastSender.text };
     }
 
-    console.log("..... NO new messages: .....", lastSender)
+    //console.log("..... NO new messages: .....", lastSender);
     return { message: '' };
   }
 

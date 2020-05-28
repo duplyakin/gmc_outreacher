@@ -1,132 +1,231 @@
 const selectors = require("../selectors");
 const links = require("../links");
-const cookieModel = require("../../models/models.js");
-const action = require('./action.js');
+const models = require("../../models/models.js");
 const puppeteer = require("puppeteer");
 
 const MyExceptions = require('../../exceptions/exceptions.js');
 
-class LoginAction extends action.Action {
-  constructor(email, password, cookies, credentials_id) {
-    super(email, password, cookies, credentials_id);
-  }
-
-  async startBrowser() {
-    this.browser = await puppeteer.launch({ headless: false }); // test mode
-    //this.browser = await puppeteer.launch();
-    this.context = await this.browser.createIncognitoBrowserContext();
-    this.page = await this.context.newPage();
-
-    if (this.cookies != undefined && this.cookies != null) {
-      //console.log('cooooookiieeeess: ', this.cookies)
-      await this.page.setCookie(...this.cookies);
-    }
-  }
-
-  async setContext(context) {
-    this.context = context;
-    this.page = await this.context.newPage();
-  }
-
-  async login() {
-    await this.page.goto(links.SIGNIN_LINK);
-
-    await this.page.waitFor(1000);  // wait linkedIn loading process (not needed here, but XZ ETOT LINKED)
-    
-    let res = await this.check_login();
-    if(res) {
-      // cookies fine
-      return res;
+class LoginAction {
+    constructor(email, password, li_at, credentials_id) {
+        this.email = email;
+        this.password = password;
+        this.li_at = li_at;
+        this.credentials_id = credentials_id;
     }
 
-    try {
-      await this.page.waitForSelector(selectors.USERNAME_SELECTOR, { timeout: 5000 });
-    } catch (err) {
-      throw MyExceptions.LoginPageError('Login page is not available');
-    }
-    await this.page.click(selectors.USERNAME_SELECTOR);
-    await this.page.keyboard.type(this.email);
-    await this.page.click(selectors.PASSWORD_SELECTOR);
-    await this.page.keyboard.type(this.password);
-    await this.page.click(selectors.CTA_SELECTOR);
+    async startBrowser() {
+        this.browser = await puppeteer.launch({ headless: false }); // test mode
+        //this.browser = await puppeteer.launch();
+        this.context = await this.browser.createIncognitoBrowserContext();
+        this.page = await this.context.newPage();
 
-    let is_phone = await this.check_phone_page(this.page);
-    if (is_phone) {
-      await this.skip_phone(this.page);
+        //this.set_cookie(this.cookies);
     }
 
-    res = await this.check_login();
-    if(res) {
-      return res;
-    } else {
-      throw MyExceptions.LoginError('Login error - check credentials');
-    }
-  }
-
-  async check_login() {
-    // check - if login success
-    let current_url = await this.page.url();
-    if (current_url === links.START_PAGE_LINK) {
-
-      console.log('........login success.......');
-
-      // add / update cookie_obj in DB
-      let cookie_obj = await cookieModel.Cookies.findOne({ credentials_id: this.credentials_id }, function (err, res) {
-        if (err) throw MyExceptions.MongoDBError('MongoDB find COOKIE err: ' + err);
-      });
-
-      // Get Session Cookies
-      let newCookies = await this.page.cookies();
-      let newExpires = 0;
-      newCookies.forEach((item) => {
-        if (item.name === 'li_at') {
-          newExpires = item.expires;
-        }
-      });
-
-      await this.page.close(); // if we call loginAction from any other worker - we have to close page here
-
-      //console.log('........find cookie object: ........', cookie_obj);
-      if (cookie_obj === undefined || cookie_obj === null) {
-        // create new cookie_obj
-        let newCookiesDocument = await new cookieModel.Cookies({ credentials_id: this.credentials_id, expires: newExpires, data: newCookies });
-        await newCookiesDocument.save(function (err) {
-          if (err) throw MyExceptions.MongoDBError('MongoDB save COOKIE err: ' + err);
-          // saved!
-          console.log('........saved in mongoDB.......');
-        });
-
-      } else {
-        // update cookie_obj info
-        await cookieModel.Cookies.findOneAndUpdate({ credentials_id: this.credentials_id }, { expires: newExpires, data: newCookies }, function (err, res) {
-          if (err) throw MyExceptions.MongoDBError('MongoDB update COOKIE err: ' + err);
-          // updated!
-          console.log('........updated in mongoDB.......');
-        });
+    async closeBrowser() {
+        this.browser.disconnect();
+        this.browser.close();
       }
 
-      return true;
-    } else {
-      return false;
-    }
-  }
-
-  async skip_phone(page) {
-    await page.waitForSelector(selectors.SKIP_PHONE_BTN_SELECTOR, { timeout: 5000 });
-    await page.click(selectors.SKIP_PHONE_BTN_SELECTOR);
-  }
-
-  async check_phone_page(page) {
-    let url = await page.url();
-
-    if (url.includes('phone')) {
-      return true;
+    async setContext(context) {
+        this.context = context;
+        this.page = await this.context.newPage();
     }
 
-    return false;
-  }
+    async set_cookie(cookies) {
+        if (cookies != undefined && cookies != null) {
+            console.log('cooooookiieeeess: ', cookies)
+            await this.page.setCookie(...cookies);
+            return true;
+        }
+        return false;
+    }
+
+    async _get_domain() {
+        await this.page.goto(links.SIGNIN_LINK);
+        await this.page.waitFor(1000);
+
+        let current_url = await this.page.url();
+
+        // Exctract domain here in format: “.www.linkedin.com”
+
+        return '.' + (new URL(current_url)).hostname;
+    }
+
+    async _get_current_cookie() {
+        // Get Session Cookies
+        await this.page.goto(links.SIGNIN_LINK);
+        await this.page.waitFor(1000);
+
+        let newCookies = await this.page.cookies();
+        if (!newCookies) {
+            throw new Error('Can\'t receive cookie.');
+        }
+
+        return newCookies;
+    }
+
+    async _update_cookie() {
+        let new_cookie = await this._get_current_cookie();
+
+        /*
+        let cookie_obj = await models.Cookies.findOne({ credentials_id: this.credentials_id }, function (err, res) {
+            if (err) throw MyExceptions.MongoDBError('MongoDB find COOKIE err: ' + err);
+        });
+
+        
+        if (cookie_obj == null) {
+            cookie_obj = await models.Cookies.create({ credentials_id: this.credentials_id, expires: 0, data: [] }, function (err, res) {
+                if (err) throw MyExceptions.MongoDBError('MongoDB find COOKIE err: ' + err);
+            });   // https://masteringjs.io/tutorials/mongoose/update
+        }*/
+
+        let new_expires = 0;
+        new_cookie.forEach((item) => {
+            if (item.name === 'li_at') {
+                new_expires = item.expires;
+            }
+        });
+
+        /*
+        //cookie_obj.credentials_id = this.credentials_id;
+        cookie_obj.expires = newExpires;
+        cookie_obj.data = new_cookie;
+        await cookie_obj.save();*/
+
+        await models.Cookies.updateOne({ credentials_id: this.credentials_id }, { expires: new_expires, data: new_cookie }, function (err, res) {
+            if (err) throw MyExceptions.MongoDBError('MongoDB find COOKIE err: ' + err);
+        });
+
+    }
+
+    async login_with_email() {
+        await this.page.goto(links.SIGNIN_LINK);
+
+        await this.page.waitFor(1000);
+
+        try {
+            await this.page.waitForSelector(selectors.USERNAME_SELECTOR, { timeout: 5000 });
+          } catch (err) {
+            throw MyExceptions.LoginPageError('Login page is not available.');
+          }
+
+          await this.page.click(selectors.USERNAME_SELECTOR);
+          await this.page.keyboard.type(this.email);
+          await this.page.click(selectors.PASSWORD_SELECTOR);
+          await this.page.keyboard.type(this.password);
+          await this.page.click(selectors.CTA_SELECTOR);
+          await this.page.waitFor(1000);
+      
+          let is_phone = await this.check_phone_page(this.page);
+          if (is_phone) {
+            await this.skip_phone(this.page);
+          }
+
+          let is_code = await this.check_challenge_page(this.page);
+          if (is_code) {
+            throw new Error('Auth error. Challenge page.');    
+          }
+    }
+
+
+    async login_with_li_at() {
+        let domain_var = await this._get_domain();
+        let cookies_data = [{
+            name : "li_at",
+            value : this.li_at,
+            domain : domain_var,
+            path : "/",
+            expires : Date.now() / 1000 + 10000000, // + ~ 4 months // https://www.epochconverter.com/
+            size : (new TextEncoder().encode(this.li_at)).length,
+            httpOnly : true,
+            secure : true,
+            session : false,
+            sameSite : "None"
+            }];
+
+        await this.set_cookie(cookies_data);
+    }
+
+    async is_logged() {
+        //await this.page.waitFor(1000);
+        await this.page.goto(links.SIGNIN_LINK, {
+            waitUntil: 'load',
+            timeout: 60000 // it may load too long! critical here
+        });
+
+        let current_url = await this.page.url();
+        if (current_url === links.START_PAGE_LINK) {
+            await this._update_cookie();
+            return true;
+        }
+
+        return false;
+    }
+
+    async login() {
+
+        // check - if we logged
+        let logged = await this.is_logged();
+        if (logged) {
+            await this.page.close();
+            return logged;
+        }
+
+        // if not - try to login with li_at
+        if (this.li_at) {
+            await this.login_with_li_at();
+            logged = await this.is_logged();
+
+            if (logged) {
+                await this.page.close();
+                return logged;
+            }
+        }
+
+        // if not - try to login with email/password
+        if (!this.email || !this.password) {
+            throw new Error('BROKEN CREDENTIALS: Email or password is empty.');
+        }
+
+        await this.login_with_email()
+        logged = await this.is_logged();
+
+        if (!logged) {
+            throw new Error('Can\'t login.');
+        }
+
+        await this.page.close();
+        return logged;
+    }
+
+
+    async skip_phone(page) {
+        await page.waitForSelector(selectors.SKIP_PHONE_BTN_SELECTOR, { timeout: 5000 });
+        await page.click(selectors.SKIP_PHONE_BTN_SELECTOR);
+    }
+
+    async check_phone_page(page) {
+        let url = await page.url();
+
+        if (url.includes('phone')) {
+            return true;
+        }
+
+        return false;
+    }
+
+    async check_challenge_page(page) {
+        let url = await page.url();
+
+        if (url.includes('challenge')) { 
+            return true;
+        }
+
+        return false;
+    }
 }
 
 module.exports = {
-  LoginAction: LoginAction
+    LoginAction: LoginAction
 }
