@@ -21,7 +21,7 @@ from o24.production_tests.utils import *
 from o24.backend.utils.templates import *
 from o24.backend.utils.decors import get_token
 import o24.backend.scheduler.scheduler as scheduler
-import o24.backend.handlers.gmail as gmail_handlers
+import o24.backend.handlers.email as gmail_handlers
 import re
 
 CAMPAIGN_MODIFIED_FIELDS = {
@@ -189,7 +189,7 @@ class RealSequenceTest(unittest.TestCase):
             message = "Can't find task for campaign_id={0}".format(campaign.id)
             self.assertTrue(False, message)
 
-        gmail_handlers.gmail_send_message(task_id=str(task.id))
+        gmail_handlers.email_send_message(task_id=str(task.id))
 
 
 

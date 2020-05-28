@@ -205,6 +205,19 @@ class TaskQueue(db.Document):
     record_type = db.IntField(default=0)
     followup_level = db.IntField(default=0)
 
+    @classmethod
+    def lock(cls, task_id):
+        locked = cls.objects(id=task_id, ack=0).update_one(upsert=False, ack=1)
+        if not locked:
+            return None
+        
+        return cls.objects(id=task_id).first()
+        
+    @classmethod
+    def unlock(cls, task_id, result_data, status):
+        return cls.objects(id=task_id).update_one(upsert=False, result_data=result_data, status=status, ack=0)
+
+
     def decrypt_password(self, credentials_dict):
         data = credentials_dict.get('data', '')
         if not data:
@@ -327,10 +340,6 @@ class TaskQueue(db.Document):
 
         if _commit:
             self._commit()
-
-    def acknowledge(self):
-        self.ack = self.ack + 1
-        return self.ack
 
     def update_status(self, status):
         self.status = status

@@ -23,31 +23,28 @@ from o24.production_tests.utils import *
 from o24.backend.utils.templates import *
 from o24.backend.utils.decors import get_token
 import o24.backend.scheduler.scheduler as scheduler
-import o24.backend.handlers.gmail as gmail_handlers
+import o24.backend.handlers.email as gmail_handlers
 import re
 
 
 class OauthTest(unittest.TestCase):
     def setUp(self):
         self.user = User.objects(email=TEST_USER_EMAIL).first()
-        
-        """Setup the test driver and create test users"""
-        self.driver = webdriver.Firefox()
-        self.driver.get(self.get_server_url())
-    
-    def test_0_gmail_token(self):
-        response = urllib.urlopen(self.get_server_url())
-        #client = app.test_client()    
-        #with app.test_request_context():
-        #    self._credentials_get(user=self.user, client=client)
-        
+            
+    def test_0_ack(self):
+        try:
+            task = TaskQueue.lock(task_id="5eccfa492e7ba73109dd9a5a")
+            if not task:
+                print("Return here")
+                return 
 
-    def _credentials_get(self, user, client):
-        url = url_for('dashboard.dashboard_oauth_button')
-        r = post_with_token(user=user, client=client, url=url, data=None, follow_redirects=True)
+            print("Found task: {0}".format(task))
 
-        response_data = json.loads(r.data)
-
+        except Exception as e:
+            print(str(e))
+        finally:
+            task = TaskQueue.unlock(task_id="5eccfa492e7ba73109dd9a5a", result_data={}, status=1)
+            #print("Free task: {0}".format(task))
 
 
 def setUpModule():

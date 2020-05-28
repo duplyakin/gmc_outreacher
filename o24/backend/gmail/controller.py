@@ -1,5 +1,6 @@
 import o24.backend.google.provider.gmail_api_provider as gmail_api_provider
 import o24.backend.google.provider.gmail_smtp_provider as gmail_smtp_provider
+import o24.backend.google.provider.oauth_provider as oauth_provider
 
 import o24.backend.models.inbox.mailbox as mailbox
 from email.mime.multipart import MIMEMultipart
@@ -14,35 +15,21 @@ import uuid
 from bs4 import BeautifulSoup
 
 class GmailController():
-    def __init__(self, email, credentials, smtp=False):
+    def __init__(self, email, credentials, credentials_id, smtp=False):
         self.credentials = credentials
+        self.credentials_id = credentials_id
         self.email = email
+        self.smtp = smtp
 
-        #TODO - check credentials and update
+        self.provider = gmail_api_provider.GmailApiProvider(credentials, credentials_id=credentials_id)
 
-
-        self.provider = gmail_api_provider.GmailApiProvider(credentials)
-
-        self.smtp = smtp   
         if self.smtp:
-            self.smtp_provider = gmail_smtp_provider.GmailSmtpProvider(email, credentials)
+            self.smtp_provider = gmail_smtp_provider.GmailSmtpProvider(self.email, credentials, credentials_id=credentials_id)
+
 
     def current_email(self):
         return self.email
        
-    def get_msgId(self, msg_id):
-        msgId = ''
-        msg = self.provider.get_message_data(msg_id=msg_id, metadataHeaders=['Message-Id'])
-        payload = msg.get('payload', '')
-        if payload:
-            headers = payload.get('headers', '')
-            if headers:
-                for header in headers:
-                    if header.get('name', '') == 'Message-Id':
-                        msgId = header.get('value', '')
-                        break
-        return msgId
-
     #message - is a MIMEMultipart object
     def add_gmail_api_meta(self, message, parent_mailbox=None):
         raw_message = {
@@ -185,9 +172,9 @@ class GmailController():
                 'credentials' : self.credentials
             }
             if self.smtp:
-                sender_meta['type'] = 'SMTP'
+                sender_meta['type'] = 'smtp'
             else:
-                sender_meta['type'] = 'API'
+                sender_meta['type'] = 'api'
 
         data = {}
 
@@ -200,6 +187,7 @@ class GmailController():
 
         return data
 
+
     def send_message(self, email_to, message):
         if self.smtp:
             return self.smtp_provider.send_message(email_to=email_to,
@@ -207,4 +195,17 @@ class GmailController():
         else:
             return self.provider.send_message(message=message)
 
-        return {'Error' : 'Something went wrong'}
+        return -1
+
+    def get_msgId(self, msg_id):
+        msgId = ''
+        msg = self.provider.get_message_data(msg_id=msg_id, metadataHeaders=['Message-Id'])
+        payload = msg.get('payload', '')
+        if payload:
+            headers = payload.get('headers', '')
+            if headers:
+                for header in headers:
+                    if header.get('name', '') == 'Message-Id':
+                        msgId = header.get('value', '')
+                        break
+        return msgId
