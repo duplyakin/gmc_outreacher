@@ -249,7 +249,7 @@ TEST_CREDENTIALS = {
         'medium' : 'linkedin',
         'data' : {
             'email' : 'grinnbob@rambler.ru',
-            'password' : 'linkedin123'
+            'password' : 'linked123'
         }
     }
 }
