@@ -115,6 +115,35 @@ Hi {first_name}<br /><br />My name is Kirill - I'm a blockchain developer and wr
     }
 }
 
+
+CAMPAIGN_LINKEDIN_PARSING_TEST_DATA = {
+    'title': 'Linkedin parse test campaign - XX-{0}',
+    'list_title' : 'Linkedin parse test list title - XX-{0}',
+    'data' : {
+        'search_url': 'https://www.linkedin.com/search/results/people/?keywords=Head%20of%20sales%20in%20germany&origin=SWITCH_SEARCH_VERTICAL',
+        'total_pages': 100,
+        'interval_pages': 10,
+    },
+    'credentials': [],
+    'from_hour': '00:00',
+    'to_hour': '23:59',
+    'time_zone': {
+        'label': "(GMT+00:00) United Kingdom Time",
+        'value': "Europe/London",
+        'offset': 0
+    },
+    'sending_days': {
+        "0": True,
+        "1": True,
+        "2": True,
+        "3": True,
+        "4": True,
+        "5": True,
+        "6": True
+    }
+}
+
+
 class RealSequenceTest(unittest.TestCase):
     def setUp(self):
         self.user = User.objects(email=TEST_USER_EMAIL).first()
@@ -223,14 +252,79 @@ class RealSequenceTest(unittest.TestCase):
             traceback.print_exc()
 
 
+        #SWITCH tasks until we have the right one:
         #Get the task and call handler
-        task = TaskQueue.objects(campaign_id=campaign.id).first()
-        if not task:
+        tasks = TaskQueue.objects(campaign_id=campaign.id)
+        if not tasks:
             message = "Can't find task for campaign_id={0}".format(campaign.id)
             self.assertTrue(False, message)
+        
+        test_actions = Prospects.objects(assign_to=campaign.id).distinct("data.test_action")
+        if not test_actions:
+            self.assertTrue("TEST DATA BROKEN: can't find distinct(data.test_action)")
+        print("******** FOUND test_actions:")
+        print(test_actions)
+        for t_a in test_actions:
+            pr = Prospects.objects(data__test_action=t_a).first()
+            task = TaskQueue.objects(prospect_id=pr.id).first()
+            if not task:
+                message = "TEST DATA BROKEN: can't find task for test_action = {0}".format(t_a)
+                self.assertTrue(False, message)
 
-        task.status = IN_PROGRESS
-        task._commit()
+            never_found = True
+            while True:
+                if task.action_key == t_a:
+                    task.status = IN_PROGRESS
+                    task._commit()
+                    
+                    never_found = False
+                    break
+                
+                current_node = task.current_node
+                next_node = Funnel.next_node(current_node, {'if_true' : True})
+                task.switch_task(next_node, _commit=True)
+                task.reload
+            
+            if never_found:
+                self.assertTrue(False, "BROKEN TEST DATA: can't find test_action node")
+
+        #START SEARCH PARSING CAMPAIGN
+        credentials = campaign.credentials
+        linkedin_credentials = None
+        for cr in credentials:
+            if cr.medium == 'linkedin':
+                linkedin_credentials = cr
+                break
+        
+        if not linkedin_credentials:
+            message = "Can't find linkedin credentials for campaign_id:{0}".format(campaign.id)
+
+        current_user = get_current_user()
+
+        client = app.test_client()    
+        with app.test_request_context():
+            #CREATE parse LINKEDIN campaign
+            LINKEDIN_PARSE_CAMPAIGN_ID = self._create_linkedin_parsing_campaign(user=current_user, 
+                                                                credentials=linkedin_credentials, 
+                                                                client=client)
+            if not LINKEDIN_PARSE_CAMPAIGN_ID:
+                self.assertTrue(False, "Can't create _create_linkedin_parsing_campaign")
+
+            #stop campaign
+            try:
+                current_user = get_current_user()
+                to_pause = Campaign.objects(id=LINKEDIN_PARSE_CAMPAIGN_ID).first()
+                scheduler.Scheduler.safe_pause_campaign(campaign=to_pause)
+            except Exception as e:
+                print(e)
+                traceback.print_exc()
+
+
+            #START parse LINKEDIN campaign
+            self._start_linkedin_campaign(user=current_user, client=client, campaign_id=LINKEDIN_PARSE_CAMPAIGN_ID)
+            task = TaskQueue.objects(campaign_id=LINKEDIN_PARSE_CAMPAIGN_ID).first()
+            task.status = IN_PROGRESS
+            task._commit()
 
     def test_2_campaign_sequence(self):
         pass
@@ -269,6 +363,74 @@ class RealSequenceTest(unittest.TestCase):
         self.assertTrue(updated_campaign['_id']['$oid'] == campaign_id, "Updated campaign ID not equal get campaign ID")
                 
         return updated_campaign
+
+
+
+    def _create_linkedin_parsing_campaign(self, user, credentials, client, req_dict=None):
+        _req_dict = None
+
+        if req_dict:
+            _req_dict = req_dict
+        else:
+            _req_dict = CAMPAIGN_LINKEDIN_PARSING_TEST_DATA
+            _req_dict['title'] = _req_dict['title'].format(random_num())
+            _req_dict['list_title'] = _req_dict['list_title'].format(random_num())
+            
+            credentials_dict = json.loads(credentials.to_json())
+            _req_dict['credentials'].append(credentials_dict)
+
+
+        json_create_data = json.dumps(_req_dict)
+        form_data = {
+            '_add_campaign' : json_create_data
+        }
+        
+        url = url_for('dashboard.create_linkedin_parsing_campaign')
+        r = post_with_token(user=user, client=client, url=url, data=form_data)
+
+        response_data = json.loads(r.data)
+        code = response_data['code']
+        msg = response_data['msg']
+        error_message = "msg: {0}".format(msg)
+        self.assertTrue(code == 1, error_message)
+
+    #check campaign type
+        added = json.loads(response_data['added'])
+        pprint(added)
+
+        message = "Created wrong campaigntype {0}".format(added['campaign_type'])
+        self.assertTrue(added['campaign_type'] == LINKEDIN_PARSING_CAMPAIGN_TYPE, message)
+        
+    #check funnel
+        message = "Created wrong funnel type {0}".format(added['funnel']['funnel_type'])
+        self.assertTrue(added['funnel']['funnel_type'] == LINKEDIN_PARSING_FUNNEL_TYPE, message)
+
+        return added['_id']['$oid']
+
+
+    def _start_linkedin_campaign(self, user, client, campaign_id):
+        form_data = {
+            '_campaign_id' : campaign_id,
+        }
+
+        url = url_for('dashboard.start_linkedin_campaign')
+        r = post_with_token(user=user, client=client, url=url, data=form_data)
+
+        response_data = json.loads(r.data)
+        pprint(response_data)
+        code = response_data['code']
+        msg = response_data['msg']
+        error_message = "msg: {0}".format(msg)
+        self.assertTrue(code == 1, error_message)
+
+        started = json.loads(response_data['started'])
+        error = "Wrong campaign started  need id:{0}  has id:{1}".format(campaign_id, started['_id']['$oid'])
+        self.assertTrue(started['_id']['$oid'] == campaign_id, error)
+
+        error = "Campaign didn't started status={0}".format(started['status'])
+        self.assertTrue(started['status'] == IN_PROGRESS, error)
+
+        return started
 
 
 
