@@ -316,7 +316,8 @@ class TaskQueue(db.Document):
 
         #init sta
         self.status = NEW
-        self.next_round = 0
+
+        self.next_round = parse("1980-05-25T16:31:37.436Z")
         self.ack = 0
 
         self.result_data = {}
@@ -333,7 +334,7 @@ class TaskQueue(db.Document):
 
         template_key = next_node.get_template_key()
         self._fill_input_data(funnel_node=next_node,
-                                campaign_id=self.campaign_di, 
+                                campaign_id=self.campaign_id, 
                                 prospect_id=self.prospect_id, 
                                 credentials_id=self.credentials_id, 
                                 template_key=template_key)
@@ -491,7 +492,7 @@ class TaskQueue(db.Document):
 
         new_task.campaign_id = campaign.id
         new_task.status = NEW
-        new_task.next_round = 0
+        new_task.next_round = parse("1980-05-25T16:31:37.436Z")
 
         template_key = _node.get_template_key()
         new_task._fill_input_data(funnel_node=_node,

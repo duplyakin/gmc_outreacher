@@ -249,7 +249,7 @@ TEST_CREDENTIALS = {
         'medium' : 'linkedin',
         'data' : {
             'email' : 'grinnbob@rambler.ru',
-            'password' : 'linkedin123'
+            'password' : 'linked123'
         }
     }
 }
@@ -396,6 +396,8 @@ FUNNELS = [
             'key' : FINISHED_ACTION
         } 
     },
+
+
     {
         'root' : {
             'key' : LINKEDIN_SEND_MESSAGE_ACTION,
@@ -412,13 +414,42 @@ FUNNELS = [
                     }
                 }
             },
-            'if_true' : FINISHED_ACTION,
-            'if_false' : FINISHED_ACTION,
+            'if_true' : 'step1',
+            'if_false' : 'step1',
         },
+        'step1' :  {
+            'key' : 'linkedin-check-reply',
+            'if_true' : 'step2',
+            'if_false' : 'step2'
+        },
+
+        'step2' : {
+            'key' : 'linkedin-check-accept',
+            'if_true' : 'step3',
+            'if_false' : 'step3'
+ 
+        },
+
+        'step3' : {
+            'key' : 'linkedin-connect',
+            'if_true' : 'step4',
+            'if_false' : 'step4'
+        },
+
+        'step4' : {
+            'key' : 'linkedin-parse-profile',
+            'if_true' : FINISHED_ACTION,
+            'if_false' : FINISHED_ACTION
+
+        },
+
         FINISHED_ACTION : {
             'key' : FINISHED_ACTION
         }
     },
+
+
+
     {
         'root' : {
             'key' : LINKEDIN_PARSE_PROFILE_ACTION,
@@ -834,6 +865,7 @@ PROSPECTS = [
         'owner' : '1@email.com',
         'assign_to' : 'test_linkedin_handler_campaign',
         'data' : {
+            'test_action' : LINKEDIN_SEND_MESSAGE_ACTION,
             'email' : 'ks.shilov+3@gmail.com',
             'linkedin' : 'https://www.linkedin.com/in/kirill-shilov-25aa8630/',
             'first_name' : 'Kirill',
@@ -842,6 +874,58 @@ PROSPECTS = [
         },
         'assign_to_list' : 'real_test_list'
     },
+
+    {
+        'owner' : '1@email.com',
+        'assign_to' : 'test_linkedin_handler_campaign',
+        'data' : {
+            'test_action' : 'linkedin-connect',
+            'email' : 'ks.shilov+3@gmail.com',
+            'linkedin' : 'https://www.linkedin.com/in/barry-magennis-768a0a1aa/',
+            'first_name' : 'Barry',
+            'company' : 'Boostlabs',
+            'url' : 'Boostlabs.com'
+        },
+        'assign_to_list' : 'real_test_list'
+    },
+    {
+        'owner' : '1@email.com',
+        'assign_to' : 'test_linkedin_handler_campaign',
+        'data' : {
+            'test_action' : 'linkedin-check-accept',
+            'email' : 'ks.shilov+3@gmail.com',
+            'linkedin' : 'https://www.linkedin.com/in/barry-magennis-768a0a1aa/',
+            'first_name' : 'Barry',
+            'company' : 'Boostlabs',
+            'url' : 'Boostlabs.com'
+        },
+        'assign_to_list' : 'real_test_list'
+    },
+    {
+        'owner' : '1@email.com',
+        'assign_to' : 'test_linkedin_handler_campaign',
+        'data' : {
+            'test_action' : 'linkedin-check-reply',
+            'email' : 'ks.shilov+3@gmail.com',
+            'linkedin' : 'https://www.linkedin.com/in/kirill-shilov-25aa8630/',
+            'first_name' : 'Kirill',
+            'company' : 'outreacher24',
+            'url' : 'outreacher24.com'
+        },
+        'assign_to_list' : 'real_test_list'
+    },
+
+    {
+        'owner' : '1@email.com',
+        'assign_to' : 'test_linkedin_handler_campaign',
+        'data' : {
+            'test_action' : 'linkedin-parse-profile',
+            'linkedin' : 'https://www.linkedin.com/in/barry-magennis-768a0a1aa/',
+        },
+        'assign_to_list' : 'real_test_list'
+    },
+
+
     {
         'owner' : '1@email.com',
         'assign_to' : 'real_test',

@@ -188,7 +188,9 @@ class Scheduler():
             return self.resume_campaign(owner=owner, campaign=campaign)
 
         if campaign._allow_no_prospects():
+            self._create_parsing_task(campaign)
             campaign._safe_start()
+
         else:
             prospects = models.Prospects.get_prospects(status=NEW, campaign_id=campaign.id)
             if not prospects:
@@ -330,9 +332,10 @@ class Scheduler():
 
 
     def _check_new_prospects(self, owner, campaign):
-        prospects = models.Prospects.get_prospects(status=NEW, campaign_id=campaign.id)
-        if prospects:
-            self.add_prospects(owner=owner, campaign=campaign, prospects=prospects)
+        if not campaign._allow_no_prospects():
+            prospects = models.Prospects.get_prospects(status=NEW, campaign_id=campaign.id)
+            if prospects:
+                self.add_prospects(owner=owner, campaign=campaign, prospects=prospects)
 
     def _load_prospects(self, campaign, prospects):
         tasks = []
@@ -345,6 +348,11 @@ class Scheduler():
         prospect_ids = [t.prospect_id for t in inserted_tasks]
         
         return prospect_ids
+
+    def _create_parsing_task(self, campaign):
+        task = TaskQueue.create_task(campaign=campaign, prospect=None)
+        task._commit()
+
 
     def _update_prospects(self, ids, status):
         models.Prospects.update_prospects(ids, status)
