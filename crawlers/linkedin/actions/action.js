@@ -1,6 +1,7 @@
 const puppeteer = require("puppeteer");
 const LoginAction = require('./loginAction.js');
 const links = require("../links");
+const selectors = require("../selectors");
 
 const MyExceptions = require('../../exceptions/exceptions.js');
 
@@ -72,8 +73,6 @@ class Action {
     if(err == null || err == undefined) {
       throw new Error('Empty error in error_handler.');
     }
-
-    console.log( err.stack );
 
     if(this.check_block()) {
       let context_obj = await this.get_context();

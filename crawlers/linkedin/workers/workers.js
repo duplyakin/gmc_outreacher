@@ -38,13 +38,6 @@ function check_expired(cookies) {
 }
 
 
-async function save_context(credentials_id, context) {
-  await models.Context.updateOne({ credentials_id: credentials_id }, context, { upsert: true }, function (err, res) {
-    if (err) throw MyExceptions.MongoDBError('MongoDB updateOne Context err: ' + err); 
-  });
-}
-
-
 function serialize_data(input_data) {
   if (!input_data){
     throw new Error ('SERIALIZATION error: input_data can’t be empty');
@@ -65,7 +58,6 @@ async function searchWorker(task_id) {
   let status = -1; 
   let result_data = {};
   let task = null;
-  let credentials_id = null;
 
   let browser = null;
   try {
@@ -75,7 +67,7 @@ async function searchWorker(task_id) {
       return;
     }
 
-    credentials_id = task.credentials_id;
+    let credentials_id = task.credentials_id;
     if (!credentials_id) {
       throw new Error ('there is no task.credentials_id');
     }
@@ -107,16 +99,14 @@ async function searchWorker(task_id) {
         code: err.code,
         raw: err.error
       };
-    } else if (err.code == -3) {
+    } else if (err.code == -1) {
       // Context error
-      if(credentials_id == null || err.context == null) {
+      if(err.context == null) {
         // something went wromg...
         console.log('Never happend: credentials_id or err.context is null in CONTEXT_ERROR in worker: ', err);
-        console.log('credentials_id: ', credentials_id);
         console.log('err.context: ', err.context);
         throw new Error('Never happend: credentials_id or err.context is null in CONTEXT_ERROR in worker: ', err);
       }
-      await save_context(credentials_id, err.contex);
       status = 6;
       result_data = {
         code: err.code,
@@ -136,8 +126,10 @@ async function searchWorker(task_id) {
       await models_shared.TaskQueue.findOneAndUpdate({ _id: task_id }, { ack: 0, status: status, result_data: result_data }, { new: true });
     }
 
-    if(browser !== null && status !== 6) {
-      await browser.close();
+    if(browser !== null) {
+      if(status !== 6) {
+        await browser.close();
+      }
       browser.disconnect();
     }
   }
@@ -148,7 +140,6 @@ async function connectWorker(task_id) {
   let status = -1; 
   let result_data = {};
   let task = null;
-  let credentials_id = null;
 
   let browser = null;
   try {
@@ -158,7 +149,7 @@ async function connectWorker(task_id) {
       return;
     }
 
-    credentials_id = task.credentials_id;
+    let credentials_id = task.credentials_id;
     if (!credentials_id) {
       throw new Error ('there is no task.credentials_id');
     }
@@ -206,16 +197,14 @@ async function connectWorker(task_id) {
         code: err.code,
         raw: err.error
       };
-    } else if (err.code == -3) {
+    } else if (err.code == -1) {
       // Context error
-      if(credentials_id == null || err.context == null) {
+      if(err.context == null) {
         // something went wromg...
         console.log('Never happend: credentials_id or err.context is null in CONTEXT_ERROR in worker: ', err);
-        console.log('credentials_id: ', credentials_id);
         console.log('err.context: ', err.context);
         throw new Error('Never happend: credentials_id or err.context is null in CONTEXT_ERROR in worker: ', err);
       }
-      await save_context(credentials_id, err.contex);
       status = 6;
       result_data = {
         code: err.code,
@@ -236,8 +225,10 @@ async function connectWorker(task_id) {
       await models_shared.TaskQueue.findOneAndUpdate({ _id: task_id }, { ack: 0, status: status, result_data: result_data }, { new: true });
     }
     
-    if(browser !== null && status !== 6) {
-      await browser.close();
+    if(browser !== null) {
+      if(status !== 6) {
+        await browser.close();
+      }
       browser.disconnect();
     }
   }
@@ -248,7 +239,6 @@ async function messageWorker(task_id) {
   let status = -1; 
   let result_data = {};
   let task = null;
-  let credentials_id = null;
 
   let browser = null;
   try {
@@ -258,7 +248,7 @@ async function messageWorker(task_id) {
       return;
     }
 
-    credentials_id = task.credentials_id;
+    let credentials_id = task.credentials_id;
     if (!credentials_id) {
       throw new Error ('there is no task.credentials_id');
     }
@@ -307,16 +297,14 @@ async function messageWorker(task_id) {
         code: err.code,
         raw: err.error
       };
-    } else if (err.code == -3) {
+    } else if (err.code == -1) {
       // Context error
-      if(credentials_id == null || err.context == null) {
+      if(err.context == null) {
         // something went wromg...
         console.log('Never happend: credentials_id or err.context is null in CONTEXT_ERROR in worker: ', err);
-        console.log('credentials_id: ', credentials_id);
         console.log('err.context: ', err.context);
         throw new Error('Never happend: credentials_id or err.context is null in CONTEXT_ERROR in worker: ', err);
       }
-      await save_context(credentials_id, err.contex);
       status = 6;
       result_data = {
         code: err.code,
@@ -337,8 +325,10 @@ async function messageWorker(task_id) {
       await models_shared.TaskQueue.findOneAndUpdate({ _id: task_id }, { ack: 0, status: status, result_data: result_data }, { new: true });
     }
 
-    if(browser !== null && status !== 6) {
-      await browser.close();
+    if(browser !== null) {
+      if(status !== 6) {
+        await browser.close();
+      }
       browser.disconnect();
     }
   }
@@ -349,7 +339,6 @@ async function scribeWorker(task_id) {
   let status = -1; 
   let result_data = {};
   let task = null;
-  let credentials_id = null;
 
   let browser = null;
   try {
@@ -359,7 +348,7 @@ async function scribeWorker(task_id) {
       return;
     }
 
-    credentials_id = task.credentials_id;
+    let credentials_id = task.credentials_id;
     if (!credentials_id) {
       throw new Error ('there is no task.credentials_id');
     }
@@ -393,16 +382,14 @@ async function scribeWorker(task_id) {
         code: err.code,
         raw: err.error
       };
-    } else if (err.code == -3) {
+    } else if (err.code == -1) {
       // Context error
-      if(credentials_id == null || err.context == null) {
+      if(err.context == null) {
         // something went wromg...
         console.log('Never happend: credentials_id or err.context is null in CONTEXT_ERROR in worker: ', err);
-        console.log('credentials_id: ', credentials_id);
         console.log('err.context: ', err.context);
         throw new Error('Never happend: credentials_id or err.context is null in CONTEXT_ERROR in worker: ', err);
       }
-      await save_context(credentials_id, err.contex);
       status = 6;
       result_data = {
         code: err.code,
@@ -423,8 +410,10 @@ async function scribeWorker(task_id) {
       await models_shared.TaskQueue.findOneAndUpdate({ _id: task_id }, { ack: 0, status: status, result_data: result_data }, { new: true });
     }
 
-    if(browser !== null && status !== 6) {
-      await browser.close();
+    if(browser !== null) {
+      if(status !== 6) {
+        await browser.close();
+      }
       browser.disconnect();
     }
   }
@@ -435,7 +424,6 @@ async function messageCheckWorker(task_id) {
   let status = -1; 
   let result_data = {};
   let task = null;
-  let credentials_id = null;
 
   let browser = null;
   try {
@@ -445,7 +433,7 @@ async function messageCheckWorker(task_id) {
       return;
     }
 
-    credentials_id = task.credentials_id;
+    let credentials_id = task.credentials_id;
     if (!credentials_id) {
       throw new Error ('there is no task.credentials_id');
     }
@@ -479,16 +467,14 @@ async function messageCheckWorker(task_id) {
         code: err.code,
         raw: err.error
       };
-    } else if (err.code == -3) {
+    } else if (err.code == -1) {
       // Context error
-      if(credentials_id == null || err.context == null) {
+      if(err.context == null) {
         // something went wromg...
         console.log('Never happend: credentials_id or err.context is null in CONTEXT_ERROR in worker: ', err);
-        console.log('credentials_id: ', credentials_id);
         console.log('err.context: ', err.context);
         throw new Error('Never happend: credentials_id or err.context is null in CONTEXT_ERROR in worker: ', err);
       }
-      await save_context(credentials_id, err.contex);
       status = 6;
       result_data = {
         code: err.code,
@@ -509,8 +495,10 @@ async function messageCheckWorker(task_id) {
       await models_shared.TaskQueue.findOneAndUpdate({ _id: task_id }, { ack: 0, status: status, result_data: result_data }, { new: true });
     }
 
-    if(browser !== null && status !== 6) {
-      await browser.close();
+    if(browser !== null) {
+      if(status !== 6) {
+        await browser.close();
+      }
       browser.disconnect();
     }
   }
@@ -521,7 +509,6 @@ async function connectCheckWorker(task_id) {
   let status = -1; 
   let result_data = {};
   let task = null;
-  let credentials_id = null;
 
   let browser = null;
   try {
@@ -531,7 +518,7 @@ async function connectCheckWorker(task_id) {
       return;
     }
 
-    credentials_id = task.credentials_id;
+    let credentials_id = task.credentials_id;
     if (!credentials_id) {
       throw new Error ('there is no task.credentials_id');
     }
@@ -566,16 +553,14 @@ async function connectCheckWorker(task_id) {
         code: err.code,
         raw: err.error
       };
-    } else if (err.code == -3) {
+    } else if (err.code == -1) {
       // Context error
-      if(credentials_id == null || err.context == null) {
+      if(err.context == null) {
         // something went wromg...
         console.log('Never happend: credentials_id or err.context is null in CONTEXT_ERROR in worker: ', err);
-        console.log('credentials_id: ', credentials_id);
         console.log('err.context: ', err.context);
         throw new Error('Never happend: credentials_id or err.context is null in CONTEXT_ERROR in worker: ', err);
       }
-      await save_context(credentials_id, err.contex);
       status = 6;
       result_data = {
         code: err.code,
@@ -596,8 +581,10 @@ async function connectCheckWorker(task_id) {
       await models_shared.TaskQueue.findOneAndUpdate({ _id: task_id }, { ack: 0, status: status, result_data: result_data }, { new: true });
     }
 
-    if(browser !== null && status !== 6) {
-      await browser.close();
+    if(browser !== null) {
+      if(status !== 6) {
+        await browser.close();
+      }
       browser.disconnect();
     }
   }

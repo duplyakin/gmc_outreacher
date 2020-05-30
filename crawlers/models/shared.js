@@ -23,6 +23,8 @@ let taskQueueSchema = new Schema({
     default: 0,
   },
 
+  blocking_data : Object,
+
 }, { collection: 'task_queue' } );
 
 

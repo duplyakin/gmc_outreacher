@@ -44,7 +44,7 @@ class MessageAction extends action.Action {
     await page.click(selectors.SEND_MSG_BTN_SELECTOR);
     //await page.waitFor(100000); // to see result
 
-    //TODO: add check here
+    await super.error_handler('Check message');
 
     return true;
   }

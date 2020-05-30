@@ -49,7 +49,7 @@ class ConnectAction extends action.Action {
     await this.page.click(selectors.SEND_INVITE_TEXT_BTN_SELECTOR);
     //await this.page.waitFor(100000); // to see result
 
-    // TODO: check here result
+    await super.error_handler('Check connect');
 
     return true;
   }

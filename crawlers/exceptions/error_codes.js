@@ -14,9 +14,9 @@ module.exports = {
     SCRIBE_WORKER_ERROR: -4060,
     SEARCH_WORKER_ERROR: -4070,
     
-    BAN_ERROR: -1, //Seems we are banned
+    BAN_ERROR: -3, //Seems we are banned
     NETWORK_ERROR: -2, //something wromg with network
-    CONTEXT_ERROR: -3, // Custom error that required user action to continue task
+    CONTEXT_ERROR: -1, // Custom error that required user action to continue task
     
     LOGIN_ACTION_ERROR: -1010, //On our sid
     LOGIN_ERROR: -1011, //Check credentials
