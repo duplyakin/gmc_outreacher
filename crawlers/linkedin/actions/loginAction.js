@@ -14,7 +14,7 @@ class LoginAction {
     }
 
     async startBrowser() {
-        this.browser = await puppeteer.launch({ headless: false }); // test mode
+        this.browser = await puppeteer.launch({ headless: true }); // test mode
         //this.browser = await puppeteer.launch();
         this.context = await this.browser.createIncognitoBrowserContext();
         this.page = await this.context.newPage();
@@ -23,8 +23,8 @@ class LoginAction {
     }
 
     async closeBrowser() {
-        this.browser.disconnect();
-        this.browser.close();
+        await this.browser.close();
+        await this.browser.disconnect();
       }
 
     async setContext(context) {
@@ -34,7 +34,7 @@ class LoginAction {
 
     async set_cookie(cookies) {
         if (cookies != undefined && cookies != null) {
-            console.log('cooooookiieeeess: ', cookies)
+            //console.log('cooooookiieeeess: ', cookies)
             await this.page.setCookie(...cookies);
             return true;
         }
@@ -49,7 +49,7 @@ class LoginAction {
 
         // Exctract domain here in format: “.www.linkedin.com”
 
-        return '.' + (new URL(current_url)).hostname;
+        return (new URL(current_url)).hostname;
     }
 
     async _get_current_cookie() {
@@ -68,18 +68,6 @@ class LoginAction {
     async _update_cookie() {
         let new_cookie = await this._get_current_cookie();
 
-        /*
-        let cookie_obj = await models.Cookies.findOne({ credentials_id: this.credentials_id }, function (err, res) {
-            if (err) throw MyExceptions.MongoDBError('MongoDB find COOKIE err: ' + err);
-        });
-
-        
-        if (cookie_obj == null) {
-            cookie_obj = await models.Cookies.create({ credentials_id: this.credentials_id, expires: 0, data: [] }, function (err, res) {
-                if (err) throw MyExceptions.MongoDBError('MongoDB find COOKIE err: ' + err);
-            });   // https://masteringjs.io/tutorials/mongoose/update
-        }*/
-
         let new_expires = 0;
         new_cookie.forEach((item) => {
             if (item.name === 'li_at') {
@@ -87,14 +75,8 @@ class LoginAction {
             }
         });
 
-        /*
-        //cookie_obj.credentials_id = this.credentials_id;
-        cookie_obj.expires = newExpires;
-        cookie_obj.data = new_cookie;
-        await cookie_obj.save();*/
-
         await models.Cookies.updateOne({ credentials_id: this.credentials_id }, { expires: new_expires, data: new_cookie }, { upsert: true }, function (err, res) {
-            if (err) throw MyExceptions.MongoDBError('MongoDB find COOKIE err: ' + err); // add ...
+            if (err) throw MyExceptions.MongoDBError('MongoDB find COOKIE err: ' + err); 
         });
 
     }
@@ -131,14 +113,14 @@ class LoginAction {
 
     async login_with_li_at() {
         let domain_var = await this._get_domain();
-        if(domain_var == null || domain_var == '.' || domain_var == '') {
-            console.log('Never happend: domain_var is bad.')
+        if(domain_var == null || domain_var == '') {
+            console.log('Never happend: domain_var is broken.')
             return;
         }
         let cookies_data = [{
             name : "li_at",
             value : this.li_at,
-            domain : domain_var,
+            domain : '.' + domain_var,
             path : "/",
             expires : Date.now() / 1000 + 10000000, // + ~ 4 months // https://www.epochconverter.com/
             size : (new TextEncoder().encode(this.li_at)).length,
@@ -159,10 +141,21 @@ class LoginAction {
         });
 
         let current_url = await this.page.url();
-        if (current_url === links.START_PAGE_LINK) {
+        if (current_url === links.START_PAGE_LINK) { // add domain here
+            // login success
             return true;
+        } else if (this.check_block()) {
+            // BAN here
+            let context_obj = await this.get_context();
+            if(context_obj !== null && context_obj !== undefined) {
+                throw MyExceptions.ContextError('Can\'t goto url: ' + err, context_obj);
+            } else {
+                console.log( 'Never happend - empty context: ', err );
+                throw MyExceptions.ContextError('Can\'t goto url and empty context: ' + err, context_obj);
+            }
         }
 
+        // login failed
         return false;
     }
 
@@ -230,6 +223,42 @@ class LoginAction {
 
         return false;
     }
+
+    check_block() {
+        let current_url = this.page.url();
+        if(current_url == links.BAN_LINK || current_url == links.CHALLENGE_LINK) {
+          return true;
+        } else {
+          return false;
+        }
+    }
+
+    async get_context() {
+        if(this.browser == null || this.browser == undefined) {
+          throw new Error('Can\t get context. Browser is not defined.')
+        }
+    
+        if(this.context == null || this.context == undefined) {
+          throw new Error('Can\t get context. Context is not defined.')
+        }
+    
+        if(this.page == null || this.page == undefined) {
+          throw new Error('Can\t get context. Page is not defined.')
+        }
+    
+        await page.waitFor(10000); // wait 10 sec for lading and screenshot page
+        let screenshot_str = await page.screenshot();
+    
+        let context = {
+          endpoint: this.browser.wsEndpoint(),
+          context_id: this.context._id,
+          url: this.page.url(),
+          screenshot: screenshot_str,
+        }
+        
+        return context;
+      }
+
 }
 
 module.exports = {

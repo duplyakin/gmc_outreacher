@@ -36,6 +36,13 @@ const NetworkError = (message) => ({
   code: ERROR_CODES.NETWORK_ERROR
 });
 
+//------Custom error that required user action to continue task-------
+const ContextError = (message, context) => ({
+  error: new Error(message),
+  code: ERROR_CODES.CONTEXT_ERROR,
+  context: context, // object
+});
+
 //------Workers-------
 const LoginWorkerError = (message) => ({
   error: new Error(message),
@@ -112,6 +119,8 @@ module.exports = {
   MongoDBError: MongoDBError,
   BanError: BanError,
   NetworkError: NetworkError,
+
+  ContextError: ContextError,
 
   LoginWorkerError: LoginWorkerError,
   ConnectWorkerError: ConnectWorkerError,

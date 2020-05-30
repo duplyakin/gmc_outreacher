@@ -1,6 +1,7 @@
 const action = require('../linkedin/actions/loginAction.js');
 const models_shared = require("../models/shared.js");
 
+
 // test login
 
 (async () => {
@@ -37,8 +38,10 @@ const models_shared = require("../models/shared.js");
     let loginAction = new action.LoginAction(task_data.credentials_data.email, task_data.credentials_data.password, task_data.credentials_data.li_at, credentials_id);
 
     await loginAction.startBrowser();
-    await loginAction.login();
+    let res = await loginAction.login();
     await loginAction.closeBrowser();
+
+    console.log('login: ', res)
   } catch(err) {
       console.log( '..........err.............', err.stack )
   }

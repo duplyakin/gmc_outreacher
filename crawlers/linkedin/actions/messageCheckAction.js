@@ -14,14 +14,7 @@ class MessageCheckAction extends action.Action {
   async messageCheck() {
     await super.gotoChecker(this.url);
 
-    try {
-      // close messages box !!! (critical here)
-      await this.page.waitFor(1000);  // wait linkedIn loading process
-      await this.page.click(selectors.CLOSE_MSG_BOX_SELECTOR);
-      await this.page.waitFor(1000);  // wait linkedIn loading process
-    } catch (err) {
-      console.log("..... CLOSE_MSG_BOX_SELECTOR not found .....");
-    }
+    await super.close_msg_box(this.page);
 
     if (await this.page.$(selectors.WRITE_MSG_BTN_SELECTOR) === null) {
       console.log('You can\'t write messages to ' + this.url);

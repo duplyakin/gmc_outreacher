@@ -19,7 +19,12 @@ class ConnectCheckAction extends action.Action {
     await this.page.click(selectors.SEARCH_CONNECTS_SELECTOR);
     await this.page.keyboard.type(this.prospect_full_name);
 
-    await this.page.waitForSelector(selectors.CONNECTOR_SELECTOR, { timeout: 5000 });
+    try {
+      await this.page.waitForSelector(selectors.CONNECTOR_SELECTOR, { timeout: 5000 });
+    } catch (err) {
+      await super.error_handler(err);
+    }
+
     await this.page.waitFor(1000);  // wait linkedIn loading process
 
     let selector = selectors.CONNECTOR_SELECTOR;

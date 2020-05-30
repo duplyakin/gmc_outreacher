@@ -10,9 +10,6 @@ async function bullConsumer() {
   bull_workers.process(async job => {
     try {
       switch (job.data.action_key) {
-        case 'linkedin-check-reply':
-          await workers.loginWorker(job.data.task_id);
-          break;
         case 'linkedin-connect':
           await workers.connectWorker(job.data.task_id);
           break;
