@@ -220,24 +220,45 @@ TEAMS = [
 ]
 
 TEST_CREDENTIALS = {
-    'test_email_handlers' : {
+    'test_gsuite_handlers' : {
         'owner' : '1@email.com',
-        'title' : 'test_email_handlers',
+        'title' : 'test_gsuite_handlers',
         'medium' : 'email',
         'data' : {
-               "email" : "ks.shilov@gmail.com",
-                "account" : "ks.shilov@gmail.com",
+                "email" : "ks.shilov@howtotoken.com",
+                "account" : "ks.shilov@howtotoken.com",
                 "credentials" : {
-                        "token" : "ya29.a0AfH6SMCeBPkFvS4bb2zH8rCylKsEsiAhz3DuZZ_p5A9qP7MmMTrb2ck2gwqjEqb_RMi7Ww6VQ5wZczeZ2rzHpL1-0DRTq3AJ_5w9w_6EMwhUM0vErMpBw1voV1ypZ-an7j6U1Yb3emtdWTvTKWNSN3v4htzcrPuXO6Nt",
-                        "refresh_token" : "null",
+                        "token" : "ya29.a0AfH6SMCgwiioWflg8IJfz7217ec1xGmUpKsH9vhgd5jJjyJtbg7CBUsfnOXrFg2Cj_1UB06dUeKppFa2F0pZC0Nu5TsP85biaPg1GdB2hG__txu1IxcUWN9VJeI7kytN1wO1-dzq61VNYtQYlVPa9Z_a88cMpN523dY",
+                        "refresh_token" : "1//0cP18JofiiiqQCgYIARAAGAwSNwF-L9Irm-CZ1h8Xl126YUuGpha3tb6E9kon0z7P3Za3EG8mPzExmMbVJFcHyTQPvjjvaUUZoxo",
                         "token_uri" : "https://oauth2.googleapis.com/token",
                         "client_id" : "606646624276-qcedt5p3vdad7h6aie2l5s75mg59at7t.apps.googleusercontent.com",
                         "client_secret" : "Gn-M_96r8PTML9SQaLxAqqWD",
                         "scopes" : [
                                 "https://mail.google.com/",
                                 "https://www.googleapis.com/auth/gmail.send",
-                                "https://www.googleapis.com/auth/gmail.modify",
-                                "https://www.googleapis.com/auth/gmail.metadata"
+                                "https://www.googleapis.com/auth/gmail.modify"
+                        ]
+                },
+                "sender" : "api"        
+        }
+    },
+    'test_email_handlers' : {
+        'owner' : '1@email.com',
+        'title' : 'test_email_handlers',
+        'medium' : 'email',
+        'data' : {
+                "email" : "ks.shilov@gmail.com",
+                "account" : "ks.shilov@gmail.com",
+                "credentials" : {
+                        "token" : "ya29.a0AfH6SMDPeB34lsSa1pzhvU4t1q39PJiqchEAiUpc5Kn54hwk9VyF5lljPeib91uD3-rhpTcpPw-rlPIefZRDoVnP3znR6ySlVWGkc9hVLb5DZMovgqjQGSpWNkuEuncFjH-H1-SDA4dZwn_auj0C6iB62oBX-XuX-Fo",
+                        "refresh_token" : "1//0cSUqE84_yG2hCgYIARAAGAwSNwF-L9IrTwx-kjr1-mxAb71UBHB8H4B7xxz36XmtPgS6JoABIjb0jM2jjDyMncOb_Ky0fLTsxMA",
+                        "token_uri" : "https://oauth2.googleapis.com/token",
+                        "client_id" : "606646624276-qcedt5p3vdad7h6aie2l5s75mg59at7t.apps.googleusercontent.com",
+                        "client_secret" : "Gn-M_96r8PTML9SQaLxAqqWD",
+                        "scopes" : [
+                                "https://mail.google.com/",
+                                "https://www.googleapis.com/auth/gmail.send",
+                                "https://www.googleapis.com/auth/gmail.modify"
                         ]
                 },
                 "sender" : "smtp"
@@ -762,6 +783,13 @@ CAMPAIGNS = [
         'credentials' : 'test_email_handlers'
     },
     {
+        'title' : 'test_gsuite_handler_campaign',
+        'owner' : '1@email.com',
+        'funnel' : 'test_email_handler_funnel',
+        'credentials' : 'test_gsuite_handlers'
+    },
+
+    {
         'title' : 'test_linkedin_handler_campaign',
         'owner' : '1@email.com',
         'funnel' : 'test_linkedin_handler_funnel',
@@ -853,14 +881,29 @@ PROSPECTS = [
         'owner' : '1@email.com',
         'assign_to' : 'test_email_handler_campaign',
         'data' : {
-            'email' : 'ks.shilov+1@gmail.com',
+            'email' : 'ks.shilov@howtotoken.com',
             'linkedin' : 'https://www.linkedin.com/in/kirill-shilov-25aa8630/',
-            'first_name' : 'Kirill',
-            'company' : 'Outreacher24',
-            'url' : 'outreacher24.com'
+            'first_name' : 'Kirill-Gsuite',
+            'company' : 'Howtotoken',
+            'url' : 'Howtotoken.com.com',
+            'prospect_to' : 'test_email_handler_campaign'
         },
         'assign_to_list' : 'real_test_list'
     },
+    {
+        'owner' : '1@email.com',
+        'assign_to' : 'test_gsuite_handler_campaign',
+        'data' : {
+            'email' : 'ks.shilov@gmail.com',
+            'linkedin' : 'https://www.linkedin.com/in/kirill-shilov-25aa8630/',
+            'first_name' : 'Kirill-Gmail',
+            'company' : 'Geek22',
+            'url' : 'Geek22.com',
+            'prospect_to' : 'test_gsuite_handler_campaign'
+        },
+        'assign_to_list' : 'real_test_list'
+    },
+
     {
         'owner' : '1@email.com',
         'assign_to' : 'test_linkedin_handler_campaign',

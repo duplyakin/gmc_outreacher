@@ -79,10 +79,11 @@ class GoogleOauthProvider():
         credentials_obj = google.oauth2.credentials.Credentials(**credentials)
 
         #need to have naive datetime
-        expiry = expiry.replace(tzinfo=None)
-        credentials_obj.expiry = expiry
+        if expiry:
+            expiry = expiry.replace(tzinfo=None)
+            credentials_obj.expiry = expiry
 
-        if credentials_obj and credentials_obj.expired:
+        if (credentials_obj and credentials_obj.expired) or not expiry:
             credentials_obj.refresh(Request())
             access_credentials = credentials_to_dict(credentials_obj)
             return access_credentials, credentials_obj.expiry

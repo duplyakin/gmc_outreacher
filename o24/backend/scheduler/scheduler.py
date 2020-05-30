@@ -225,6 +225,7 @@ class Scheduler():
             raise Exception("Campaign already resumed, title={0}".format(campaign.title))
 
         # TaskQueue.resume_tasks(campaign_id=campaign.id)
+        self._input_data_refresh(campaign=campaign)
 
         self._check_new_prospects(owner=owner, campaign=campaign)
 
@@ -348,6 +349,16 @@ class Scheduler():
         prospect_ids = [t.prospect_id for t in inserted_tasks]
         
         return prospect_ids
+
+    def _input_data_refresh(self, campaign):
+        tasks = TaskQueue.objects(campaign_id=campaign.id)
+        if not tasks:
+            return
+        
+        for task in tasks:
+            task.refresh_input_data()
+        
+        return
 
     def _create_parsing_task(self, campaign):
         task = TaskQueue.create_task(campaign=campaign, prospect=None)

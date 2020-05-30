@@ -55,6 +55,16 @@ class MailBox(db.Document):
     created = db.DateTimeField(default=pytz.utc.localize(datetime.utcnow()))
 
     @classmethod
+    def sequence_start_date(cls, prospect_id, campaign_id):
+        first_message = cls.objects(Q(prospect_id=prospect_id) & Q(campaign_id=campaign_id)).order_by('created').first()
+        if not first_message:
+            now = pytz.utc.localize(datetime.utcnow())
+            return int(now.timestamp()) - 30
+        
+        created = first_message.created
+        return int(created.timestamp()) - 30
+
+    @classmethod
     def add_message(cls, data, task_meta={}, tracker_token='', message_type=1):
         new_message = cls()
 

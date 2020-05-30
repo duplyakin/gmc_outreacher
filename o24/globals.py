@@ -16,6 +16,9 @@ ACTION_NONE = -1
 INTRO=0
 FOLLOWUP=1
 
+# this is the secs that you need to substruct to receive correct time in POSIX
+MAGIC_TIME_DIFF_SEC = 3015
+
 #15 hours
 NEXT_DAY_SECONDS = 15 * 60 * 60
 DAY_TO_SECONDS = 24 * 60 * 60
