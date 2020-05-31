@@ -3,6 +3,10 @@ module.exports.USERNAME_SELECTOR = '#username';
 module.exports.PASSWORD_SELECTOR = '#password';
 module.exports.CTA_SELECTOR = '#app__container > main > div > form > div.login__form_action_container > button';
 
+// checkpoint
+module.exports.VERIFICATION_PIN_SELECTOR = '#input__email_verification_pin';
+module.exports.VERIFICATION_PIN_BTN_SELECTOR = '#email-pin-submit-button';
+
 // search
 module.exports.SEARCH_ELEMENT_SELECTOR = '.search-result__wrapper .search-result__info a';
 module.exports.LINK_SELECTOR = 'span > .actor-name';

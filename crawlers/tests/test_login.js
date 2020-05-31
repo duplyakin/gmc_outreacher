@@ -39,7 +39,7 @@ const models_shared = require("../models/shared.js");
 
     await loginAction.startBrowser();
     let res = await loginAction.login();
-    await loginAction.closeBrowser();
+    //await loginAction.closeBrowser();
 
     console.log('login: ', res)
   } catch(err) {

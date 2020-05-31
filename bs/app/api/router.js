@@ -1,5 +1,9 @@
-var log = require('bole')('customers/router')
-var router = require('express').Router()
+const log = require('bole')('customers/router')
+const router = require('express').Router()
+
+const models_shared = require('../../../crawlers/models/shared')
+const status_codes = require('../../../crawlers/linkedin/status_codes')
+const utils = require('./utils')
 
 /*
 request:
@@ -10,25 +14,42 @@ body = {
 }
 
 */
-function captchaInput (req, res) {
-    // get input connect to pupeeter and input
+async function captchaInput (req, res) {
     let task_id = req.body.task_id;
     let captcha_input = req.body.captcha_input;
 
-    /*
-    find task in database...
-    connect to pupetter
-    enter input data
+    let task = await models_shared.TaskQueue.findOneAndUpdate({ _id: task_id, status: status_codes.NEED_USER_ACTION }, { status: status_codes.NEED_USER_ACTION_PROGRESS }, { new: true });
+   
+    if(task == null) {
+        console.log('There is no task with task._id = ' + task_id + ' and status NEED_USER_ACTION.');
+        return res.json({
+			code: 1 // IN_PROGRESS
+		});
+        //throw new Error('There is no task with task._id = ' + task_id + ' and status NEED_USER_ACTION.');
+    }
 
-    if ok:
-        res.json({code: 1})
-    else:
-        res.json({ 
-            code: 0
-            screenshot: task.result_data['blocking_data']['screenshot']
-        })
-    */
+    if(task.result_data == null) {
+        console.log("..... There is no task.result_data. ..... ", task_id);
+        return res.json({ code: -2 })
+        //throw new Error('There is no task.result_data.');
+    }
 
+    if(task.result_data.blocking_data == null) {
+        console.log("..... There is no task.result_data.blocking_data. ..... ", task_id);
+        return res.json({ code: -2 })
+        //throw new Error('There is no task.result_data.blocking_data.');
+    }
+
+    if(!captcha_input) {
+        throw new Error("Input can't be empty");
+    }
+
+    // get connect to pupeeter and input data
+    utils.input_captcha(task.result_data.blocking_data, captcha_input);
+
+    return res.json({
+		code: 1 // IN_PROGRESS
+	})
 }
 
 /*
@@ -41,19 +62,49 @@ response json:
     screenshot: <base64>
 }
 */
-function captchaStatus (req, res) {
+async function captchaStatus (req, res) {
     let task_id = req.params.task_id;
-    /* 
-    Check status of the task in database.
-    if status == NEED_USER_ACTION (6): 
-        res.json({ 
-            code: 0
-            screenshot: task.result_data['blocking_data']['screenshot']
-        })
-    elif status == NEED_USER_ACTION_RESOLVED(7):
-        res.json({code: 1})
 
-    */
+    let task = await models_shared.TaskQueue.findOne( { _id: task_id, ack: 0 } );
+
+    if(task == null) {
+        console.log("..... There is no task with task._id : ..... ", task_id);
+        return res.json({ code: -2 })
+        //throw new Error('There is no task with task._id = ' + task_id);
+    }
+
+    if (task.status == status_codes.NEED_USER_ACTION) {
+        if(task.result_data == null) {
+            console.log("..... There is no task.result_data. ..... ", task_id);
+            return res.json({ code: -2 })
+            //throw new Error('There is no task.result_data.');
+        }
+
+        if(task.result_data.blocking_data == null) {
+            console.log("..... There is no task.result_data.blocking_data. ..... ", task_id);
+            return res.json({ code: -2 })
+            //throw new Error('There is no task.result_data.blocking_data.');
+        }
+
+        res.json({
+			code: -1, // wait user action
+			blocking_data: task.result_data.blocking_data,
+		})
+    } else if (task.status == status_codes.NEED_USER_ACTION_PROGRESS) {
+        res.json({
+			code: 1,  // IN_PROGRESS
+		})
+    } else if (task.status == status_codes.NEED_USER_ACTION_RESOLVED) {
+        res.json({
+			code: 0, // SUCCESS
+		})
+    } else {
+        res.json({
+			code: -2, // Unknown error - try again later
+		})
+    }
+
+    return res;
 }
 
 

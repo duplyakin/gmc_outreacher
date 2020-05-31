@@ -20,7 +20,7 @@ const models_shared = require("../models/shared.js");
     let input_data = get_val(task, 'input_data');
     input_data.credentials_data.email = 'clients@boostlabs.co.uk';
     input_data.credentials_data.password = '!@£$%^';
-    input_data.credentials_data.li_at = 'AQEDARcxwXEBb18zAAABcflw5z8AAAFyHX1rP00AVzV1p6dd9IpqrPbIfjq5ajRuaeHm8ZvSGYaQccRo1fX80kr0WHCDWLOvuPfz-uiAn-dw631pZyHV2ZdU66bPPX4J--EXfE0IxqwMYTi8bIiWfL8U';
+    input_data.credentials_data.li_at = '3454ccx';
 
     await models_shared.TaskQueue.findOneAndUpdate({ _id: task_id }, { input_data: input_data });
 

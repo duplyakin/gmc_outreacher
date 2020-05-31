@@ -5,4 +5,4 @@ module.exports.CONNECTS_LINK = "https://www.linkedin.com/mynetwork/invite-connec
 
 // BAN urls
 module.exports.BAN_LINK = "https://www.linkedin.com/";
-module.exports.CHALLENGE_LINK = "https://www.linkedin.com/";
+module.exports.CHALLENGE_LINK = "checkpoint/challenge/";

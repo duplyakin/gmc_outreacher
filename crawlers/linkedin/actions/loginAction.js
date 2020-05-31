@@ -14,7 +14,7 @@ class LoginAction {
     }
 
     async startBrowser() {
-        this.browser = await puppeteer.launch({ headless: true }); // test mode
+        this.browser = await puppeteer.launch({ headless: false }); // test mode
         //this.browser = await puppeteer.launch();
         this.context = await this.browser.createIncognitoBrowserContext();
         this.page = await this.context.newPage();
@@ -99,12 +99,12 @@ class LoginAction {
           await this.page.click(selectors.CTA_SELECTOR);
           await this.page.waitFor(1000);
       
-          let is_phone = await this.check_phone_page(this.page);
+          let is_phone = this.check_phone_page(this.page);
           if (is_phone) {
             await this.skip_phone(this.page);
           }
 
-          let is_code = await this.check_challenge_page(this.page);
+          let is_code = this.check_challenge_page(this.page);
           if (is_code) {
             throw new Error('Auth error. Challenge page.');    
           }
@@ -204,8 +204,8 @@ class LoginAction {
         await page.click(selectors.SKIP_PHONE_BTN_SELECTOR);
     }
 
-    async check_phone_page(page) {
-        let url = await page.url();
+    check_phone_page(page) {
+        let url = page.url();
 
         if (url.includes('phone')) {
             return true;
@@ -214,8 +214,8 @@ class LoginAction {
         return false;
     }
 
-    async check_challenge_page(page) {
-        let url = await page.url();
+    check_challenge_page(page) { // dell it?
+        let url = page.url();
 
         if (url.includes('challenge')) { 
             return true;
