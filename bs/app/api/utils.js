@@ -2,6 +2,9 @@ const puppeteer = require('puppeteer')
 const links = require('../../../crawlers/linkedin/links')
 const selectors = require('../../../crawlers/linkedin/selectors')
 
+const models_shared = require('../../../crawlers/models/shared')
+const status_codes = require('../../../crawlers/linkedin/status_codes')
+
 const found_form_and_input = async (page, input) => {
 
     let url = page.url();
@@ -15,7 +18,7 @@ const found_form_and_input = async (page, input) => {
 
     } else {
         console.log('UNCKNOWN page found: ', url);
-        throw new Error('UNCKNOWN page found: ' + url);
+        //throw new Error('UNCKNOWN page found: ' + url);
     }
 
     return res;
@@ -46,6 +49,32 @@ const resolve_ban = async(page, input) => {
     return false;
 }
 
+const get_context = async(browser, context, page) => {
+    if(browser == null) {
+      throw new Error('Can\t get context. Browser is not defined.')
+    }
+
+    if(context == null) {
+      throw new Error('Can\t get context. Context is not defined.')
+    }
+
+    if(page == null) {
+      throw new Error('Can\t get context. Page is not defined.')
+    }
+
+    await page.waitFor(10000); // wait 10 sec for lading and screenshot page
+    let screenshot_str = await page.screenshot();
+
+    let context_obj = {
+      endpoint: browser.wsEndpoint(),
+      context_id: context._id,
+      page_url: page.url(),
+      screenshot: screenshot_str,
+    }
+    
+    return context_obj;
+  }
+
 const validate_data = async(data) => {
     let endpoint = data.endpoint;
     if (!endpoint){
@@ -69,7 +98,7 @@ const validate_data = async(data) => {
 
 }
 
-const page_connect = async (browser, validated_data) => {
+const context_connect = async (browser, validated_data) => {
     let contexts = await browser.browserContexts();
     if (!contexts){
         throw new Error("Can't receive browser.browserContexts");
@@ -88,7 +117,15 @@ const page_connect = async (browser, validated_data) => {
         throw new Error("Can't find context by id", context_id);
     }
 
-    let pages = await found_context.pages();
+    return found_context;
+}
+
+const page_connect = async (context, validated_data) => {
+    if (context == null){
+        throw new Error("Can't find context by id", context_id);
+    }
+
+    let pages = await context.pages();
     if (pages ==  null){
         throw new Error("Context doesn't have pages");
     }
@@ -110,26 +147,53 @@ const page_connect = async (browser, validated_data) => {
     return found_page;
 }
 
-const input_captcha = async (data, input) => {
+const input_captcha = async (task, input) => {
     if (!input){
-        //throw new Error("Input can't be empty");
+        //throw new MyError("Input can't be empty");
         console.log("..... Input can't be empty. ..... ");
     }
 
-    await validate_data(data)
+    if (task.result_data == null) {
+        console.log("..... There is no task.result_data. ..... ", task_id);
+        throw new Error('There is no task.result_data.');
+    }
+
+    if (task.result_data.blocking_data == null) {
+        console.log("..... There is no task.result_data.blocking_data. ..... ", task_id);
+        throw new Error('There is no task.result_data.blocking_data.');
+    }
+
+    await validate_data(task.result_data.blocking_data)
 
     var browser = await puppeteer.connect({
         browserWSEndpoint: data.endpoint
     });
 
-    let captcha_page = await page_connect(browser, data);
-    if (!captcha_page){
+    let context = await context_connect(browser, data);
+    if (context == null){
+        throw new Error("Can't connect to context");
+    }
+    let page = await page_connect(context, data);
+    if (page == null){
         throw new Error("Can't connect to page");
     }
 
-    let res = await found_form_and_input(captcha_page, input);
+    let res = await found_form_and_input(page, input);
 
-    return res;
+    if(res) {
+        await models_shared.TaskQueue.findOneAndUpdate({ _id: task._id }, { status: status_codes.NEED_USER_ACTION_RESOLVED });
+    } else {
+        let context_obj = await get_context(browser, context, page);
+        if(context_obj == null) {
+            throw new Error("Error in input_captcha: context_obj is null.")
+        }
+        let result_data = {
+            code: -1,
+            raw: 'Block error NOT resolved.',
+            blocking_data: context_obj
+          }
+        await models_shared.TaskQueue.findOneAndUpdate({ _id: task._id }, { status: status_codes.NEED_USER_ACTION, result_data: result_data });
+    }
 }
 
 const check_captcha_status = async (data, input) => {

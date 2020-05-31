@@ -29,28 +29,19 @@ async function captchaInput(req, res) {
             //throw new Error('There is no task with task._id = ' + task_id + ' and status NEED_USER_ACTION.');
         }
 
-        if (task.result_data == null) {
-            console.log("..... There is no task.result_data. ..... ", task_id);
-            throw new Error('There is no task.result_data.');
-        }
-
-        if (task.result_data.blocking_data == null) {
-            console.log("..... There is no task.result_data.blocking_data. ..... ", task_id);
-            throw new Error('There is no task.result_data.blocking_data.');
-        }
-
         if (!captcha_input) {
             throw new Error("Input can't be empty");
         }
 
         // get connect to pupeeter and input data
-        utils.input_captcha(task.result_data.blocking_data, captcha_input);
+        utils.input_captcha(task, captcha_input);
 
         return res.json({
             code: 1 // IN_PROGRESS
         })
 
     } catch (err) {
+        console.log("..... Error in captchaInput : ..... ", err);
         await models_shared.TaskQueue.findOneAndUpdate({ _id: task_id }, { status: status_codes.FAILED });
     }
 }
