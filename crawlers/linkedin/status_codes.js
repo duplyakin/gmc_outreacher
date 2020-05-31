@@ -1,5 +1,5 @@
 module.exports = {
-    // codes for task status
+    // codes for task.status
     NEW: 0,
     IN_PROGRESS: 1,
     PAUSED: 2, // not used
@@ -11,4 +11,7 @@ module.exports = {
     NEED_USER_ACTION_PROGRESS: 8,
     NEED_USER_ACTION_RESOLVED: 9,
     FAILED: -1,
+
+    // task.result_data.code
+    ///
 }

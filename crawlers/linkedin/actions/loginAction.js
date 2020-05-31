@@ -237,7 +237,7 @@ class LoginAction {
         let context_obj = {
           endpoint: this.browser.wsEndpoint(),
           context_id: this.context._id,
-          url: this.page.url(),
+          page_url: this.page.url(),
           screenshot: screenshot_str,
         }
         
