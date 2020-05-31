@@ -112,7 +112,8 @@ const page_connect = async (browser, validated_data) => {
 
 const input_captcha = async (data, input) => {
     if (!input){
-        throw new Error("Input can't be empty");
+        //throw new Error("Input can't be empty");
+        console.log("..... Input can't be empty. ..... ");
     }
 
     await validate_data(data)

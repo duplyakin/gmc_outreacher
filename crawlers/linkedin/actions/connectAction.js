@@ -34,13 +34,8 @@ class ConnectAction extends action.Action {
     }
     await this.page.click(selectors.ADD_MSG_BTN_SELECTOR);
 
-    try {
-      await this.page.waitForSelector(selectors.MSG_SELECTOR, { timeout: 5000 });
-      await this.page.waitForSelector(selectors.SEND_INVITE_TEXT_BTN_SELECTOR, { timeout: 5000 });
-    } catch (err) {
-      await super.error_handler(err);
-    }
-
+    // wait selector here
+    await super.check_success_selector(selectors.MSG_SELECTOR);
     await this.page.click(selectors.MSG_SELECTOR);
 
     let text = super.formatMessage(this.template, this.data);
@@ -49,7 +44,9 @@ class ConnectAction extends action.Action {
     await this.page.click(selectors.SEND_INVITE_TEXT_BTN_SELECTOR);
     //await this.page.waitFor(100000); // to see result
 
-    await super.error_handler('Check connect');
+    // wait page here
+    await this.page.waitFor(2000);
+    await super.check_success_page(this.url);
 
     return true;
   }

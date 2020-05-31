@@ -24,6 +24,10 @@ class MessageCheckAction extends action.Action {
     await this.page.waitForSelector(selectors.WRITE_MSG_BTN_SELECTOR, { timeout: 5000 });
 
     await this.page.click(selectors.WRITE_MSG_BTN_SELECTOR);
+
+    // wait selector here
+    await super.check_success_selector(selectors.LAST_MSG_LINK_SELECTOR);
+
     let mySelectors = {
       selector1: selectors.LAST_MSG_LINK_SELECTOR,
       selector2: selectors.LAST_MSG_SELECTOR,

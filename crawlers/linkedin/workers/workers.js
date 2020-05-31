@@ -4,15 +4,17 @@ const models = require("../../models/models.js");
 
 const MyExceptions = require('../../exceptions/exceptions.js');
 
+const status_codes = require('../status_codes')
+
 
 async function get_cookies(email, password, li_at, credentials_id) {
 
   let cookies = await models.Cookies.findOne({ credentials_id: credentials_id }, function (err, res) {
-      if (err) throw MyExceptions.MongoDBError('MongoDB find COOKIE err: ' + err);
+    if (err) throw MyExceptions.MongoDBError('MongoDB find COOKIE err: ' + err);
   });
-  
+
   let is_expired = check_expired(cookies); // true if we have to update cookies
-  
+
   if (cookies == null || is_expired) {
     let loginAction = new modules.loginAction.LoginAction(email, password, li_at, credentials_id);
     await loginAction.startBrowser();
@@ -20,42 +22,42 @@ async function get_cookies(email, password, li_at, credentials_id) {
     await loginAction.closeBrowser();
 
     cookies = await models.Cookies.findOne({ credentials_id: credentials_id }, function (err, res) {
-        if (err) throw MyExceptions.MongoDBError('MongoDB find COOKIE err: ' + err);
+      if (err) throw MyExceptions.MongoDBError('MongoDB find COOKIE err: ' + err);
     });
-  
-    return cookies.data; 
+
+    return cookies.data;
   }
-  
+
   return cookies.data;
 }
-  
+
 
 function check_expired(cookies) {
-	if (cookies == null){
-		return true;
+  if (cookies == null) {
+    return true;
   }
-	return (Date.now() / 1000 > cookies.expires);
+  return (Date.now() / 1000 > cookies.expires);
 }
 
 
 function serialize_data(input_data) {
-  if (!input_data){
-    throw new Error ('SERIALIZATION error: input_data can’t be empty');
+  if (!input_data) {
+    throw new Error('SERIALIZATION error: input_data can’t be empty');
   }
-    
+
   let task_data = {};
-    
+
   task_data['credentials_data'] = input_data.credentials_data;
   task_data['campaign_data'] = input_data.campaign_data;
   task_data['template_data'] = input_data.template_data;
   task_data['prospect_data'] = input_data.prospect_data;
-    
+
   return task_data;
 }
 
 
 async function searchWorker(task_id) {
-  let status = -1; 
+  let status = status_codes.FAILED;
   let result_data = {};
   let task = null;
 
@@ -69,15 +71,15 @@ async function searchWorker(task_id) {
 
     let credentials_id = task.credentials_id;
     if (!credentials_id) {
-      throw new Error ('there is no task.credentials_id');
+      throw new Error('there is no task.credentials_id');
     }
     let input_data = task.input_data;
     if (!input_data) {
-      throw new Error ('there is no task.input_data');
+      throw new Error('there is no task.input_data');
     }
     let task_data = serialize_data(input_data);
     //console.log("..... task_data: .....", task_data);
-    
+
     let cookies = await get_cookies(task_data.credentials_data.email, task_data.credentials_data.password, task_data.credentials_data.li_at, credentials_id);
 
     // start work
@@ -87,47 +89,51 @@ async function searchWorker(task_id) {
     browser = await searchAction.closeBrowser();
 
     status = result_data.code >= 0 ? 5 : -1;  // if we got some exception (BAN?), we have to save results before catch Error and send task status -1
-   
+
   } catch (err) {
 
-    console.log( err.stack )
+    console.log(err.stack)
 
-    status = -1;
+    status = status_codes.FAILED;
 
-    if (err.code !== undefined && err.code !== null) {
+    if (err.code != null && err.code != -1) {
       result_data = {
         code: err.code,
         raw: err.error
       };
     } else if (err.code == -1) {
       // Context error
-      if(err.context == null) {
+      if (err.context == null) {
         // something went wromg...
         console.log('Never happend: credentials_id or err.context is null in CONTEXT_ERROR in worker: ', err);
         console.log('err.context: ', err.context);
         throw new Error('Never happend: credentials_id or err.context is null in CONTEXT_ERROR in worker: ', err);
       }
-      status = 6;
-      result_data = {
-        code: err.code,
-        raw: err.error,
-        blocking_data: err.contex
-      };
+      status = status_codes.BLOCK_HAPPENED;
+      if (err.data == null) {
+        result_data = {
+          code: err.code,
+          raw: err.error,
+          blocking_data: err.context
+        };
+      } else {
+        result_data = err.data;
+      }
     } else {
       result_data = {
         code: MyExceptions.SearchWorkerError().code,
         raw: MyExceptions.SearchWorkerError("searchWorker error: " + err).error
       };
-    }  
+    }
 
   } finally {
     console.log("RES: ", result_data);
-    if(task !== null) {
+    if (task !== null) {
       await models_shared.TaskQueue.findOneAndUpdate({ _id: task_id }, { ack: 0, status: status, result_data: result_data }, { new: true });
     }
 
-    if(browser !== null) {
-      if(status !== 6) {
+    if (browser !== null) {
+      if (status !== status_codes.BLOCK_HAPPENED) {
         await browser.close();
       }
       browser.disconnect();
@@ -137,7 +143,7 @@ async function searchWorker(task_id) {
 
 
 async function connectWorker(task_id) {
-  let status = -1; 
+  let status = status_codes.FAILED;
   let result_data = {};
   let task = null;
 
@@ -151,11 +157,11 @@ async function connectWorker(task_id) {
 
     let credentials_id = task.credentials_id;
     if (!credentials_id) {
-      throw new Error ('there is no task.credentials_id');
+      throw new Error('there is no task.credentials_id');
     }
     let input_data = task.input_data;
     if (!input_data) {
-      throw new Error ('there is no task.input_data');
+      throw new Error('there is no task.input_data');
     }
     let task_data = serialize_data(input_data);
 
@@ -190,43 +196,47 @@ async function connectWorker(task_id) {
 
   } catch (err) {
 
-    console.log( err.stack )
+    console.log(err.stack)
 
-    if (err.code !== undefined && err.code !== null) {
+    if (err.code != null && err.code != -1) {
       result_data = {
         code: err.code,
         raw: err.error
       };
     } else if (err.code == -1) {
       // Context error
-      if(err.context == null) {
+      if (err.context == null) {
         // something went wromg...
         console.log('Never happend: credentials_id or err.context is null in CONTEXT_ERROR in worker: ', err);
         console.log('err.context: ', err.context);
         throw new Error('Never happend: credentials_id or err.context is null in CONTEXT_ERROR in worker: ', err);
       }
-      status = 6;
-      result_data = {
-        code: err.code,
-        raw: err.error,
-        blocking_data: err.contex
-      };
+      status = status_codes.BLOCK_HAPPENED;
+      if (err.data == null) {
+        result_data = {
+          code: err.code,
+          raw: err.error,
+          blocking_data: err.context
+        };
+      } else {
+        result_data = err.data;
+      }
     } else {
       result_data = {
         code: MyExceptions.ConnectWorkerError().code,
         raw: MyExceptions.ConnectWorkerError("connectWorker error: " + err).error
       };
     }
-    status = -1;
+    status = status_codes.FAILED;
 
   } finally {
     console.log("RES: ", result_data);
-    if(task !== null) {
+    if (task !== null) {
       await models_shared.TaskQueue.findOneAndUpdate({ _id: task_id }, { ack: 0, status: status, result_data: result_data }, { new: true });
     }
-    
-    if(browser !== null) {
-      if(status !== 6) {
+
+    if (browser !== null) {
+      if (status !== status_codes.BLOCK_HAPPENED) {
         await browser.close();
       }
       browser.disconnect();
@@ -236,7 +246,7 @@ async function connectWorker(task_id) {
 
 
 async function messageWorker(task_id) {
-  let status = -1; 
+  let status = status_codes.FAILED;
   let result_data = {};
   let task = null;
 
@@ -250,11 +260,11 @@ async function messageWorker(task_id) {
 
     let credentials_id = task.credentials_id;
     if (!credentials_id) {
-      throw new Error ('there is no task.credentials_id');
+      throw new Error('there is no task.credentials_id');
     }
     let input_data = task.input_data;
     if (!input_data) {
-      throw new Error ('there is no task.input_data');
+      throw new Error('there is no task.input_data');
     }
     let task_data = serialize_data(input_data);
 
@@ -287,46 +297,50 @@ async function messageWorker(task_id) {
       };
     }
     status = 5;
-    
+
   } catch (err) {
 
-    console.log( err.stack )
+    console.log(err.stack)
 
-    if (err.code !== undefined && err.code !== null) {
+    if (err.code != null && err.code != -1) {
       result_data = {
         code: err.code,
         raw: err.error
       };
     } else if (err.code == -1) {
       // Context error
-      if(err.context == null) {
+      if (err.context == null) {
         // something went wromg...
         console.log('Never happend: credentials_id or err.context is null in CONTEXT_ERROR in worker: ', err);
         console.log('err.context: ', err.context);
         throw new Error('Never happend: credentials_id or err.context is null in CONTEXT_ERROR in worker: ', err);
       }
-      status = 6;
-      result_data = {
-        code: err.code,
-        raw: err.error,
-        blocking_data: err.contex
-      };
+      status = status_codes.BLOCK_HAPPENED;
+      if (err.data == null) {
+        result_data = {
+          code: err.code,
+          raw: err.error,
+          blocking_data: err.context
+        };
+      } else {
+        result_data = err.data;
+      }
     } else {
       result_data = {
         code: MyExceptions.MessageWorkerError().code,
         raw: MyExceptions.MessageWorkerError("messageWorker error: " + err).error
       };
     }
-    status = -1;
+    status = status_codes.FAILED;
 
   } finally {
     console.log("RES: ", result_data);
-    if(task !== null) {
+    if (task !== null) {
       await models_shared.TaskQueue.findOneAndUpdate({ _id: task_id }, { ack: 0, status: status, result_data: result_data }, { new: true });
     }
 
-    if(browser !== null) {
-      if(status !== 6) {
+    if (browser !== null) {
+      if (status !== status_codes.BLOCK_HAPPENED) {
         await browser.close();
       }
       browser.disconnect();
@@ -336,7 +350,7 @@ async function messageWorker(task_id) {
 
 
 async function scribeWorker(task_id) {
-  let status = -1; 
+  let status = status_codes.FAILED;
   let result_data = {};
   let task = null;
 
@@ -350,11 +364,11 @@ async function scribeWorker(task_id) {
 
     let credentials_id = task.credentials_id;
     if (!credentials_id) {
-      throw new Error ('there is no task.credentials_id');
+      throw new Error('there is no task.credentials_id');
     }
     let input_data = task.input_data;
     if (!input_data) {
-      throw new Error ('there is no task.input_data');
+      throw new Error('there is no task.input_data');
     }
     let task_data = serialize_data(input_data);
 
@@ -375,43 +389,47 @@ async function scribeWorker(task_id) {
 
   } catch (err) {
 
-    console.log( err.stack )
+    console.log(err.stack)
 
-    if (err.code !== undefined && err.code !== null) {
+    if (err.code != null && err.code != -1) {
       result_data = {
         code: err.code,
         raw: err.error
       };
     } else if (err.code == -1) {
       // Context error
-      if(err.context == null) {
+      if (err.context == null) {
         // something went wromg...
         console.log('Never happend: credentials_id or err.context is null in CONTEXT_ERROR in worker: ', err);
         console.log('err.context: ', err.context);
         throw new Error('Never happend: credentials_id or err.context is null in CONTEXT_ERROR in worker: ', err);
       }
-      status = 6;
-      result_data = {
-        code: err.code,
-        raw: err.error,
-        blocking_data: err.contex
-      };
+      status = status_codes.BLOCK_HAPPENED;
+      if (err.data == null) {
+        result_data = {
+          code: err.code,
+          raw: err.error,
+          blocking_data: err.context
+        };
+      } else {
+        result_data = err.data;
+      }
     } else {
       result_data = {
         code: MyExceptions.ScribeWorkerError().code,
         raw: MyExceptions.ScribeWorkerError("scribeWorker error: " + err).error
       };
     }
-    status = -1;
+    status = status_codes.FAILED;
 
   } finally {
     console.log("RES: ", result_data);
-    if(task !== null) {
+    if (task !== null) {
       await models_shared.TaskQueue.findOneAndUpdate({ _id: task_id }, { ack: 0, status: status, result_data: result_data }, { new: true });
     }
 
-    if(browser !== null) {
-      if(status !== 6) {
+    if (browser !== null) {
+      if (status !== status_codes.BLOCK_HAPPENED) {
         await browser.close();
       }
       browser.disconnect();
@@ -421,7 +439,7 @@ async function scribeWorker(task_id) {
 
 
 async function messageCheckWorker(task_id) {
-  let status = -1; 
+  let status = status_codes.FAILED;
   let result_data = {};
   let task = null;
 
@@ -435,11 +453,11 @@ async function messageCheckWorker(task_id) {
 
     let credentials_id = task.credentials_id;
     if (!credentials_id) {
-      throw new Error ('there is no task.credentials_id');
+      throw new Error('there is no task.credentials_id');
     }
     let input_data = task.input_data;
     if (!input_data) {
-      throw new Error ('there is no task.input_data');
+      throw new Error('there is no task.input_data');
     }
     let task_data = serialize_data(input_data);
 
@@ -460,43 +478,47 @@ async function messageCheckWorker(task_id) {
 
   } catch (err) {
 
-    console.log( err.stack )
+    console.log(err.stack)
 
-    if (err.code !== undefined && err.code !== null) {
+    if (err.code != null && err.code != -1) {
       result_data = {
         code: err.code,
         raw: err.error
       };
     } else if (err.code == -1) {
       // Context error
-      if(err.context == null) {
+      if (err.context == null) {
         // something went wromg...
         console.log('Never happend: credentials_id or err.context is null in CONTEXT_ERROR in worker: ', err);
         console.log('err.context: ', err.context);
         throw new Error('Never happend: credentials_id or err.context is null in CONTEXT_ERROR in worker: ', err);
       }
-      status = 6;
-      result_data = {
-        code: err.code,
-        raw: err.error,
-        blocking_data: err.contex
-      };
+      status = status_codes.BLOCK_HAPPENED;
+      if (err.data == null) {
+        result_data = {
+          code: err.code,
+          raw: err.error,
+          blocking_data: err.context
+        };
+      } else {
+        result_data = err.data;
+      }
     } else {
       result_data = {
         code: MyExceptions.MessageCheckWorkerError().code,
         raw: MyExceptions.MessageCheckWorkerError("messageCheckWorker error: " + err).error
       };
     }
-    status = -1;
+    status = status_codes.FAILED;
 
   } finally {
     console.log("RES: ", result_data);
-    if(task !== null) {
+    if (task !== null) {
       await models_shared.TaskQueue.findOneAndUpdate({ _id: task_id }, { ack: 0, status: status, result_data: result_data }, { new: true });
     }
 
-    if(browser !== null) {
-      if(status !== 6) {
+    if (browser !== null) {
+      if (status !== status_codes.BLOCK_HAPPENED) {
         await browser.close();
       }
       browser.disconnect();
@@ -506,7 +528,7 @@ async function messageCheckWorker(task_id) {
 
 
 async function connectCheckWorker(task_id) {
-  let status = -1; 
+  let status = status_codes.FAILED;
   let result_data = {};
   let task = null;
 
@@ -520,11 +542,11 @@ async function connectCheckWorker(task_id) {
 
     let credentials_id = task.credentials_id;
     if (!credentials_id) {
-      throw new Error ('there is no task.credentials_id');
+      throw new Error('there is no task.credentials_id');
     }
     let input_data = task.input_data;
     if (!input_data) {
-      throw new Error ('there is no task.input_data');
+      throw new Error('there is no task.input_data');
     }
     let task_data = serialize_data(input_data);
 
@@ -546,43 +568,47 @@ async function connectCheckWorker(task_id) {
 
   } catch (err) {
 
-    console.log( err.stack )
+    console.log(err.stack)
 
-    if (err.code !== undefined && err.code !== null) {
+    if (err.code != null && err.code != -1) {
       result_data = {
         code: err.code,
         raw: err.error
       };
     } else if (err.code == -1) {
       // Context error
-      if(err.context == null) {
+      if (err.context == null) {
         // something went wromg...
         console.log('Never happend: credentials_id or err.context is null in CONTEXT_ERROR in worker: ', err);
         console.log('err.context: ', err.context);
         throw new Error('Never happend: credentials_id or err.context is null in CONTEXT_ERROR in worker: ', err);
       }
-      status = 6;
-      result_data = {
-        code: err.code,
-        raw: err.error,
-        blocking_data: err.contex
-      };
+      status = status_codes.BLOCK_HAPPENED;
+      if (err.data == null) {
+        result_data = {
+          code: err.code,
+          raw: err.error,
+          blocking_data: err.context
+        };
+      } else {
+        result_data = err.data;
+      }
     } else {
       result_data = {
         code: MyExceptions.ConnectCheckWorkerError().code,
         raw: MyExceptions.ConnectCheckWorkerError("connectCheckWorker error: " + err).error
       };
     }
-    status = -1;
+    status = status_codes.FAILED;
 
   } finally {
     console.log("RES: ", result_data);
-    if(task !== null) {
+    if (task !== null) {
       await models_shared.TaskQueue.findOneAndUpdate({ _id: task_id }, { ack: 0, status: status, result_data: result_data }, { new: true });
     }
 
-    if(browser !== null) {
-      if(status !== 6) {
+    if (browser !== null) {
+      if (status !== status_codes.BLOCK_HAPPENED) {
         await browser.close();
       }
       browser.disconnect();

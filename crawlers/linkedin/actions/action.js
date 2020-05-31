@@ -30,65 +30,138 @@ class Action {
 
   async closeBrowser() {
     await this.browser.close();
-    await this.browser.disconnect();
+    this.browser.disconnect();
+
     return null;
   }
 
-  async get_context() {
-    if(this.browser == null || this.browser == undefined) {
+  async get_context(browser = this.browser, context = this.context, page = this.page) {
+    if(browser == null) {
       throw new Error('Can\t get context. Browser is not defined.')
     }
 
-    if(this.context == null || this.context == undefined) {
+    if(context == null) {
       throw new Error('Can\t get context. Context is not defined.')
     }
 
-    if(this.page == null || this.page == undefined) {
+    if(page == null) {
       throw new Error('Can\t get context. Page is not defined.')
     }
 
     await page.waitFor(10000); // wait 10 sec for lading and screenshot page
     let screenshot_str = await page.screenshot();
 
-    let context = {
-      endpoint: this.browser.wsEndpoint(),
-      context_id: this.context._id,
-      url: this.page.url(),
+    let context_obj = {
+      endpoint: browser.wsEndpoint(),
+      context_id: context._id,
+      page_url: page.url(),
       screenshot: screenshot_str,
     }
     
-    return context;
+    return context_obj;
   }
 
-  check_block() {
-    let current_url = this.page.url();
-    if(current_url == links.BAN_LINK || current_url == links.CHALLENGE_LINK) {
+/*
+  check_block(page = this.page) {
+    let current_url = page.url();
+    if(current_url.includes(links.BAN_LINK) || current_url.includes(links.CHALLENGE_LINK)) {
+      // not target page here
       return true;
     } else {
+      // all ok
       return false;
     }
   }
 
-  async error_handler(err) {
-    if(err == null || err == undefined) {
-      throw new Error('Empty error in error_handler.');
+  async check_success_selector(selector, page = this.page, data = null) {
+    if(!selector) {
+      throw new Error ('Empty selector.');
     }
 
-    if(this.check_block()) {
-      let context_obj = await this.get_context();
-      if(context_obj !== null && context_obj !== undefined) {
-        throw MyExceptions.ContextError('Can\'t goto url: ' + err, context_obj);
-      } else {
-        console.log( 'Never happend - empty context: ', err );
-        throw MyExceptions.ContextError('Can\'t goto url and empty context: ' + err, context_obj);
+    try {
+      await page.waitForSelector(selector, { timeout: 5000 });
+
+    } catch(err) {
+      if(this.check_block(page)) {
+        // not target page here
+        let context_obj = await this.get_context(); // todo: send here browser, page, context
+
+        if(context_obj != null) {
+          throw MyExceptions.ContextError('Can\'t goto url: ' + err, context_obj, data);
+
+        } else {
+          console.log( 'Never happend - empty context: ', err );
+          throw new Error('Can\'t goto url and empty context: ' + err);
+        }
       }
+ 
+      // uncknown page here
+      throw MyExceptions.NetworkError('Something wromg with connection or uncknown page: ' + err);
+    }
+  }
+*/
+
+async check_block(page = this.page, data = null) {
+  let current_url = page.url();
+
+  if(current_url.includes(links.BAN_LINK) || current_url.includes(links.CHALLENGE_LINK)) {
+    // not target page here
+    let context_obj = await this.get_context(); // todo: send here browser, page, context
+
+    if(context_obj != null) {
+      if(data != null) {
+        // add info to excisting result_data
+        data.code = MyExceptions.ContextError().code;
+        data.raw = MyExceptions.ContextError('Can\'t goto url: ' + err).error;
+        data.blocking_data = context_obj;
+      } 
+      throw MyExceptions.ContextError('Can\'t goto url: ' + err, context_obj, data);
+    } else {
+      console.log( 'Never happend - empty context: ', err );
+      throw new Error('Can\'t goto url and empty context: ' + err);
     }
 
-    throw MyExceptions.NetworkError('Something wromg with connection: ' + err);
+  } else {
+    // all ok
+    return false;
+  }
+}
+
+async check_success_selector(selector, page = this.page, data = null) {
+  if(!selector) {
+    throw new Error ('Empty selector.');
   }
 
-  async close_msg_box(page) {
-    if(page == null || page == undefined) {
+  try {
+    await page.waitForSelector(selector, { timeout: 5000 });
+
+  } catch(err) {
+    await this.check_block(page, data);
+
+    // uncknown page here
+    throw MyExceptions.NetworkError('Something wromg with connection or uncknown page: ' + err);
+  }
+}
+
+  async check_success_page(required_url, page = this.page, data = null) {
+    if(!required_url) {
+      throw new Error ('Empty required_url.');
+    }
+
+      let current_url = page.url();
+
+      if(current_url.includes(required_url)) {
+        return true;
+      }
+
+      await this.check_block(page, data);
+ 
+      // uncknown page here
+      throw new Error('Uncknowm page here: ', current_url);
+  }
+
+  async close_msg_box(page = this.page) {
+    if(page == null) {
       throw new Error ('Page not found.');
     }
     try {
@@ -98,17 +171,18 @@ class Action {
       await page.click(selectors.CLOSE_MSG_BOX_SELECTOR);
       await page.waitFor(1000);  // wait linkedIn loading process
     } catch (err) {
-      console.log("..... CLOSE_MSG_BOX_SELECTOR not found .....")
+      console.log("..... CLOSE_MSG_BOX_SELECTOR not found .....");
     }
   }
 
   // format message
   formatMessage(message, data) {
     if(!message || message == '') {
-      throw new Error('Empty message.');
+      //throw new Error('Empty message.');
+      return '';
     }
 
-    if(!data) {
+    if(data == null) {
       return message;
     }
 
@@ -122,14 +196,14 @@ class Action {
   }
 
   // do 1 trie to connect URL or goto login
-  async gotoChecker(url) {
+  async gotoChecker(url, page = this.page) {
+    //console.log('........url......: ', url);
+    if(!url) {
+      throw new Error ('Empty url.');
+    }
     try {
-      //console.log('........url......: ', url);
-      if(!url) {
-        throw new Error ('Empty url.');
-      }
-      await this.page.goto(url);
-      let current_url = this.page.url();
+      await page.goto(url);
+      let current_url = page.url();
 
       if (current_url !== url) {
         if (current_url.includes('login') || current_url.includes('signup')) {
@@ -139,16 +213,16 @@ class Action {
 
           let result = await loginAction.login();
           if (result) {
-            await this.page.goto(url);
+            await page.goto(url);
           }
         } else {
           console.log('current_url: ', current_url);
           console.log('url: ', url);
-          throw MyExceptions.BanError('We cann\'t go to page, we got: ' + current_url);
+          throw new Error('We cann\'t go to page, we got: ' + current_url);
         }
       }
     } catch (err) {
-      this.error_handler(err);
+      await this.check_block(page);
     }
   }
 

@@ -103,11 +103,6 @@ class LoginAction {
           if (is_phone) {
             await this.skip_phone(this.page);
           }
-
-          let is_code = this.check_challenge_page(this.page);
-          if (is_code) {
-            throw new Error('Auth error. Challenge page.');    
-          }
     }
 
 
@@ -214,19 +209,9 @@ class LoginAction {
         return false;
     }
 
-    check_challenge_page(page) { // dell it?
-        let url = page.url();
-
-        if (url.includes('challenge')) { 
-            return true;
-        }
-
-        return false;
-    }
-
     check_block() {
         let current_url = this.page.url();
-        if(current_url == links.BAN_LINK || current_url == links.CHALLENGE_LINK) {
+        if(current_url.includes(links.BAN_LINK) || current_url.includes(links.CHALLENGE_LINK)) {
           return true;
         } else {
           return false;
@@ -234,29 +219,29 @@ class LoginAction {
     }
 
     async get_context() {
-        if(this.browser == null || this.browser == undefined) {
+        if(this.browser == null) {
           throw new Error('Can\t get context. Browser is not defined.')
         }
     
-        if(this.context == null || this.context == undefined) {
+        if(this.context == null) {
           throw new Error('Can\t get context. Context is not defined.')
         }
     
-        if(this.page == null || this.page == undefined) {
+        if(this.page == null) {
           throw new Error('Can\t get context. Page is not defined.')
         }
     
         await page.waitFor(10000); // wait 10 sec for lading and screenshot page
-        let screenshot_str = await page.screenshot();
+        let screenshot_str = await this.page.screenshot();
     
-        let context = {
+        let context_obj = {
           endpoint: this.browser.wsEndpoint(),
           context_id: this.context._id,
           url: this.page.url(),
           screenshot: screenshot_str,
         }
         
-        return context;
+        return context_obj;
       }
 
 }

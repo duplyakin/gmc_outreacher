@@ -12,6 +12,10 @@ class SearchAction extends action.Action {
   }
 
   async search() {
+    if(!this.searchUrl) {
+      throw new Error('Empty search url.');
+    }
+    
     await super.gotoChecker(this.searchUrl);
 
     let currentPage = 1;
@@ -25,7 +29,9 @@ class SearchAction extends action.Action {
     };
     
     try {
-      await this.page.waitForSelector(selectors.SEARCH_ELEMENT_SELECTOR, { timeout: 5000 });
+      // wait selector here
+      await super.check_success_selector(selectors.SEARCH_ELEMENT_SELECTOR, this.page, result_data);
+      //await this.page.waitForSelector(selectors.SEARCH_ELEMENT_SELECTOR, { timeout: 5000 });
 
       let mySelectors = {
         selector1: selectors.SEARCH_ELEMENT_SELECTOR,
@@ -56,7 +62,8 @@ class SearchAction extends action.Action {
 
         await super.autoScroll(this.page);
 
-        if (await this.page.$(selectors.NEXT_PAGE_SELECTOR) === null) {
+        /*
+        if (await this.page.$(selectors.NEXT_PAGE_SELECTOR) == null) {
           // TODO: add check-selector for BAN page
           // perhaps it was BAN
           result_data.code = MyExceptions.SearchActionError().code;
@@ -64,10 +71,15 @@ class SearchAction extends action.Action {
           console.log('something went wrong - selector not found!');
           break;
         }
-        if (await this.page.$(selectors.NEXT_PAGE_MUTED_SELECTOR) !== null) {
+        */
+
+        // wait selector here
+        await super.check_success_selector(selectors.NEXT_PAGE_SELECTOR, this.page, result_data);
+
+        if (await this.page.$(selectors.NEXT_PAGE_MUTED_SELECTOR) != null) {
           // all awailable pages has been scribed
           result_data.code = 1000;
-          console.log('all contacts scribed!');
+          console.log('All contacts scribed!');
           break;
         }
 
