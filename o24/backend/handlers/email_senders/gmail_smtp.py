@@ -6,9 +6,10 @@ import random
 from o24.exceptions.exception_with_code import ErrorCodeException
 from o24.backend.gmail.controller import GmailController
 from o24.backend.models.inbox.mailbox import MailBox
+import o24.backend.handlers.email_senders.gmail_api as gmail_api
 
 def check_reply(task, **kwargs):
-    return None
+    return gmail_api.check_reply(task, **kwargs)
 
 def send_email(task, **kwargs):
     access_credentials = kwargs['credentials_data'].get('credentials', '')

@@ -9,16 +9,23 @@ import email
 from o24.backend.google.service.api import GoogleApiService
 import o24.backend.google.provider.oauth_provider as oauth_provider
 from o24.exceptions.exception_with_code import ErrorCodeException
+from datetime import datetime
 
 import traceback
 
 class GmailApiProvider():
-    def __init__(self, credentials, credentials_id):
+    def __init__(self, credentials, credentials_id=None):
         self.credentials_id = credentials_id
         self.credentials = credentials
 
-        self._refresh_credentials()    
+        if credentials_id:
+            self._refresh_credentials()    
+        else:
+            self._setup_credentials()
     
+    def _setup_credentials(self):
+        self.service = GoogleApiService.build_gmail_api_service(self.credentials)
+
     def _refresh_credentials(self):
         self.credentials = oauth_provider.GoogleOauthProvider.check_and_update_credentials(credentials_id=self.credentials_id)
 
@@ -55,6 +62,13 @@ class GmailApiProvider():
         message = self._safe_execute(request=request)
 
         return message
+
+    def send_reply_to_thread(self, message, user_id='me'):
+        request = self.service.users().messages().send(userId=user_id, body=message)
+
+        response = self._safe_execute(request=request)
+
+        return response
 
 
 
@@ -228,3 +242,39 @@ class GmailApiProvider():
         
         response = self._safe_execute(request=request)
         return response
+
+    def check_reply(self, email_from, after, user_id='me', anywhere=True):
+        #example: from:support@hackernoon.com in:anywhere after:2020/05/24 
+        #after: should be POSIX TIME, seconds since epoch
+
+        query = "from:{0}".format(email_from)
+        if anywhere:
+            query = query + " in:anywhere"
+
+        if after:
+            after_query = " after:{0}".format(after)
+            query = query + after_query
+
+        print("*******")
+        print(query)
+        request = self.service.users().messages().list(userId=user_id,
+                                                q=query)
+        response = self._safe_execute(request=request)
+
+        messages = []
+        if 'messages' in response:
+            messages.extend(response['messages'])
+
+        return messages
+
+
+    def _convert_datetime_to_q(self, date):
+        if type(date) != datetime:
+            message = "gmail_api_provider: date is wrong type: {0}".format(type(date))
+            raise Exception(message)
+
+        res = str(date.year)
+        res = res + '/' + str(date.month)
+        res = res + '/' + str(date.day)
+
+        return res

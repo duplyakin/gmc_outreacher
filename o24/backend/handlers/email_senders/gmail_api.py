@@ -6,9 +6,40 @@ import random
 from o24.exceptions.exception_with_code import ErrorCodeException
 from o24.backend.gmail.controller import GmailController
 from o24.backend.models.inbox.mailbox import MailBox
+from datetime import datetime
 
 def check_reply(task, **kwargs):
-    return None
+    access_credentials = kwargs['credentials_data'].get('credentials', '')
+    if not access_credentials:
+        raise Exception("Can't find access_credentials for credentials task_id:{0}".format(task.id))
+
+    
+    gmail_controller = GmailController(email=kwargs['email_from'],
+                                        credentials=access_credentials,
+                                        credentials_id=kwargs['credentials_id'],
+                                        smtp=False)
+    
+    start_time = MailBox.sequence_start_date(prospect_id=kwargs['prospect_id'], 
+                                            campaign_id=kwargs['prospect_id'])
+    
+    prospect_email = kwargs['prospect_data'].get('email')
+    messages = gmail_controller.check_reply(email_from=prospect_email, 
+                                            after=start_time)
+    result_data = {
+        'if_true' : False,
+        'code' : 0
+    }
+    if not messages:
+        return result_data
+    else:
+        result_data['if_true'] = True
+        result_data['reply_found_at'] = str(datetime.utcnow())
+
+
+    #TODO - need to save reply to MailBox
+
+    return result_data
+
     
 def send_email(task, **kwargs):
     access_credentials = kwargs['credentials_data'].get('credentials', '')

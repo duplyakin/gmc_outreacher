@@ -29,7 +29,19 @@ class GmailController():
 
     def current_email(self):
         return self.email
-       
+    
+    @classmethod
+    def test_create_thread_message_body(cls, email_from, email_to, subject, message_text, thread_id):
+        message = MIMEText(message_text)
+        
+        message['to'] = email_to
+        message['from'] = email_from
+        message['subject'] = subject
+        raw = base64.urlsafe_b64encode(message.as_bytes())
+        raw = raw.decode()
+        body = {'raw': raw, 'threadId':thread_id}
+        return body
+
     #message - is a MIMEMultipart object
     def add_gmail_api_meta(self, message, parent_mailbox=None):
         raw_message = {
@@ -209,3 +221,6 @@ class GmailController():
                         msgId = header.get('value', '')
                         break
         return msgId
+
+    def check_reply(self, email_from, after=None):
+        return self.provider.check_reply(email_from=email_from, after=after)

@@ -18,7 +18,7 @@ SEND_ACTION_HANDLERS = {
 }
 
 CHECK_REPLY_ACTION_HANDLERS = {
-    'smtp' : gmail_smtp.check_reply,
+    'smtp' : gmail_api.check_reply,  # FOR GMAIL credentials we also check replies via API
     'api' : gmail_api.check_reply
 }
 
@@ -44,7 +44,7 @@ def email_check_reply(task_id):
         params['campaign_id'] = task.campaign_id
         params['credentials_id'] = task.credentials_id
         if not params['credentials_id']:
-            raise Exception("email_send_message ERROR: credentials_id can't be None for task_id:{0}".format(task_id))
+            raise Exception("email_check_reply ERROR: credentials_id can't be None for task_id:{0}".format(task_id))
 
 
         params['input_data'] = task.get_input_data()
@@ -55,6 +55,15 @@ def email_check_reply(task_id):
         if not params['credentials_data']:
             raise Exception("INPUT_DATA.CREDENTIALS_DATA ERROR: No credentials_data for task_id:{0}".format(task_id))
         
+        params['prospect_data'] = params['input_data'].get('prospect_data', '')
+        if not params['prospect_data']:
+            raise Exception("INPUT_DATA.PROSPECT_DATA ERROR: No prospect_data for task_id:{0}".format(task_id))
+        
+        params['prospect_email'] = params['prospect_data'].get('email', '')
+        if not params['prospect_email']:
+            raise Exception("prospect_data ERROR: No prospect_email for task_id:{0}".format(task_id))
+
+
         params['email_from'] = params['credentials_data'].get('email', '')
         if not params['email_from']:
             raise Exception("Can't find email_from for credentials task_id:{0}".format(task_id))
@@ -67,7 +76,7 @@ def email_check_reply(task_id):
         if not sender:
             raise Exception("Can't find sender for credentials task_id:{0}".format(task_id))
 
-        handler = SEND_ACTION_HANDLERS.get(sender, None)
+        handler = CHECK_REPLY_ACTION_HANDLERS.get(sender, None)
         if not handler:
             message = "Unsupported email sender={0}".format(sender)
             raise Exception(message)
@@ -96,7 +105,10 @@ def email_check_reply(task_id):
             unlocked = shared.TaskQueue.unlock(task_id=task_id, result_data=result_data, status=status)
             if not unlocked:
                 raise Exception("Can't unlock email_check_reply")
-    return
+        
+        return result_data
+
+    return result_data
 
 @celery.task
 def email_send_message(task_id):
@@ -133,6 +145,15 @@ def email_send_message(task_id):
         params['email_from'] = params['credentials_data'].get('email', '')
         if not params['email_from']:
             raise Exception("Can't find email_from for credentials task_id:{0}".format(task_id))
+
+        params['prospect_data'] = params['input_data'].get('prospect_data', '')
+        if not params['prospect_data']:
+            raise Exception("INPUT_DATA.PROSPECT_DATA ERROR: No prospect_data for task_id:{0}".format(task_id))
+        
+        params['prospect_email'] = params['prospect_data'].get('email', '')
+        if not params['prospect_email']:
+            raise Exception("prospect_data ERROR: No prospect_email for task_id:{0}".format(task_id))
+
 
         params['parent_mailbox'] = MailBox.get_parent(prospect_id=task.prospect_id, 
                                         campaign_id=task.campaign_id)
@@ -171,5 +192,7 @@ def email_send_message(task_id):
             unlocked = shared.TaskQueue.unlock(task_id=task_id, result_data=result_data, status=status)
             if not unlocked:
                 raise Exception("Can't unlock email_send_message")
+        
+        return result_data
     
-    return
+    return result_data

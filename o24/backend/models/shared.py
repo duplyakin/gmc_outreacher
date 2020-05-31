@@ -304,6 +304,18 @@ class TaskQueue(db.Document):
             }
         return self.input_data
 
+    #Need to refresh if campaign was on pause
+    def refresh_input_data(self):
+        template_key = self.current_node.get_template_key()
+        self._fill_input_data(funnel_node=self.current_node,
+                                campaign_id=self.campaign_id, 
+                                prospect_id=self.prospect_id, 
+                                credentials_id=self.credentials_id, 
+                                template_key=template_key)
+
+        self._commit()
+
+
     def switch_task(self, next_node, _commit=False):
         if not next_node:
             raise Exception("switch_task ERROR: next_node={0} can't be None".format(next_node))
