@@ -29,5 +29,12 @@ module.exports = {
     SEARCH_ACTION_ERROR: -1070, //Can't open the next page, need to wait maybe because of limit
     
     
-    CARRYOUT_SEARCH_ACTION_PAGES_FINISHED: 1000 //we have reached the last page for this search
+    CARRYOUT_SEARCH_ACTION_PAGES_FINISHED: 1000, //we have reached the last page for this search
+
+
+    // codes for user action
+    SYSTEM_ERROR: -11, // not used from here
+    UNKNOWN_PAGE_ERROR: -12,
+    EMPTY_INPUT_ERROR: -13,
+
 }

@@ -5,6 +5,8 @@ const models_shared = require('../../../crawlers/models/shared')
 const status_codes = require('../../../crawlers/linkedin/status_codes')
 const utils = require('./utils')
 
+const MyExceptions = require('../../../crawlers/exceptions/exceptions.js');
+
 /*
 request:
 outreacher24.com/bs/api/captcha/put
@@ -42,7 +44,14 @@ async function captchaInput(req, res) {
 
     } catch (err) {
         console.log("..... Error in captchaInput : ..... ", err);
-        await models_shared.TaskQueue.findOneAndUpdate({ _id: task_id }, { status: status_codes.FAILED });
+
+        if(err.code != null) {
+            await models_shared.TaskQueue.findOneAndUpdate({ _id: task_id }, { status: status_codes.NEED_USER_ACTION });
+            return res.json({ code: err.code })
+        } else {
+            await models_shared.TaskQueue.findOneAndUpdate({ _id: task_id }, { status: status_codes.FAILED });
+            return res.json({ code: -1 }) // system error
+        }
     }
 }
 

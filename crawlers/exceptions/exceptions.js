@@ -112,6 +112,17 @@ const SearchActionError = (message) => ({
   code: ERROR_CODES.SEARCH_ACTION_ERROR
 });
 
+
+//------------User action errors----------------
+const UnknownPageError = (message) => ({
+  error: new Error(message),
+  code: ERROR_CODES.UNKNOWN_PAGE_ERROR
+});
+const EmptyInputError = (message) => ({
+  error: new Error(message),
+  code: ERROR_CODES.EMPTY_INPUT_ERROR
+});
+
 module.exports = {
   UnknownError: UnknownError,
   HandlerError: HandlerError,
@@ -140,4 +151,8 @@ module.exports = {
   MessageCheckActionError: MessageCheckActionError,
   ScribeActionError: ScribeActionError,
   SearchActionError: SearchActionError,
+
+  UnknownPageError: UnknownPageError,
+  EmptyInputError: EmptyInputError,
+
 }

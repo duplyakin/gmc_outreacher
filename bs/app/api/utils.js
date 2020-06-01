@@ -5,6 +5,9 @@ const selectors = require('../../../crawlers/linkedin/selectors')
 const models_shared = require('../../../crawlers/models/shared')
 const status_codes = require('../../../crawlers/linkedin/status_codes')
 
+const MyExceptions = require('../../../crawlers/exceptions/exceptions.js');
+
+
 const found_form_and_input = async (page, input) => {
 
     let url = page.url();
@@ -18,36 +21,45 @@ const found_form_and_input = async (page, input) => {
 
     } else {
         console.log('UNCKNOWN page found: ', url);
-        //throw new Error('UNCKNOWN page found: ' + url);
+        throw MyExceptions.UnknownPageError("Unknown error page: " + url);
     }
 
     return res;
 }
 
+
 const resolve_challenge = async(page, input) => {
     try {
         await page.waitForSelector(selectors.VERIFICATION_PIN_SELECTOR, { timeout: 5000 });
         await page.waitForSelector(selectors.VERIFICATION_PIN_BTN_SELECTOR, { timeout: 5000 });
-      } catch (err) {
+    } catch (err) {
         throw new Error('Challenge page selectors not found: ' + err);
-      }
+    }
 
-      await page.click(selectors.VERIFICATION_PIN_SELECTOR);
-      await page.keyboard.type(input);
-      await page.click(selectors.VERIFICATION_PIN_BTN_SELECTOR);
-      await page.waitFor(1000);
+    if(!input || input == '') {
+        console.log("..... Input can't be empty in resolve_challenge. ..... ");
+        throw MyExceptions.EmptyInputError("Input can't be empty in resolve_challenge.");
+    }
 
-      let current_url = page.url();
-        if(current_url == links.START_PAGE_LINK) {
-          return true; // resolved
-        } else {
-          return false; // something went wrong...
-        }
+    await page.click(selectors.VERIFICATION_PIN_SELECTOR);
+    await page.keyboard.type(input);
+    await page.click(selectors.VERIFICATION_PIN_BTN_SELECTOR);
+    await page.waitFor(1000);
+
+    //await page.goto(links.START_PAGE_LINK); // test - need it or not
+    let current_url = page.url();
+    if(current_url == links.START_PAGE_LINK) {
+        return true; // resolved
+    } else {
+        return false; // something went wrong...
+    }
 }
+
 
 const resolve_ban = async(page, input) => {
     return false;
 }
+
 
 const get_context = async(browser, context, page) => {
     if(browser == null) {
@@ -75,6 +87,7 @@ const get_context = async(browser, context, page) => {
     return context_obj;
   }
 
+
 const validate_data = async(data) => {
     let endpoint = data.endpoint;
     if (!endpoint){
@@ -98,9 +111,10 @@ const validate_data = async(data) => {
 
 }
 
+
 const context_connect = async (browser, validated_data) => {
     let contexts = await browser.browserContexts();
-    if (!contexts){
+    if (contexts == null){
         throw new Error("Can't receive browser.browserContexts");
     }
 
@@ -120,37 +134,37 @@ const context_connect = async (browser, validated_data) => {
     return found_context;
 }
 
+
 const page_connect = async (context, validated_data) => {
     if (context == null){
         throw new Error("Can't find context by id", context_id);
     }
 
     let pages = await context.pages();
-    if (pages ==  null){
+    if (pages == null){
         throw new Error("Context doesn't have pages");
     }
 
     let page_url = validated_data.page_url;
     let found_page = null;
-    for (page in pages){
-        if (page.url() == page_url){
+    for (page in pages){ 
+        if (page.url() == page_url){ // here can be several pages with same url
             found_page = page;
             break;
         }
     }
 
-
-    if (!found_page){
+    if (found_page == null){
         throw new Error("Can't find page by url", context_id);
     }
 
     return found_page;
 }
 
+
 const input_captcha = async (task, input) => {
     if (!input){
-        //throw new MyError("Input can't be empty");
-        console.log("..... Input can't be empty. ..... ");
+        console.log("..... Empty input. ..... ");
     }
 
     if (task.result_data == null) {
@@ -185,12 +199,12 @@ const input_captcha = async (task, input) => {
     } else {
         let context_obj = await get_context(browser, context, page);
         if(context_obj == null) {
-            throw new Error("Error in input_captcha: context_obj is null.")
+            throw new Error("Error in input_captcha: context_obj is null.");
         }
         let result_data = {
             code: -1,
-            raw: 'Block error NOT resolved.',
-            blocking_data: context_obj
+            raw: 'Block error is NOT resolved.',
+            blocking_data: context_obj,
           }
         await models_shared.TaskQueue.findOneAndUpdate({ _id: task._id }, { status: status_codes.NEED_USER_ACTION, result_data: result_data });
     }
