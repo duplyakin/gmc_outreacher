@@ -1,9 +1,11 @@
 const { bull_workers } = require('./bullWorkersSettings.js');
-const models = require("../../models/shared.js");
+const models_shared = require("../../models/shared.js");
 const workers = require('../workers/workers.js');
 const cron = require('node-cron');
 
 const actionKeys = require('./actionKeys.js');
+
+const status_codes = require('../status_codes')
 
 
 async function bullConsumer() {
@@ -26,7 +28,7 @@ async function bullConsumer() {
           await workers.scribeWorker(job.data.task_id);
           break;
         case 'linkedin-check-reply':
-          await workers.messageCheck(job.data.task_id);
+          await workers.messageCheckWorker(job.data.task_id);
           break;
         /*
                 case 'finished':
@@ -52,11 +54,14 @@ async function bullConsumer() {
           break;
       }
     } catch (err) {
+      console.log('Handler queue something went wrong: ', err);
+
       let err_result = {
         code: MyExceptions.HandlerError().code,
         raw: MyExceptions.HandlerError("HandlerError error: " + err).error
       };
-      await models.TaskQueue.updateOne({ id: job.data.task_id }, { status: -1, result_data: err_result }, function (err, res) {
+      
+      await models_shared.TaskQueue.updateOne({ _id: job.data.task_id }, { status: -1, result_data: err_result }, function (err, res) {
         if (err) throw MyExceptions.MongoDBError('MongoDB save err: ' + err);
         // updated!
         console.log(success_db_save_text);
@@ -68,7 +73,7 @@ async function bullConsumer() {
 async function taskStatusListener() {
   // start cron every minute
   cron.schedule("* * * * *", async () => {
-    let tasks = await models.TaskQueue.find({ status: 1, action_key: { $in: actionKeys.action_keys }}, function (err, res) {
+    let tasks = await models_shared.TaskQueue.find({ status: status_codes.IN_PROGRESS, action_key: { $in: actionKeys.action_keys }}, function (err, res) {
       if (err) throw MyExceptions.MongoDBError('MongoDB find TASKs err: ' + err);
     });
 
@@ -79,6 +84,8 @@ async function taskStatusListener() {
           action_key: task.action_key,
         };
         await bull_workers.add(data);
+
+        console.log('task in handler added, status: ' + task.status + ' action_keys: ' + task.action_key); // test
       });
 
       console.log('CRON log - TASKs ADDED in queue');

@@ -83,7 +83,7 @@ async function searchWorker(task_id) {
     let cookies = await get_cookies(task_data.credentials_data.email, task_data.credentials_data.password, task_data.credentials_data.li_at, credentials_id);
 
     // start work
-    searchAction = new modules.searchAction.SearchAction(task_data.credentials_data.email, task_data.credentials_data.password, task_data.credentials_data.li_at, cookies, credentials_id, task_data.campaign_data.search_url, task_data.campaign_data.page_count);
+    searchAction = new modules.searchAction.SearchAction(task_data.credentials_data.email, task_data.credentials_data.password, task_data.credentials_data.li_at, cookies, credentials_id, task_data.campaign_data.search_url, task_data.campaign_data.interval_pages);
     browser = await searchAction.startBrowser();
     result_data = await searchAction.search();
     browser = await searchAction.closeBrowser();

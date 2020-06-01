@@ -36,12 +36,13 @@ const MY_URL = "https://www.linkedin.com/in/grigoriy-polyanitsin/";
   };
 
   //task = JSON.stringify(task);
-  let task = "5ece63a80a2de70af2b327d7";
+  //let task = "5ece63a80a2de70af2b327d7";
+  let task = "5ed54712ad1aa4da0718c623";
 
   //await workers.loginWorker(task);
-  //await workers.searchWorker(task);
+  await workers.searchWorker(task);
   //await workers.connectWorker(task);
-  await workers.messageWorker(task);
+  //await workers.messageWorker(task);
   //await workers.scribeWorker(task);
   //await workers.messageCheckWorker(task);
   //await workers.connectCheckWorker(task);

@@ -4,11 +4,11 @@ const action = require('./action.js');
 const MyExceptions = require('../../exceptions/exceptions.js');
 
 class SearchAction extends action.Action {
-  constructor(email, password, li_at, cookies, credentials_id, searchUrl, page_count) {
+  constructor(email, password, li_at, cookies, credentials_id, searchUrl, interval_pages) {
     super(email, password, li_at, cookies, credentials_id);
 
     this.searchUrl = searchUrl;
-    this.page_count = page_count;
+    this.interval_pages = interval_pages;
   }
 
   async search() {
@@ -29,6 +29,8 @@ class SearchAction extends action.Action {
     };
     
     try {
+      await super.autoScroll(this.page);
+
       // wait selector here
       await super.check_success_selector(selectors.SEARCH_ELEMENT_SELECTOR, this.page, result_data);
       //await this.page.waitForSelector(selectors.SEARCH_ELEMENT_SELECTOR, { timeout: 5000 });
@@ -39,7 +41,7 @@ class SearchAction extends action.Action {
         selector3: selectors.FULL_NAME_SELECTOR,
       };
 
-      while (currentPage <= this.page_count) {
+      while (currentPage <= this.interval_pages) {
         let newData = await this.page.evaluate((mySelectors) => {
 
           let results = [];
@@ -58,11 +60,9 @@ class SearchAction extends action.Action {
           return results;
         }, mySelectors);
         result_data.data.arr = result_data.data.arr.concat(newData);
-        result_data.data.link = await this.page.url();
+        result_data.data.link = this.page.url();
 
-        await super.autoScroll(this.page);
-
-        /*
+       /*
         if (await this.page.$(selectors.NEXT_PAGE_SELECTOR) == null) {
           // TODO: add check-selector for BAN page
           // perhaps it was BAN
@@ -84,9 +84,9 @@ class SearchAction extends action.Action {
         }
 
         await this.page.click(selectors.NEXT_PAGE_SELECTOR);
-        await this.page.waitFor(1000); // critical here!?
+        await this.page.waitFor(2000); // critical here!?
         // here we have to check BAN page
-        result_data.data.link = await this.page.url(); // we have to send NEXT page link in task
+        result_data.data.link = this.page.url(); // we have to send NEXT page link in task
 
         currentPage++;
       }
