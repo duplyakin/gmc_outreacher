@@ -62,9 +62,12 @@ class Action {
   }
 
 /*
-  check_block(page = this.page) {
-    let current_url = page.url();
-    if(current_url.includes(links.BAN_LINK) || current_url.includes(links.CHALLENGE_LINK)) {
+  check_block(url) {
+    if(!url) {
+      throw new Error('Empty url in check_block.')
+    }
+
+    if(url.includes(links.BAN_LINK) || url.includes(links.CHALLENGE_LINK)) {
       // not target page here
       return true;
     } else {
@@ -101,10 +104,12 @@ class Action {
   }
 */
 
-async check_block(page = this.page, data = null) {
-  let current_url = page.url(); // get it from params
+async check_block(url, data = null) {
+  if(!url) {
+    throw new Error('Empty url in check_block.')
+  }
 
-  if(current_url.includes(links.BAN_LINK) || current_url.includes(links.CHALLENGE_LINK)) {
+  if(url.includes(links.BAN_LINK) || url.includes(links.CHALLENGE_LINK)) {
     // not target page here
     let context_obj = await this.get_context(); // todo: send here browser, page, context
 
@@ -112,13 +117,13 @@ async check_block(page = this.page, data = null) {
       if(data != null) {
         // add info to excisting result_data
         data.code = MyExceptions.ContextError().code;
-        data.raw = MyExceptions.ContextError('Can\'t goto url: ' + err).error;
+        data.raw = MyExceptions.ContextError('Can\'t goto url: ' + url).error;
         data.blocking_data = context_obj;
       } 
-      throw MyExceptions.ContextError('Can\'t goto url: ' + err, context_obj, data);
+      throw MyExceptions.ContextError('Can\'t goto url: ' + url, context_obj, data);
     } else {
-      console.log( 'Never happend - empty context: ', err );
-      throw new Error('Can\'t goto url and empty context: ' + err);
+      console.log( 'Never happend - empty context in check_block.');
+      throw new Error('Can\'t goto url and empty context in check_block');
     }
 
   } else {
@@ -136,7 +141,7 @@ async check_success_selector(selector, page = this.page, data = null) {
     await page.waitForSelector(selector, { timeout: 5000 });
 
   } catch(err) {
-    await this.check_block(page, data);
+    await this.check_block(page.url(), data);
 
     // uncknown page here
     throw MyExceptions.NetworkError('Something wromg with connection or uncknown page: ' + err);
@@ -154,7 +159,7 @@ async check_success_selector(selector, page = this.page, data = null) {
       return true;
     }
 
-    await this.check_block(page, data);
+    await this.check_block(page.url(), data);
 
     // uncknown page here
     throw new Error('Uncknowm page here: ', current_url);
@@ -222,7 +227,7 @@ async check_success_selector(selector, page = this.page, data = null) {
         }
       }
     } catch (err) {
-      await this.check_block(page);
+      await this.check_block(page.url());
     }
   }
 
