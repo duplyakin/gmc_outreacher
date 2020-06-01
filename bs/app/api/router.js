@@ -31,10 +31,6 @@ async function captchaInput(req, res) {
             //throw new Error('There is no task with task._id = ' + task_id + ' and status NEED_USER_ACTION.');
         }
 
-        if (!captcha_input) {
-            throw new Error("Input can't be empty");
-        }
-
         // get connect to pupeeter and input data
         utils.input_captcha(task, captcha_input);
 

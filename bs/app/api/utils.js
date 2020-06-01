@@ -46,13 +46,21 @@ const resolve_challenge = async(page, input) => {
     await page.click(selectors.VERIFICATION_PIN_BTN_SELECTOR);
     await page.waitFor(1000);
 
-    //await page.goto(links.START_PAGE_LINK); // test - need it or not
     let current_url = page.url();
-    if(current_url == links.START_PAGE_LINK) {
+
+    if(check_block_url(current_url)) {
+        return false; // something went wrong...
+    }
+
+    return true;
+
+    /*
+    //await page.goto(links.START_PAGE_LINK); // test - need it or not
+    if(current_url == links.START_PAGE_LINK || current_url == links.SIGNIN_LINK) {
         return true; // resolved
     } else {
         return false; // something went wrong...
-    }
+    }*/
 }
 
 
@@ -61,17 +69,30 @@ const resolve_ban = async(page, input) => {
 }
 
 
+const check_block_url = (url) => {
+    if(!url) {
+        throw new Error('Empty url.');
+    }
+
+    if(url.includes(links.BAN_LINK) || url.includes(links.CHALLENGE_LINK)) {
+        return true;
+    }
+
+    return false;
+}
+
+
 const get_context = async(browser, context, page) => {
     if(browser == null) {
-      throw new Error('Can\t get context. Browser is not defined.')
+      throw new Error('Can\t get_context. Browser is not defined.')
     }
 
     if(context == null) {
-      throw new Error('Can\t get context. Context is not defined.')
+      throw new Error('Can\t get_context. Context is not defined.')
     }
 
     if(page == null) {
-      throw new Error('Can\t get context. Page is not defined.')
+      throw new Error('Can\t get_context. Page is not defined.')
     }
 
     await page.waitFor(10000); // wait 10 sec for lading and screenshot page
@@ -112,13 +133,12 @@ const validate_data = async(data) => {
 }
 
 
-const context_connect = async (browser, validated_data) => {
+const context_connect = async (browser, context_id) => {
     let contexts = await browser.browserContexts();
     if (contexts == null){
         throw new Error("Can't receive browser.browserContexts");
     }
 
-    let context_id = validated_data.context_id;
     let found_context = null;
     for (cx in contexts){
         if (cx._id == context_id){
@@ -128,24 +148,27 @@ const context_connect = async (browser, validated_data) => {
     }
 
     if (found_context == null){
-        throw new Error("Can't find context by id", context_id);
+        throw new Error("Can't find context by id: " + context_id);
     }
 
     return found_context;
 }
 
 
-const page_connect = async (context, validated_data) => {
+const page_connect = async (context, page_url) => {
     if (context == null){
-        throw new Error("Can't find context by id", context_id);
+        throw new Error("Can't find context: " + context);
+    }
+
+    if(!page_url){
+        throw new Error("Can't find page_url: " + page_url);
     }
 
     let pages = await context.pages();
     if (pages == null){
-        throw new Error("Context doesn't have pages");
+        throw new Error("Context doesn't have pages.");
     }
 
-    let page_url = validated_data.page_url;
     let found_page = null;
     for (page in pages){ 
         if (page.url() == page_url){ // here can be several pages with same url
@@ -155,7 +178,7 @@ const page_connect = async (context, validated_data) => {
     }
 
     if (found_page == null){
-        throw new Error("Can't find page by url", context_id);
+        throw new Error("Can't find page by url: " + page_url);
     }
 
     return found_page;
@@ -183,11 +206,11 @@ const input_captcha = async (task, input) => {
         browserWSEndpoint: data.endpoint
     });
 
-    let context = await context_connect(browser, data);
+    let context = await context_connect(browser, data.context_id);
     if (context == null){
         throw new Error("Can't connect to context");
     }
-    let page = await page_connect(context, data);
+    let page = await page_connect(context, data.page_url);
     if (page == null){
         throw new Error("Can't connect to page");
     }
@@ -210,11 +233,5 @@ const input_captcha = async (task, input) => {
     }
 }
 
-const check_captcha_status = async (data, input) => {
 
-}
-
-
-module.exports.input_captcha = input_captcha
-//module.exports.get_task = get_task
-module.exports.check_captcha_status = check_captcha_status
+module.exports.input_captcha = input_captcha;

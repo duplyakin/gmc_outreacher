@@ -102,7 +102,7 @@ class Action {
 */
 
 async check_block(page = this.page, data = null) {
-  let current_url = page.url();
+  let current_url = page.url(); // get it from params
 
   if(current_url.includes(links.BAN_LINK) || current_url.includes(links.CHALLENGE_LINK)) {
     // not target page here
@@ -148,16 +148,16 @@ async check_success_selector(selector, page = this.page, data = null) {
       throw new Error ('Empty required_url.');
     }
 
-      let current_url = page.url();
+    let current_url = page.url();
 
-      if(current_url.includes(required_url)) {
-        return true;
-      }
+    if(current_url.includes(required_url)) {
+      return true;
+    }
 
-      await this.check_block(page, data);
- 
-      // uncknown page here
-      throw new Error('Uncknowm page here: ', current_url);
+    await this.check_block(page, data);
+
+    // uncknown page here
+    throw new Error('Uncknowm page here: ', current_url);
   }
 
   async close_msg_box(page = this.page) {
