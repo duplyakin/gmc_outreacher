@@ -83,7 +83,7 @@ async function searchWorker(task_id) {
     let cookies = await get_cookies(task_data.credentials_data.email, task_data.credentials_data.password, task_data.credentials_data.li_at, credentials_id);
 
     // start work
-    searchAction = new modules.searchAction.SearchAction(task_data.credentials_data.email, task_data.credentials_data.password, task_data.credentials_data.li_at, cookies, credentials_id, task_data.campaign_data.next_url, task_data.campaign_data.page_count);
+    searchAction = new modules.searchAction.SearchAction(task_data.credentials_data.email, task_data.credentials_data.password, task_data.credentials_data.li_at, cookies, credentials_id, task_data.campaign_data.search_url, task_data.campaign_data.page_count);
     browser = await searchAction.startBrowser();
     result_data = await searchAction.search();
     browser = await searchAction.closeBrowser();
@@ -178,8 +178,13 @@ async function connectWorker(task_id) {
 
     let res = false;
     if (!resCheck) {
+      let message = '';
+      if(task_data.template_data != null) {
+        if(task_data.template_data.message != null)
+          message = task_data.template_data.message;
+      }
       // connect if not connected
-      let connectAction = new modules.connectAction.ConnectAction(task_data.credentials_data.email, task_data.credentials_data.password, task_data.credentials_data.li_at, cookies, credentials_id, task_data.prospect_data.linkedin, task_data.template_data.message, task_data.prospect_data);
+      let connectAction = new modules.connectAction.ConnectAction(task_data.credentials_data.email, task_data.credentials_data.password, task_data.credentials_data.li_at, cookies, credentials_id, task_data.prospect_data.linkedin, message, task_data.prospect_data);
       browser = await connectAction.startBrowser();
       res = await connectAction.connect();
       browser = await connectAction.closeBrowser();
@@ -192,7 +197,7 @@ async function connectWorker(task_id) {
       code: 0,
       if_true: res,
     };
-    status = 5
+    status = status_codes.CARRYOUT;
 
   } catch (err) {
 
@@ -296,7 +301,7 @@ async function messageWorker(task_id) {
         data: JSON.stringify(resCheckMsg)
       };
     }
-    status = 5;
+    status = status_codes.CARRYOUT;
 
   } catch (err) {
 
@@ -385,7 +390,7 @@ async function scribeWorker(task_id) {
       if_true: true,
       data: JSON.stringify(res),
     };
-    status = 5;
+    status = status_codes.CARRYOUT;
 
   } catch (err) {
 
@@ -470,11 +475,11 @@ async function messageCheckWorker(task_id) {
     browser = await messageCheckAction.closeBrowser();
 
     result_data = {
-      code: (res.message === '' ? 0 : 2000),
-      if_true: (res.message === '' ? false : true),
+      code: (res.message == '' ? 0 : 2000),
+      if_true: (res.message == '' ? false : true),
       data: JSON.stringify(res)
     };
-    status = 5;
+    status = status_codes.CARRYOUT;
 
   } catch (err) {
 
@@ -564,7 +569,7 @@ async function connectCheckWorker(task_id) {
       code: 0,
       if_true: res,
     };
-    status = 5;
+    status = status_codes.CARRYOUT;
 
   } catch (err) {
 
