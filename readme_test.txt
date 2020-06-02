@@ -46,3 +46,9 @@ python -m unittest o24.production_tests.test_PING_PONG_emails.PingPongEmailsTest
 
 
 python -m unittest o24.production_tests.test_PING_PONG_emails.PingPongEmailsTest.test_check_reply
+
+
+#TEST Enrichment
+python -m unittest o24.production_tests.test_prod_4_enrichment.EnricherTest.test_snovio_emit_enricher
+
+python -m unittest o24.production_tests.test_prod_4_enrichment.EnricherTest.test_snovio_restart_prospect

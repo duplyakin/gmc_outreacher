@@ -183,6 +183,10 @@ class Funnel(db.Document):
         if _reload:
             self.reload()
 
+class TaskQueueLock(db.Document):
+    key = db.StringField(unique=True)
+    ack = db.IntField(default=0)
+
 # How TaskQueue works
 # When the new task created status = NEW
 # When the task added to job queue status = IN_PROGRESS
@@ -192,6 +196,7 @@ class TaskQueue(db.Document):
 
     status = db.IntField(default=NEW)
     ack = db.IntField(default=0)
+    is_queued = db.IntField(default=0)
 
     next_round = db.DateTimeField(default=parse("1980-05-25T16:31:37.436Z"))
 

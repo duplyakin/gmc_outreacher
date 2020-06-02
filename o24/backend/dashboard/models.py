@@ -36,6 +36,8 @@ class User(db.Document):
     email = db.EmailField(unique=True, required=True)
     password = db.StringField(nullable=False)
 
+    enrich_credits = db.IntField(default=0)
+
     active = db.BooleanField(default=True)
     current_oauth_state = db.StringField()
 
@@ -139,6 +141,10 @@ class User(db.Document):
             invite_code=data.get('invite_code', '')
         )
 
+        enrich_credits = int(data.get('enrich_credits', 0))
+        if enrich_credits:
+            new_user.enrich_credits = enrich_credits
+
         new_user.role = data.get('role', 'user')
         new_user._commit()
         return new_user
@@ -167,6 +173,15 @@ class User(db.Document):
         self._commit()
         
         return self.current_oauth_state
+
+    def withdraw_credits(self, amount):
+        self.enrich_credits = self.enrich_credits - amount
+        self._commit()
+
+        return self.enrich_credits
+
+    def get_credits(self):
+        return self.enrich_credits
 
     def _generate_ouath_state(self):
         state = uuid.uuid4().hex
@@ -1240,6 +1255,39 @@ class Prospects(db.Document):
         self._chek_for_duplicates(owner_id=owner_id, data=data)
 
         return True
+
+    @classmethod
+    def enrich_prospect(cls, owner_id, prospect_id, prospect_data):
+        if not prospect_data:
+            raise Exception("Can't enrich from empty prospect_data")
+        
+        if not owner_id:
+            raise Exception("Can't enrich for empty owner_id")
+
+        prospect = cls.objects(id=prospect_id, owner=owner_id).first()
+        if not prospect:
+            message = "No such prospect_id={0} owner_id={1}".format(prospect_id, owner_id)
+            raise Exception(message)
+
+        prospect.data['enriched_data'] = prospect_data
+
+        prospect_details = prospect_data.get('prospect_details', None)
+        if prospect_details:
+            first_name = prospect_details.get('first_name', '')
+            if first_name:
+                prospect.data['first_name'] = first_name
+             
+            last_name = prospect_details.get('last_name', '')
+            if last_name:
+                prospect.data['last_name'] = last_name
+            
+            email = prospect_details.get('email', '')
+            if email:
+                prospect.data['email'] = email
+        
+        prospect._commit()
+        return True
+
 
     @classmethod
     def get_from_list(cls, owner_id, list_id):

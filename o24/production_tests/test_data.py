@@ -6,6 +6,7 @@ USERS = [
      'role' : 'admin',
      'invited_by' : 'test_invite',
      'invite_code' : 'test_invite',
+     'enrich_credits' : 1000,
      'active' : True,
      'credentials' : [
          {
@@ -917,6 +918,17 @@ PROSPECTS = [
         },
         'assign_to_list' : 'real_test_list'
     },
+    {
+        'owner' : '1@email.com',
+        'data' : {
+            'linkedin' : 'https://www.linkedin.com/in/barry-magennis-768a0a1aa/',
+            'company_url' : 'boostlabs.co.uk',
+            'first_name' : 'Barry',
+            'last_name' : 'magennis',
+            'prospect_test' : 'enrich_test'
+        },
+        'assign_to_list' : 'enrich_test_list'
+    },
 
     {
         'owner' : '1@email.com',
@@ -927,7 +939,7 @@ PROSPECTS = [
             'linkedin' : 'https://www.linkedin.com/in/barry-magennis-768a0a1aa/',
             'first_name' : 'Barry',
             'company' : 'Boostlabs',
-            'url' : 'Boostlabs.com'
+            'url' : 'Boostlabs.com',
         },
         'assign_to_list' : 'real_test_list'
     },
