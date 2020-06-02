@@ -166,7 +166,7 @@ class TestUsersCampaignsProspects(unittest.TestCase):
                         'linkedin' : linkedin
                     }
                     
-                    campaign_id=None
+                    campaign_id = None
                     if campaign:
                         campaign_id = campaign.id
                     new_prospect = Prospects.create_prospect(owner_id=owner.id,
@@ -187,7 +187,7 @@ class TestUsersCampaignsProspects(unittest.TestCase):
                 
                 data = prospect.get('data')
                 new_prospect = Prospects.create_prospect(owner_id=owner.id,
-                                                        campaign_id=campaign.id,
+                                                        campaign_id=campaign_id,
                                                         list_id=list_id,
                                                         data=data)
      

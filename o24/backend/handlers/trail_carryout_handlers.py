@@ -5,6 +5,8 @@ import o24.backend.scheduler.scheduler as scheduler
 from o24.globals import *
 import datetime
 from mongoengine.queryset.visitor import Q
+import o24.config as config
+import o24.backend.handlers.enricher as enricher
 
 def default_handler(task):
     if task.status != CARRYOUT:
@@ -22,6 +24,7 @@ def default_handler(task):
 
     task.update_status(status=READY)
     return 
+
 
 def start_linkedin_enrichment_campaign(task):
     #We have finixhed linkedin_search_action action and need to start enrichment campaign 
@@ -139,6 +142,10 @@ def linkedin_parse_profile_action(task):
     prospect.update_data_partly(new_data=data)
 
     task.update_status(status=READY)
+
+    #TODO: need to be controlled by campaign
+    if config.EMAIL_AUTO_ENRICHMENT:
+        enricher.add_prospect_for_enrichment(prospect=prospect)
 
     return
 

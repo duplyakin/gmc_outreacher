@@ -14,7 +14,10 @@ from o24.backend.models.shared import TaskQueue
 @celery.task
 def emit_scheduler():
     try:
-        scheduler = Scheduler()
+        scheduler = Scheduler.lock()
+        if not scheduler:
+            print("emit_scheduler concurrence attempt")
+            return {"status": False}
         
         #handle FAILED and CARRYOUT tasks
         scheduler.trail()
@@ -32,6 +35,8 @@ def emit_scheduler():
         app.logger.error(".....emit_scheduler Exception:{0}".format(str(e)))
         traceback.print_exc()
         return {"status": False}
-
+    finally:
+        if scheduller:
+            scheduler.unlock()
 
     return {"status": True}

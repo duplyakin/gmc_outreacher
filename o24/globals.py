@@ -1,3 +1,6 @@
+FAILED = -1
+
+#scheduler statuses
 NEW = 0 #this status can be get by execution stage
 IN_PROGRESS = 1 #execution
 PAUSED = 2 #Not used
@@ -6,7 +9,6 @@ READY = 4
 CARRYOUT = 5
 NEED_USER_ACTION = 6
 NEED_USER_ACTION_RESOLVED = 7
-FAILED = -1
 
 TASKS_CAN_BE_PAUSED = [IN_PROGRESS]
 TASKS_CAN_BE_RESUMED = [PAUSED]
@@ -15,6 +17,18 @@ ACTION_NONE = -1
 
 INTRO=0
 FOLLOWUP=1
+
+#ENRICH controller statuses
+ENRICH_NEW = 0
+ENRICH_IN_PROGRESS = 1
+ENRICH_SUCCESS = 2
+ENRICH_FAILED_TO_FOUND = 3
+ENRICH_TRIED_ALL = 4
+ENRICH_OUT_OF_CREDITS = 5
+ENRICH_MOVED = 6
+
+#ENRICH Providers
+SNOVIO_PROVIDER = 1
 
 # this is the secs that you need to substruct to receive correct time in POSIX
 MAGIC_TIME_DIFF_SEC = 3015

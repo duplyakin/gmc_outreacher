@@ -2,7 +2,7 @@ from o24.backend import db
 from o24.backend import app
 import o24.backend.dashboard.models as models
 
-from o24.backend.models.shared import TaskQueue, Funnel, Action, AsyncTaskQueue
+from o24.backend.models.shared import TaskQueue, TaskQueueLock, Funnel, Action, AsyncTaskQueue
 from o24.globals import *
 from .models import Priority, TaskLog
 import o24.backend.handlers.jobs_map as jobs_map
@@ -20,7 +20,26 @@ from o24.exceptions.error_codes import *
 class Scheduler():
     def __init__(self):
         pass
-    
+
+    @classmethod
+    def lock(cls):
+        try:
+            locked = TaskQueueLock.objects(key='scheduler_lock', ack=0).update_one(upsert=True, ack=1)
+            if not locked:
+                return None
+
+            scheduler = cls()
+            return scheduler
+        except Exception as e:
+            print(str(e))
+            traceback.print_exc()
+        
+        return None
+
+    def unlock(self):
+        return TaskQueueLock.objects(key='scheduler_lock').update_one(upsert=False, ack=0)
+
+
     ###################################### SCHEDULER CYCLE tasks  ##################################
     #################################################################################################
     

@@ -59,6 +59,19 @@ class BaseConfig():
     GMAIL_SMTP_HOST = 'smtp.gmail.com'
     GMAIL_SMTP_PORT = 587
 
+    EMAIL_AUTO_ENRICHMENT = True
+    #Enrich providers
+    SNOVIO_CREDENTIALS = {
+        'grant_type':'client_credentials',
+        'client_id':'5c543104ff5fc8cb5e12e3432883f42e',
+        'client_secret': '1a87f87d6ec80e754046a1d6aa2c05c3'
+    }
+    SNOVIO_API_URL = 'https://api.snov.io/v1'
+    DEFAULT_ENRICH_PROVIDERS = {
+        '0' : 1 #snovio provider
+    }
+
+
 class DevConfig(BaseConfig):
     FLASK_ENV = 'development'
     DEBUG = True
@@ -107,3 +120,10 @@ class TestConfig(BaseConfig):
         'port': 27017,
         'tz_aware':True
     }
+
+    SNOVIO_CREDENTIALS = {
+        'grant_type':'client_credentials',
+        'client_id':'5c543104ff5fc8cb5e12e3432883f42e',
+        'client_secret': '1a87f87d6ec80e754046a1d6aa2c05c3'
+    }
+    SNOVIO_API_URL = 'https://api.snov.io/v1'
