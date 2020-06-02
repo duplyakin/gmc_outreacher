@@ -2,7 +2,7 @@
   <div>
     <card>
       <card>
-        <p>Campaign title (required)</p>
+        <p>Leads Campaign Name</p>
         <el-input
           :disabled="!modified_fields['title']"
           placeholder="Input campaign title"
@@ -35,7 +35,7 @@
       </card>
 
       <card v-if="modified_fields['lists']">
-        <p>Select prospects list to enreach (required)</p>
+        <p>Select leads list to enrich</p>
         <el-select
           class="select-default mb-3"
           style="width: 100%;"
@@ -55,13 +55,13 @@
       </card>
 
       <card v-if="modified_fields['time_table']">
-        <h5 class="text-center">Enreach time with respect to prospect's timezone</h5>
+        <h5 class="text-center">Schedule</h5>
         <div class="extended-forms">
           <card>
             <div class="col-12">
               <div class="row">
-                <div class="col-lg-6">
-                  <h4 class="title">From</h4>
+                <div class="col-lg-4">
+                  <h4 class="title">Start</h4>
                   <el-time-select
                     name="From time"
                     v-model="campaign_data.from_hour"
@@ -73,8 +73,8 @@
                     placeholder="Select time"
                   ></el-time-select>
                 </div>
-                <div class="col-lg-6">
-                  <h4 class="title">Till</h4>
+                <div class="col-lg-4">
+                  <h4 class="title">End</h4>
                   <el-time-select
                     name="Till time has to be after FROM time"
                     v-model="campaign_data.to_hour"
@@ -86,16 +86,13 @@
                     placeholder="Select time"
                   ></el-time-select>
                 </div>
-              </div>
-            </div>
-            <div class="row">
-              <div class="col-6">
-                <h4 class="title">Fallback Time Zone</h4>
+                <div class="col-lg-4">
+                <h4 class="title">Time Zone</h4>
                 <el-select
                   class="select-primary"
-                  name="Fallback Time Zone"
+                  name="Time Zone"
                   size="large"
-                  placeholder="Fallback Time Zone"
+                  placeholder="Select Time Zone"
                   v-model="timezones_selected"
                   value-key="label"
                 >
@@ -108,10 +105,11 @@
                   ></el-option>
                 </el-select>
               </div>
+              </div>
             </div>
           </card>
         </div>
-        <h4 class="title">Days Preference</h4>
+        <h4 class="title">Days of the week</h4>
         <div class="row">
           <div class="col-12">
             <card title="Select sending days">

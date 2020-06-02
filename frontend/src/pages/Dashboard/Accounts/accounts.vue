@@ -2,11 +2,10 @@
 <div>
     <card>
     <div class="row">
-        <div class="col-4 d-flex align-self-center">
-            <span font-><h3><i class="nc-icon nc-single-02"></i> Accounts</h3></span>
+        <div class="col-6 d-flex align-self-center">
+            <span font-><h3><i class="nc-icon nc-single-02"></i> Accounts managment</h3></span>
         </div>
-        <div class="col-8 d-flex flex-row-reverse align-self-center">
-            <button @click.prevent="loadCredentials" type="button" class="btn btn-default btn-success mx-1">Reload</button>
+        <div class="col-6 d-flex flex-row-reverse align-self-center">
             <button @click.prevent="addAccount" type="button" class="btn btn-default btn-success mx-1">Add account</button>
         </div>
 
@@ -37,10 +36,10 @@
                             <template v-else> {{ show_data(scope.row, column) }} </template>
                         </template>
                 </el-table-column>
-                <el-table-column :min-width="50" fixed="right" label="Refresh">
+                <el-table-column :min-width="50" fixed="right" label="Reconnect">
                     <template slot-scope="props">
                     <a
-                        v-tooltip.top-center="'Refresh'"
+                        v-tooltip.top-center="'Reconnect'"
                         class="btn-info btn-simple btn-link"
                         @click.prevent="refreshCredentials(props.row._id.$oid, props.$index)"
                     >
@@ -66,11 +65,6 @@
         </card>
     </div>
     </div>
-
-    <modal
-    :width = "720"
-    name="major_modal">
-    </modal>
 
 </div>
 </template>
@@ -162,7 +156,7 @@
                 if (r.code > 0) {
                     this.$set(this.accounts_data.credentials, current_index, JSON.parse(r.credentials));
                     _table.$forceUpdate();
-                    Notification.success({title: "Success", message: "Account refreshed"});
+                    Notification.success({title: "Success", message: "Account reconnected"});
                 } else {
                     var msg = 'Server Error loading credentials ' + r.msg;
                     Notification.error({title: "Error", message: msg});

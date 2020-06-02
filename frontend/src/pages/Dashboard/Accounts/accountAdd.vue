@@ -23,34 +23,80 @@
             </div>
         </div>
         <div v-if="model.credentials_type == 'linkedin'" class="row">
+
+                <div>
+                    <p class="labels">Linkedin profile URL</p>
+                </div>
                 <div class="col-12">
                     <fg-input name="linkedin_account"
-                        label="Linkedin account"
                         class="mb-3"
                         v-model="model.data.account"
-                        placeholder="example: linkedin.com/your_account"/>
+                        placeholder="example: linkedin.com/myaccount"/>
+                </div>
+
+                <div>
+                    <div class="container">
+                        <p class="labels">Linkedin login</p>
+                    <el-popover
+                        placement="top-start"
+                        title="Why login better then li_at?"
+                        width="200"
+                        trigger="hover"
+                        content="It's safer for prevent linkedin blocking.">
+                        <el-button slot="reference"><i class='el-icon-question'></i></el-button>
+                    </el-popover>
+                    </div>
                 </div>
                 <div class="col-12">
                     <fg-input name="linkedin_login"
-                        label="Linkedin login"
                         class="mb-3"
-                        v-model="model.data.login"/>
+                        v-model="model.data.login"
+                        placeholder="example: myemail@gmail.com"/>
+                </div>
+
+                <div>
+                    <p class="labels">Linkedin password</p>
                 </div>
                 <div class="col-12">
                     <fg-input name="linkedin_password"
-                        label="Linkedin password"
                         class="mb-3"
                         v-model="model.data.password"/>
                 </div>
+
+                <div>
+                    <div class="container">
+                    <p class="labels">Linkedin li_at cookie</p>
+                    <el-popover
+                        placement="top-start"
+                        title="What is li_at?"
+                        width="200"
+                        trigger="hover"
+                        content='li_at allows us to login linkedin without user password. Get li_at here: //www.some_link.here'>
+                        <el-button slot="reference"><i class='el-icon-question'></i></el-button>
+                    </el-popover>
+                    </div>
+                </div>
                 <div class="col-12">
                     <fg-input name="linkedin_li_at"
-                        label="Linkedin li_at cookie *"
                         class="mb-3"
                         v-model="model.data.li_at"/>
-                </div>          
+                </div>
+  
+                <div>
+                    <div class="container">
+                    <p class="labels">Limits per day</p>
+                    <el-popover
+                        placement="top-start"
+                        title="What is limits?"
+                        width="200"
+                        trigger="hover"
+                        content='Limits - maximum messages from current account allowd by Linkedin.'>
+                        <el-button slot="reference"><i class='el-icon-question'></i></el-button>
+                    </el-popover>
+                    </div>
+                </div>
                 <div class="col-12">
                     <fg-input name="limits_per_day"
-                    label="Limits per day"
                     class="mb-3"
                     v-model="model.limit_per_day"/>
                 </div>
@@ -67,7 +113,7 @@
 </template>
 
 <script>
-import { Notification, Select, Option } from 'element-ui'
+import { Popover, Notification, Select, Option } from 'element-ui'
 import axios from '@/api/axios-auth';
 
 const OAUTH_SERVER = process.env.VUE_APP_API_URL;
@@ -75,7 +121,8 @@ const OAUTH_SERVER = process.env.VUE_APP_API_URL;
 export default {
     components: {
         [Select.name]: Select,
-        [Option.name]: Option
+        [Option.name]: Option,
+        [Popover.name]: Popover,
     },
     name : 'account-add',
     props : {
@@ -107,16 +154,27 @@ export default {
                 Notification.error({title: "Error", message: "Select account type"});
                 return false;
             } else if (this.model.credentials_type == 'linkedin') {
-                if(this.model.data.account == '') {
-                    Notification.error({title: "Error", message: "Input your linkedin account"});
+
+                if (this.model.data.account == '') {
+                    Notification.error({title: "Error", message: "Input your linkedin profile URL"});
                     return false;
-                } else if (((this.model.data.login == '') || (this.model.data.password == '')) && (this.model.data.li_at == '')) {
+                }
+                if(!this.model.data.account.includes('linkedin')) {
+                    Notification.error({title: "Error", message: "Linkedin profile URL field must be like: www.linkedin.com/example_user/"});
+                    return false;
+                }
+                
+                this.model.data.account = this.model.data.account.substring(this.model.data.account.indexOf("www"), this.model.data.account.length -1);
+                console.log('acc: ', this.model.data.account)
+
+                if (((this.model.data.login == '') || (this.model.data.password == '')) && (this.model.data.li_at == '')) {
                     Notification.error({title: "Error", message: "Input your login and password or li_at cookie"});
                     return false;
                 }
             }
 
             if (confirm("Are you sure?")) {
+
                 var accountData = new FormData();
                 accountData.append("_credentials", JSON.stringify(this.model))
 
@@ -155,6 +213,27 @@ export default {
 <style>
 label {
     color:black;
+}
+.el-icon-question {
+    font-size: 16px;
+    color: #c0c4cc;
+    margin: 12px 0 16px;
+    line-height: 0px;
+}
+.labels {
+  text-transform: uppercase;
+  /*text-align: left;*/
+  font-size: 12px;
+  font-weight: 100;
+  padding: 0px 20px;
+  color: #8b8c91;
+}
+.container {
+  display: flex;
+  justify-content: space-around;
+  padding: 0px 20px;
+  align-items: flex-start;
+  max-width: 260px;
 }
 </style>
     

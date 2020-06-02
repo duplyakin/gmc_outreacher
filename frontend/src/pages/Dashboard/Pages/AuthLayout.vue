@@ -76,7 +76,6 @@
 </template>
 <script>
   import CollapseTransition from 'element-ui/lib/transitions/collapse-transition'
-
   export default {
     components: {
       [CollapseTransition.name]: CollapseTransition

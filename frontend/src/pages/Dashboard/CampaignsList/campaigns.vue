@@ -13,12 +13,12 @@
             @click.prevent="addCampaign"
             type="button"
             class="btn btn-default btn-success mx-1"
-        >Add Campaign</button>
+        >Create a Campaign</button>
         <button
             @click.prevent="reload_campaigns"
             type="button"
             class="btn btn-default btn-success mx-1"
-        >Reload</button>
+        >Refresh</button>
 
     </div>
     </div>
@@ -207,9 +207,7 @@ methods: {
         }
     },
     addCampaign() {
-        this.$router.push({
-          path: "campaign_form"
-        });
+        this.$router.push({path: "campaign_form"});
     },
     editCampaign(msg_dict, index) {
         var status = -2;

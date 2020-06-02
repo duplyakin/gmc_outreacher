@@ -117,12 +117,12 @@ export default {
                         this.$emit('close');
                         this.valueUpdated(updated_prospect);
                     }else{
-                        var msg = 'Answer Error editing prospect ' + result.msg;
+                        var msg = 'Answer Error editing lead ' + result.msg;
                         Notification.error({title: "Error", message: msg});
                     }
                 })
                 .catch((error) => {
-                    var msg = 'Answer Error editing prospect ' + error;
+                    var msg = 'Answer Error editing lead ' + error;
                     Notification.error({title: "Error", message: msg});
                 });
            };

@@ -9,18 +9,19 @@
               <h3 class="card-title text-center">Login</h3>
             </div>
             <div>
-              <fg-input
+              <el-input
                 label="Email address"
                 placeholder="Enter email"
                 type="email"
                 v-model="model.email"
-              ></fg-input>
-              <fg-input
+              ></el-input>
+              <el-input
                 label="passsword"
                 type="password"
                 placeholder="Password"
                 v-model="model.password"
-              ></fg-input>
+                show-password
+              ></el-input>
               <div v-if="error" class="form-group">
                 <small class="text-danger">{{ error }}</small>
               </div>

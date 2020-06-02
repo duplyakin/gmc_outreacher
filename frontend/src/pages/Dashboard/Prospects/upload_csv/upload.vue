@@ -120,12 +120,12 @@ export default {
                         this.valueUpdated(uploaded);
                     }else{
                         _this.upload_error = true;
-                        _this.upload_error_message = 'Error upload prospect ' + result.msg;
+                        _this.upload_error_message = 'Error upload lead ' + result.msg;
                     }
                 })
                 .catch((error) => {
                     _this.upload_error = true;
-                    _this.upload_error_message = 'Error upload prospect ' + error;
+                    _this.upload_error_message = 'Error upload lead ' + error;
                 });
            };
         }

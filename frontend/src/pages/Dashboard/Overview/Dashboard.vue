@@ -1,10 +1,10 @@
 <template>
   <div>
-    <div class="row">
+
       <card>
-        <div class="col-4 d-flex align-self-center">
+        <div class="col-12 d-flex align-self-center">
           <h3>
-            <i class="nc-icon nc-air-baloon"></i> Overview
+            <i class="nc-icon nc-air-baloon"></i> Dashboard
           </h3>
         </div>
         <card>
@@ -16,7 +16,7 @@
           ></youtube>
         </card>
       </card>
-    </div>
+
   </div>
 </template>
 <script>

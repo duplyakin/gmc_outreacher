@@ -4,7 +4,7 @@
 <div class="row">
     <div class="col-4 d-flex align-self-center">
         <h3>
-        <i class="nc-icon nc-single-copy-04"></i> Prospect Lists
+        <i class="nc-icon nc-single-copy-04"></i> Leads Lists
         </h3>
     </div>
     <div class="col-8 d-flex flex-row-reverse align-self-center">
@@ -13,12 +13,12 @@
             @click.prevent="addList"
             type="button"
             class="btn btn-default btn-success mx-1"
-        >Create List</button>
+        >Create a List</button>
         <button
             @click.prevent="load_lists"
             type="button"
             class="btn btn-default btn-success mx-1"
-        >Reload</button>
+        >Refresh</button>
 
     </div>
     </div>
