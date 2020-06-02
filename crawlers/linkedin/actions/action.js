@@ -171,10 +171,10 @@ async check_success_selector(selector, page = this.page, data = null) {
     }
     try {
       // close messages box !!! (XZ ETOT LINKED)
-      await page.waitFor(2000);  // wait linkedIn loading process
+      await page.waitFor(10000);  // wait linkedIn loading process
       await page.waitForSelector(selectors.CLOSE_MSG_BOX_SELECTOR, { timeout: 5000 });
       await page.click(selectors.CLOSE_MSG_BOX_SELECTOR);
-      await page.waitFor(1000);  // wait linkedIn loading process
+      await page.waitFor(2000);  // wait linkedIn loading process
     } catch (err) {
       console.log("..... CLOSE_MSG_BOX_SELECTOR not found .....");
     }

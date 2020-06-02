@@ -129,7 +129,7 @@ async function searchWorker(task_id) {
   } finally {
     console.log("RES: ", result_data);
     if (task !== null) {
-      await models_shared.TaskQueue.findOneAndUpdate({ _id: task_id }, { ack: 0, status: status, result_data: result_data }, { new: true });
+      await models_shared.TaskQueue.findOneAndUpdate({ _id: task_id }, { ack: 0, status: status, result_data: result_data, is_queued: 0 });
     }
 
     if (browser !== null) {
@@ -237,7 +237,7 @@ async function connectWorker(task_id) {
   } finally {
     console.log("RES: ", result_data);
     if (task !== null) {
-      await models_shared.TaskQueue.findOneAndUpdate({ _id: task_id }, { ack: 0, status: status, result_data: result_data }, { new: true });
+      await models_shared.TaskQueue.findOneAndUpdate({ _id: task_id }, { ack: 0, status: status, result_data: result_data, is_queued: 0 }, { new: true });
     }
 
     if (browser !== null) {
@@ -341,7 +341,7 @@ async function messageWorker(task_id) {
   } finally {
     console.log("RES: ", result_data);
     if (task !== null) {
-      await models_shared.TaskQueue.findOneAndUpdate({ _id: task_id }, { ack: 0, status: status, result_data: result_data }, { new: true });
+      await models_shared.TaskQueue.findOneAndUpdate({ _id: task_id }, { ack: 0, status: status, result_data: result_data, is_queued: 0 }, { new: true });
     }
 
     if (browser !== null) {
@@ -430,7 +430,7 @@ async function scribeWorker(task_id) {
   } finally {
     console.log("RES: ", result_data);
     if (task !== null) {
-      await models_shared.TaskQueue.findOneAndUpdate({ _id: task_id }, { ack: 0, status: status, result_data: result_data }, { new: true });
+      await models_shared.TaskQueue.findOneAndUpdate({ _id: task_id }, { ack: 0, status: status, result_data: result_data, is_queued: 0 }, { new: true });
     }
 
     if (browser !== null) {
@@ -519,7 +519,7 @@ async function messageCheckWorker(task_id) {
   } finally {
     console.log("RES: ", result_data);
     if (task !== null) {
-      await models_shared.TaskQueue.findOneAndUpdate({ _id: task_id }, { ack: 0, status: status, result_data: result_data }, { new: true });
+      await models_shared.TaskQueue.findOneAndUpdate({ _id: task_id }, { ack: 0, status: status, result_data: result_data, is_queued: 0 }, { new: true });
     }
 
     if (browser !== null) {
@@ -609,7 +609,7 @@ async function connectCheckWorker(task_id) {
   } finally {
     console.log("RES: ", result_data);
     if (task !== null) {
-      await models_shared.TaskQueue.findOneAndUpdate({ _id: task_id }, { ack: 0, status: status, result_data: result_data }, { new: true });
+      await models_shared.TaskQueue.findOneAndUpdate({ _id: task_id }, { ack: 0, status: status, result_data: result_data, is_queued: 0 }, { new: true });
     }
 
     if (browser !== null) {

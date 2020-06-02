@@ -73,7 +73,7 @@ async function bullConsumer() {
 async function taskStatusListener() {
   // start cron every minute
   cron.schedule("* * * * *", async () => {
-    let tasks = await models_shared.TaskQueue.find({ status: status_codes.IN_PROGRESS, action_key: { $in: actionKeys.action_keys }}, function (err, res) {
+    let tasks = await models_shared.TaskQueue.find({ status: status_codes.IN_PROGRESS, is_queued: 0, action_key: { $in: actionKeys.action_keys }}, function (err, res) {
       if (err) throw MyExceptions.MongoDBError('MongoDB find TASKs err: ' + err);
     });
 
@@ -84,6 +84,8 @@ async function taskStatusListener() {
           action_key: task.action_key,
         };
         await bull_workers.add(data);
+
+        await models_shared.TaskQueue.findOneAndUpdate({ _id: task.id }, { is_queued: 1 });
 
         console.log('task in handler added, status: ' + task.status + ' action_keys: ' + task.action_key); // test
       });
