@@ -26,8 +26,13 @@ def create_nodes(funnel_dict):
     current = root
     stack = []
 
+    counter = 0
     # Create actions
     while True:
+        counter = counter + 1
+        if counter > 2000:
+            break
+
         if current is not None:
             stack.append(current) 
             key = current.get('if_true', None)
@@ -68,8 +73,13 @@ def connect_nodes(funnel_dict):
     current = root
     stack = []
 
+    counter = 0
     # Create actions
     while True:
+        counter = counter + 1
+        if counter > 2000:
+            break
+
         if current is not None:
             stack.append(current)  
             key = current.get('if_true', None)

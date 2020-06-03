@@ -8,8 +8,6 @@ from o24.backend.models.shared import Action, Funnel
 from o24.backend.utils.funnel import construct_funnel
 from o24.backend.google.models import GoogleAppSetting
 
-from o24.production_tests.test_data import *
-
 def drop_database():
     env = os.environ.get('APP_ENV', None)
     assert env == "Test", "ERROR: Must be Test environment. APP_ENV={0}".format(env)

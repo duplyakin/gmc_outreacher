@@ -28,11 +28,6 @@ COLUMNS = [
         'prop' : 'status'
     },
     {
-        'label' : 'Account type',
-        'prop' : 'sender',
-        'data' : True
-    },
-    {
         'label' : 'Limit per day',
         'prop' : 'limit_per_day'
     },

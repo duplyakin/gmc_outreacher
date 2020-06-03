@@ -8,8 +8,10 @@ from o24.backend.models.shared import Action, Funnel
 from o24.backend.utils.funnel import construct_funnel
 
 from o24.backend.google.models import GoogleAppSetting
-from o24.production_tests.test_data import *
 from o24.production_tests.create_data import *
+
+#from o24.production_tests.test_data import *
+from o24.production_tests.test_data_production import *
 
 
 class TestUsersCampaignsProspects(unittest.TestCase):

@@ -222,6 +222,7 @@ class Credentials(db.Document):
     # -1 - Failed
     status = db.IntField(default=0)
     error_message = db.StringField(default='')
+    ack = db.IntField(default=0)
 
     medium = db.StringField()
 
