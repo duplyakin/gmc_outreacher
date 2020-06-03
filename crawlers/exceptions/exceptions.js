@@ -73,6 +73,10 @@ const SearchWorkerError = (message) => ({
   error: new Error(message),
   code: ERROR_CODES.SEARCH_WORKER_ERROR
 });
+const VisitProfileWorkerError = (message) => ({
+  error: new Error(message),
+  code: ERROR_CODES.VISIT_PROFILE_WORKER_ERROR
+});
 
 //------Actions-------
 const LoginActionError = (message) => ({
@@ -141,6 +145,7 @@ module.exports = {
   MessageCheckWorkerError: MessageCheckWorkerError,
   ScribeWorkerError: ScribeWorkerError,
   SearchWorkerError: SearchWorkerError,
+  VisitProfileWorkerError: VisitProfileWorkerError,
 
   LoginActionError: LoginActionError,
   LoginError: LoginError,

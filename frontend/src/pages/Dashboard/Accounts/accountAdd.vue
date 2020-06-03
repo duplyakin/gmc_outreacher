@@ -23,9 +23,8 @@
             </div>
         </div>
         <div v-if="model.credentials_type == 'linkedin'" class="row">
-                <div>
-                    <p class="labels">Linkedin profile URL</p>
-                </div>
+
+                <p class="labels">Linkedin profile URL</p>
                 <div class="col-12">
                     <fg-input name="linkedin_account"
                         class="mb-3"
@@ -33,19 +32,16 @@
                         placeholder="example: linkedin.com/myaccount"/>
                 </div>
 
-                <div>
-                    <div class="container">
-                        <p class="labels">Linkedin login</p>
-                    <el-popover
-                        placement="top-start"
-                        title="Why login better then li_at?"
-                        width="200"
-                        trigger="hover"
-                        content="It's safer for prevent linkedin blocking.">
-                        <el-button slot="reference"><i class='el-icon-question'></i></el-button>
-                    </el-popover>
-                    </div>
-                </div>
+                <p class="labels">Linkedin login
+                <el-popover
+                    placement="top-start"
+                    title="Why login better then li_at?"
+                    width="200"
+                    trigger="hover"
+                    content="It's safer for prevent linkedin blocking.">
+                    <el-button slot="reference"><i class='el-icon-question'></i></el-button>
+                </el-popover>
+                </p>
                 <div class="col-12">
                     <fg-input name="linkedin_login"
                         class="mb-3"
@@ -53,54 +49,47 @@
                         placeholder="example: myemail@gmail.com"/>
                 </div>
 
-                <div>
-                    <p class="labels">Linkedin password</p>
-                </div>
+                <p class="labels">Linkedin password</p>
                 <div class="col-12">
                     <fg-input name="linkedin_password"
                         class="mb-3"
                         v-model="model.data.password"/>
                 </div>
 
-                <div>
-                    <div class="container">
-                    <p class="labels">Linkedin li_at cookie</p>
-                    <el-popover
-                        placement="top-start"
-                        title="What is li_at?"
-                        width="200"
-                        trigger="hover"
-                        content='li_at allows us to login linkedin without user password. Get li_at here: //www.some_link.here'>
-                        <el-button slot="reference"><i class='el-icon-question'></i></el-button>
-                    </el-popover>
-                    </div>
-                </div>
+                <p class="labels">Linkedin li_at cookie
+                <el-popover
+                    placement="top-start"
+                    title="What is li_at?"
+                    width="200"
+                    trigger="hover"
+                    content='li_at allows us to login linkedin without user password. Get li_at here: //www.some_link.here'>
+                    <el-button slot="reference"><i class='el-icon-question'></i></el-button>
+                </el-popover>
+                </p>
                 <div class="col-12">
                     <fg-input name="linkedin_li_at"
                         class="mb-3"
                         v-model="model.data.li_at"/>
                 </div>
   
-                <div>
-                    <div class="container">
-                    <p class="labels">Limits per day</p>
-                    <el-popover
-                        placement="top-start"
-                        title="What is limits?"
-                        width="200"
-                        trigger="hover"
-                        content='Limits - maximum messages from current account allowd by Linkedin.'>
-                        <el-button slot="reference"><i class='el-icon-question'></i></el-button>
-                    </el-popover>
-                    </div>
-                </div>
+                <p class="labels">Limits per day
+                <el-popover
+                    placement="top-start"
+                    title="What is limits?"
+                    width="200"
+                    trigger="hover"
+                    content='Limits - maximum messages from current account allowd by Linkedin.'>
+                    <el-button slot="reference"><i class='el-icon-question'></i></el-button>
+                </el-popover>
+                </p>
                 <div class="col-12">
                     <fg-input name="limits_per_day"
                     class="mb-3"
                     v-model="model.limit_per_day"/>
                 </div>
-        </div>    
+            </div>    
         </card>
+
         <div class="row">
                 <div class="col-12 d-flex flex-row-reverse">
                     <button v-if="model.credentials_type" v-on:click="addAccount"  type="button" class="btn btn-outline btn-wd btn-success mx-1">Add</button>

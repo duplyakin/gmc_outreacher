@@ -14,7 +14,28 @@ class ScribeAction extends action.Action {
     await super.gotoChecker(this.url);
 
     await super.autoScroll(this.page);
+
     let result = {};
+    let country = null;
+    let company_website = null;
+
+    let selector = selectors.COUNTRY_SELECTOR;
+
+    try {
+      await this.page.waitForSelector(selectors.COUNTRY_SELECTOR, { timeout: 5000 });
+
+      country = await this.page.evaluate((selector) => {
+        let res = document.querySelector(selector).innerText;
+        return res;
+      }, selector);
+
+    } catch(err) {
+      //console.log("..... empty country for this profile: .....", this.url)
+    }
+
+    if(country){
+      result.country = country;
+    }
 
     try {
       await this.page.waitForSelector(selectors.JOB_LINK_SELECTOR, { timeout: 5000 });
@@ -23,20 +44,30 @@ class ScribeAction extends action.Action {
       return result;
     }
 
-    let selector = selectors.JOB_LINK_SELECTOR;
-    let link = await this.page.evaluate((selector) => {
-      let a = document.querySelector(selector).href;
-      return a;
-    }, selector);
+    let mySelectors = {
+       selector1: selectors.JOB_LINK_SELECTOR,
+       selector2: selectors.JOB_SELECTOR,
+    };
+    let scribe_result = await this.page.evaluate((mySelectors) => {
+      let res = {};
+      res.link = document.querySelector(mySelectors.selector1).href;
+      res.job_title = document.querySelector(mySelectors.selector1).querySelector(mySelectors.selector2).innerText;
+      return res;
+    }, mySelectors);
 
-    if (link === null || typeof link === undefined) {
+    if(scribe_result.job_title) {
+      result.job_title = scribe_result.job_title;
+    }
+
+    if (!scribe_result.link) {
+      // company don't have linkedin page -> we can't continue scribe
       //console.log("..... link-null: .....", link)
       return result;
     }
-    result.company_linkedin_page = link;
+    result.company_linkedin_page = scribe_result.link;
 
     //await this.page.goto(link + '/about');
-    await super.gotoChecker(link + '/about');
+    await super.gotoChecker(scribe_result.link + 'about');
 
     try {
       await this.page.waitForSelector(selectors.JOB_SITE_SELECTOR, { timeout: 5000 });
@@ -45,19 +76,20 @@ class ScribeAction extends action.Action {
       return result;
     }
 
-    let job_link = null;
     selector = selectors.JOB_SITE_SELECTOR;
-    await this.page.evaluate((selector) => {
-      job_link = document.querySelector(selector).href;
+    company_website = await this.page.evaluate((selector) => {
+      res = document.querySelector(selector).innerText;
+      return res;
     }, selector);
 
-    //console.log("..... link: .....", link)
-    if (job_link === null || job_link === undefined) {
-      //console.log("..... job_link not found: .....", job_link)
+    //console.log("..... company_website: .....", company_website)
+    if (!company_website) {
+      //console.log("..... company_website not found: .....", company_website)
       //console.log("..... result: .....", result);
       return result;
     }
-    result.company_url = job_link;
+
+    result.company_url = company_website;
     //console.log("..... result: .....", result);
     return result;
   }

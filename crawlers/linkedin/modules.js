@@ -6,4 +6,5 @@ module.exports = {
    messageAction : require('./actions/messageAction.js'),
    messageCheckAction : require('./actions/messageCheckAction.js'),
    scribeAction : require('./actions/scribeAction.js'),
+   visitProfileAction: require('./actions/visitProfileAction.js'),
 }

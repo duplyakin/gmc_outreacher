@@ -2,44 +2,34 @@
   <div class="test-modal">
     <card title="Change password form">
 
-        <div class="col-10">
-        <p>Old password</p>
-        <fg-input>
-              <textarea
-                class="form-control"
-                placeholder="Enter Old Password"
-                rows="1"
-                name="Password_old"
-                v-model="password_old"
-              ></textarea>
-        </fg-input>
-        </div>
+        <p class="labels">Old password</p>
+        <el-input
+            placeholder="Enter Old Password"
+            rows="1"
+            name="Password_old"
+            v-model="password_old"
+            show-password>
+        </el-input>
 
-        <div class="col-10">
-        <p>New password</p>
-        <fg-input>
-              <textarea
-                class="form-control"
-                placeholder="Enter New Password"
-                rows="1"
-                name="Password_new"
-                v-model="password_new"
-              ></textarea>
-        </fg-input>
-        </div>
+        <p class="labels">New password</p>
+        <el-input
+            placeholder="Enter New Password"
+            rows="1"
+            name="Password_new"
+            v-model="password_new"
+            show-password>
+        </el-input>
 
-        <div class="col-10">
-        <p>Repeat new password</p>
-        <fg-input>
-              <textarea
-                class="form-control"
-                placeholder="Enter New Password"
-                rows="1"
-                name="Password_new_repeat"
-                v-model="password_new_repeat"
-              ></textarea>
-        </fg-input>
-        </div>
+        <p class="labels">Repeat new password</p>
+        <el-input
+            placeholder="Enter New Password"
+            rows="1"
+            name="Password_new_repeat"
+            v-model="password_new_repeat"
+            show-password>
+        </el-input>
+
+        <p> </p>
 
         <div class="col-12 d-flex flex-row-reverse">
           <button
@@ -130,6 +120,8 @@ export default {
 };
 </script>
 <style>
-
+.labels {
+  color: #8b8c91;
+}
 </style>
   

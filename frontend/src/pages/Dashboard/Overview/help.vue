@@ -7,28 +7,39 @@
           <template slot="header"></template>
           <el-collapse>
             <el-collapse-item title="How to add campaign?" name="1">
-              <div>Anim pariatur cliche reprehenderit, enim eiusmod high life accusamus terry richardson ad squid. 3 wolf moon officia aute, non cupidatat skateboard dolor brunch. Food truck quinoa nesciunt laborum eiusmod. Brunch 3 wolf moon tempor, sunt aliqua put a bird on it squid single-origin coffee nulla assumenda shoreditch et. Nihil anim keffiyeh helvetica, craft beer labore wes anderson cred nesciunt sapiente ea proident. Ad vegan excepteur butcher vice lomo. Leggings occaecat craft beer farm-to-table, raw denim aesthetic synth nesciunt you probably haven't heard of them accusamus labore sustainable VHS.</div>
+              <p> </p>
+              <div>GO to Leads page -> Add Leads</div>
+              <div>GO to Settings page -> Leads list -> Add Leads list</div>
+              <div>GO to Campaigns page -> Add Campaign</div>
             </el-collapse-item>
             <el-collapse-item title="What is li_at cookie?" name="2">
+              <p> </p>
               <div>
                 li_at cookie allows you to login without Login/Password. You can get them following instructions below.
                 Browser-Independent:
+              </div>
 
+              <div> 1.
                 Navigate to Linkedin.com and log in.
                 Open up the browser developer tools (Ctrl-Shift-I or right click -> inspect element)
                 Chrome:
+              </div>
 
+              <div> 2.
                 Select the Application tab.
                 Under the Storage header on the left-hand menu, click the Cookies dropdown and select www.linkedin.com
                 Find the li_at cookie, and double click the value to select it before copying
                 Firefox:
+              </div>
 
+              <div> 3.
                 Select Storage tab.
                 Click the Cookies dropdown and select www.linkedin.com
                 Find and copy the li_at value
               </div>
             </el-collapse-item>
             <el-collapse-item title="How to token?" name="3">
+              <p> </p>
               <div>Anim pariatur cliche reprehenderit, enim eiusmod high life accusamus terry richardson ad squid. 3 wolf moon officia aute, non cupidatat skateboard dolor brunch. Food truck quinoa nesciunt laborum eiusmod. Brunch 3 wolf moon tempor, sunt aliqua put a bird on it squid single-origin coffee nulla assumenda shoreditch et. Nihil anim keffiyeh helvetica, craft beer labore wes anderson cred nesciunt sapiente ea proident. Ad vegan excepteur butcher vice lomo. Leggings occaecat craft beer farm-to-table, raw denim aesthetic synth nesciunt you probably haven't heard of them accusamus labore sustainable VHS.</div>
             </el-collapse-item>
           </el-collapse>

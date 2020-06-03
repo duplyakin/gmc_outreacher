@@ -18,22 +18,10 @@
       </button>
       <div class="collapse navbar-collapse justify-content-end">
         <ul class="navbar-nav">
-          <drop-down>
-            <template slot="title">
-              <i class="nc-icon nc-bell-55"></i>
-              <span class="notification">2</span>
-              <span class="d-lg-none">Notification</span>
-            </template>
-            <a class="dropdown-item" href="#">New connects</a>
-            <a class="dropdown-item" href="#">Account status</a>
-          </drop-down>
           <drop-down position="right">
             <i slot="title" class="nc-icon nc-bullet-list-67"></i>
             <a class="dropdown-item" href="/help">
               <i class="nc-icon nc-umbrella-13"></i> Help Center
-            </a>
-            <a class="dropdown-item" href="#">
-              <i class="nc-icon nc-settings-90"></i> Settings
             </a>
             <div class="dropdown-item text-danger">
               <button type="button" @click.prevent="onLogout" class="btn btn-fill btn-info btn-round btn-wd">Logout</button>

@@ -7,5 +7,6 @@ module.exports = {
         'linkedin-search',
         'linkedin-parse-profile',
         'linkedin-check-reply',
+        'linkedin-visit-profile',
     ]
 }

@@ -13,6 +13,7 @@ module.exports = {
     MESSAGE_CHECK_WORKER_ERROR: -4050,
     SCRIBE_WORKER_ERROR: -4060,
     SEARCH_WORKER_ERROR: -4070,
+    VISIT_PROFILE_WORKER_ERROR: -4080,
     
     BAN_ERROR: -3, //Seems we are banned
     NETWORK_ERROR: -2, //something wromg with network
