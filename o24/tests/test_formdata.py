@@ -1,0 +1,16 @@
+import requests
+
+url = 'https://api.snov.io:443/v1/add-url-for-search'
+auth = 'Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJhdWQiOiJlY2ZkYTM3Yjg4NGM0OTM3OTQ0ZWMyZmQyMzc0ZTIxMCIsImp0aSI6IjczYjBlYTIwMGQ4ODkyNGNlN2U3MTJkZmI3NmJhZmJmNjc3ZDViYmIwYTg3Yzk1MGIyNzhkMzUyZGI3ZjdiMjUyMTVhNGVhNmRlMmZkNDIwIiwiaWF0IjoxNTkxMTE2MTU3LCJuYmYiOjE1OTExMTYxNTcsImV4cCI6MTU5MTExOTc1Nywic3ViIjoiMTQ0MTE3Iiwic2NvcGVzIjpbIioiXX0.H0LotC-xKygQBLCu935E8EzNpt_vAMEeQYRDF1qzKAU267siF1x7HZ-iSYspYX-2e4t9geiBdSU8yp8GRe8LQ2WrMEcyGO34uxwPmwGlEMwVrXgqzCaJMcIMDiqA7AEfWaku3yvWM2muwZMO-9hsHVxQqlhYdDB-KPhYXZn-cxK1oef8nzxX6vgUfPysEtlGbFfw5yJ79YxtE9hnbooHQYr4MMmZlDbHl9XwfCgdsxrjfrO0ekO9Ic-jyfkEWPEEhCAHkf0t48KFrcXspE9wZxG0Q6uBpU9ojUxEreJAkcLQkfhaasHEX-dSnqmRbgPX5k6uWDQWSh2sM6wlenXki9WoFexKm2_8qE-c0MQRcJ146iutleYMIv6kkTghvZs5Pk7cfY65rNXsZqP2ZDnJ7PS28d0QahyPV2zSWKhonDHW-BB5jgZeG6wPk37LTGdfxSXLUaWGuQq7Yd1Vungve7sbr2_lhSIO5PKk1_nbn7qChTr71ItesAQiia3BFWPqMHR99tlQawAuLzFCMjParqP3sWFJoI6e_LpjwrbRjk5FUYAT-s_1QClUTUz4LcxzAnZrrwE_0V80ogbNy7y4evpFhecrgW4oXjLDpTBrvh0q_eOw1M1lKf57XxS7MG6s3dguNqO5NLoXtdoBRJ1GDx7X2VSDQAqe9on89Fi1dbU'
+
+headers = {
+    'Authorization' : auth
+}
+
+
+files = {'upload_file': open('test.txt', 'rb')} 
+res = requests.post(url, files=files, headers=headers)
+print(res)
+print(res.text)
+print(res.request.headers)
+print(res.request.body)
