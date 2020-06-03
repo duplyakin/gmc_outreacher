@@ -14,9 +14,11 @@
 
         <sidebar-item :link="{name: 'Accounts', icon: 'nc-icon nc-single-02', path: '/accounts'}"></sidebar-item>
 
-        <sidebar-item :link="{name: 'Leads List', icon: 'nc-icon nc-single-copy-04', path: '/prospects_list'}"></sidebar-item>
+        <sidebar-item :link="{name: 'Settings', icon: 'nc-icon nc-notes'}">
+          <sidebar-item :link="{name: 'Profile', icon: 'nc-icon nc-circle-09', path: '/profile'}"></sidebar-item>
+          <sidebar-item :link="{name: 'Leads Lists', icon: 'nc-icon nc-single-copy-04', path: '/prospects_list'}"></sidebar-item>
+        </sidebar-item>
 
-        <sidebar-item :link="{name: 'Profile', icon: 'nc-icon nc-circle-09', path: '/profile'}"></sidebar-item>
 
         <div v-if="role==='admin'">
 

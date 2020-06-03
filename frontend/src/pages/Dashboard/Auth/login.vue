@@ -5,9 +5,11 @@
         <form method="#" action="#">
           <!--You can specify transitions on initial render. The `card-hidden` class will be present initially and then it will be removed-->
           <card>
+
             <div slot="header">
               <h3 class="card-title text-center">Login</h3>
             </div>
+
             <div>
               <p class="text">email</p>
               <el-input
@@ -16,6 +18,7 @@
                 type="email"
                 v-model="model.email"
               ></el-input>
+
               <p class="text">password</p>
               <el-input
                 label="passsword"
@@ -24,10 +27,12 @@
                 v-model="model.password"
                 show-password
               ></el-input>
+
               <div v-if="error" class="form-group">
                 <small class="text-danger">{{ error }}</small>
               </div>
             </div>
+
             <p class="text"> </p>
             <div class="text-center">
               <button
@@ -37,6 +42,7 @@
               >Login</button>
               <br />
             </div>
+
           </card>
         </form>
       </div>
