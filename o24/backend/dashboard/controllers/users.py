@@ -74,6 +74,9 @@ def sign_up():
                 raise Exception("Error register the User")
             
             current_user._commit(_reload=True)
+            
+            #TODO: make it more clear
+            current_user._created()
 
             session['user_id'] = str(current_user.id)
 

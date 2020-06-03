@@ -90,7 +90,7 @@ export default {
           {
             prop: "funnel",
             sub_prop: "title",
-            label: "Funnel",
+            label: "Sequence",
             campaign: true,
             object: true,
             minWidth: 100
@@ -98,39 +98,39 @@ export default {
           {
             prop: "prospects_list",
             sub_prop: "title",
-            label: "Prospects list",
+            label: "Leads list",
             object: true,
             campaign: true,
             minWidth: 100
           },
           {
             prop: "prospects_contacted_total",
-            label: "Prospects contacted",
+            label: "Contacted",
             minWidth: 50
           },
           {
             prop: "prospects_email_opens_total",
-            label: "Emails opened",
+            label: "Opened",
             minWidth: 50
           },
           {
             prop: "linkedin_accounts_404",
-            label: "Linkedin 404",
+            label: "Not found",
             minWidth: 50
           },
           {
             prop: "email_bounced_total",
-            label: "Emails bounced",
+            label: "Bounced",
             minWidth: 50
           },
           {
             prop: "linkedin_messages_failed_total",
-            label: "Linkedin messages failed",
+            label: "Sent failed",
             minWidth: 50
           },
           {
             prop: "prospects_accepted_linkedin_total",
-            label: "LinkedIn accepts",
+            label: "Accepted",
             minWidth: 50
           },
           {

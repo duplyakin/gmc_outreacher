@@ -30,7 +30,7 @@ COLUMNS = [
         'prop' : 'status'
     },
     {
-        'label' : 'Funnel',
+        'label' : 'Sequence',
         'prop' : 'funnel',
         'field' : 'title',   
     }

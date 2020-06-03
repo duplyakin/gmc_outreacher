@@ -48,6 +48,18 @@ class User(db.Document):
     invite_code = db.StringField(default='')
     invited_by = db.StringField(default='')
 
+    def __created(self):
+        #Create special-medium
+        exist = Credentials.objects(owner=self.id, medium='special-medium').first()
+        if not exist:
+            exist = Credentials.create_credentials(owner=self.id, 
+                                                    new_data={}, 
+                                                    medium='special-medium', 
+                                                    limit_per_day=10000,
+                                                    limit_interval=1)
+
+        return True
+
     def _init_user(self, 
                     email=None, 
                     password=None, 
@@ -215,17 +227,16 @@ class Credentials(db.Document):
 
     data = db.DictField()
     
+    day_first_action = db.DateTimeField(default=pytz.utc.localize(datetime.utcnow()))
     last_action = db.DateTimeField(default=pytz.utc.localize(datetime.utcnow()))
     next_action = db.DateTimeField(default=pytz.utc.localize(datetime.utcnow()))
 
     #limits and schedule
     limit_per_day = db.IntField(default=DEFAULT_PER_DAY_LIMIT)
 
-    limit_per_hour = db.IntField(default=0) #NOT USED
     limit_interval = db.IntField(default=DEFAULT_INTERVAL) #in seconds
 
     current_daily_counter = db.IntField(default=0)
-    current_hourly_counter = db.IntField(default=0) #NOT USED
 
     #FOR test purpose only
     test_title = db.StringField(default='')
@@ -237,7 +248,7 @@ class Credentials(db.Document):
         return ids
 
     @classmethod
-    def create_credentials(cls, owner, new_data, medium, limit_per_day=None):
+    def create_credentials(cls, owner, new_data, medium, limit_per_day=None, limit_interval=None):
         exist = None
 
         #hash password
@@ -254,6 +265,13 @@ class Credentials(db.Document):
 
         if (limit_per_day is not None) and (limit_per_day > 0):
             exist.limit_per_day = limit_per_day
+
+        if (limit_interval is not None) and (limit_interval > 0):
+            exist.limit_interval = limit_interval
+
+        if medium == 'special-medium':
+            exist.limit_per_day = 100000
+            exist.limit_interval = 1
 
         exist.owner = owner
         exist.medium = medium
@@ -288,7 +306,7 @@ class Credentials(db.Document):
 
     @classmethod
     def admin_async_credentials(cls):
-        db_query = cls.objects()
+        db_query = cls.objects(medium__in=cls.SHOWED_MEDIUM)
 
         #we use it for join and showing objects as it is
         pipeline = [
@@ -337,7 +355,7 @@ class Credentials(db.Document):
 
     @classmethod
     def list_credentials(cls, credential_ids):
-        return cls.objects(Q(id__in=credential_ids))
+        return cls.objects(id__in=credential_ids)
 
     @classmethod
     def update_credentials(cls, arr):
@@ -357,7 +375,22 @@ class Credentials(db.Document):
     def get_medium(self):
         return self.medium
 
+    def _check_day_changed(self, now):
+
+        diff = now - self.day_first_action
+        diff_days = diff.days
+        if diff_days < 0:
+            diff_days = diff_days * -1
+        
+        if diff_days >= 1:
+            self.current_daily_counter = 0
+            self.day_first_action = now
+
+        return
+
     def change_limits(self, now):
+        self._check_day_changed(now)
+
         self.current_daily_counter = self.current_daily_counter + 1
 
         self.last_action = self.next_action
@@ -629,7 +662,7 @@ class Campaign(db.Document):
         campaign = cls.objects(id=campaign_id).get()
 
         medium = funnel_node.action.medium
-
+            
         for c in campaign.credentials:
             if c.medium == medium:
                 return c.id

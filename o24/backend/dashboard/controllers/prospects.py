@@ -68,7 +68,7 @@ COLUMNS = [
         'field' : 'title'
     },
     {
-        'label' : 'Prospects List',
+        'label' : 'Leads list',
         'prop' : 'assign_to_list',
         'field' : 'title'
     }

@@ -23,7 +23,6 @@
             </div>
         </div>
         <div v-if="model.credentials_type == 'linkedin'" class="row">
-
                 <div>
                     <p class="labels">Linkedin profile URL</p>
                 </div>

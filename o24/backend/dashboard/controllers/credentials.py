@@ -19,31 +19,25 @@ from o24.backend.utils.decors import auth_required
 
 COLUMNS = [
     {
-        'label' : 'account',
+        'label' : 'Account',
         'prop' : 'account',
         'data' : True
     },
     {
-        'label' : 'status',
+        'label' : 'Status',
         'prop' : 'status'
     },
     {
-        'label' : 'Sender',
+        'label' : 'Account type',
         'prop' : 'sender',
         'data' : True
-    },
-    {
-        'label' : 'Linkedin cookie',
-        'prop' : 'li_at',
-        'data' : True
-   
     },
     {
         'label' : 'Limit per day',
         'prop' : 'limit_per_day'
     },
     {
-        'label' : 'Actions done today',
+        'label' : 'No. of actions',
         'prop' : 'current_daily_counter'
     },
     {
