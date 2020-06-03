@@ -258,21 +258,22 @@ class SnovioProvider():
 
     
     #Snov.io api requests
-    def _safe_request(self, api_url, params, post=True, headers={}):
+    def _safe_request(self, api_url, params, post=True, headers={}, form=False):
         try:
             res = 'Unknow error'
-            if post:
-                res = requests.post(api_url, data=params, headers=headers)
+            if form:
+                res = requests.post(api_url, headers=headers, data=params, files=[])
             else:
-                res = requests.get(api_url, data=params, headers=headers)
+                if post:
+                    res = requests.post(api_url, data=params, headers=headers)
+                else:
+                    res = requests.get(api_url, data=params, headers=headers)
 
-            print("............REQUEST...............")
-            print(res.request.headers)
-            print(res.request.body)
-            print("............RESPONSE..............")
-            print(res)
-            print(res.text)
             res = json.loads(res.text)
+            message = res.get('message', '')
+            if message:
+                if 'ran out of credits' in message:
+                    raise Exception("BUDGET ERROR: snovio api stopped: ran out of credits, {0}".format(message))
         except Exception as e:
             return str(e)
 
@@ -280,32 +281,24 @@ class SnovioProvider():
 
     def api_add_url(self, url):
         api_url = self.api_url + '/add-url-for-search'
-        headers = {'Content-type' : 'multipart/form-data'}
+
         res = {
             'code' : -1
         }
         if not url:
             return res
         
-        key = None
-
-        if ('linkedin' in url) or ('Linkedin' in url):
-            key = 'social[linkedin]'
-        elif ('twitter' in url) or ('Twitter' in url):
-            key = 'social[twitter]' 
-
-        if not key:
-            res['message'] = "api_add_url: Undefined type of social network for url:{0}".format(url)
-            return res
-
         token = self.get_auth_token()
-        headers['Authorization'] = 'Bearer ' + token
+        
+        headers = {
+            'Authorization': 'Bearer ' + token
+        }
         
         params = {
-            key : url
+            'url': url
         }
 
-        api_response = self._safe_request(api_url=api_url, params=params, post=True, headers=headers)
+        api_response = self._safe_request(api_url=api_url, params=params, post=True, headers=headers, form=True)
         if type(api_response) == str:
             res['message'] = api_response
             return res
@@ -356,26 +349,18 @@ class SnovioProvider():
         }
         if not url:
             return res
-
-        key = None
-
-        if 'linkedin' in url or 'Linkedin' in url:
-            key = 'social[linkedin]'
-        elif 'twitter' in url or 'Twitter' in url:
-            key = 'social[twitter]' 
-
-        if not key:
-            res['message'] = "Undefined type of social network for url:{0}".format(url)
-            return res
-
+        
         token = self.get_auth_token()
+        
+        headers = {
+            'Authorization': 'Bearer ' + token
+        }
+        
         params = {
-            'access_token' : token,
-            key : url
+            'url': url
         }
 
-
-        api_response = self._safe_request(api_url=api_url, params=params, post=True)
+        api_response = self._safe_request(api_url=api_url, params=params, post=True, headers=headers, form=True)
         if type(api_response) == str:
             res['message'] = api_response
             return res
