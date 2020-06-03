@@ -31,7 +31,7 @@ async function bullConsumer() {
         case 'linkedin-check-reply':
           await workers.messageCheckWorker(job.data.task_id);
           break;
-        case 'linkedin-profile-view':
+        case 'linkedin-visit-profile':
           await workers.visitProfileWorker(job.data.task_id);
           break;
 
