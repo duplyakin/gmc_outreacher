@@ -3,23 +3,23 @@
 <card>
 <div class="row">
     <div class="col-3 d-flex align-self-center">
-        <span font-><h3><i class="nc-icon nc-layers-3"></i> Prospects</h3></span>
+        <span font-><h3><i class="nc-icon nc-layers-3"></i> Leads</h3></span>
     </div>
     <div class="col-9 d-flex flex-row-reverse align-self-center">
 
         <div v-if="multipleSelection.length > 0">
-        <button @click.prevent="unassignProspects" type="button" class="btn btn-default btn-success mx-1">Unassign Campaign</button>
-        <button @click.prevent="assignProspects" type="button" class="btn btn-default btn-success mx-1">Assign Campaign</button>
+        <button @click.prevent="unassignProspects" type="button" class="btn btn-default btn-success mx-1">Unassign from Campaign</button>
+        <button @click.prevent="assignProspects" type="button" class="btn btn-default btn-success mx-1">Assign to Campaign</button>
         <button @click.prevent="listAddProspects" type="button" class="btn btn-default btn-success mx-1">Add to list</button>
         <button @click.prevent="listRemoveProspects" type="button" class="btn btn-default btn-success mx-1">Remove from list</button>
-        <button @click.prevent="stopSequenceProspects" type="button" class="btn btn-wd btn-danger mx-1">Stop sequence</button>
+        <button @click.prevent="stopSequenceProspects" type="button" class="btn btn-wd btn-danger mx-1">Pause actions</button>
         <button @click.prevent="deleteProspects" type="button" class="btn btn-wd btn-danger mx-1">Delete</button>
         </div>
         
         <div v-if="multipleSelection.length == 0">
         <button @click.prevent="addProspect" type="button" class="btn btn-default btn-success mx-1">Add manually</button>
         <button @click.prevent="uploadProspect" type="button" class="btn btn-default btn-success mx-1">Upload CSV</button>
-        <button @click.prevent="reload_prospects" type="button" class="btn btn-default btn-success mx-1">Reload</button>
+        <button @click.prevent="reload_prospects" type="button" class="btn btn-default btn-success mx-1">Refresh</button>
         </div>
     
     </div>
@@ -32,7 +32,7 @@
     <card title="">
     <div> 
         <div class="col-12 d-flex">
-        <card title="Filter prospects by:">
+        <card title="Filter leads by:">
             <form @submit.prevent="submit_filter">
             <div class="row">
             <div class="col-3">
@@ -415,14 +415,14 @@ methods: {
         .then((res) => {
             var r = res.data;
             if (r.code <= 0){
-                var msg = "Error loading prospects." + r.msg;
+                var msg = "Error loading leads." + r.msg;
                 Notification.error({title: "Error", message: msg});
             }else{
                 this.deserialize_prospects(r);
             }
             })
             .catch((error) => {
-                var msg = "Error loading prospects. ERROR: " + error;
+                var msg = "Error loading leads. ERROR: " + error;
                 Notification.error({title: "Error", message: msg});
             });
     },
@@ -445,11 +445,11 @@ methods: {
         const _table = this.$refs.prospects_data_table;
         this.$modal.show(ProspectEdit, {
             prospectObj: {},
-            modalTitle: "Prospect create",
+            modalTitle: "Add lead manually",
             action: 'create',
             api_url : PROSPECTS_API_CREATE,
             valueUpdated:(newValue) => {
-                Notification.success({title: "Success", message: "Prospect created"});
+                Notification.success({title: "Success", message: "Lead added"});
                 this.load_prospects();   
             }
             },
@@ -586,7 +586,7 @@ methods: {
             })
     },
     unassignProspects(){
-    if (confirm("Are you sure? This will stop all campaigns for prospects")){
+    if (confirm("Are you sure? This will stop all campaigns for leads.")){
         const path = PROSPECTS_API_UNASSIGN;
 
         var unassignData = new FormData();
@@ -611,7 +611,7 @@ methods: {
     }
     },
     stopSequenceProspects() {
-        if (confirm("Stop sequence for this prospects?")) {
+        if (confirm("Stop actions for this leads?")) {
 
             const path = PROSPECTS_SEQUENCE_STOP_API;
 
@@ -622,15 +622,15 @@ methods: {
             .then((res) => {
                 var r = res.data;
                 if (r.code <= 0){
-                var msg = "Error stopping sequence for prospects " + r.msg;
+                var msg = "Error stopping actions for leads: " + r.msg;
                 Notification.error({title: "Error", message: msg});
                 } else {
-                    Notification.success({title: "Success", message: "Sequence stopped"});
+                    Notification.success({title: "Success", message: "Actions stopped"});
                     this.load_prospects();
                 }
             })
             .catch((error) => {
-                var msg = "Error stopping sequence for prospects " + error;
+                var msg = "Error stopping actions for leads: " + error;
                 Notification.error({title: "Error", message: msg});
             });
         }
@@ -646,7 +646,7 @@ methods: {
         .then((res) => {
             var r = res.data;
             if (r.code <= 0){
-            var msg = "Error deleting prospects " + r.msg;
+            var msg = "Error deleting leads: " + r.msg;
             Notification.error({title: "Error", message: msg});
             }else{
                 Notification.success({title: "Success", message: "Deleteed"});
@@ -654,7 +654,7 @@ methods: {
             }
         })
         .catch((error) => {
-            var msg = "Error loading prospects " + error;
+            var msg = "Error loading leads: " + error;
             Notification.error({title: "Error", message: msg});
         });
 

@@ -1,13 +1,12 @@
 <template>
   <div class="test-modal">
-    <card title="Campaign type">
+    <card title="Where do you want your leads to come from?">
       <div>
-        <p>Select action type</p>
         <div class="col-6">
           <el-select
             class="select-default mb-3"
             style="width: 100%;"
-            placeholder="Select campaign type"
+            placeholder="Source of leads"
             v-model="campaign_type"
             value-key="label"
           >
@@ -56,18 +55,18 @@ export default {
     return {
       campaign_type: {},
       campaign_types: [
-        { label: "Linkedin parsing", description: "Parsing LinkedIn prospects (first name, last name, link) by the search limk." },
-        { label: "Linkedin data enrichment", description: "Enrich prospects information from LinkedIn: current prospects job (website and LinkedIn pages)." }
+        { label: "Add Leads from Linkedin search URL", description: "Cut and paste a Linkedin search URL to add leads." },
+        { label: "Add Leads for Linkedin profiles from CSV", description: "Enrich leads information from Linkedin: current leads job (website and Linkedin pages). > Import a list of LinkedIn profiles to enrich." }
       ],
     };
   },
   methods: {
     submit() {
-      if (this.campaign_type.label === "Linkedin parsing") {
+      if (this.campaign_type.label === "Add Leads from Linkedin search URL") {
         this.$router.push({
           path: "linkedin_parsing"
         });
-      } else if (this.campaign_type.label === "Linkedin data enrichment") {
+      } else if (this.campaign_type.label === "Add Leads for Linkedin profiles from CSV") {
         this.$router.push({
           path: "linkedin_enrichment_data"
         });

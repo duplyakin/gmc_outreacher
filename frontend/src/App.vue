@@ -3,7 +3,6 @@
 </template>
 
 <script>
-  import NotificationSample from 'src/pages/Dashboard/Components/NotificationSample';
   export default {
     mounted () {
       /*this.$notify(

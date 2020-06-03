@@ -1,6 +1,16 @@
 <template>
 <div>
-    <h5 class="text-center">Upload .csv file with data</h5>
+    <div class="container">
+        <div><h5 class="text-center">Upload .csv file with leads</h5></div>
+        <el-popover
+            placement="top-start"
+            title="Upload from excel"
+            width="200"
+            trigger="hover"
+            content='Here you can upload leads from .csv file and then ussign them to linkedin or email campaign.'>
+            <el-button slot="reference"><i class='el-icon-question'></i></el-button>
+        </el-popover>
+    </div>
     <div v-if="error" class="text-center text-danger invalid-feedback" style="display: block;">
         {{ error_message }}
     </div>
@@ -24,7 +34,7 @@
             <i class="el-icon-upload"></i>
             <div class="el-upload__text">Drop file here or <em>click to upload</em></div>
             <div class="el-upload__tip" slot="tip">
-                    Your file must contain a column with header: email. The value of this column will be your prospects email address.
+                    Your file must contain a column with header: email. The value of this column will be your leads email address.
                     <br>
                     [Maximum Upload File Size: 5MB or 10,000 rows]
                     {{this.model.file}}
@@ -35,13 +45,14 @@
 </div>
 </template>
 <script>
-import { Upload } from 'element-ui'
+import { Popover, Upload } from 'element-ui'
 
 
 export default {
     name : 'first-step',
     components: {
-      [Upload.name] : Upload
+      [Upload.name] : Upload,
+      [Popover.name] : Popover,
     },
     data () {
         return {
@@ -135,5 +146,18 @@ export default {
     color: #c0c4cc;
     margin: 40px 0 16px;
     line-height: 50px;
+}
+.el-icon-question {
+    font-size: 16px;
+    color: #c0c4cc;
+    margin: 12px 0 16px;
+    line-height: 0px;
+}
+.container {
+  display: flex;
+  justify-content: space-around;
+  align-items: flex-start;
+  padding: 10px 20px;
+  max-width: 280px;
 }
 </style>

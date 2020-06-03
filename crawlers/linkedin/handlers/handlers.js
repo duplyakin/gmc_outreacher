@@ -1,18 +1,17 @@
 const { bull_workers } = require('./bullWorkersSettings.js');
-const taskModel = require("./../../models/shared.js");
-const workers = require('./../workers/workers.js');
+const models_shared = require("../../models/shared.js");
+const workers = require('../workers/workers.js');
 const cron = require('node-cron');
 
-const MyExceptions = require('./../../exceptions/exceptions.js');
+const actionKeys = require('./actionKeys.js');
+
+const status_codes = require('../status_codes')
 
 
 async function bullConsumer() {
   bull_workers.process(async job => {
     try {
       switch (job.data.action_key) {
-        case 'linkedin-check-reply':
-          await workers.loginWorker(job.data.task_id);
-          break;
         case 'linkedin-connect':
           await workers.connectWorker(job.data.task_id);
           break;
@@ -29,62 +28,82 @@ async function bullConsumer() {
           await workers.scribeWorker(job.data.task_id);
           break;
         case 'linkedin-check-reply':
-          await workers.messageCheck(job.data.task_id);
+          await workers.messageCheckWorker(job.data.task_id);
           break;
-/*
-        case 'finished':
-          //await workers.loginWorker(job.task);
-          break;
-        case 'success':
-          //await workers.loginWorker(job.task);
-          break;
-        case 'delay-linkedin':
-          console.log("..... task.action_key: ..... delay-linkedin");
-          break;
-        case 'email-send-message':
-          console.log("..... task.action_key: ..... email-send-message");
-          break;
-        case 'delay-email':
-          console.log("..... task.action_key: ..... delay-email");
-          break;
-        case 'email-check-reply':
-          console.log("..... task.action_key: ..... email-check-reply");
-          break;
-*/
+        /*
+                case 'finished':
+                  //await workers.loginWorker(job.task);
+                  break;
+                case 'success':
+                  //await workers.loginWorker(job.task);
+                  break;
+                case 'delay-linkedin':
+                  console.log("..... task.action_key: ..... delay-linkedin");
+                  break;
+                case 'email-send-message':
+                  console.log("..... task.action_key: ..... email-send-message");
+                  break;
+                case 'delay-email':
+                  console.log("..... task.action_key: ..... delay-email");
+                  break;
+                case 'email-check-reply':
+                  console.log("..... task.action_key: ..... email-check-reply");
+                  break;
+        */
         default:
           break;
       }
     } catch (err) {
+      console.log('Bull queue - something went wrong: ', err);
+
       let err_result = {
         code: MyExceptions.HandlerError().code,
         raw: MyExceptions.HandlerError("HandlerError error: " + err).error
       };
-      await taskModel.TaskQueue.updateOne({ id: job.data.task_id }, { status: -1, result_data: err_result }, function (err, res) {
+      
+      await models_shared.TaskQueue.updateOne({ _id: job.data.task_id }, { status: -1, result_data: err_result }, function (err, res) {
         if (err) throw MyExceptions.MongoDBError('MongoDB save err: ' + err);
         // updated!
-        console.log(success_db_save_text);
+        console.log('MongoDB save success.');
       });
     }
   });
 }
 
 async function taskStatusListener() {
+  var handler_lock = 0;
+
   // start cron every minute
   cron.schedule("* * * * *", async () => {
-    let tasks = await taskModel.TaskQueue.find({ status: 1 }, function (err, res) {
-      if (err) throw MyExceptions.MongoDBError('MongoDB find err: ' + err);
-    });
-    if (Array.isArray(tasks) && tasks.length !== 0) {
-      tasks.forEach(async (task) => {
-        let data = {
-          task_id: task.id,
-          action_key: task.action_key,
-        };
-        await bull_workers.add(data);
+
+    if(handler_lock === 0) {
+      let tasks = await models_shared.TaskQueue.find({ status: status_codes.IN_PROGRESS, is_queued: 0, action_key: { $in: actionKeys.action_keys }}, function (err, res) {
+        if (err) throw MyExceptions.MongoDBError('MongoDB find TASKs err: ' + err);
       });
 
-      console.log('this message logs every minute - TASKs ADDED in queue');
+      if (Array.isArray(tasks) && tasks.length !== 0) {
+        handler_lock = 1;
+
+        tasks.forEach(async (task) => {
+          let data = {
+            task_id: task.id,
+            action_key: task.action_key,
+          };
+          await bull_workers.add(data);
+
+          await models_shared.TaskQueue.findOneAndUpdate({ _id: task.id }, { is_queued: 1 }, function (err, res) {
+            if (err) throw MyExceptions.MongoDBError('MongoDB findOneAndUpdate TASK err: ' + err);
+          });
+
+          console.log('task in handler added, status: ' + task.status + ' action_keys: ' + task.action_key); // test
+        });
+
+        handler_lock = 0;
+        console.log('CRON log - TASKs ADDED in queue');
+      }
     }
+
+    console.log('this message logs every minute - CRON is active');
   });
 }
 

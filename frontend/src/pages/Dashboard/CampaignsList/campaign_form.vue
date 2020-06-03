@@ -2,19 +2,19 @@
   <div>
     <card>
       <card>
-        <p>Campaign title (required)</p>
+        <p>Name your campaign</p>
         <el-input
           :disabled="!modified_fields['title']"
-          placeholder="Input campaign title"
+          placeholder="Сampaign name"
           v-model="campaign_data.title"
         ></el-input>
       </card>
       <card>
-        <p>Select prospects list to send data to (required)</p>
+        <p>Leads list</p>
         <el-select
           class="select-default mb-3"
           style="width: 100%;"
-          placeholder="Select prospects list"
+          placeholder="Select leads list"
           v-model="campaign_data.list_selected"
           value-key="title"
           :disabled="!modified_fields['lists']"
@@ -30,13 +30,13 @@
       </card>
 
       <card>
-        <p>Funnel to use for communication (required)</p>
+        <p>Select sequence</p>
         <el-select
           class="select-default mb-3"
-          name="Campaign funnel"
+          name="Sequence"
           v-on:change="onChangeFunnel"
           style="width: 100%;"
-          placeholder="Select funnel"
+          placeholder="Sequence"
           v-model="campaign_data.funnel"
           value-key="title"
         >
@@ -52,11 +52,11 @@
 
       <card v-if="hasMedium('any')">
         <div v-if="hasMedium('email')" class="col-6">
-          <p>Select Email account</p>
+          <p>Email account</p>
           <el-select
             class="select-default mb-3"
             style="width: 100%;"
-            placeholder="Select email account"
+            placeholder="Select email account to use"
             v-on:change="onChangeEmailCredentials"
             v-model="email_account_selected"
             value-key="data.account"
@@ -74,11 +74,11 @@
         </div>
 
         <div v-if="hasMedium('linkedin')" class="col-6">
-          <p>Select Linkedin account</p>
+          <p>Linkedin account</p>
           <el-select
             class="select-default mb-3"
             style="width: 100%;"
-            placeholder="Select linkedin account"
+            placeholder="Select linkedin account to use"
             v-on:change="onChangeLinkedinCredentials"
             v-model="linkedin_account_selected"
             value-key="data.account"
@@ -155,13 +155,13 @@
       </card>
 
       <card v-if="modified_fields['time_table']">
-        <h5 class="text-center">Delivery time with respect to prospect's timezone</h5>
+        <h5 class="text-center">Schedule</h5>
         <div class="extended-forms">
           <card>
             <div class="col-12">
               <div class="row">
-                <div class="col-lg-6">
-                  <h4 class="title">From</h4>
+                <div class="col-lg-4">
+                  <h4 class="title">Start</h4>
                   <el-time-select
                     name="From time"
                     v-model="campaign_data.from_hour"
@@ -173,8 +173,8 @@
                     placeholder="Select time"
                   ></el-time-select>
                 </div>
-                <div class="col-lg-6">
-                  <h4 class="title">Till</h4>
+                <div class="col-lg-4">
+                  <h4 class="title">End</h4>
                   <el-time-select
                     name="Till time has to be after FROM time"
                     v-model="campaign_data.to_hour"
@@ -186,35 +186,33 @@
                     placeholder="Select time"
                   ></el-time-select>
                 </div>
-              </div>
-            </div>
-            <div class="row">
-              <div class="col-6">
-                <h4 class="title">Fallback Time Zone</h4>
-                <el-select
-                  class="select-primary"
-                  name="Fallback Time Zone"
-                  size="large"
-                  placeholder="Fallback Time Zone"
-                  v-model="timezones_selected"
-                  value-key="label"
-                >
-                  <el-option
-                    v-for="option in timezones_selects"
+                <div class="col-lg-4">
+                  <h4 class="title">Time Zone</h4>
+                  <el-select
                     class="select-primary"
-                    :value="option"
-                    :label="option.label"
-                    :key="option.label"
-                  ></el-option>
-                </el-select>
+                    name="Time Zone"
+                    size="large"
+                    placeholder="Select Time Zone"
+                    v-model="timezones_selected"
+                    value-key="label"
+                  >
+                    <el-option
+                      v-for="option in timezones_selects"
+                      class="select-primary"
+                      :value="option"
+                      :label="option.label"
+                      :key="option.label"
+                    ></el-option>
+                  </el-select>
+                </div>
               </div>
             </div>
           </card>
         </div>
-        <h4 class="title">Days Preference</h4>
+        <h4 class="title">Days of the week</h4>
         <div class="row">
           <div class="col-12">
-            <card title="Select sending days">
+            <card>
               <div class="btn-group">
                 <button
                   type="button"
@@ -264,17 +262,16 @@
         </div>
       </card>
 
-        <div class="row">
-          <div class="col-12 d-flex flex-row-reverse">
-            <button
-              @click.prevent="save_changes"
-              type="button"
-              class="btn btn-default btn-success mx-1"
-            >Save Changes</button>
-            <!--  <button type="button" class="btn btn-outline btn-wd btn-danger">Discard</button> -->
-          </div>
+      <div class="row">
+        <div class="col-12 d-flex flex-row-reverse">
+          <button
+            @click.prevent="save_changes"
+            type="button"
+            class="btn btn-default btn-success mx-1"
+          >Save Draft</button>
+          <!--  <button type="button" class="btn btn-outline btn-wd btn-danger">Discard</button> -->
         </div>
-
+      </div>
     </card>
 
     <div v-if="test" class="row">
@@ -315,9 +312,9 @@ import {
 } from "element-ui";
 
 import timezones from "./defaults/timezones";
-import axios from '@/api/axios-auth';;
+import axios from "@/api/axios-auth";
 
-const MessageEdit = () => import('./messageEdit.vue')
+const MessageEdit = () => import("./messageEdit.vue");
 
 const CAMPAIGNS_API_GET = "/campaigns/get";
 const CAMPAIGNS_API_DATA = "/campaigns/data";
@@ -352,7 +349,7 @@ export default {
       email_table_columns: [
         {
           prop: "title",
-          label: "Template title",
+          label: "Template name",
           minWidth: 300
         },
         {
@@ -362,7 +359,7 @@ export default {
         },
         {
           prop: "interval",
-          label: "Interval",
+          label: "Delay (days)",
           minWidth: 100
         }
       ],
@@ -370,12 +367,12 @@ export default {
       linkedin_table_columns: [
         {
           prop: "title",
-          label: "Template title",
+          label: "Template name",
           minWidth: 300
         },
         {
           prop: "interval",
-          label: "Interval",
+          label: "Delay (days)",
           minWidth: 100
         }
       ],
@@ -646,8 +643,12 @@ export default {
 
       var credentials = this.campaign_data.credentials;
       var need_accounts = 1;
-      if ( (this.campaign_data.templates.email && this.campaign_data.templates.email.length > 0) && 
-          (this.campaign_data.templates.linkedin && this.campaign_data.templates.linkedin.length > 0)){
+      if (
+        this.campaign_data.templates.email &&
+        this.campaign_data.templates.email.length > 0 &&
+        this.campaign_data.templates.linkedin &&
+          this.campaign_data.templates.linkedin.length > 0
+      ) {
         need_accounts = 2;
       }
 
@@ -726,7 +727,10 @@ export default {
               Notification.error({ title: "Error", message: msg });
             } else {
               this.$router.push({ path: "campaigns" });
-              Notification.success({ title: "Success", message: "Campaign created" });
+              Notification.success({
+                title: "Success",
+                message: "Campaign created"
+              });
             }
           })
           .catch(error => {

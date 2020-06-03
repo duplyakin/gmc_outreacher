@@ -1,20 +1,22 @@
-const selectors = require("./../selectors");
+const selectors = require("../selectors");
 const action = require('./action.js');
 
-const MyExceptions = require('./../../exceptions/exceptions.js');
+const MyExceptions = require('../../exceptions/exceptions.js');
 
 class SearchAction extends action.Action {
-  constructor(email, password, cookies, credentials_id, searchUrl, page_count) {
-    super(email, password, cookies, credentials_id);
+  constructor(email, password, li_at, cookies, credentials_id, searchUrl, interval_pages) {
+    super(email, password, li_at, cookies, credentials_id);
 
     this.searchUrl = searchUrl;
-    this.page_count = page_count;
+    this.interval_pages = interval_pages;
   }
 
   async search() {
+    if(!this.searchUrl) {
+      throw new Error('Empty search url.');
+    }
+    
     await super.gotoChecker(this.searchUrl);
-
-    await this.page.waitForSelector(selectors.SEARCH_ELEMENT_SELECTOR, { timeout: 5000 });
 
     let currentPage = 1;
     let result_data = {
@@ -25,14 +27,21 @@ class SearchAction extends action.Action {
         link: this.searchUrl
       }
     };
-    let mySelectors = {
-      selector1: selectors.SEARCH_ELEMENT_SELECTOR,
-      selector2: selectors.LINK_SELECTOR,
-      selector3: selectors.FULL_NAME_SELECTOR,
-    };
-
+    
     try {
-      while (currentPage <= this.page_count) {
+      await super.autoScroll(this.page);
+
+      // wait selector here
+      await super.check_success_selector(selectors.SEARCH_ELEMENT_SELECTOR, this.page, result_data);
+      //await this.page.waitForSelector(selectors.SEARCH_ELEMENT_SELECTOR, { timeout: 5000 });
+
+      let mySelectors = {
+        selector1: selectors.SEARCH_ELEMENT_SELECTOR,
+        selector2: selectors.LINK_SELECTOR,
+        selector3: selectors.FULL_NAME_SELECTOR,
+      };
+
+      while (currentPage <= this.interval_pages) {
         let newData = await this.page.evaluate((mySelectors) => {
 
           let results = [];
@@ -51,11 +60,10 @@ class SearchAction extends action.Action {
           return results;
         }, mySelectors);
         result_data.data.arr = result_data.data.arr.concat(newData);
-        result_data.data.link = await this.page.url();
+        result_data.data.link = this.page.url();
 
-        await super.autoScroll(this.page);
-
-        if (await this.page.$(selectors.NEXT_PAGE_SELECTOR) === null) {
+       /*
+        if (await this.page.$(selectors.NEXT_PAGE_SELECTOR) == null) {
           // TODO: add check-selector for BAN page
           // perhaps it was BAN
           result_data.code = MyExceptions.SearchActionError().code;
@@ -63,17 +71,22 @@ class SearchAction extends action.Action {
           console.log('something went wrong - selector not found!');
           break;
         }
-        if (await this.page.$(selectors.NEXT_PAGE_MUTED_SELECTOR) !== null) {
+        */
+
+        // wait selector here
+        await super.check_success_selector(selectors.NEXT_PAGE_SELECTOR, this.page, result_data);
+
+        if (await this.page.$(selectors.NEXT_PAGE_MUTED_SELECTOR) != null) {
           // all awailable pages has been scribed
           result_data.code = 1000;
-          console.log('all contacts scribed!');
+          console.log('All contacts scribed!');
           break;
         }
 
         await this.page.click(selectors.NEXT_PAGE_SELECTOR);
-        await this.page.waitFor(1000); // critical here!?
+        await this.page.waitFor(2000); // critical here!?
         // here we have to check BAN page
-        result_data.data.link = await this.page.url(); // we have to send NEXT page link in task
+        result_data.data.link = this.page.url(); // we have to send NEXT page link in task
 
         currentPage++;
       }
@@ -86,8 +99,8 @@ class SearchAction extends action.Action {
       //throw MyExceptions.SearchActionError('It is BAN (?) in searchAction: '+ err);
     }
 
-    //console.log("..... User Data: .....", result_data)
-    //console.log("..... User Data: .....", result_data.data.arr)
+    //console.log("..... Reult Data: .....", result_data)
+    //console.log("..... Users Data: .....", result_data.data.arr)
     result_data.data = JSON.stringify(result_data.data);
     return result_data;
   }

@@ -4,7 +4,7 @@
 <div class="row">
     <div class="col-4 d-flex align-self-center">
         <h3>
-        <i class="nc-icon nc-bag"></i> LinkedIn Enrichment
+        <i class="nc-icon nc-bag"></i> Leads managment
         </h3>
     </div>
     <div class="col-8 d-flex flex-row-reverse align-self-center">
@@ -13,12 +13,12 @@
             @click.prevent="addCampaign"
             type="button"
             class="btn btn-default btn-success mx-1"
-        >Create campaign</button>
+        >Add leads</button>
         <button
             @click.prevent="reload_campaigns"
             type="button"
             class="btn btn-default btn-success mx-1"
-        >Reload</button>
+        >Refresh</button>
 
     </div>
     </div>

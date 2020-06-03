@@ -1,0 +1,29 @@
+{
+  "name": "crawlers",
+  "version": "1.0.0",
+  "description": "npm install esm\r node -r esm index.js",
+  "main": "database.js",
+  "directories": {
+    "test": "tests"
+  },
+  "dependencies": {
+    "babel-polyfill": "^6.26.0",
+    "bull": "^3.13.0",
+    "jQuery": "^1.7.4",
+    "jsdom": "^16.2.2",
+    "nickjs": "^0.3.7",
+    "node-fetch": "^2.6.0",
+    "node-cron": "^2.0.3",
+    "pino": "^6.0.0",
+    "puppeteer": "^2.1.1",
+    "validator": "^13.0.0",
+    "mongoose": "^5.9.12",
+    "xmlhttprequest": "^1.8.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "green",
+  "license": "ISC"
+}

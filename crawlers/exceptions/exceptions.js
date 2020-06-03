@@ -36,6 +36,14 @@ const NetworkError = (message) => ({
   code: ERROR_CODES.NETWORK_ERROR
 });
 
+//------Custom error that required user action to continue task-------
+const ContextError = (message, context, data = null) => ({
+  error: new Error(message),
+  code: ERROR_CODES.CONTEXT_ERROR,
+  context: context, // object - context of the last page // delete it?
+  data: data, // object - part of the result_data
+});
+
 //------Workers-------
 const LoginWorkerError = (message) => ({
   error: new Error(message),
@@ -104,6 +112,17 @@ const SearchActionError = (message) => ({
   code: ERROR_CODES.SEARCH_ACTION_ERROR
 });
 
+
+//------------User action errors----------------
+const UnknownPageError = (message) => ({
+  error: new Error(message),
+  code: ERROR_CODES.UNKNOWN_PAGE_ERROR
+});
+const EmptyInputError = (message) => ({
+  error: new Error(message),
+  code: ERROR_CODES.EMPTY_INPUT_ERROR
+});
+
 module.exports = {
   UnknownError: UnknownError,
   HandlerError: HandlerError,
@@ -112,6 +131,8 @@ module.exports = {
   MongoDBError: MongoDBError,
   BanError: BanError,
   NetworkError: NetworkError,
+
+  ContextError: ContextError,
 
   LoginWorkerError: LoginWorkerError,
   ConnectWorkerError: ConnectWorkerError,
@@ -130,4 +151,8 @@ module.exports = {
   MessageCheckActionError: MessageCheckActionError,
   ScribeActionError: ScribeActionError,
   SearchActionError: SearchActionError,
+
+  UnknownPageError: UnknownPageError,
+  EmptyInputError: EmptyInputError,
+
 }

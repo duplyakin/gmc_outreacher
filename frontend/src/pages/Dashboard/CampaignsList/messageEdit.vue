@@ -1,20 +1,19 @@
 <template>
   <div class="test-modal">
-    <card title="Message create">
+
+    <card>
+      <h4>{{template.title}}</h4>
       <form v-if="template" @submit.prevent="submitData">
         <card v-if="template_type === 'email'">
           <div class="col-12">
-            <fg-input label="Subject" :error="getError('Subject')">
-              <textarea
-                class="form-control"
+            <el-input label="Subject"
                 placeholder="Enter Subject"
-                rows="1"
                 name="Subject"
-                v-model="template.subject"
-                v-validate="modelValidations.subject"
-              ></textarea>
-            </fg-input>
-            <fg-input :error="getError('body text')">
+                maxlength="100"
+                show-word-limit
+                v-model="subject">
+            </el-input>
+            <fg-input label=" ">
               <editor
                 name="body text"
                 output-format="html"
@@ -37,9 +36,10 @@
           </div>
         </card>
 
+
         <card v-if="template_type === 'linkedin'">
           <div class="col-12">
-            <fg-input :error="getError('body text')">
+            <fg-input>
               <editor
                 name="body text"
                 output-format="html"
@@ -72,8 +72,10 @@
             >Discard</button>
           </div>
         </div>
+
       </form>
     </card>
+
   </div>
 </template>
 
@@ -85,7 +87,7 @@ export default {
   components: {
     [Select.name]: Select,
     [Option.name]: Option,
-    editor: Editor
+    editor: Editor,
   },
   props: {
     template_type: String,
@@ -94,7 +96,11 @@ export default {
   },
   data() {
     return {
-      interval: 1, // feature
+      subject: '', // element-ui feature
+      interval: 1, // element-ui feature
+
+      linkedin_max_msg_length: 1999,
+
       template: null,
       editorSettings: {
         height: 200,
@@ -108,7 +114,39 @@ export default {
           "undo redo | formatselect | bold italic backcolor | \
            alignleft aligncenter alignright alignjustify | \
            bullist numlist outdent indent | removeformat | help \
-           image | link | autolink"
+           image | link | autolink",
+    /*    
+        max_chars: 1000, // max. allowed chars
+        setup: function (ed) {
+          var allowedKeys = [8, 37, 38, 39, 40, 46]; // backspace, delete and cursor keys
+          ed.on('keydown', function (e) {
+              if (allowedKeys.indexOf(e.keyCode) != -1) return true;
+              if (tinymce_getContentLength() + 1 > this.settings.max_chars) {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  return false;
+              }
+              return true;
+          });
+          ed.on('keyup', function (e) {
+              tinymce_updateCharCounter(this, tinymce_getContentLength());
+          });
+        },
+        init_instance_callback: function () { // initialize counter div
+            $('#' + this.id).prev().append('<div class="char_count" style="text-align:right"></div>');
+            tinymce_updateCharCounter(this, tinymce_getContentLength());
+        },
+        paste_preprocess: function (plugin, args) {
+            var editor = tinymce.get(tinymce.activeEditor.id);
+            var len = editor.contentDocument.body.innerText.length;
+            var text = $(args.content).text();
+            if (len + text.length > editor.settings.max_chars) {
+                alert('Pasting this exceeds the maximum allowed number of ' + editor.settings.max_chars + ' characters.');
+                args.content = '';
+            } else {
+                tinymce_updateCharCounter(editor, len + text.length);
+            }
+        }*/
       },
       modelValidations: {
         message_data: {
@@ -121,9 +159,15 @@ export default {
     };
   },
   methods: {
-    getError(fieldName) {
-      return this.errors.first(fieldName);
+    /*
+    tinymce_updateCharCounter(el, len) {
+        $('#' + el.id).prev().find('.char_count').text(len + '/' + el.settings.max_chars);
     },
+    tinymce_getContentLength() {
+       return tinymce.get(tinymce.activeEditor.id).contentDocument.body.innerText.length;
+    },
+    */
+
     convertToPlainText(htmlText) {
       let res = htmlText.replace(/<style([\s\S]*?)<\/style>/gi, "");
       res = res.replace(/<script([\s\S]*?)<\/script>/gi, "");
@@ -142,17 +186,29 @@ export default {
         Notification.error({title: "Error", message: "Template can't be empty"});
         return false;
       }
-      if (this.template_type == "email" && (this.template.subject == '' || this.template.body == '')) {
-        Notification.error({title: "Error", message: "Subject and body can't be empty"});
+      if (this.template_type == "email" && this.subject == '') {
+        Notification.error({title: "Error", message: "Subject can't be empty"});
         return false;
       }
+      if (this.template_type == "email" && this.template.body == '') {
+        Notification.error({title: "Error", message: "Body can't be empty"});
+        return false;
+      }
+
       if (this.template_type == "linkedin" && this.template.message == '') {
         Notification.error({title: "Error", message: "Message can't be empty"});
         return false;
-      }
+      } 
+
+      if (this.template_type == "linkedin" && this.convertToPlainText(this.template.message).length > this.linkedin_max_msg_length) {
+        Notification.error({title: "Error", message: "Message lengh should be shorter than " + this.linkedin_max_msg_length + " symbols."});
+        return false;
+      } 
+
       if (confirm("Are you sure?")) {
         this.$emit("close");
-        this.template.interval = this.interval; // feature
+        this.template.interval = this.interval; // element-ui feature
+        this.template.subject = this.subject; // element-ui feature
         this.valueUpdated(this.template);
         console.log("template: ", this.template);
       }
@@ -164,25 +220,31 @@ export default {
   created() {
     if (Object.keys(this.templateObj).length != 0) {
       this.template = JSON.parse(JSON.stringify(this.templateObj));
-      this.interval = this.template.interval; // feature
 
       /* If we create the new object we don't have properties */
       if (this.template_type === "email") {
         if (!this.template.hasOwnProperty("subject")) {
           this.template["subject"] = "";
+        } else {
+          this.subject = this.template.subject; // element-ui feature
         }
         if (!this.template.hasOwnProperty("body")) {
           this.template["body"] = "";
         }
         if (!this.template.hasOwnProperty("interval")) {
           this.template["interval"] = 1;
+        } else {
+          this.interval = this.template.interval; // element-ui feature
         }
+
       } else if (this.template_type === "linkedin") {
         if (!this.template.hasOwnProperty("message")) {
           this.template["message"] = "";
         }
         if (!this.template.hasOwnProperty("interval")) {
           this.template["interval"] = 1;
+        } else {
+          this.interval = this.template.interval; // element-ui feature
         }
       }
       console.log(this.template);

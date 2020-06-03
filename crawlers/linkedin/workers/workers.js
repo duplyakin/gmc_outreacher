@@ -1,269 +1,169 @@
 const modules = require('../modules.js');
-const cookieModel = require("../../models/models.js");
-const taskModel = require("../../models/shared.js");
+const models_shared = require("../../models/shared.js");
+const models = require("../../models/models.js");
 
 const MyExceptions = require('../../exceptions/exceptions.js');
-const error_db_save_text = "........ERROR MONGODB: update TASK failed: ";
-const success_db_save_text = "........SUCCSESS MONGODB: result_data added........";
+
+const status_codes = require('../status_codes')
 
 
 async function get_cookies(email, password, li_at, credentials_id) {
 
-  let cookies = await cookieModel.Cookies.findOne({ credentials_id: credentials_id }, function (err, res) {
+  let cookies = await models.Cookies.findOne({ credentials_id: credentials_id }, function (err, res) {
     if (err) throw MyExceptions.MongoDBError('MongoDB find COOKIE err: ' + err);
   });
 
-  // update cookies if: 1. old cookies, 2. there is no cookies
-  if (cookies != undefined && cookies != null) {
-    // cookies defined
-    if (Date.now() / 1000 > cookies.expires) {
-      // check - if cookies old
-      // login
-      let loginAction = new modules.loginAction.LoginAction(email, password, cookies.data, credentials_id);
-      await loginAction.startBrowser();
-      await loginAction.login();
-      await loginAction.closeBrowser();
+  let is_expired = check_expired(cookies); // true if we have to update cookies
 
-      cookies = await cookieModel.Cookies.findOne({ credentials_id: credentials_id }, function (err, res) {
-        if (err) throw MyExceptions.MongoDBError('MongoDB find COOKIE err: ' + err);
-      }); 
-    }
-
-    return cookies.data;
-
-  } else {
-    // cookies not defined
-    let cookies_data = null;
-    if (li_at !== '') {
-      cookies_data = [{
-        name : "li_at",
-        value : li_at,
-        domain : ".www.linkedin.com",
-        path : "/",
-        expires : Date.now() / 1000 + 10000000, // + ~ 4 months // https://www.epochconverter.com/
-        size : (new TextEncoder().encode(li_at)).length,
-        httpOnly : true,
-        secure : true,
-        session : false,
-        sameSite : "None"
-      }];
-    };
-
-    // login
-    let loginAction = new modules.loginAction.LoginAction(email, password, cookies_data, credentials_id);
+  if (cookies == null || is_expired) {
+    let loginAction = new modules.loginAction.LoginAction(email, password, li_at, credentials_id);
     await loginAction.startBrowser();
     await loginAction.login();
     await loginAction.closeBrowser();
 
-    cookies = await cookieModel.Cookies.findOne({ credentials_id: credentials_id }, function (err, res) {
+    cookies = await models.Cookies.findOne({ credentials_id: credentials_id }, function (err, res) {
       if (err) throw MyExceptions.MongoDBError('MongoDB find COOKIE err: ' + err);
     });
+
     return cookies.data;
   }
+
+  return cookies.data;
 }
 
 
-function serialize_data(task_data, task) {
-  for (var key in task) {
-    if (task_data.hasOwnProperty(key) && task[key]){
-        //task_data[key] = JSON.parse(task[key]);
-        task_data[key] = task[key];
-    }
+function check_expired(cookies) {
+  if (cookies == null) {
+    return true;
   }
+  return (Date.now() / 1000 > cookies.expires);
+}
+
+
+function serialize_data(input_data) {
+  if (!input_data) {
+    throw new Error('SERIALIZATION error: input_data can’t be empty');
+  }
+
+  let task_data = {};
+
+  task_data['credentials_data'] = input_data.credentials_data;
+  task_data['campaign_data'] = input_data.campaign_data;
+  task_data['template_data'] = input_data.template_data;
+  task_data['prospect_data'] = input_data.prospect_data;
+
   return task_data;
 }
 
 
-// todo: delete it...
-async function loginWorker(task_id) {
-  try {
-    /*
-    let task = await taskModel.TaskQueue.findOne({ id: task_id }, function (err, res) {
-      if (err) throw MyExceptions.MongoDBError('MongoDB find TASK err: ' + err);
-    });*/
-    let task = task_id.input_data;
-    let credentials_id = task_id.credentials_id;
-
-    let task_data = {
-      credentials_data: {
-          email: '',
-          password: '',
-          li_at: '',
-      }
-    }
-
-    task_data = serialize_data(task_data, task);
-
-    /*
-    if (task_data.credentials_data.li_at === '' && (task_data.credentials_data.email === '' || task_data.credentials_data.password === '')) {
-      throw MyExceptions.LoginWorkerError('Empty credentials - login/password or li_at required.');
-    }
-    let cookies = await get_cookies(task_data.credentials_data.email, task_data.credentials_data.password, task_data.credentials_data.li_at, credentials_id);
-    */
-
-    //
-    let cookies_data = null;
-    if (task_data.credentials_data.li_at !== '') {
-      cookies_data = [{
-        name : "li_at",
-        value : task_data.credentials_data.li_at,
-        domain : ".www.linkedin.com",
-        path : "/",
-        expires : Date.now() / 1000 + 10000000, // + ~ 4 months // https://www.epochconverter.com/
-        size : (new TextEncoder().encode(task_data.credentials_data.li_at)).length,
-        httpOnly : true,
-        secure : true,
-        session : false,
-        sameSite : "None"
-      }];
-
-    } else if (task_data.credentials_data.email !== '' && task_data.credentials_data.password !== '') {
-
-      cookies = await cookieModel.Cookies.findOne({ credentials_id: credentials_id }, function (err, res) {
-        if (err) throw MyExceptions.MongoDBError('MongoDB find COOKIE err: ' + err);
-      });
-
-      if (cookies != undefined && cookies != null) {
-        cookies_data = cookies.data;
-      } 
-    } else {
-      throw MyExceptions.LoginWorkerError('Empty credentials - login/password or li_at required.');
-    }
-
-    let loginAction = new modules.loginAction.LoginAction(task_data.credentials_data.email, task_data.credentials_data.password, cookies_data, credentials_id);
-    await loginAction.startBrowser();
-    let res = await loginAction.login();
-    await loginAction.closeBrowser();
-    //
-
-    let result = {
-      code: 0,
-      //if_true: cookies ? true : false, // if we here - we loggedin
-      if_true: res,
-    };
-
-    console.log('result_data: ', result);
-    await task.updateOne({ status: 5, result_data: result }, function (err, res) {
-      if (err) throw MyExceptions.MongoDBError(error_db_save_text + err);
-      // updated!
-      console.log(success_db_save_text);
-    });
-
-  } catch (err) {
-
-    let err_result = {};
-    if (err.code !== undefined && err.code !== null) {
-      err_result = {
-        code: err.code,
-        raw: err.error
-      };
-    } else {
-      err_result = {
-        code: MyExceptions.LoginWorkerError().code,
-        raw: MyExceptions.LoginWorkerError("loginWorker error: " + err).error
-      };
-    }
-    console.log("RES: ", err_result);
-
-    await task.updateOne({ status: -1, result_data: err_result }, function (err, res) {
-      if (err) throw MyExceptions.MongoDBError(error_db_save_text + err);
-      // updated!
-      console.log(success_db_save_text);
-    });
-
-  }
-}
-
-
 async function searchWorker(task_id) {
-  try {
-    let task = await taskModel.TaskQueue.findOne({ id: task_id }, function (err, res) {
-      if (err) throw MyExceptions.MongoDBError('MongoDB find err: ' + err);
-    });
-    task = task.input_data;
-    let credentials_id = task.credentials_id;
+  let status = status_codes.FAILED;
+  let result_data = {};
+  let task = null;
 
-    let task_data = {
-      credentials_data: {
-        email: '',
-        password: '',
-        li_at: '',
-      },
-      campaign_data: {
-        next_url: '',
-        page_count: '',
-      }
+  let browser = null;
+  try {
+    task = await models_shared.TaskQueue.findOneAndUpdate({ _id: task_id, ack: 0 }, { ack: 1 }, { new: true });
+    if (task == null) {
+      console.log("..... task not found or locked: .....");
+      return;
     }
 
-    task_data = serialize_data(task_data, task);
+    let credentials_id = task.credentials_id;
+    if (!credentials_id) {
+      throw new Error('there is no task.credentials_id');
+    }
+    let input_data = task.input_data;
+    if (!input_data) {
+      throw new Error('there is no task.input_data');
+    }
+    let task_data = serialize_data(input_data);
+    //console.log("..... task_data: .....", task_data);
 
     let cookies = await get_cookies(task_data.credentials_data.email, task_data.credentials_data.password, task_data.credentials_data.li_at, credentials_id);
 
     // start work
-    let searchAction = new modules.searchAction.SearchAction(task_data.credentials_data.email, task_data.credentials_data.password, cookies, credentials_id, task_data.campaign_data.next_url, task_data.campaign_data.page_count);
-    await searchAction.startBrowser();
-    let res = await searchAction.search();
-    await searchAction.closeBrowser();
+    searchAction = new modules.searchAction.SearchAction(task_data.credentials_data.email, task_data.credentials_data.password, task_data.credentials_data.li_at, cookies, credentials_id, task_data.campaign_data.search_url, task_data.campaign_data.interval_pages);
+    browser = await searchAction.startBrowser();
+    result_data = await searchAction.search();
+    browser = await searchAction.closeBrowser();
 
-    console.log('result_data: ', res);
-    // if we got some exception (BAN?), we have to save results before catch Error and send task status -1
-    await task.updateOne({ status: res.code >= 0 ? 5 : -1, result_data: res }, function (err, res) {
-      if (err) throw MyExceptions.MongoDBError(error_db_save_text + err);
-      // updated!
-      console.log(success_db_save_text);
-    });
+    status = result_data.code >= 0 ? 5 : -1;  // if we got some exception (BAN?), we have to save results before catch Error and send task status -1
+
   } catch (err) {
 
-    let err_result = {};
-    if (err.code !== undefined && err.code !== null) {
-      err_result = {
+    console.log(err.stack)
+
+    status = status_codes.FAILED;
+
+    if (err.code != null && err.code != -1) {
+      result_data = {
         code: err.code,
         raw: err.error
       };
+    } else if (err.code == -1) {
+      // Context error
+      if (err.context == null) {
+        // something went wromg...
+        console.log('Never happend: credentials_id or err.context is null in CONTEXT_ERROR in worker: ', err);
+        console.log('err.context: ', err.context);
+        throw new Error('Never happend: credentials_id or err.context is null in CONTEXT_ERROR in worker: ', err);
+      }
+      status = status_codes.BLOCK_HAPPENED;
+      if (err.data == null) {
+        result_data = {
+          code: err.code,
+          raw: err.error,
+          blocking_data: err.context
+        };
+      } else {
+        result_data = err.data;
+      }
     } else {
-      err_result = {
+      result_data = {
         code: MyExceptions.SearchWorkerError().code,
         raw: MyExceptions.SearchWorkerError("searchWorker error: " + err).error
       };
     }
-    console.log("RES: ", err_result);
 
-    await task.updateOne({ status: -1, result_data: err_result }, function (err, res) {
-      if (err) throw MyExceptions.MongoDBError(error_db_save_text + err);
-       //updated!
-      console.log(success_db_save_text);
-    });
+  } finally {
+    console.log("RES: ", result_data);
+    if (task !== null) {
+      await models_shared.TaskQueue.findOneAndUpdate({ _id: task_id }, { ack: 0, status: status, result_data: result_data, is_queued: 0 });
+    }
 
+    if (browser !== null) {
+      if (status !== status_codes.BLOCK_HAPPENED) {
+        await browser.close();
+      }
+      browser.disconnect();
+    }
   }
 }
 
 
 async function connectWorker(task_id) {
-  try {
-    let task = await taskModel.TaskQueue.findOne({ id: task_id }, function (err, res) {
-      if (err) throw MyExceptions.MongoDBError('MongoDB find err: ' + err);
-    });
-    task = task.input_data;
-    let credentials_id = task.credentials_id;
+  let status = status_codes.FAILED;
+  let result_data = {};
+  let task = null;
 
-    let task_data = {
-      credentials_data: {
-        email: '',
-        password: '',
-        li_at: '',
-      },
-      prospect_data: {
-        first_name: '',
-        last_name: '',
-        company_title: '',
-        linkedin: '',
-      },
-      template_data: {
-        body: ''
-      }
+  let browser = null;
+  try {
+    task = await models_shared.TaskQueue.findOneAndUpdate({ _id: task_id, ack: 0 }, { ack: 1 }, { new: true });
+    if (task == null) {
+      console.log("..... task not found or locked: .....");
+      return;
     }
 
-    task_data = serialize_data(task_data, task);
+    let credentials_id = task.credentials_id;
+    if (!credentials_id) {
+      throw new Error('there is no task.credentials_id');
+    }
+    let input_data = task.input_data;
+    if (!input_data) {
+      throw new Error('there is no task.input_data');
+    }
+    let task_data = serialize_data(input_data);
 
     let cookies = await get_cookies(task_data.credentials_data.email, task_data.credentials_data.password, task_data.credentials_data.li_at, credentials_id);
 
@@ -271,356 +171,458 @@ async function connectWorker(task_id) {
 
     // start work
     // check connect
-    let connectCheckAction = new modules.connectCheckAction.ConnectCheckAction(task_data.credentials_data.email, task_data.credentials_data.password, cookies, credentials_id, prospect_full_name);
-    await connectCheckAction.startBrowser();
+    let connectCheckAction = new modules.connectCheckAction.ConnectCheckAction(task_data.credentials_data.email, task_data.credentials_data.password, task_data.credentials_data.li_at, cookies, credentials_id, prospect_full_name);
+    browser = await connectCheckAction.startBrowser();
     let resCheck = await connectCheckAction.connectCheck();
-    await connectCheckAction.closeBrowser();
+    browser = await connectCheckAction.closeBrowser();
 
     let res = false;
     if (!resCheck) {
+      let message = '';
+      if(task_data.template_data != null) {
+        if(task_data.template_data.message != null)
+          message = task_data.template_data.message;
+      }
       // connect if not connected
-      let connectAction = new modules.connectAction.ConnectAction(task_data.credentials_data.email, task_data.credentials_data.password, cookies, credentials_id, task_data.prospect_data.linkedin, task_data.template_data.body, task_data.prospect_data);
-      await connectAction.startBrowser();
+      let connectAction = new modules.connectAction.ConnectAction(task_data.credentials_data.email, task_data.credentials_data.password, task_data.credentials_data.li_at, cookies, credentials_id, task_data.prospect_data.linkedin, message, task_data.prospect_data);
+      browser = await connectAction.startBrowser();
       res = await connectAction.connect();
-      await connectAction.closeBrowser();
+      browser = await connectAction.closeBrowser();
     } else {
       res = true;
       //throw MyExceptions.ConnectActionError('Connect is already connected: ' + err);
     }
 
-    let result = {
+    result_data = {
       code: 0,
       if_true: res,
     };
+    status = status_codes.CARRYOUT;
 
-    console.log('result_data: ', result);
-    await task.updateOne({ status: 5, result_data: result }, function (err, res) {
-      if (err) throw MyExceptions.MongoDBError(error_db_save_text + err);
-      // updated!
-      console.log(success_db_save_text);
-    });
   } catch (err) {
 
-    let err_result = {};
-    if (err.code !== undefined && err.code !== null) {
-      err_result = {
+    console.log(err.stack)
+
+    if (err.code != null && err.code != -1) {
+      result_data = {
         code: err.code,
         raw: err.error
       };
+    } else if (err.code == -1) {
+      // Context error
+      if (err.context == null) {
+        // something went wromg...
+        console.log('Never happend: credentials_id or err.context is null in CONTEXT_ERROR in worker: ', err);
+        console.log('err.context: ', err.context);
+        throw new Error('Never happend: credentials_id or err.context is null in CONTEXT_ERROR in worker: ', err);
+      }
+      status = status_codes.BLOCK_HAPPENED;
+      if (err.data == null) {
+        result_data = {
+          code: err.code,
+          raw: err.error,
+          blocking_data: err.context
+        };
+      } else {
+        result_data = err.data;
+      }
     } else {
-      err_result = {
+      result_data = {
         code: MyExceptions.ConnectWorkerError().code,
         raw: MyExceptions.ConnectWorkerError("connectWorker error: " + err).error
       };
     }
-    console.log("RES: ", err_result);
+    status = status_codes.FAILED;
 
-    await task.updateOne({ status: -1, result_data: err_result }, function (err, res) {
-      if (err) throw MyExceptions.MongoDBError(error_db_save_text + err);
-      // updated!
-      console.log(success_db_save_text);
-    });
+  } finally {
+    console.log("RES: ", result_data);
+    if (task !== null) {
+      await models_shared.TaskQueue.findOneAndUpdate({ _id: task_id }, { ack: 0, status: status, result_data: result_data, is_queued: 0 }, { new: true });
+    }
 
+    if (browser !== null) {
+      if (status !== status_codes.BLOCK_HAPPENED) {
+        await browser.close();
+      }
+      browser.disconnect();
+    }
   }
 }
 
-async function messageWorker(task_id) {
-  try {
-    let task = await taskModel.TaskQueue.findOne({ id: task_id }, function (err, res) {
-      if (err) throw MyExceptions.MongoDBError('MongoDB find err: ' + err);
-    });
-    task = task.input_data;
-    let credentials_id = task.credentials_id;
 
-    let task_data = {
-      credentials_data: {
-        email: '',
-        password: '',
-        li_at: '',
-      },
-      prospect_data: {
-        first_name: '',
-        last_name: '',
-        company_title: '',
-        linkedin: '',
-      },
-      template_data: {
-        body: '',
-      }
+async function messageWorker(task_id) {
+  let status = status_codes.FAILED;
+  let result_data = {};
+  let task = null;
+
+  let browser = null;
+  try {
+    task = await models_shared.TaskQueue.findOneAndUpdate({ _id: task_id, ack: 0 }, { ack: 1 }, { new: true });
+    if (task == null) {
+      console.log("..... task not found or locked: .....");
+      return;
     }
 
-    task_data = serialize_data(task_data, task);
+    let credentials_id = task.credentials_id;
+    if (!credentials_id) {
+      throw new Error('there is no task.credentials_id');
+    }
+    let input_data = task.input_data;
+    if (!input_data) {
+      throw new Error('there is no task.input_data');
+    }
+    let task_data = serialize_data(input_data);
 
     let cookies = await get_cookies(task_data.credentials_data.email, task_data.credentials_data.password, task_data.credentials_data.li_at, credentials_id);
 
     // start work
     // check reply
-    let messageCheckAction = new modules.messageCheckAction.MessageCheckAction(task_data.credentials_data.email, task_data.credentials_data.password, cookies, credentials_id, task_data.prospect_data.linkedin);
-    await messageCheckAction.startBrowser();
+    let messageCheckAction = new modules.messageCheckAction.MessageCheckAction(task_data.credentials_data.email, task_data.credentials_data.password, task_data.credentials_data.li_at, cookies, credentials_id, task_data.prospect_data.linkedin);
+    browser = await messageCheckAction.startBrowser();
     let resCheckMsg = await messageCheckAction.messageCheck();
-    await messageCheckAction.closeBrowser();
+    browser = await messageCheckAction.closeBrowser();
 
-    let result = {};
     if (resCheckMsg.message === '') {
       // if no reply - send msg
-      let messageAction = new modules.messageAction.MessageAction(task_data.credentials_data.email, task_data.credentials_data.password, cookies, credentials_id, task_data.prospect_data.linkedin, task_data.prospect_data, task_data.template_data.body);
-      await messageAction.startBrowser();
+      let messageAction = new modules.messageAction.MessageAction(task_data.credentials_data.email, task_data.credentials_data.password, task_data.credentials_data.li_at, cookies, credentials_id, task_data.prospect_data.linkedin, task_data.prospect_data, task_data.template_data.message);
+      browser = await messageAction.startBrowser();
       let res = await messageAction.message();
-      await messageAction.closeBrowser();
+      browser = await messageAction.closeBrowser();
 
-      result = {
+      result_data = {
         code: 0,
         if_true: res,
       };
     } else {
       // else - task finished
-      result = {
+      result_data = {
         code: 2000,
         if_true: true,
         data: JSON.stringify(resCheckMsg)
       };
     }
-
-    console.log('result_data: ', result);
-    await task.updateOne({ status: task_status, result_data: result }, function (err, res) {
-      if (err) throw MyExceptions.MongoDBError(error_db_save_text + err);
-      // updated!
-      console.log(success_db_save_text);
-    });
+    status = status_codes.CARRYOUT;
 
   } catch (err) {
 
-    let err_result = {};
-    if (err.code !== undefined && err.code !== null) {
-      err_result = {
+    console.log(err.stack)
+
+    if (err.code != null && err.code != -1) {
+      result_data = {
         code: err.code,
         raw: err.error
       };
+    } else if (err.code == -1) {
+      // Context error
+      if (err.context == null) {
+        // something went wromg...
+        console.log('Never happend: credentials_id or err.context is null in CONTEXT_ERROR in worker: ', err);
+        console.log('err.context: ', err.context);
+        throw new Error('Never happend: credentials_id or err.context is null in CONTEXT_ERROR in worker: ', err);
+      }
+      status = status_codes.BLOCK_HAPPENED;
+      if (err.data == null) {
+        result_data = {
+          code: err.code,
+          raw: err.error,
+          blocking_data: err.context
+        };
+      } else {
+        result_data = err.data;
+      }
     } else {
-      err_result = {
+      result_data = {
         code: MyExceptions.MessageWorkerError().code,
         raw: MyExceptions.MessageWorkerError("messageWorker error: " + err).error
       };
     }
-    console.log("RES: ", err_result);
+    status = status_codes.FAILED;
 
-    console.log('result_data: ', result);
-    await task.updateOne({ status: -1, result_data: err_result }, function (err, res) {
-      if (err) throw MyExceptions.MongoDBError(error_db_save_text + err);
-      // updated!
-      console.log(success_db_save_text);
-    });
+  } finally {
+    console.log("RES: ", result_data);
+    if (task !== null) {
+      await models_shared.TaskQueue.findOneAndUpdate({ _id: task_id }, { ack: 0, status: status, result_data: result_data, is_queued: 0 }, { new: true });
+    }
 
+    if (browser !== null) {
+      if (status !== status_codes.BLOCK_HAPPENED) {
+        await browser.close();
+      }
+      browser.disconnect();
+    }
   }
 }
 
-async function scribeWorker(task_id) {
-  try {
-    let task = await taskModel.TaskQueue.findOne({ id: task_id }, function (err, res) {
-      if (err) throw MyExceptions.MongoDBError('MongoDB find err: ' + err);
-    });
-    task = task.input_data;
-    let credentials_id = task.credentials_id;
 
-    let task_data = {
-      credentials_data: {
-        email: '',
-        password: '',
-        li_at: '',
-      },
-      prospect_data: {
-        linkedin: '',
-      }
+async function scribeWorker(task_id) {
+  let status = status_codes.FAILED;
+  let result_data = {};
+  let task = null;
+
+  let browser = null;
+  try {
+    task = await models_shared.TaskQueue.findOneAndUpdate({ _id: task_id, ack: 0 }, { ack: 1 }, { new: true });
+    if (task == null) {
+      console.log("..... task not found or locked: .....");
+      return;
     }
 
-    task_data = serialize_data(task_data, task);
+    let credentials_id = task.credentials_id;
+    if (!credentials_id) {
+      throw new Error('there is no task.credentials_id');
+    }
+    let input_data = task.input_data;
+    if (!input_data) {
+      throw new Error('there is no task.input_data');
+    }
+    let task_data = serialize_data(input_data);
 
     let cookies = await get_cookies(task_data.credentials_data.email, task_data.credentials_data.password, task_data.credentials_data.li_at, credentials_id);
 
     // start work
-    let scribeAction = new modules.scribeAction.ScribeAction(task_data.credentials_data.email, task_data.credentials_data.password, cookies, credentials_id, task_data.prospect_data.linkedin);
-    await scribeAction.startBrowser();
+    let scribeAction = new modules.scribeAction.ScribeAction(task_data.credentials_data.email, task_data.credentials_data.password, task_data.credentials_data.li_at, cookies, credentials_id, task_data.prospect_data.linkedin);
+    browser = await scribeAction.startBrowser();
     let res = await scribeAction.scribe();
-    await scribeAction.closeBrowser();
+    browser = await scribeAction.closeBrowser();
 
-    let result = {
+    result_data = {
       code: 0,
       if_true: true,
       data: JSON.stringify(res),
     };
-
-    console.log('result_data: ', result);
-    await task.updateOne({ status: 5, result_data: result }, function (err, res) {
-      if (err) throw MyExceptions.MongoDBError(error_db_save_text + err);
-      // updated!
-      console.log(success_db_save_text);
-    });
+    status = status_codes.CARRYOUT;
 
   } catch (err) {
 
-    let err_result = {};
-    if (err.code !== undefined && err.code !== null) {
-      err_result = {
+    console.log(err.stack)
+
+    if (err.code != null && err.code != -1) {
+      result_data = {
         code: err.code,
         raw: err.error
       };
+    } else if (err.code == -1) {
+      // Context error
+      if (err.context == null) {
+        // something went wromg...
+        console.log('Never happend: credentials_id or err.context is null in CONTEXT_ERROR in worker: ', err);
+        console.log('err.context: ', err.context);
+        throw new Error('Never happend: credentials_id or err.context is null in CONTEXT_ERROR in worker: ', err);
+      }
+      status = status_codes.BLOCK_HAPPENED;
+      if (err.data == null) {
+        result_data = {
+          code: err.code,
+          raw: err.error,
+          blocking_data: err.context
+        };
+      } else {
+        result_data = err.data;
+      }
     } else {
-      err_result = {
+      result_data = {
         code: MyExceptions.ScribeWorkerError().code,
         raw: MyExceptions.ScribeWorkerError("scribeWorker error: " + err).error
       };
     }
-    console.log("RES: ", err_result);
+    status = status_codes.FAILED;
 
-    await task.updateOne({ status: -1, result_data: err_result }, function (err, res) {
-      if (err) throw MyExceptions.MongoDBError(error_db_save_text + err);
-      // updated!
-      console.log(success_db_save_text);
-    });
+  } finally {
+    console.log("RES: ", result_data);
+    if (task !== null) {
+      await models_shared.TaskQueue.findOneAndUpdate({ _id: task_id }, { ack: 0, status: status, result_data: result_data, is_queued: 0 }, { new: true });
+    }
 
+    if (browser !== null) {
+      if (status !== status_codes.BLOCK_HAPPENED) {
+        await browser.close();
+      }
+      browser.disconnect();
+    }
   }
 }
 
-async function messageCheckWorker(task_id) {
-  try {
-    let task = await taskModel.TaskQueue.findOne({ id: task_id }, function (err, res) {
-      if (err) throw MyExceptions.MongoDBError('MongoDB find err: ' + err);
-    });
-    task = task.input_data;
-    let credentials_id = task.credentials_id;
 
-    let task_data = {
-      credentials_data: {
-        email: '',
-        password: '',
-        li_at: '',
-      },
-      prospect_data: {
-        linkedin: '',
-      }
+async function messageCheckWorker(task_id) {
+  let status = status_codes.FAILED;
+  let result_data = {};
+  let task = null;
+
+  let browser = null;
+  try {
+    task = await models_shared.TaskQueue.findOneAndUpdate({ _id: task_id, ack: 0 }, { ack: 1 }, { new: true });
+    if (task == null) {
+      console.log("..... task not found or locked: .....");
+      return;
     }
 
-    task_data = serialize_data(task_data, task);
+    let credentials_id = task.credentials_id;
+    if (!credentials_id) {
+      throw new Error('there is no task.credentials_id');
+    }
+    let input_data = task.input_data;
+    if (!input_data) {
+      throw new Error('there is no task.input_data');
+    }
+    let task_data = serialize_data(input_data);
 
     let cookies = await get_cookies(task_data.credentials_data.email, task_data.credentials_data.password, task_data.credentials_data.li_at, credentials_id);
 
     // start work
-    let messageCheckAction = new modules.messageCheckAction.MessageCheckAction(task_data.credentials_data.email, task_data.credentials_data.password, cookies, credentials_id, task_data.prospect_data.linkedin);
-    await messageCheckAction.startBrowser();
+    let messageCheckAction = new modules.messageCheckAction.MessageCheckAction(task_data.credentials_data.email, task_data.credentials_data.password, task_data.credentials_data.li_at, cookies, credentials_id, task_data.prospect_data.linkedin);
+    browser = await messageCheckAction.startBrowser();
     let res = await messageCheckAction.messageCheck();
-    await messageCheckAction.closeBrowser();
+    browser = await messageCheckAction.closeBrowser();
 
-    let result = {
-      code: (res.message === '' ? 0 : 2000),
-      if_true: (res.message === '' ? false : true),
+    result_data = {
+      code: (res.message == '' ? 0 : 2000),
+      if_true: (res.message == '' ? false : true),
       data: JSON.stringify(res)
     };
-    console.log('result_data: ', result);
-
-    await task.updateOne({ status: 5, result_data: result }, function (err, res) {
-      if (err) throw MyExceptions.MongoDBError(error_db_save_text + err);
-      // updated!
-      console.log(success_db_save_text);
-    });
+    status = status_codes.CARRYOUT;
 
   } catch (err) {
 
-    let err_result = {};
-    if (err.code !== undefined && err.code !== null) {
-      err_result = {
+    console.log(err.stack)
+
+    if (err.code != null && err.code != -1) {
+      result_data = {
         code: err.code,
         raw: err.error
       };
+    } else if (err.code == -1) {
+      // Context error
+      if (err.context == null) {
+        // something went wromg...
+        console.log('Never happend: credentials_id or err.context is null in CONTEXT_ERROR in worker: ', err);
+        console.log('err.context: ', err.context);
+        throw new Error('Never happend: credentials_id or err.context is null in CONTEXT_ERROR in worker: ', err);
+      }
+      status = status_codes.BLOCK_HAPPENED;
+      if (err.data == null) {
+        result_data = {
+          code: err.code,
+          raw: err.error,
+          blocking_data: err.context
+        };
+      } else {
+        result_data = err.data;
+      }
     } else {
-      err_result = {
+      result_data = {
         code: MyExceptions.MessageCheckWorkerError().code,
         raw: MyExceptions.MessageCheckWorkerError("messageCheckWorker error: " + err).error
       };
     }
-    console.log("RES: ", err_result);
+    status = status_codes.FAILED;
 
-    await task.updateOne({ status: -1, result_data: err_result }, function (err, res) {
-      if (err) throw MyExceptions.MongoDBError(error_db_save_text + err);
-      // updated!
-      console.log(success_db_save_text);
-    });
+  } finally {
+    console.log("RES: ", result_data);
+    if (task !== null) {
+      await models_shared.TaskQueue.findOneAndUpdate({ _id: task_id }, { ack: 0, status: status, result_data: result_data, is_queued: 0 }, { new: true });
+    }
 
+    if (browser !== null) {
+      if (status !== status_codes.BLOCK_HAPPENED) {
+        await browser.close();
+      }
+      browser.disconnect();
+    }
   }
 }
 
-async function connectCheckWorker(task_id) {
-  try {
-    let task = await taskModel.TaskQueue.findOne({ id: task_id }, function (err, res) {
-      if (err) throw MyExceptions.MongoDBError('MongoDB find err: ' + err);
-    });
-    task = task.input_data;
-    let credentials_id = task.credentials_id;
 
-    let task_data = {
-      credentials_data: {
-        email: '',
-        password: '',
-        li_at: '',
-      },
-      prospect_data: {
-        first_name: '',
-        last_name: '',
-        company_title: '',
-        linkedin: '',
-      }
+async function connectCheckWorker(task_id) {
+  let status = status_codes.FAILED;
+  let result_data = {};
+  let task = null;
+
+  let browser = null;
+  try {
+    task = await models_shared.TaskQueue.findOneAndUpdate({ _id: task_id, ack: 0 }, { ack: 1 }, { new: true });
+    if (task == null) {
+      console.log("..... task not found or locked: .....");
+      return;
     }
 
-    task_data = serialize_data(task_data, task);
+    let credentials_id = task.credentials_id;
+    if (!credentials_id) {
+      throw new Error('there is no task.credentials_id');
+    }
+    let input_data = task.input_data;
+    if (!input_data) {
+      throw new Error('there is no task.input_data');
+    }
+    let task_data = serialize_data(input_data);
 
     let prospect_full_name = task_data.prospect_data.first_name + ' ' + task_data.prospect_data.last_name;
 
     let cookies = await get_cookies(task_data.credentials_data.email, task_data.credentials_data.password, task_data.credentials_data.li_at, credentials_id);
 
     // start work
-    let connectCheckAction = new modules.connectCheckAction.ConnectCheckAction(task_data.credentials_data.email, task_data.credentials_data.password, cookies, credentials_id, prospect_full_name);
-    await connectCheckAction.startBrowser();
+    let connectCheckAction = new modules.connectCheckAction.ConnectCheckAction(task_data.credentials_data.email, task_data.credentials_data.password, task_data.credentials_data.li_at, cookies, credentials_id, prospect_full_name);
+    browser = await connectCheckAction.startBrowser();
     let res = await connectCheckAction.connectCheck();
-    await connectCheckAction.closeBrowser();
+    browser = await connectCheckAction.closeBrowser();
 
-    let result = {
+    result_data = {
       code: 0,
       if_true: res,
     };
-
-    console.log('result_data: ', result);
-    await task.updateOne({ status: 5, result_data: result }, function (err, res) {
-      if (err) throw MyExceptions.MongoDBError(error_db_save_text + err);
-      // updated!
-      console.log(success_db_save_text);
-    });
+    status = status_codes.CARRYOUT;
 
   } catch (err) {
 
-    let err_result = {};
-    if (err.code !== undefined && err.code !== null) {
-      err_result = {
+    console.log(err.stack)
+
+    if (err.code != null && err.code != -1) {
+      result_data = {
         code: err.code,
         raw: err.error
       };
+    } else if (err.code == -1) {
+      // Context error
+      if (err.context == null) {
+        // something went wromg...
+        console.log('Never happend: credentials_id or err.context is null in CONTEXT_ERROR in worker: ', err);
+        console.log('err.context: ', err.context);
+        throw new Error('Never happend: credentials_id or err.context is null in CONTEXT_ERROR in worker: ', err);
+      }
+      status = status_codes.BLOCK_HAPPENED;
+      if (err.data == null) {
+        result_data = {
+          code: err.code,
+          raw: err.error,
+          blocking_data: err.context
+        };
+      } else {
+        result_data = err.data;
+      }
     } else {
-      err_result = {
+      result_data = {
         code: MyExceptions.ConnectCheckWorkerError().code,
         raw: MyExceptions.ConnectCheckWorkerError("connectCheckWorker error: " + err).error
       };
     }
-    console.log("RES: ", err_result);
+    status = status_codes.FAILED;
 
-    await task.updateOne({ status: -1, result_data: err_result }, function (err, res) {
-      if (err) throw MyExceptions.MongoDBError(error_db_save_text + err);
-      // updated!
-      console.log(success_db_save_text);
-    });
+  } finally {
+    console.log("RES: ", result_data);
+    if (task !== null) {
+      await models_shared.TaskQueue.findOneAndUpdate({ _id: task_id }, { ack: 0, status: status, result_data: result_data, is_queued: 0 }, { new: true });
+    }
 
+    if (browser !== null) {
+      if (status !== status_codes.BLOCK_HAPPENED) {
+        await browser.close();
+      }
+      browser.disconnect();
+    }
   }
 }
 
+
 module.exports = {
-  loginWorker: loginWorker,
   searchWorker: searchWorker,
   connectWorker: connectWorker,
   messageWorker: messageWorker,

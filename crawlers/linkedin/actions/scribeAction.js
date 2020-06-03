@@ -1,11 +1,11 @@
-const selectors = require("./../selectors");
+const selectors = require("../selectors");
 const action = require('./action.js');
 
-const MyExceptions = require('./../../exceptions/exceptions.js');
+const MyExceptions = require('../../exceptions/exceptions.js');
 
 class ScribeAction extends action.Action {
-  constructor(email, password, cookies, credentials_id, url) {
-    super(email, password, cookies, credentials_id);
+  constructor(email, password, li_at, cookies, credentials_id, url) {
+    super(email, password, li_at, cookies, credentials_id);
 
     this.url = url;
   }
@@ -35,7 +35,9 @@ class ScribeAction extends action.Action {
     }
     result.company_linkedin_page = link;
 
-    await this.page.goto(link + '/about');
+    //await this.page.goto(link + '/about');
+    await super.gotoChecker(link + '/about');
+
     try {
       await this.page.waitForSelector(selectors.JOB_SITE_SELECTOR, { timeout: 5000 });
     } catch (err) {
@@ -43,14 +45,14 @@ class ScribeAction extends action.Action {
       return result;
     }
 
-    let job_link = undefined;
+    let job_link = null;
     selector = selectors.JOB_SITE_SELECTOR;
     await this.page.evaluate((selector) => {
       job_link = document.querySelector(selector).href;
     }, selector);
 
     //console.log("..... link: .....", link)
-    if (job_link === undefined || job_link === null) {
+    if (job_link === null || job_link === undefined) {
       //console.log("..... job_link not found: .....", job_link)
       //console.log("..... result: .....", result);
       return result;

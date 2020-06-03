@@ -2,21 +2,21 @@
   <div>
     <card>
       <card>
-        <p>Campaign title (required)</p>
+        <p>Leads Campaign Name</p>
         <el-input
           :disabled="!modified_fields['title']"
-          placeholder="Input campaign title"
+          placeholder="Campaign name"
           v-model="campaign_data.title"
         ></el-input>
       </card>
 
       <card v-if="modified_fields['credentials']">
         <div class="col-6">
-          <p>Select Linkedin account</p>
+          <p>Select Linkedin Account</p>
           <el-select
             class="select-default mb-3"
             style="width: 100%;"
-            placeholder="Select linkedin account"
+            placeholder="Linkedin account"
             v-on:change="onChangeLinkedinCredentials"
             v-model="linkedin_account_selected"
             value-key="data.account"
@@ -35,16 +35,16 @@
       </card>
 
       <card v-if="modified_fields['lists']">
-        <p>Prospects list title</p>
+        <p>Your Leads List Name</p>
         <el-input
           :disabled="!modified_fields['lists']"
-          placeholder="Input prospects list title"
+          placeholder="List Name"
           v-model="campaign_data.list_title"
         ></el-input>
       </card>
 
       <card v-if="modified_fields['search_url']">
-        <p>Search url</p>
+        <p>Paste your Linkedin search URL</p>
         <el-input
           :disabled="!modified_fields['search_url']"
           placeholder="ex: https://www.linkedin.com/search/results/all/?keywords=company&origin=GLOBAL_SEARCH_HEADER&page=97"
@@ -53,18 +53,18 @@
       </card>
 
       <card v-if="modified_fields['total_pages'] || modified_fields['interval_pages']">
-      <p>LinkedIn pages settings</p>
-      <div class="container">
-            <p class="interval_text">Total pages required</p>
+      <p>LinkedIn limits</p>
+          <div class="container">
+            <p class="interval_text">Crawl the first X pages</p>
             <div class="col-3" v-if="modified_fields['total_pages']">
-              <fg-input label>
+              <fg-input>
                 <el-input-number v-model="campaign_data.data.total_pages" placeholder="ex: 100.00" :min="1" :max="100000000"></el-input-number>
               </fg-input>
             </div>
-            <p class="interval_text">Number of pages for iteration (10 recommended)</p>
+            <p class="interval_text">Number of pages per launch (20 recommended)</p>
 
             <div class="col-3" v-if="modified_fields['interval_pages']">
-              <fg-input label>
+              <fg-input>
                 <el-input-number v-model="campaign_data.data.interval_pages" placeholder="ex: 10.00" :min="1" :max="1000"></el-input-number>
               </fg-input>
             </div>
@@ -72,13 +72,13 @@
       </card>
 
       <card v-if="modified_fields['time_table']">
-        <h5 class="text-center">Search time with respect to prospect's timezone</h5>
+        <h5 class="text-center">Schedule</h5>
         <div class="extended-forms">
           <card>
             <div class="col-12">
               <div class="row">
-                <div class="col-lg-6">
-                  <h4 class="title">From</h4>
+                <div class="col-lg-4">
+                  <h4 class="title">Start</h4>
                   <el-time-select
                     name="From time"
                     v-model="campaign_data.from_hour"
@@ -90,8 +90,8 @@
                     placeholder="Select time"
                   ></el-time-select>
                 </div>
-                <div class="col-lg-6">
-                  <h4 class="title">Till</h4>
+                <div class="col-lg-4">
+                  <h4 class="title">End</h4>
                   <el-time-select
                     name="Till time has to be after FROM time"
                     v-model="campaign_data.to_hour"
@@ -103,32 +103,30 @@
                     placeholder="Select time"
                   ></el-time-select>
                 </div>
-              </div>
-            </div>
-            <div class="row">
-              <div class="col-6">
-                <h4 class="title">Fallback Time Zone</h4>
-                <el-select
-                  class="select-primary"
-                  name="Fallback Time Zone"
-                  size="large"
-                  placeholder="Fallback Time Zone"
-                  v-model="timezones_selected"
-                  value-key="label"
-                >
-                  <el-option
-                    v-for="option in timezones_selects"
+                <div class="col-lg-4">
+                  <h4 class="title">Time Zone</h4>
+                  <el-select
                     class="select-primary"
-                    :value="option"
-                    :label="option.label"
-                    :key="option.label"
-                  ></el-option>
-                </el-select>
+                    name="Time Zone"
+                    size="large"
+                    placeholder="Select Time Zone"
+                    v-model="timezones_selected"
+                    value-key="label"
+                  >
+                    <el-option
+                      v-for="option in timezones_selects"
+                      class="select-primary"
+                      :value="option"
+                      :label="option.label"
+                      :key="option.label"
+                    ></el-option>
+                  </el-select>
+                </div>
               </div>
             </div>
           </card>
         </div>
-        <h4 class="title">Days Preference</h4>
+        <h4 class="title">Days of the week</h4>
         <div class="row">
           <div class="col-12">
             <card title="Select sending days">
@@ -187,7 +185,7 @@
               @click.prevent="save_changes"
               type="button"
               class="btn btn-default btn-success mx-1"
-            >Save Changes</button>
+            >Save Draft</button>
             <!--  <button type="button" class="btn btn-outline btn-wd btn-danger">Discard</button> -->
           </div>
         </div>
@@ -277,7 +275,7 @@ export default {
         data: {
             search_url: '',
             total_pages: 100,
-            interval_pages: 10,
+            interval_pages: 20,
         },
         title: "",
         credentials: [],

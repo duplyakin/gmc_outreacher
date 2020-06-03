@@ -1,6 +1,6 @@
 <template>
 <div>
-<card title="Assign selected prospects">
+<card title="Assign selected leads">
     <form @submit.prevent="assignSubmit">
         <card>
         <div class="row">

@@ -1,11 +1,11 @@
-const selectors = require("./../selectors");
+const selectors = require("../selectors");
 const action = require('./action.js');
 
-const MyExceptions = require('./../../exceptions/exceptions.js');
+const MyExceptions = require('../../exceptions/exceptions.js');
 
 class MessageCheckAction extends action.Action {
-  constructor(email, password, cookies, credentials_id, url) {
-    super(email, password, cookies, credentials_id);
+  constructor(email, password, li_at, cookies, credentials_id, url) {
+    super(email, password, li_at, cookies, credentials_id);
 
     // CONNECT URL
     this.url = url;
@@ -14,14 +14,7 @@ class MessageCheckAction extends action.Action {
   async messageCheck() {
     await super.gotoChecker(this.url);
 
-    try {
-      // close messages box !!! (critical here)
-      await this.page.waitFor(1000);  // wait linkedIn loading process
-      await this.page.click(selectors.CLOSE_MSG_BOX_SELECTOR);
-      await this.page.waitFor(1000);  // wait linkedIn loading process
-    } catch (err) {
-      console.log("..... CLOSE_MSG_BOX_SELECTOR not found .....")
-    }
+    await super.close_msg_box(this.page);
 
     if (await this.page.$(selectors.WRITE_MSG_BTN_SELECTOR) === null) {
       console.log('You can\'t write messages to ' + this.url);
@@ -31,6 +24,10 @@ class MessageCheckAction extends action.Action {
     await this.page.waitForSelector(selectors.WRITE_MSG_BTN_SELECTOR, { timeout: 5000 });
 
     await this.page.click(selectors.WRITE_MSG_BTN_SELECTOR);
+
+    // wait selector here
+    await super.check_success_selector(selectors.LAST_MSG_LINK_SELECTOR);
+
     let mySelectors = {
       selector1: selectors.LAST_MSG_LINK_SELECTOR,
       selector2: selectors.LAST_MSG_SELECTOR,
@@ -42,11 +39,11 @@ class MessageCheckAction extends action.Action {
     }, mySelectors);
 
     if (lastSender.res === this.url) {
-      console.log("..... new message: .....", lastSender)
+      //console.log("..... new message: .....", lastSender);
       return { message: lastSender.text };
     }
 
-    console.log("..... NO new messages: .....", lastSender)
+    //console.log("..... NO new messages: .....", lastSender);
     return { message: '' };
   }
 

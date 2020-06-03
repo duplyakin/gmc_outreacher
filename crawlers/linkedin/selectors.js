@@ -3,6 +3,10 @@ module.exports.USERNAME_SELECTOR = '#username';
 module.exports.PASSWORD_SELECTOR = '#password';
 module.exports.CTA_SELECTOR = '#app__container > main > div > form > div.login__form_action_container > button';
 
+// checkpoint
+module.exports.VERIFICATION_PIN_SELECTOR = '#input__email_verification_pin';
+module.exports.VERIFICATION_PIN_BTN_SELECTOR = '#email-pin-submit-button';
+
 // search
 module.exports.SEARCH_ELEMENT_SELECTOR = '.search-result__wrapper .search-result__info a';
 module.exports.LINK_SELECTOR = 'span > .actor-name';
@@ -30,6 +34,7 @@ module.exports.WRITE_MSG_BTN_SELECTOR = '.message-anywhere-button.pv-s-profile-a
 module.exports.WRITE_MSG_BTN_DISABLED_SELECTOR = '.artdeco-button.artdeco-button--2.artdeco-button--secondary.ember-view';
 module.exports.CLOSE_MSG_BOX_SELECTOR = '.msg-overlay-bubble-header';
 module.exports.MSG_BOX_SELECTOR = '.msg-form__msg-content-container';
+//module.exports.MSG_BOX_SELECTOR = '.message-anywhere-button.pv-s-profile-actions.pv-s-profile-actions--message';
 module.exports.SEND_MSG_BTN_SELECTOR = '.msg-form__send-button';
 module.exports.LAST_MSG_LINK_SELECTOR = '.msg-s-event-listitem__link';
 module.exports.LAST_MSG_SELECTOR = '.msg-s-event-listitem__body';

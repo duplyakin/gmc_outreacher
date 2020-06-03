@@ -5,15 +5,16 @@
       <mobile-menu></mobile-menu>
       <template slot-scope="props" slot="links">
 
-        <sidebar-item :link="{name: 'Overview', icon: 'nc-icon nc-air-baloon', path: '/overview'}"></sidebar-item>
-        <sidebar-item :link="{name: 'Campaigns', icon: 'nc-icon nc-bullet-list-67', path: '/campaigns'}"></sidebar-item>
-        <sidebar-item :link="{name: 'Prospects', icon: 'nc-icon nc-layers-3', path: '/prospects'}"></sidebar-item>
-
+        <sidebar-item :link="{name: 'Dashboard', icon: 'nc-icon nc-air-baloon', path: '/dashboard'}"></sidebar-item>
         <sidebar-item :link="{name: 'Statistics', icon: 'nc-icon nc-chart-bar-32', path: '/statistics'}"></sidebar-item>
-        <sidebar-item :link="{name: 'Accounts', icon: 'nc-icon nc-single-02', path: '/accounts'}"></sidebar-item>
-        <sidebar-item :link="{name: 'LinkedIn enrichment', icon: 'nc-icon nc-bag', path: '/linkedin_enrichment'}"></sidebar-item>
+        <sidebar-item :link="{name: 'Leads managment', icon: 'nc-icon nc-bag', path: '/linkedin_enrichment'}"></sidebar-item>
 
-        <sidebar-item :link="{name: 'Prospects List', icon: 'nc-icon nc-single-copy-04', path: '/prospects_list'}"></sidebar-item>
+        <sidebar-item :link="{name: 'Campaigns', icon: 'nc-icon nc-bullet-list-67', path: '/campaigns'}"></sidebar-item>
+        <sidebar-item :link="{name: 'Leads', icon: 'nc-icon nc-layers-3', path: '/prospects'}"></sidebar-item>
+
+        <sidebar-item :link="{name: 'Accounts', icon: 'nc-icon nc-single-02', path: '/accounts'}"></sidebar-item>
+
+        <sidebar-item :link="{name: 'Leads List', icon: 'nc-icon nc-single-copy-04', path: '/prospects_list'}"></sidebar-item>
 
         <sidebar-item :link="{name: 'Profile', icon: 'nc-icon nc-circle-09', path: '/profile'}"></sidebar-item>
 
@@ -25,36 +26,6 @@
           <sidebar-item :link="{name: 'Users list', path: '/admin/users_list'}"></sidebar-item>
           <sidebar-item :link="{name: 'Google App Settings', path: '/admin/google_app_settings'}"></sidebar-item>
           <sidebar-item :link="{name: 'Limits', path: '/admin/limits'}"></sidebar-item>
-        </sidebar-item>
-
-
-        <sidebar-item :link="{name: 'Dashboard', icon: 'nc-icon nc-chart-pie-35', path: '/admin/overview_standart'}"></sidebar-item>
-        <sidebar-item :link="{name: 'Components', icon: 'nc-icon nc-app'}">
-          <sidebar-item :link="{name: 'Buttons', path: '/admin/components/buttons'}"></sidebar-item>
-          <sidebar-item :link="{name: 'Grid System', path: '/admin/components/grid-system'}"></sidebar-item>
-          <sidebar-item :link="{name: 'Panels', path: '/admin/components/panels'}"></sidebar-item>
-          <sidebar-item :link="{name: 'Sweet Alert', path: '/admin/components/sweet-alert'}"></sidebar-item>
-          <sidebar-item :link="{name: 'Notifications', path: '/admin/components/notifications'}"></sidebar-item>
-          <sidebar-item :link="{name: 'Icons', path: '/admin/components/icons'}"></sidebar-item>
-          <sidebar-item :link="{name: 'Typography', path: '/admin/components/typography'}"></sidebar-item>
-        </sidebar-item>
-        <sidebar-item :link="{name: 'Forms', icon: 'nc-icon nc-notes'}">
-          <sidebar-item :link="{name: 'Regular Forms', path: '/forms/regular'}"></sidebar-item>
-          <sidebar-item :link="{name: 'Extended Forms', path: '/forms/extended'}"></sidebar-item>
-          <sidebar-item :link="{name: 'Validation Forms', path: '/forms/validation'}"></sidebar-item>
-          <sidebar-item :link="{name: 'Wizard', path: '/forms/wizard'}"></sidebar-item>
-        </sidebar-item>
-        <sidebar-item :link="{name: 'Tables', icon: 'nc-icon nc-paper-2'}">
-          <sidebar-item :link="{name: 'Regular Tables', path: '/table-list/regular'}"></sidebar-item>
-          <sidebar-item :link="{name: 'Extended Tables', path: '/table-list/extended'}"></sidebar-item>
-          <sidebar-item :link="{name: 'Paginated Tables', path: '/table-list/paginated'}"></sidebar-item>
-        </sidebar-item>
-        <sidebar-item :link="{name: 'Charts', icon: 'nc-icon nc-chart-bar-32', path: '/admin/charts'}"></sidebar-item>
-        <sidebar-item :link="{name: 'Pages', icon: 'nc-icon nc-puzzle-10'}">
-          <sidebar-item :link="{name: 'User Page', path: '/pages/user'}"></sidebar-item>
-          <sidebar-item :link="{name: 'Login Page', path: '/login'}"></sidebar-item>
-          <sidebar-item :link="{name: 'Register', path: '/register'}"></sidebar-item>
-          <sidebar-item :link="{name: 'Lock Screen Page', path: '/lock'}"></sidebar-item>
         </sidebar-item>
 
       </div>

@@ -14,8 +14,9 @@ module.exports = {
     SCRIBE_WORKER_ERROR: -4060,
     SEARCH_WORKER_ERROR: -4070,
     
-    BAN_ERROR: -1, //Seems we are banned
+    BAN_ERROR: -3, //Seems we are banned
     NETWORK_ERROR: -2, //something wromg with network
+    CONTEXT_ERROR: -1, // Custom error that required user action to continue task
     
     LOGIN_ACTION_ERROR: -1010, //On our sid
     LOGIN_ERROR: -1011, //Check credentials
@@ -28,5 +29,12 @@ module.exports = {
     SEARCH_ACTION_ERROR: -1070, //Can't open the next page, need to wait maybe because of limit
     
     
-    CARRYOUT_SEARCH_ACTION_PAGES_FINISHED: 1000 //we have reached the last page for this search
+    CARRYOUT_SEARCH_ACTION_PAGES_FINISHED: 1000, //we have reached the last page for this search
+
+
+    // codes for user action
+    SYSTEM_ERROR: -11, // not used from here
+    UNKNOWN_PAGE_ERROR: -12,
+    EMPTY_INPUT_ERROR: -13,
+
 }
