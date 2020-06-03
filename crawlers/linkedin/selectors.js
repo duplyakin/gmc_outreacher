@@ -11,6 +11,7 @@ module.exports.VERIFICATION_PIN_BTN_SELECTOR = '#email-pin-submit-button';
 module.exports.SEARCH_ELEMENT_SELECTOR = '.search-result__wrapper .search-result__info a';
 module.exports.LINK_SELECTOR = 'span > .actor-name';
 module.exports.FULL_NAME_SELECTOR = 'span > .actor-name';
+module.exports.FIRST_DEGREE_SELECTOR = 'span > .dist-value';
 module.exports.NEXT_PAGE_SELECTOR = '.artdeco-pagination__button--next';
 module.exports.NEXT_PAGE_MUTED_SELECTOR = '.artdeco-pagination__button--next.artdeco-button--disabled';
 
@@ -39,9 +40,11 @@ module.exports.SEND_MSG_BTN_SELECTOR = '.msg-form__send-button';
 module.exports.LAST_MSG_LINK_SELECTOR = '.msg-s-event-listitem__link';
 module.exports.LAST_MSG_SELECTOR = '.msg-s-event-listitem__body';
 
-// scribe work link
+// scribe
 module.exports.JOB_LINK_SELECTOR = 'a.full-width.ember-view';
-module.exports.JOB_SITE_SELECTOR = '.link-without-visited-state';
+module.exports.JOB_SITE_SELECTOR = 'span.link-without-visited-state';
+module.exports.COUNTRY_SELECTOR = '.t-16.t-black.t-normal.inline-block';
+module.exports.JOB_SELECTOR = '.t-16.t-black.t-bold';
 
 // connect check
 module.exports.SEARCH_CONNECTS_SELECTOR = '#mn-connections-search-input';

@@ -622,6 +622,94 @@ async function connectCheckWorker(task_id) {
 }
 
 
+async function visitProfileWorker(task_id) {
+  let status = status_codes.FAILED;
+  let result_data = {};
+  let task = null;
+
+  let browser = null;
+  try {
+    task = await models_shared.TaskQueue.findOneAndUpdate({ _id: task_id, ack: 0 }, { ack: 1 }, { new: true });
+    if (task == null) {
+      console.log("..... task not found or locked: .....");
+      return;
+    }
+
+    let credentials_id = task.credentials_id;
+    if (!credentials_id) {
+      throw new Error('there is no task.credentials_id');
+    }
+    let input_data = task.input_data;
+    if (!input_data) {
+      throw new Error('there is no task.input_data');
+    }
+    let task_data = serialize_data(input_data);
+
+    let cookies = await get_cookies(task_data.credentials_data.email, task_data.credentials_data.password, task_data.credentials_data.li_at, credentials_id);
+
+    // start work
+    let visitProfileAction = new modules.visitProfileAction.VisitProfileAction(task_data.credentials_data.email, task_data.credentials_data.password, task_data.credentials_data.li_at, cookies, credentials_id, task_data.prospect_data.linkedin);
+    browser = await visitProfileAction.startBrowser();
+    let res = await visitProfileAction.visit();
+    browser = await visitProfileAction.closeBrowser();
+
+    result_data = {
+      code: 0,
+      if_true: res,
+    };
+    status = status_codes.CARRYOUT;
+
+  } catch (err) {
+
+    console.log(err.stack)
+
+    if (err.code != null && err.code != -1) {
+      result_data = {
+        code: err.code,
+        raw: err.error
+      };
+    } else if (err.code == -1) {
+      // Context error
+      if (err.context == null) {
+        // something went wromg...
+        console.log('Never happend: credentials_id or err.context is null in CONTEXT_ERROR in worker: ', err);
+        console.log('err.context: ', err.context);
+        throw new Error('Never happend: credentials_id or err.context is null in CONTEXT_ERROR in worker: ', err);
+      }
+      status = status_codes.BLOCK_HAPPENED;
+      if (err.data == null) {
+        result_data = {
+          code: err.code,
+          raw: err.error,
+          blocking_data: err.context
+        };
+      } else {
+        result_data = err.data;
+      }
+    } else {
+      result_data = {
+        code: MyExceptions.VisitProfileWorkerError().code,
+        raw: MyExceptions.VisitProfileWorkerError("visitProfileWorker error: " + err).error
+      };
+    }
+    status = status_codes.FAILED;
+
+  } finally {
+    console.log("RES: ", result_data);
+    if (task !== null) {
+      await models_shared.TaskQueue.findOneAndUpdate({ _id: task_id }, { ack: 0, status: status, result_data: result_data, is_queued: 0 }, { new: true });
+    }
+
+    if (browser !== null) {
+      if (status !== status_codes.BLOCK_HAPPENED) {
+        await browser.close();
+      }
+      browser.disconnect();
+    }
+  }
+}
+
+
 module.exports = {
   searchWorker: searchWorker,
   connectWorker: connectWorker,
@@ -629,4 +717,5 @@ module.exports = {
   scribeWorker: scribeWorker,
   messageCheckWorker: messageCheckWorker,
   connectCheckWorker: connectCheckWorker,
+  visitProfileWorker: visitProfileWorker,
 }

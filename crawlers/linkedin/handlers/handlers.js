@@ -1,10 +1,11 @@
 const { bull_workers } = require('./bullWorkersSettings.js');
+
 const models_shared = require("../../models/shared.js");
 const workers = require('../workers/workers.js');
+
 const cron = require('node-cron');
 
 const actionKeys = require('./actionKeys.js');
-
 const status_codes = require('../status_codes')
 
 
@@ -30,26 +31,10 @@ async function bullConsumer() {
         case 'linkedin-check-reply':
           await workers.messageCheckWorker(job.data.task_id);
           break;
-        /*
-                case 'finished':
-                  //await workers.loginWorker(job.task);
-                  break;
-                case 'success':
-                  //await workers.loginWorker(job.task);
-                  break;
-                case 'delay-linkedin':
-                  console.log("..... task.action_key: ..... delay-linkedin");
-                  break;
-                case 'email-send-message':
-                  console.log("..... task.action_key: ..... email-send-message");
-                  break;
-                case 'delay-email':
-                  console.log("..... task.action_key: ..... delay-email");
-                  break;
-                case 'email-check-reply':
-                  console.log("..... task.action_key: ..... email-check-reply");
-                  break;
-        */
+        case 'linkedin-profile-view':
+          await workers.visitProfileWorker(job.data.task_id);
+          break;
+
         default:
           break;
       }
@@ -95,7 +80,7 @@ async function taskStatusListener() {
             if (err) throw MyExceptions.MongoDBError('MongoDB findOneAndUpdate TASK err: ' + err);
           });
 
-          console.log('task in handler added, status: ' + task.status + ' action_keys: ' + task.action_key); // test
+          console.log('task added in handler, status: ' + task.status + ' action_key: ' + task.action_key); // test
         });
 
         handler_lock = 0;

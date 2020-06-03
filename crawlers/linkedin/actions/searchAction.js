@@ -39,6 +39,7 @@ class SearchAction extends action.Action {
         selector1: selectors.SEARCH_ELEMENT_SELECTOR,
         selector2: selectors.LINK_SELECTOR,
         selector3: selectors.FULL_NAME_SELECTOR,
+        selector4: selectors.FIRST_DEGREE_SELECTOR,
       };
 
       while (currentPage <= this.interval_pages) {
@@ -48,7 +49,8 @@ class SearchAction extends action.Action {
           let items = document.querySelectorAll(mySelectors.selector1);
 
           items.forEach((item) => {
-            if (item.querySelector(mySelectors.selector2) !== null && !item.querySelector(mySelectors.selector3).innerText.includes('LinkedIn')) {
+            // don't add: noName LinkedIn members and 1st degree connections
+            if (item.querySelector(mySelectors.selector2) !== null && !item.querySelector(mySelectors.selector3).innerText.includes('LinkedIn') && !item.querySelector(mySelectors.selector4).innerText.includes('1st')) {
               let str = item.querySelector(mySelectors.selector3).innerText;
               results.push({
                 linkedin: item.href,

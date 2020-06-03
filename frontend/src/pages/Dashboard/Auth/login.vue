@@ -9,12 +9,14 @@
               <h3 class="card-title text-center">Login</h3>
             </div>
             <div>
+              <p class="text">email</p>
               <el-input
                 label="Email address"
                 placeholder="Enter email"
                 type="email"
                 v-model="model.email"
               ></el-input>
+              <p class="text">password</p>
               <el-input
                 label="passsword"
                 type="password"
@@ -26,6 +28,7 @@
                 <small class="text-danger">{{ error }}</small>
               </div>
             </div>
+            <p class="text"> </p>
             <div class="text-center">
               <button
                 type="submit"
@@ -103,5 +106,13 @@ export default {
 .navbar-nav .nav-item p {
   line-height: inherit;
   margin-left: 5px;
+}
+.text {
+  display: flex;
+  font-size: 12px;
+  font-weight: 200;
+  line-height: 30px;
+  text-transform: uppercase;
+  color: rgb(119, 119, 119);
 }
 </style>
