@@ -1,5 +1,7 @@
 module.exports.SIGNIN_LINK = "https://www.linkedin.com/uas/login";
+module.exports.SIGNIN_SHORTLINK = "/login";
 module.exports.START_PAGE_LINK = "https://www.linkedin.com/feed/";
+module.exports.START_PAGE_SHORTLINK = "/feed";
 
 module.exports.CONNECTS_LINK = "https://www.linkedin.com/mynetwork/invite-connect/connections/";
 

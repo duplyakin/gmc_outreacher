@@ -24,7 +24,7 @@ class LoginAction {
 
     async closeBrowser() {
         await this.browser.close();
-        await this.browser.disconnect();
+        this.browser.disconnect();
       }
 
     async setContext(context) {
@@ -47,7 +47,7 @@ class LoginAction {
 
         let current_url = await this.page.url();
 
-        // Exctract domain here in format: “.www.linkedin.com”
+        // Exctract domain here in format: “www.linkedin.com”
 
         return (new URL(current_url)).hostname;
     }
@@ -59,7 +59,7 @@ class LoginAction {
 
         let newCookies = await this.page.cookies();
         if (!newCookies) {
-            throw new Error('Can\'t receive cookie.');
+            throw new Error("Can't get cookie.");
         }
 
         return newCookies;

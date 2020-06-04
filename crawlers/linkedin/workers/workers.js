@@ -132,12 +132,8 @@ async function searchWorker(task_id) {
       await models_shared.TaskQueue.findOneAndUpdate({ _id: task_id }, { ack: 0, status: status, result_data: result_data, is_queued: 0 });
     }
 
-    if (browser !== null) {
-      if (status !== status_codes.BLOCK_HAPPENED) {
-        await browser.close();
-      }
-      browser.disconnect();
-    }
+    await browser.close();
+    browser.disconnect();
   }
 }
 
@@ -240,12 +236,8 @@ async function connectWorker(task_id) {
       await models_shared.TaskQueue.findOneAndUpdate({ _id: task_id }, { ack: 0, status: status, result_data: result_data, is_queued: 0 }, { new: true });
     }
 
-    if (browser !== null) {
-      if (status !== status_codes.BLOCK_HAPPENED) {
-        await browser.close();
-      }
-      browser.disconnect();
-    }
+    await browser.close();
+    browser.disconnect();
   }
 }
 
@@ -344,12 +336,8 @@ async function messageWorker(task_id) {
       await models_shared.TaskQueue.findOneAndUpdate({ _id: task_id }, { ack: 0, status: status, result_data: result_data, is_queued: 0 }, { new: true });
     }
 
-    if (browser !== null) {
-      if (status !== status_codes.BLOCK_HAPPENED) {
-        await browser.close();
-      }
-      browser.disconnect();
-    }
+    await browser.close();
+    browser.disconnect();
   }
 }
 
@@ -433,12 +421,8 @@ async function scribeWorker(task_id) {
       await models_shared.TaskQueue.findOneAndUpdate({ _id: task_id }, { ack: 0, status: status, result_data: result_data, is_queued: 0 }, { new: true });
     }
 
-    if (browser !== null) {
-      if (status !== status_codes.BLOCK_HAPPENED) {
-        await browser.close();
-      }
-      browser.disconnect();
-    }
+    await browser.close();
+    browser.disconnect();
   }
 }
 
@@ -522,12 +506,8 @@ async function messageCheckWorker(task_id) {
       await models_shared.TaskQueue.findOneAndUpdate({ _id: task_id }, { ack: 0, status: status, result_data: result_data, is_queued: 0 }, { new: true });
     }
 
-    if (browser !== null) {
-      if (status !== status_codes.BLOCK_HAPPENED) {
-        await browser.close();
-      }
-      browser.disconnect();
-    }
+    await browser.close();
+    browser.disconnect();
   }
 }
 
@@ -612,12 +592,8 @@ async function connectCheckWorker(task_id) {
       await models_shared.TaskQueue.findOneAndUpdate({ _id: task_id }, { ack: 0, status: status, result_data: result_data, is_queued: 0 }, { new: true });
     }
 
-    if (browser !== null) {
-      if (status !== status_codes.BLOCK_HAPPENED) {
-        await browser.close();
-      }
-      browser.disconnect();
-    }
+    await browser.close();
+    browser.disconnect();
   }
 }
 
@@ -700,12 +676,8 @@ async function visitProfileWorker(task_id) {
       await models_shared.TaskQueue.findOneAndUpdate({ _id: task_id }, { ack: 0, status: status, result_data: result_data, is_queued: 0 }, { new: true });
     }
 
-    if (browser !== null) {
-      if (status !== status_codes.BLOCK_HAPPENED) {
-        await browser.close();
-      }
-      browser.disconnect();
-    }
+    await browser.close();
+    browser.disconnect();
   }
 }
 

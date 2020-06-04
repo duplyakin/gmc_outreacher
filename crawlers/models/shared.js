@@ -28,6 +28,19 @@ let taskQueueSchema = new Schema({
 }, { collection: 'task_queue' } );
 
 
+let credentialsSchema = new Schema({
+
+  status : Number,
+
+  ack : {
+    type: Number,
+    default: 0,
+  },
+
+}, { collection: 'credentials' } );
+
+
 module.exports = {
    TaskQueue : mongoose.model('TaskQueue', taskQueueSchema),
+   Credentials : mongoose.model('Credentials', credentialsSchema),
 }

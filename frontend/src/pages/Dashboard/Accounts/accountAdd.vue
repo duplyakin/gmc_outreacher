@@ -22,12 +22,11 @@
                 </el-select>
             </div>
         </div>
-        <div v-if="model.credentials_type == 'linkedin'" class="row">
+        <div v-if="model.credentials_type == 'linkedin'">
 
                 <p class="labels">Linkedin profile URL</p>
-                <div class="col-12">
+                <div>
                     <fg-input name="linkedin_account"
-                        class="mb-3"
                         v-model="model.data.account"
                         placeholder="example: linkedin.com/myaccount"/>
                 </div>
@@ -42,17 +41,15 @@
                     <el-button slot="reference"><i class='el-icon-question'></i></el-button>
                 </el-popover>
                 </p>
-                <div class="col-12">
+                <div>
                     <fg-input name="linkedin_login"
-                        class="mb-3"
                         v-model="model.data.login"
                         placeholder="example: myemail@gmail.com"/>
                 </div>
 
                 <p class="labels">Linkedin password</p>
-                <div class="col-12">
+                <div>
                     <fg-input name="linkedin_password"
-                        class="mb-3"
                         v-model="model.data.password"/>
                 </div>
 
@@ -66,9 +63,8 @@
                     <el-button slot="reference"><i class='el-icon-question'></i></el-button>
                 </el-popover>
                 </p>
-                <div class="col-12">
+                <div>
                     <fg-input name="linkedin_li_at"
-                        class="mb-3"
                         v-model="model.data.li_at"/>
                 </div>
   
@@ -82,9 +78,8 @@
                     <el-button slot="reference"><i class='el-icon-question'></i></el-button>
                 </el-popover>
                 </p>
-                <div class="col-12">
+                <div>
                     <fg-input name="limits_per_day"
-                    class="mb-3"
                     v-model="model.limit_per_day"/>
                 </div>
             </div>    

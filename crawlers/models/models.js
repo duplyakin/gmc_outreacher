@@ -2,14 +2,33 @@ let mongooseConnect = require('./connect.js');
 let mongoose = mongooseConnect.mongoose;
 let Schema = mongoose.Schema;
 
-let cookiesSchema = new Schema({
-    credentials_id : mongoose.ObjectId,
+let accountsSchema = new Schema({
+    credentials_id: mongoose.ObjectId,
 
-    expires : Number,
+    task_id: {
+        type: mongoose.ObjectId,
+        default: null,
+    },
 
-    data : Array,
+    status: {
+        type: Number,
+        default: 0,
+    },
+
+    login: String,
+
+    password: String,
+
+    expires: Number,
+
+    cookies: Array,
+
+    blocking_data: {
+        type: Object,
+        default: null,
+    },
 });
 
 module.exports = {
-   Cookies : mongoose.model('Cookies', cookiesSchema),
+    Accounts: mongoose.model('Accounts', accountsSchema),
 }
