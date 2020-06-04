@@ -2,6 +2,7 @@ from o24.globals import *
 import o24.backend.handlers.dummy as dummy
 import o24.backend.handlers.general as general
 import o24.backend.handlers.email as email
+import o24.backend.handlers.enricher as enricher
 
 import os
 
@@ -23,6 +24,8 @@ JOBS_MAP_TEST = {
 }
 
 JOBS_MAP_PROD = {
+    EMAIL_ENRICH: enricher.enrich_action,
+    EMAIL_CHECK_ENRICHED: enricher.check_enriched_action,
     EMAIL_SEND_MESSAGE_ACTION: email.email_send_message,
     EMAIL_CHECK_REPLY_ACTION: email.email_check_reply,
     DELAY_ACTION: general.delay_handler,

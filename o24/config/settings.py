@@ -59,7 +59,7 @@ class BaseConfig():
     GMAIL_SMTP_HOST = 'smtp.gmail.com'
     GMAIL_SMTP_PORT = 587
 
-    EMAIL_AUTO_ENRICHMENT = True
+    EMAIL_AUTO_ENRICHMENT = False
     #Enrich providers
     SNOVIO_CREDENTIALS = {
         'grant_type':'client_credentials',
