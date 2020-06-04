@@ -118,6 +118,7 @@ def check_enriched_action(task_id):
             status = READY
             return
 
+        prospect.add_tag(title='no_email')
         result_data = {
             'if_true' : False,
             'code' : 2,
