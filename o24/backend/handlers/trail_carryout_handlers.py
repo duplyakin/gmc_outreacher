@@ -143,10 +143,6 @@ def linkedin_parse_profile_action(task):
 
     task.update_status(status=READY)
 
-    #TODO: need to be controlled by campaign
-    if config.EMAIL_AUTO_ENRICHMENT:
-        enricher.add_prospect_for_enrichment(prospect=prospect)
-
     return
 
     

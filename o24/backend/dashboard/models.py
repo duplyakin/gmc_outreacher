@@ -27,6 +27,7 @@ from o24.backend.utils.helpers import template_key_dict
 from o24.backend.dashboard.serializers import JSCampaignData
 import string
 import random
+from urllib.parse import unquote, urlparse
 
 def generate_invite_code(stringLength=10):
     letters = string.ascii_lowercase
@@ -47,6 +48,18 @@ class User(db.Document):
 
     invite_code = db.StringField(default='')
     invited_by = db.StringField(default='')
+
+    def __created(self):
+        #Create special-medium
+        exist = Credentials.objects(owner=self.id, medium='special-medium').first()
+        if not exist:
+            exist = Credentials.create_credentials(owner=self.id, 
+                                                    new_data={}, 
+                                                    medium='special-medium', 
+                                                    limit_per_day=10000,
+                                                    limit_interval=1)
+
+        return True
 
     def _init_user(self, 
                     email=None, 
@@ -198,6 +211,109 @@ class User(db.Document):
         return '<User %r>' % (self.email)
 
 
+class BlackList(db.Document):
+    owner = db.ReferenceField(User, reverse_delete_rule=1)
+
+    emails = db.DictField()
+    domains = db.DictField()
+    linkedin = db.DictField()
+
+    created = db.DateTimeField( default=pytz.utc.localize(datetime.utcnow()) )
+
+    @classmethod
+    def async_list(cls, owner_id):
+        exist = cls.objects(owner=owner_id).first()
+        if not exist:
+            return {}
+        
+        return exist.to_json()
+
+    @classmethod
+    def get_black_list(cls, owner_id):
+        exist = cls.objects(owner=owner_id).first()
+        if not exist:
+            exist = cls()
+            exist._commit(_reload=True)
+        
+        return exist
+    
+    def remove_entities(self, entities):
+        for key in entities:
+            self.emails.pop(key, None)
+            self.domains.pop(key, None)
+            self.linkedin.pop(key, None)
+
+        self._commit()
+        return
+
+    def add_list(self, entities):
+        emails = entities.get('emails', None)
+        if emails:
+            for email in emails:
+                if '@' not in email:
+                    continue
+                email = email.replace(" ","")
+                if email not in self.emails.keys():
+                    self.emails[email] = pytz.utc.localize(datetime.utcnow())
+
+        domains = entities.get('domains', None)
+        if domains:
+            for domain in domains:
+                domain = domain.replace(" ","")
+                if domain not in self.domains.keys():
+                    self.domains[domain] = pytz.utc.localize(datetime.utcnow())
+        
+        linkedin_accounts = entities.get('linkedin', None)
+        if linkedin_accounts:
+            for li_acc in linkedin_accounts:
+                li_acc = li_acc.replace(" ","")
+                li_acc = urlparse(li_acc).path
+                if li_acc:
+                    li_acc = li_acc.strip('/')
+                    if li_acc not in self.linkedin.keys():
+                        self.linkedin[li_acc] = pytz.utc.localize(datetime.utcnow())
+
+        self._commit()
+
+    @classmethod
+    def is_listed_email(cls, owner_id, email):
+        black_list = cls.objects(owner=owner_id).first()
+        if not black_list:
+            return False
+        
+        stripped = email.replace(" ", "")
+        if stripped in self.emails.keys():
+            return True
+
+        email_domain = stripped.split('@')
+        if len(email_domain) > 1:
+            email_domain = email_domain[1]
+            if email_domain in self.domains.keys():
+                return True
+
+        return False
+
+    @classmethod
+    def is_listed_linkedin(cls, owner_id, account):
+        black_list = cls.objects(owner=owner_id).first()
+        if not black_list:
+            return False
+        
+        stripped = account.replace(" ", "")
+        path = urlparse(stripped).path
+        if path:
+            path = path.strip('/')
+            if path in self.linkedin.keys():
+                return True
+
+        return False
+
+
+    def _commit(self, _reload=False):
+        self.save()
+        if _reload:
+            self.reload()
+
 #### Menu: Outreach Accounts ####
 #### Store data to access external accounts
 class Credentials(db.Document):
@@ -210,22 +326,22 @@ class Credentials(db.Document):
     # -1 - Failed
     status = db.IntField(default=0)
     error_message = db.StringField(default='')
+    ack = db.IntField(default=0)
 
     medium = db.StringField()
 
     data = db.DictField()
     
+    day_first_action = db.DateTimeField(default=pytz.utc.localize(datetime.utcnow()))
     last_action = db.DateTimeField(default=pytz.utc.localize(datetime.utcnow()))
     next_action = db.DateTimeField(default=pytz.utc.localize(datetime.utcnow()))
 
     #limits and schedule
     limit_per_day = db.IntField(default=DEFAULT_PER_DAY_LIMIT)
 
-    limit_per_hour = db.IntField(default=0) #NOT USED
     limit_interval = db.IntField(default=DEFAULT_INTERVAL) #in seconds
 
     current_daily_counter = db.IntField(default=0)
-    current_hourly_counter = db.IntField(default=0) #NOT USED
 
     #FOR test purpose only
     test_title = db.StringField(default='')
@@ -237,7 +353,7 @@ class Credentials(db.Document):
         return ids
 
     @classmethod
-    def create_credentials(cls, owner, new_data, medium, limit_per_day=None):
+    def create_credentials(cls, owner, new_data, medium, limit_per_day=None, limit_interval=None):
         exist = None
 
         #hash password
@@ -254,6 +370,13 @@ class Credentials(db.Document):
 
         if (limit_per_day is not None) and (limit_per_day > 0):
             exist.limit_per_day = limit_per_day
+
+        if (limit_interval is not None) and (limit_interval > 0):
+            exist.limit_interval = limit_interval
+
+        if medium == 'special-medium':
+            exist.limit_per_day = 100000
+            exist.limit_interval = 1
 
         exist.owner = owner
         exist.medium = medium
@@ -288,7 +411,7 @@ class Credentials(db.Document):
 
     @classmethod
     def admin_async_credentials(cls):
-        db_query = cls.objects()
+        db_query = cls.objects(medium__in=cls.SHOWED_MEDIUM)
 
         #we use it for join and showing objects as it is
         pipeline = [
@@ -337,7 +460,7 @@ class Credentials(db.Document):
 
     @classmethod
     def list_credentials(cls, credential_ids):
-        return cls.objects(Q(id__in=credential_ids))
+        return cls.objects(id__in=credential_ids)
 
     @classmethod
     def update_credentials(cls, arr):
@@ -357,7 +480,22 @@ class Credentials(db.Document):
     def get_medium(self):
         return self.medium
 
+    def _check_day_changed(self, now):
+
+        diff = now - self.day_first_action
+        diff_days = diff.days
+        if diff_days < 0:
+            diff_days = diff_days * -1
+        
+        if diff_days >= 1:
+            self.current_daily_counter = 0
+            self.day_first_action = now
+
+        return
+
     def change_limits(self, now):
+        self._check_day_changed(now)
+
         self.current_daily_counter = self.current_daily_counter + 1
 
         self.last_action = self.next_action
@@ -416,16 +554,13 @@ class Credentials(db.Document):
         if _commit:
             self._commit()
     
-    def error(self, error='', delay=None):
+    def error(self, error=''):
         self.error_message = error
         self.status = -1
 
-        if delay is not None and delay > 0 :
-            self._inc_next_action(seconds=delay*NEXT_DAY_SECONDS, _commit=False)
-
         self._commit()
 
-    def refresh(self, _reload=False):
+    def resolved(self, _reload=False):
         self.error_message = ''
         self.status = 1
         
@@ -629,7 +764,7 @@ class Campaign(db.Document):
         campaign = cls.objects(id=campaign_id).get()
 
         medium = funnel_node.action.medium
-
+            
         for c in campaign.credentials:
             if c.medium == medium:
                 return c.id
@@ -1169,6 +1304,7 @@ class Prospects(db.Document):
     # DENY (3) - Prevent the deletion of the reference object.
     # PULL (4) - Pull the reference from a ListField of references
     assign_to_list = db.ReferenceField('ProspectsList')
+    tags = db.ListField(db.StringField())
 
     created = db.DateTimeField( default=pytz.utc.localize(datetime.utcnow()) )
 
@@ -1255,7 +1391,13 @@ class Prospects(db.Document):
         self._chek_for_duplicates(owner_id=owner_id, data=data)
 
         return True
-
+    
+    def add_tag(self, title):
+        if title not in self.tags:
+            self.tags.append(title)
+        
+        self._commit()
+        
     @classmethod
     def enrich_prospect(cls, owner_id, prospect_id, prospect_data):
         if not prospect_data:
