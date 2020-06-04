@@ -92,6 +92,9 @@ LINKEDIN_CHECK_REPLY_ACTION = 'linkedin-check-reply'
 
 EMAIL_SEND_MESSAGE_ACTION = 'email-send-message'
 EMAIL_CHECK_REPLY_ACTION = 'email-check-reply'
+EMAIL_ENRICH = 'email-enrich'
+EMAIL_CHECK_ENRICHED = 'email-check-enriched'
+
 
 DELAY_ACTION = 'delay'
 FINISHED_ACTION = 'finished'

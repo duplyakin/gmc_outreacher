@@ -81,6 +81,18 @@ ACTIONS = [
         'key' : EMAIL_CHECK_REPLY_ACTION
     },
     {
+        'action_type' : 2,
+        'data' : {},
+        'medium' : 'special-medium',
+        'key' : EMAIL_ENRICH
+    },
+    {
+        'action_type' : 2,
+        'data' : {},
+        'medium' : 'special-medium',
+        'key' : EMAIL_CHECK_ENRICHED
+    },
+    {
         'action_type' : 1,
         'data' : {},
         'medium' : 'special-medium',
@@ -288,12 +300,11 @@ FUNNELS = [
 
   {
         'root' : {
-            'key' : EMAIL_SEND_MESSAGE_ACTION,
+            'key' : EMAIL_ENRICH,
             'title' : 'Email only sequence',
             'funnel_type' : GENERAL_FUNNEL_TYPE,
             'root' : True,
-            'template_key' : 'intro_email',
-            'if_true' : 'visit-delay-1',
+            'if_true' : 'email-send-intro',
             'if_false' : 'visit-delay-1',
             'templates_required' : {
                 'email' : {
@@ -322,11 +333,28 @@ FUNNELS = [
         },
                 'visit-delay-1' : {
                     'key' : DELAY_ACTION,
+                    'data' : { 'delay' : 20000 },
+                    'if_true' : 'has-email',
+                    'if_false' : 'has-email'
+                },
+        'has-email' : {
+            'key' : EMAIL_CHECK_ENRICHED,
+            'if_true' : 'email-send-intro',
+            'if_false' : FINISHED_ACTION 
+
+        },
+        'email-send-intro' : {
+            'key' : EMAIL_SEND_MESSAGE_ACTION,
+            'template_key' : 'intro_email',
+            'if_true' : 'delay-before',
+            'if_false' : 'delay-before' 
+        },
+        'delay-before' : {
+                    'key' : DELAY_ACTION,
                     'data' : { 'delay' : 80000 },
                     'if_true' : 'email-check-before-followup-1',
                     'if_false' : 'email-check-before-followup-1'
-                },
-
+        },
         'email-check-before-followup-1' : {
             'key' : EMAIL_CHECK_REPLY_ACTION,
             'if_true' : SUCCESS_ACTION,
@@ -448,10 +476,25 @@ FUNNELS = [
                 },
         'linkedin-check-accept-1' : {
             'key' : LINKEDIN_CHECK_ACCEPT_ACTION,
-            'if_true' : 'email-1',
-            'if_false' : 'email-1'
+            'if_true' : 'is-email',
+            'if_false' : 'is-email'
         },
-
+        'is-email' : {
+            'key' : EMAIL_ENRICH,
+            'if_true' : 'email-1',
+            'if_false' : 'delay-before'
+        },
+        'delay-before' : {
+                    'key' : DELAY_ACTION,
+                    'data' : { 'delay' : 20000 },
+                    'if_true' : 'has-email',
+                    'if_false' : 'has-email'
+        },
+        'has-email' : {
+            'key' : EMAIL_CHECK_ENRICHED,
+            'if_true' : 'email-1',
+            'if_false' : FINISHED_ACTION
+        },
         'email-1' : {
             'key' : EMAIL_SEND_MESSAGE_ACTION,
             'template_key' : 'intro_email',
@@ -598,6 +641,22 @@ FUNNELS = [
 
         # EMAIL sending branch
         'connect-deny-1' : {
+            'key' : EMAIL_ENRICH,
+            'if_true' : 'send-intro',
+            'if_false' : 'delay-before'
+        },
+        'delay-before' : {
+                    'key' : DELAY_ACTION,
+                    'data' : { 'delay' : 20000 },
+                    'if_true' : 'has-email',
+                    'if_false' : 'has-email'
+        },
+        'has-email' : {
+            'key' : EMAIL_CHECK_ENRICHED,
+            'if_true' : 'send-intro',
+            'if_false' : FINISHED_ACTION
+        },
+        'send-intro' : {
             'key' : EMAIL_SEND_MESSAGE_ACTION,
             'template_key' : 'intro_email',
             'if_true' : 'email-delay-1',
