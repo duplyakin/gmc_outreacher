@@ -122,8 +122,14 @@ async function accountlogin(req, res) {
     
 	let account = null;
 	try {
-        account = await models.Accounts.findOneAndUpdate({ _id: credentials_id, status: status_codes.AVAILABLE }, {credentials_id: credentials_id, login: login, password: password, status: status_codes.IN_PROGRESS}, { new: true, upsert: true }); 
+        // check if it BROKEN_CREDENTIALS account
+        account = await models.Accounts.findOneAndUpdate({ _id: credentials_id, status: status_codes.BROKEN_CREDENTIALS }, {credentials_id: credentials_id, login: login, password: password, status: status_codes.IN_PROGRESS}, { new: true, upsert: false }); 
         
+        if (account == null){
+            // if not - create new AVAILABLE account
+            account = await models.Accounts.findOneAndUpdate({ _id: credentials_id, status: status_codes.AVAILABLE }, {credentials_id: credentials_id, login: login, password: password, status: status_codes.IN_PROGRESS}, { new: true, upsert: true }); 
+        }
+
         if (account == null){
             return res.json({ code: -1 }); // system error
         }
