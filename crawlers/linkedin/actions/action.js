@@ -6,11 +6,7 @@ const selectors = require("../selectors");
 const MyExceptions = require('../../exceptions/exceptions.js');
 
 class Action {
-  constructor(email, password, li_at, cookies, credentials_id) {
-    this.email = email;
-    this.password = password;
-    this.li_at = li_at;
-
+  constructor(cookies, credentials_id) {
     this.cookies = cookies;
     
     this.credentials_id = credentials_id;
@@ -35,33 +31,7 @@ class Action {
     return null;
   }
 
-  async get_context(browser = this.browser, context = this.context, page = this.page) {
-    if(browser == null) {
-      throw new Error('Can\t get context. Browser is not defined.')
-    }
 
-    if(context == null) {
-      throw new Error('Can\t get context. Context is not defined.')
-    }
-
-    if(page == null) {
-      throw new Error('Can\t get context. Page is not defined.')
-    }
-
-    await page.waitFor(10000); // wait 10 sec for lading and screenshot page
-    let screenshot_str = await page.screenshot();
-
-    let context_obj = {
-      endpoint: browser.wsEndpoint(),
-      context_id: context._id,
-      page_url: page.url(),
-      screenshot: screenshot_str,
-    }
-    
-    return context_obj;
-  }
-
-/*
   check_block(url) {
     if(!url) {
       throw new Error('Empty url in check_block.')
@@ -76,6 +46,7 @@ class Action {
     }
   }
 
+/*
   async check_success_selector(selector, page = this.page, data = null) {
     if(!selector) {
       throw new Error ('Empty selector.');
@@ -102,7 +73,7 @@ class Action {
       throw MyExceptions.NetworkError('Something wromg with connection or uncknown page: ' + err);
     }
   }
-*/
+
 
 async check_block(url, data = null) {
   if(!url) {
@@ -131,24 +102,29 @@ async check_block(url, data = null) {
     return false;
   }
 }
+*/
 
-async check_success_selector(selector, page = this.page, data = null) {
+async check_success_selector(selector, page = this.page) {
   if(!selector) {
     throw new Error ('Empty selector.');
   }
 
   try {
     await page.waitForSelector(selector, { timeout: 5000 });
+    return true;
 
   } catch(err) {
-    await this.check_block(page.url(), data);
+    
+    if(this.check_block(page.url())) {
+      throw MyExceptions.ContextError("Block happend.");
+    }
 
     // uncknown page here
     throw MyExceptions.NetworkError('Something wromg with connection or uncknown page: ' + err);
   }
 }
 
-  async check_success_page(required_url, page = this.page, data = null) {
+  async check_success_page(required_url, page = this.page) {
     if(!required_url) {
       throw new Error ('Empty required_url.');
     }
@@ -159,7 +135,9 @@ async check_success_selector(selector, page = this.page, data = null) {
       return true;
     }
 
-    await this.check_block(page.url(), data);
+    if(this.check_block(page.url())) {
+      throw MyExceptions.ContextError("Block happend.");
+    }
 
     // uncknown page here
     throw new Error('Uncknowm page here: ', current_url);
@@ -213,7 +191,7 @@ async check_success_selector(selector, page = this.page, data = null) {
       if (current_url !== url) {
         if (current_url.includes('login') || current_url.includes('signup')) {
 
-          let loginAction = new LoginAction.LoginAction(this.email, this.password, this.li_at, this.credentials_id);
+          let loginAction = new LoginAction.LoginAction(this.credentials_id);
           await loginAction.setContext(this.context);
 
           let result = await loginAction.login();
@@ -223,7 +201,7 @@ async check_success_selector(selector, page = this.page, data = null) {
         } else {
           console.log('current_url: ', current_url);
           console.log('url: ', url);
-          throw new Error('We cann\'t go to page, we got: ' + current_url);
+          throw new Error("We cann't go to page, we got: " + current_url);
         }
       }
     } catch (err) {

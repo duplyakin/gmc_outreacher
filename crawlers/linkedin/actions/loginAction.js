@@ -6,10 +6,7 @@ const puppeteer = require("puppeteer");
 const MyExceptions = require('../../exceptions/exceptions.js');
 
 class LoginAction {
-    constructor(email, password, li_at, credentials_id) {
-        this.email = email;
-        this.password = password;
-        this.li_at = li_at;
+    constructor(credentials_id) {
         this.credentials_id = credentials_id;
     }
 
@@ -75,10 +72,18 @@ class LoginAction {
             }
         });
 
-        await models.Cookies.updateOne({ credentials_id: this.credentials_id }, { expires: new_expires, data: new_cookie }, { upsert: true }, function (err, res) {
-            if (err) throw MyExceptions.MongoDBError('MongoDB find COOKIE err: ' + err); 
+        await models.Accounts.updateOne({ credentials_id: this.credentials_id }, { expires: new_expires, cookies: new_cookie }, { upsert: true }, function (err, res) {
+            if (err) throw MyExceptions.MongoDBError('MongoDB find Account err: ' + err); 
         });
 
+    }
+
+    async get_account() {
+        let account = await models.Accounts.findOne({ credentials_id: this.credentials_id });
+        if(account == null) {
+            throw MyExceptions.LoginActionError("Account with credentials_id: " + this.credentials_id + " not exists.");
+        }
+        return account;
     }
 
     async login_with_email() {
@@ -88,24 +93,33 @@ class LoginAction {
 
         try {
             await this.page.waitForSelector(selectors.USERNAME_SELECTOR, { timeout: 5000 });
-          } catch (err) {
+        } catch (err) {
             throw MyExceptions.LoginPageError('Login page is not available.');
-          }
+        }
 
-          await this.page.click(selectors.USERNAME_SELECTOR);
-          await this.page.keyboard.type(this.email);
-          await this.page.click(selectors.PASSWORD_SELECTOR);
-          await this.page.keyboard.type(this.password);
-          await this.page.click(selectors.CTA_SELECTOR);
-          await this.page.waitFor(1000);
-      
-          let is_phone = this.check_phone_page(this.page);
-          if (is_phone) {
+        let account = await this.get_account();
+        if(account == null) {
+            throw MyExceptions.LoginActionError("Account with credentials_id: " + this.credentials_id + " not exists.");
+        }
+
+        if(!account.login || !account.password) {
+            throw MyExceptions.LoginActionError("Empty login or password in account.");
+        }
+
+        await this.page.click(selectors.USERNAME_SELECTOR);
+        await this.page.keyboard.type(account.login);
+        await this.page.click(selectors.PASSWORD_SELECTOR);
+        await this.page.keyboard.type(account.password);
+        await this.page.click(selectors.CTA_SELECTOR);
+        await this.page.waitFor(1000);
+    
+        let is_phone = this.check_phone_page(this.page.url());
+        if (is_phone) {
             await this.skip_phone(this.page);
-          }
+        }
     }
 
-
+/*
     async login_with_li_at() {
         let domain_var = await this._get_domain();
         if(domain_var == null || domain_var == '') {
@@ -127,6 +141,7 @@ class LoginAction {
 
         await this.set_cookie(cookies_data);
     }
+*/
 
     async is_logged() {
         //await this.page.waitFor(1000);
@@ -135,21 +150,16 @@ class LoginAction {
             timeout: 60000 // it may load too long! critical here
         });
 
-        let current_url = await this.page.url();
+        let current_url = this.page.url();
         if (current_url === links.START_PAGE_LINK) { // add domain here
             // login success
             return true;
-        } else if (this.check_block()) {
+        } else if (this.check_block(current_url)) {
             // BAN here
-            let context_obj = await this.get_context();
-            if(context_obj !== null && context_obj !== undefined) {
-                throw MyExceptions.ContextError('Can\'t goto url: ' + err, context_obj);
-            } else {
-                console.log( 'Never happend - empty context: ', err );
-                throw MyExceptions.ContextError('Can\'t goto url and empty context: ' + err, context_obj);
-            }
+            throw MyExceptions.ContextError("Can't goto url: " + current_url);
         }
 
+        console.log("Can't login, url: ", current_url);
         // login failed
         return false;
     }
@@ -164,6 +174,7 @@ class LoginAction {
             return logged;
         }
 
+        /*
         // if not - try to login with li_at
         if (this.li_at) {
             await this.login_with_li_at();
@@ -175,21 +186,19 @@ class LoginAction {
                 return logged;
             }
         }
+        */
 
-        // if not - try to login with email/password
-        if (!this.email || !this.password) {
-            throw new Error('BROKEN CREDENTIALS: Email or password is empty.');
-        }
-
+        // if not - try to login with login/password
         await this.login_with_email()
         logged = await this.is_logged();
 
         if (!logged) {
-            throw new Error('Can\'t login.');
+            throw MyExceptions.LoginActionError("Can't login");
         }
 
         await this._update_cookie();
         await this.page.close();
+
         return logged;
     }
 
@@ -199,9 +208,7 @@ class LoginAction {
         await page.click(selectors.SKIP_PHONE_BTN_SELECTOR);
     }
 
-    check_phone_page(page) {
-        let url = page.url();
-
+    check_phone_page(url) {
         if (url.includes('phone')) {
             return true;
         }
@@ -209,9 +216,8 @@ class LoginAction {
         return false;
     }
 
-    check_block() {
-        let current_url = this.page.url();
-        if(current_url.includes(links.BAN_LINK) || current_url.includes(links.CHALLENGE_LINK)) {
+    check_block(url) {
+        if(url.includes(links.BAN_LINK) || url.includes(links.CHALLENGE_LINK)) {
           return true;
         } else {
           return false;
