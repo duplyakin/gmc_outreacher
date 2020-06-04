@@ -48,7 +48,7 @@ async function accountInput(req, res) {
         console.log("..... Error in accountInput : ..... ", err.stack);
 
         if (account != null) {
-            await models.Accounts.findOneAndUpdate({ _id: credentials_id, status: status_codes.SOLVING_CAPTCHA }, { status: status_codes.FAILED });
+            await models.Accounts.updateOne({ _id: credentials_id, status: status_codes.SOLVING_CAPTCHA }, { status: status_codes.FAILED });
             return res.json({ code: -1 }) // system error
         }
     }
@@ -143,7 +143,7 @@ async function accountlogin(req, res) {
         console.log("..... Error in loginLinkedin : ..... ", err.stack);
 
 	    if (account != null) {
-            await models.Accounts.findOneAndUpdate({ _id: credentials_id, status: status_codes.IN_PROGRESS }, { status: status_codes.AVAILABLE }, { upsert: false });
+            await models.Accounts.updateOne({ _id: credentials_id, status: status_codes.IN_PROGRESS }, { status: status_codes.AVAILABLE }, { upsert: false });
             return res.json({ code: -1 }) // system error
         }
     }
