@@ -184,6 +184,13 @@ class Scheduler():
                 
                 handler(task)
                 continue
+            elif task.status in [BLOCK_HAPPENED, NEED_USER_ACTION_RESOLVED]:
+                handler = trail_handlers.BLOCK_HANDLERS.get(tasks.status, None)
+                if handler is None:
+                    handler = trail_handlers.BLOCK_HANDLERS[BLOCK_DEFAULT_HANDLER]
+                
+                handler(task)
+                continue
             else:
                 print("Trail unknown status task.id={0} task.status={1} task.action_key={2}".format(task.id, task.status, task.action_key))
                 continue

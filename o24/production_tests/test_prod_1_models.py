@@ -9,10 +9,18 @@ from o24.backend.utils.funnel import construct_funnel
 
 from o24.backend.google.models import GoogleAppSetting
 from o24.production_tests.create_data import *
+import sys
 
-#from o24.production_tests.test_data import *
-from o24.production_tests.test_data_production import *
+TEST_DATA_FILE = sys.argv[2]
+print("Importing test data from {0}".format(TEST_DATA_FILE))
 
+if TEST_DATA_FILE == 'test_data':
+    from o24.production_tests.test_data import *
+elif TEST_DATA_FILE == 'test_data_production':
+    from o24.production_tests.test_data_production import *
+else:
+    print("need to pass argument test_data OR test_data_production")
+    exit(0)
 
 class TestUsersCampaignsProspects(unittest.TestCase):
     def setUp(self):

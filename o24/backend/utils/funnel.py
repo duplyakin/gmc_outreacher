@@ -1,6 +1,7 @@
 from o24.backend.models.shared import Action, Funnel
+from o24.globals import *
 
-def create_funnel_node(current):
+def create_funnel_node(current, json_key_title):
     #check if already create
     if current.get('node_id', None) is not None:
         return None
@@ -12,7 +13,8 @@ def create_funnel_node(current):
     data = {
         'action' : action.id,
         'data' : current.get('data', ''),
-        'json' : current
+        'json' : current,
+        'json_key_title' : json_key_title
     }
     if current.get('root', None):
         data['root'] = current.get('root')
@@ -22,86 +24,48 @@ def create_funnel_node(current):
     return node
 
 def create_nodes(funnel_dict):
-    root = funnel_dict.get('root')
-    current = root
-    stack = []
 
-    counter = 0
-    # Create actions
-    while True:
-        counter = counter + 1
-        if counter > 2000:
-            break
+    json_key_titles = []
+    nodes_created = {}
+    #create nodes in a database
+    for key, node in funnel_dict.items():
+        new_node = create_funnel_node(node, key)
+        if not new_node:
+            raise Exception("Can't create node: create_funnel_node error")
+        
+        new_node.reload()
+        if key in json_key_titles:
+            print("Error: trying to create 2 times for key={0}".format(key))
+        json_key_titles.append(key)
+        nodes_created[key] = new_node
 
-        if current is not None:
-            stack.append(current) 
-            key = current.get('if_true', None)
-            current = funnel_dict.get(key, None)
+    #connect nodes:
+    for key, node in funnel_dict.items():
+        found_node = nodes_created[key]
+        
+        if key in [FINISHED_ACTION, SUCCESS_ACTION]:
+            continue
 
-        elif(stack):
-            current = stack.pop()
-            node = create_funnel_node(current)
-            if node:
-                current['node_id'] = node.id
+        if_true_node_title = node.get('if_true')
+        if_false_node_title = node.get('if_false')
 
-            key = current.get('if_false', None)
-            current = funnel_dict.get(key, None)
-        else:
-            break
+        if_true_id = nodes_created[if_true_node_title].id
+        if_false_id = nodes_created[if_false_node_title].id
 
+        found_node.if_true = if_true_id
+        found_node.if_false = if_false_id
 
-def connect_funnel_node(current, funnel_dict):
-    node = Funnel.get_node(current.get('node_id'))
-    if not node:
-        raise Exception("No such node id:{0}".format(current.get('node_id', None)))
+        found_node._commit()
     
-    data = {}
-    true_key = current.get('if_true', None)
-    if true_key:
-        data['if_true'] = funnel_dict.get(true_key)['node_id']
-    
-    false_key = current.get('if_false', None)
-    if false_key:
-        data['if_false'] = funnel_dict.get(false_key)['node_id']
-
-    node.update_data(data)
-
-    return node
-
-def connect_nodes(funnel_dict):
-    root = funnel_dict.get('root')
-    current = root
-    stack = []
-
-    counter = 0
-    # Create actions
-    while True:
-        counter = counter + 1
-        if counter > 2000:
-            break
-
-        if current is not None:
-            stack.append(current)  
-            key = current.get('if_true', None)
-            current = funnel_dict.get(key, None)
-
-        elif(stack):
-            current = stack.pop()
-            connect_funnel_node(current, funnel_dict)
-
-            key = current.get('if_false', None)
-            current = funnel_dict.get(key, None)
-        else:
-            break
+    print(json_key_titles)
 
 
+#THIS ONE CALLED FIRST
 def construct_funnel(funnel_dict):
     if not funnel_dict:
         raise Exception("trying to construct funnel for empty funnel_dict:{0}".format(funnel_dict))
 
     create_nodes(funnel_dict)
-
-    connect_nodes(funnel_dict)
 
     return True
 

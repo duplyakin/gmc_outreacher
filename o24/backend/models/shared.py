@@ -51,6 +51,8 @@ class Funnel(db.Document):
     #2 - Linkedin Enrichment funnel
     funnel_type = db.IntField(default=0)
 
+    json_key_title = db.StringField()
+
     title = db.StringField()
     templates_required = db.DictField()
     template_key = db.StringField(default='')
@@ -159,6 +161,8 @@ class Funnel(db.Document):
             if title:
                 self.title = title
 
+        if data.get('json_key_title', None):
+            self.json_key_title = data.get('json_key_title')
 
         if data.get('root', None):
             self.root = data.get('root')
@@ -234,6 +238,28 @@ class TaskQueue(db.Document):
         
         credentials_dict['password'] = decode_password(password)
 
+    def _check_black_listed(self, prospect):
+        if not prospect:
+            return False
+
+        prospect_data = prospect.get_data()
+        owner_id = prospect.owner.id
+
+        black_listed = False
+
+        email = prospect_data.get('email', None)
+        if email:
+            black_listed = models.BlackList.is_listed_email(owner_id=owner_id, email=email)
+            
+        linkedin = prospect_data.get('linkedin', None)
+        if linkedin:
+            black_listed = models.BlackList.is_listed_linkedin(owner_id=owner_id, account=linkedin)
+
+        if black_listed:
+            prospect.add_tag(title='black_listed')
+
+        return black_listed
+
     def _fill_input_data(self, funnel_node, campaign_id=None, prospect_id=None, credentials_id=None, template_key=''):
         self.input_data = {}
 
@@ -290,6 +316,10 @@ class TaskQueue(db.Document):
             prospect =  models.Prospects.objects().get(id=prospect_id)
             if not prospect:
                 raise Exception("_fill_input_data ERROR: can't find prospect_id={0}".format(prospect_id))
+            
+            is_black_listed = self._check_black_listed(prospect)
+            if is_black_listed:
+                self.status = FINISHED
 
             self.input_data['prospect_data'] = prospect.get_data() 
 
@@ -307,6 +337,7 @@ class TaskQueue(db.Document):
                 'start' : now,
                 'delay_sec' : delay
             }
+        
         return self.input_data
 
     #Need to refresh if campaign was on pause
@@ -410,9 +441,13 @@ class TaskQueue(db.Document):
     @classmethod
     def get_ready(cls):
         active_campaigns = models.Campaign.objects(status=IN_PROGRESS).distinct('id')
+        active_credentials = models.Credentials.objects(status=IN_PROGRESS).distinct('id')
 
         now = pytz.utc.localize(datetime.utcnow())
-        return TaskQueue.objects(status=READY, campaign_id__in=active_campaigns, next_round__lte=now)
+        return TaskQueue.objects(status=READY, 
+                                campaign_id__in=active_campaigns,
+                                credentials_id__in=active_credentials,
+                                next_round__lte=now)
 
     @classmethod
     def get_trail_tasks(cls):
@@ -420,7 +455,7 @@ class TaskQueue(db.Document):
         active_campaigns = models.Campaign.objects(status=IN_PROGRESS).distinct('id')
 
         now = pytz.utc.localize(datetime.utcnow())
-        return TaskQueue.objects(Q(next_round__lte=now) & Q(campaign_id__in=active_campaigns) & (Q(status=FAILED) | Q(status=CARRYOUT)))
+        return TaskQueue.objects(Q(next_round__lte=now) & Q(campaign_id__in=active_campaigns) & Q(status__in=TRAIL_STATUSES))
 
     @classmethod
     def get_execute_tasks(cls, do_next, followup_level, now):
@@ -461,9 +496,12 @@ class TaskQueue(db.Document):
                 "as" : "cr_docs"
             }},
             { "$unwind" : "$cr_docs" },
-            {"$match" : { "cr_docs.next_action" : { "$lte" : now},
-                "cr_docs._id" : { "$nin" : credentials_ids_in_progress}
-             } },
+            {"$match" : { 
+                "cr_docs.next_action" : { "$lte" : now},
+                "cr_docs._id" : { "$nin" : credentials_ids_in_progress},
+                "cr_docs.status" : {"$eq" : IN_PROGRESS},
+                } 
+             },
              query,
             {"$group" : {"_id": "$credentials_id", "task_id" : { "$first" : "$_id" }}},
         ]
