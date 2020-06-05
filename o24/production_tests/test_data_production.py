@@ -193,6 +193,7 @@ FUNNELS = [
 
                 'connect-delay-1' : {
                     'key' : DELAY_ACTION,
+                    'template_key' : 'after_connect_sent',
                     'data' : { 'delay' : 80000 },
                     'if_true' : 'linkedin-check-accept-1',
                     'if_false' : 'linkedin-check-accept-1'
@@ -240,6 +241,7 @@ FUNNELS = [
         },
                 'delay-5' : {
                     'key' : DELAY_ACTION,
+                    'template_key' : 'linkedin_followup_2',
                     'data' : { 'delay' : 80000 },
                     'if_true' : 'ln-check-before-followup-2',
                     'if_false' : 'ln-check-before-followup-2'
@@ -257,6 +259,7 @@ FUNNELS = [
         },
                 'delay-6' : {
                     'key' : DELAY_ACTION,
+                    'template_key' : 'linkedin_followup_3',
                     'data' : { 'delay' : 80000 },
                     'if_true' : 'ln-visit-before-followup-3',
                     'if_false' : 'ln-visit-before-followup-3'
@@ -351,6 +354,7 @@ FUNNELS = [
         },
         'delay-before' : {
                     'key' : DELAY_ACTION,
+                    'template_key' : 'email_followup_1',
                     'data' : { 'delay' : 80000 },
                     'if_true' : 'email-check-before-followup-1',
                     'if_false' : 'email-check-before-followup-1'
@@ -368,7 +372,8 @@ FUNNELS = [
         },
                 'email-delay-1' : {
                     'key' : DELAY_ACTION,
-                    'data' : {},
+                    'template_key' : 'email_followup_2',
+                    'data' : {'delay' : 80000},
                     'if_true' : 'email-check-before-followup-2',
                     'if_false' : 'email-check-before-followup-2'    
                 },
@@ -386,6 +391,7 @@ FUNNELS = [
         },
                 'email-delay-3' : {
                     'key' : DELAY_ACTION,
+                    'template_key' : 'email_followup_3',
                     'data' : { 'delay' : 80000 },
                     'if_true' : 'email-check-before-followup-3',
                     'if_false' : 'email-check-before-followup-3'    
@@ -470,6 +476,7 @@ FUNNELS = [
 
                 'connect-delay-1' : {
                     'key' : DELAY_ACTION,
+                    'template_key' : 'after_connect_sent',
                     'data' : { 'delay' : 80000 },
                     'if_true' : 'linkedin-check-accept-1',
                     'if_false' : 'linkedin-check-accept-1'
@@ -514,6 +521,7 @@ FUNNELS = [
         },
                 'email-delay-2' : {
                     'key' : DELAY_ACTION,
+                    'template_key' : 'email_followup_1',
                     'data' : { 'delay' : 8000 },
                     'if_true' : 'email-check-before-followup-1',
                     'if_false' : 'email-check-before-followup-1'   
@@ -531,7 +539,8 @@ FUNNELS = [
         },
                 'email-delay-3' : {
                     'key' : DELAY_ACTION,
-                    'data' : {},
+                    'template_key' : 'email_followup_2',
+                    'data' : {'delay' : 80000},
                     'if_true' : 'email-check-before-followup-2',
                     'if_false' : 'email-check-before-followup-2'    
                 },
@@ -629,6 +638,7 @@ FUNNELS = [
 
                 'connect-delay-1' : {
                     'key' : DELAY_ACTION,
+                    'template_key' : 'after_connect_sent',
                     'data' : { 'delay' : 80000 },
                     'if_true' : 'linkedin-check-accept-1',
                     'if_false' : 'linkedin-check-accept-1'
@@ -675,6 +685,7 @@ FUNNELS = [
         },
                 'email-delay-2' : {
                     'key' : DELAY_ACTION,
+                    'template_key' : 'email_followup_1',
                     'data' : { 'delay' : 8000 },
                     'if_true' : 'email-check-before-followup-1',
                     'if_false' : 'email-check-before-followup-1'   
@@ -692,7 +703,8 @@ FUNNELS = [
         },
                 'email-delay-3' : {
                     'key' : DELAY_ACTION,
-                    'data' : {},
+                    'template_key' : 'email_followup_2',
+                    'data' : {'delay' : 80000},
                     'if_true' : 'email-check-before-followup-2',
                     'if_false' : 'email-check-before-followup-2'    
                 },
@@ -741,6 +753,7 @@ FUNNELS = [
         },
                 'ln-delay-2' : {
                     'key' : DELAY_ACTION,
+                    'template_key' : 'linkedin_followup_2',
                     'data' : { 'delay' : 8000 },
                     'if_true' : 'check-before-followup-2',
                     'if_false' : 'check-before-followup-2'    

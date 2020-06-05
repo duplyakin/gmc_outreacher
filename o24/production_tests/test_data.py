@@ -1285,7 +1285,10 @@ Hi {first_name}<br /><br />My name is Kirill - I'm a blockchain developer and wr
         'value': "Europe/London",
         'offset': 0
     },
-
+    'custom_delays' : {
+        'after_connect_sent' : 1,
+        'some_other_not_supported' : 2
+    },
     'sending_days': {
         "0": True,
         "1": True,
@@ -1354,6 +1357,10 @@ Hi {first_name}<br /><br />If you are interested in participating in our PR proj
         'label': "(GMT+07:00) Western Indonesia Time - Pontianak",
         'value': "Asia/Pontianak",
         'offset': 420
+    },
+    'custom_delays' : {
+        'after_connect_sent' : 3,
+        'some_other_not_supported' : 2
     },
     'sending_days': {
         "0": False,

@@ -240,6 +240,9 @@ class JSCampaignData(JSObject):
     def templates(self):
         return self._custom_attr(attr='templates', default={})
 
+    def custom_delays(self):
+        return self._custom_attr(attr='custom_delays', default={})
+
     def sending_days(self):
         return self._custom_attr(attr='sending_days', default={})
 

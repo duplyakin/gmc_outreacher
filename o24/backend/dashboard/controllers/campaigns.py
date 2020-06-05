@@ -43,7 +43,8 @@ modified_fields_on_create = {
     'templates' : True,
     'time_table' : True,
     'lists' : True,
-    'time_zone' : True
+    'time_zone' : True,
+    'custom_delays' : True
 }
 
 modified_fields_on_edit = {
@@ -58,7 +59,8 @@ modified_fields_on_edit = {
     'from_minutes' : True,
     'to_minutes' : True,
     'sending_days' : True,
-    'time_zone' : True
+    'time_zone' : True,
+    'custom_delays' : True
 }
 
 @bp_dashboard.route('/campaigns/data', methods=['POST'])

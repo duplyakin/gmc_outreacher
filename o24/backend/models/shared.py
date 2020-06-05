@@ -253,7 +253,8 @@ class TaskQueue(db.Document):
             
         linkedin = prospect_data.get('linkedin', None)
         if linkedin:
-            black_listed = models.BlackList.is_listed_linkedin(owner_id=owner_id, account=linkedin)
+            if not black_listed:
+                black_listed = models.BlackList.is_listed_linkedin(owner_id=owner_id, account=linkedin)
 
         if black_listed:
             prospect.add_tag(title='black_listed')
