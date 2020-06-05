@@ -108,13 +108,13 @@ export default {
         plugins: [
           "advlist autolink lists link image charmap print preview anchor",
           "searchreplace visualblocks code fullscreen",
-          "insertdatetime media table paste code help wordcount autoresize"
+          "insertdatetime media table paste code help wordcount autoresize emoticons"
         ],
         toolbar:
           "undo redo | formatselect | bold italic backcolor | \
            alignleft aligncenter alignright alignjustify | \
            bullist numlist outdent indent | removeformat | help \
-           image | link | autolink",
+           image | link | autolink | emoticons",
     /*    
         max_chars: 1000, // max. allowed chars
         setup: function (ed) {

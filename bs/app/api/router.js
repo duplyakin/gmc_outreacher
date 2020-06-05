@@ -145,9 +145,9 @@ async function accountLogin(req, res) {
 
 
 
-router.post('/input', accountInput)
-router.post('/status', accountStatus)
-router.post('/login', accountLogin)
+router.post('/input/', accountInput)
+router.post('/status/', accountStatus)
+router.post('/login/', accountLogin)
 
 
 module.exports = router

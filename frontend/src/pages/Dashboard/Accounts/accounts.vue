@@ -3,7 +3,7 @@
     <card>
     <div class="row">
         <div class="col-6 d-flex align-self-center">
-            <span font-><h3><i class="nc-icon nc-single-02"></i> Accounts managment</h3></span>
+            <span font-><h3><i class="nc-icon nc-single-02"></i>Accounts managment</h3></span>
         </div>
         <div class="col-6 d-flex flex-row-reverse align-self-center">
             <button @click.prevent="addAccount" type="button" class="btn btn-default btn-success mx-1">Add account</button>
@@ -36,18 +36,19 @@
                             <template v-else> {{ show_data(scope.row, column) }} </template>
                         </template>
                 </el-table-column>
-                <el-table-column :min-width="50" fixed="right" label="Reconnect">
+                <el-table-column :min-width="80" fixed="right">
                     <template slot-scope="props">
                     <a
                         v-tooltip.top-center="'Reconnect'"
                         class="btn-info btn-simple btn-link"
-                        @click.prevent="refreshCredentials(props.row._id.$oid, props.$index)"
+                        @click.prevent="loginLinkedinModal(props.row._id.$oid, props.$index)"
                     >
-                        <i class="fa fa-refresh"></i>
+                        <p class="small green" v-if="props.row.status != -1">Login linkedin</p>
+                        <p class="small red" v-if="props.row.status == -1">Login linkedin required</p>
                     </a>
                     </template>
                 </el-table-column>
-                <el-table-column :min-width="50" fixed="right" label="Delete">
+                <el-table-column :min-width="40" fixed="right">
                     <template slot-scope="props">
                     <a
                         v-tooltip.top-center="'Delete'"
@@ -75,12 +76,16 @@
     const O24Pagination = () => import('src/components/O24Pagination.vue')
     const AccountEdit = () => import('./accountEdit.vue')
     const AccountAdd = () => import('./accountAdd.vue')
+    const AccountLogin = () => import('./accountLogin_modal.vue')
 
     const CREDENTIALS_API_LIST = '/credentials/list';
     const CREDENTIALS_API_EDIT = '/credentials/edit';
     const CREDENTIALS_API_DELETE = '/credentials/delete';
     const CREDENTIALS_API_ADD = '/credentials/add';
-    const CREDENTIALS_API_REFRESH = '/credentials/refresh';
+    //const CREDENTIALS_API_REFRESH = '/credentials/refresh';
+
+    const BS_API_STATUS = '/bs/api/status/';
+    const BS_API_LOGIN = '/bs/api/login/';
 
 
     export default {
@@ -95,6 +100,7 @@
     },
     data () {
         return {
+            current_account_status: 0,
             status : {
                 0 : 'Active',
                 1 : 'Changed',
@@ -141,51 +147,126 @@
             });
 
         },
-        refreshCredentials(credentials_id, row_index) {
+        async loginLinkedinModal(credentials_id, row_index) {
             const current_index = row_index;
-            const _table = this.$refs.accounts_data_table;
+            //const _table = this.$refs.accounts_data_table;
+            const _credentials_id = credentials_id;
 
-            const path = CREDENTIALS_API_REFRESH;
+            this.current_account_status = 0;
+            
+            let _this = this;
+
+            this.$modal.show(AccountLogin, {
+
+                status: _this.current_account_status,
+
+                accountStatus: async(_credentials_id) => {
+                    //_this.current_account_status = await _this.accountStatusBS(_credentials_id);
+                    await _this.accountStatusBS(_credentials_id);
+                    console.log("_this.current_account_status: ", _this.current_account_status);
+
+                    if(_this.current_account_status == -1) {
+                        Notification.error({title: "Error", message: "Something went wrong... Please, contact us."});
+                        this.$emit('close');
+                    }
+
+                    if(_this.current_account_status == 0) {
+                        Notification.success({title: "Success", message: "Success."});
+                        this.$emit('close');
+                    }
+
+                    if(_this.current_account_status == 1) {
+                        Notification.info({title: "Info", message: "In progress..."});
+                        setTimeout(accountStatus(), 3000);
+                    }
+
+                    if(_this.current_account_status == 2) {
+                        Notification.info({title: "Info", message: "Need action."});
+                        this.$emit('close');
+                        _this.inputLinkedinModal(_credentials_id);
+                    }
+
+                    if(_this.current_account_status == 4) {
+                        Notification.error({title: "Error", message: "Wrong login or password."});
+                    }
+                },
+
+                accountLogin: async(login, password) => {
+                    await _this.accountLoginBS(_credentials_id, login, password);
+                }
+
+            },
+            {
+                width: '620',
+                height: 'auto',
+                scrollable: true,
+                clickToClose: false
+            })
+        },
+        async inputLinkedinModal(credentials_id) {
+            //
+        },
+        accountStatusBS(credentials_id) {
+            const path = BS_API_STATUS;
 
             var data = new FormData();
-            data.append('_credentials_id', credentials_id);
+            data.append("credentials_id", credentials_id);
 
-            axios.post(path, data)
-            .then((res) => {
-                var r = res.data;
-                if (r.code > 0) {
-                    this.$set(this.accounts_data.credentials, current_index, JSON.parse(r.credentials));
-                    _table.$forceUpdate();
-                    Notification.success({title: "Success", message: "Account reconnected"});
-                } else {
-                    var msg = 'Server Error loading credentials ' + r.msg;
-                    Notification.error({title: "Error", message: msg});
-                }
-            })
-            .catch((error) => {
-                var msg = 'Error loading credentials ' + error;
-                Notification.error({title: "Error", message: msg});
-            });
+            axios
+                .post(path, data)
+                .then(res => {
+                    var r = res.data;
+                    this.current_account_status = r.code;
+                })
+                .catch(error => {
+                    Notification.error({title: "Error", message: "Error status " + error});
+                    this.current_account_status = -1;
+                });
+        },
+        accountLoginBS(credentials_id, login, password) {
+            const path = BS_API_LOGIN;
+
+            var data = new FormData();
+            data.append("credentials_id", credentials_id);
+            data.append("login", login);
+            data.append("password", password);
+
+            //axios.defaults.baseURL = process.env.VUE_BS_APP_API_URL; // ??
+
+            axios
+                .post(path, data)
+                .then(res => {
+                    var r = res.data;
+                    if (r.code <= 0) {
+                        //var msg = "Error login " + r.msg;
+                        //Notification.error({title: "Error", message: msg});
+                    } else {
+                        //Notification.success({title: "Success", message: "Login success."});
+                    }
+                })
+                .catch(error => {
+                    Notification.error({title: "Error", message: "Error login " + error});
+                });
         },
         editAccount(account_dict, row_index) {
 
-        const current_index = row_index;
-        const _table = this.$refs.accounts_data_table;
+            const current_index = row_index;
+            const _table = this.$refs.accounts_data_table;
 
-        this.$modal.show(AccountEdit, {
-            accountObj: account_dict,
-            api_url : CREDENTIALS_API_EDIT,
-            modalTitle: "Account edit",
-            valueUpdated:(newValue) => {
-                this.$set(this.accounts_data.credentials, current_index, newValue);
-                _table.$forceUpdate();
-                Notification.success({title: "Success", message: "Account changed"});
-            }
+            this.$modal.show(AccountEdit, {
+                accountObj: account_dict,
+                api_url : CREDENTIALS_API_EDIT,
+                modalTitle: "Account edit",
+                valueUpdated:(newValue) => {
+                    this.$set(this.accounts_data.credentials, current_index, newValue);
+                    _table.$forceUpdate();
+                    Notification.success({title: "Success", message: "Account changed"});
+                }
             },
             {
-            width: '720',
-            height: 'auto',
-            scrollable: true
+                width: '720',
+                height: 'auto',
+                scrollable: true
             })
         },
         delete_credentials(credentials_id, row_index){
@@ -228,31 +309,32 @@
             })
         },
         show_data(scope_row, column){
-        var data = column.data || '';
-        if (data){
-            return scope_row.data[column.prop] || '';
-        }else{
-            var field = column.field || '';
-            if (field){
-                return scope_row[column.prop][field] || '';
-            }else{
-                return scope_row[column.prop] || '';
+            var data = column.data || '';
+            if (data){
+                return scope_row.data[column.prop] || '';
+            } else {
+                var field = column.field || '';
+                if (field){
+                    return scope_row[column.prop][field] || '';
+                }else{
+                    return scope_row[column.prop] || '';
+                }
             }
-        }
 
-        return '';
-    },
+            return '';
+        },
 
-    },
-    mounted () {
-        this.loadCredentials();
-    },
-    created() {
-    },
+        },
+        mounted () {
+            this.loadCredentials();
+        },
     }
 </script>
 <style>
 .red {
 color: red;
+}
+.green {
+color: rgb(3, 212, 3);
 }
 </style>
