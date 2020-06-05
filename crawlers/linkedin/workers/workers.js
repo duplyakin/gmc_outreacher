@@ -107,7 +107,7 @@ async function searchWorker(task_id) {
         code: err.code,
         raw: err.error
       };
-      await models.Accounts.updateOne({ _id: credentials_id }, { status: status_codes.BLOCKED, task_id: task_id }, { upsert: false });
+      await models.Accounts.findOneAndUpdate({ _id: credentials_id }, { status: status_codes.BLOCKED, task_id: task_id }, { upsert: false });
       
     } else {
       result_data = {
@@ -119,7 +119,7 @@ async function searchWorker(task_id) {
   } finally {
     console.log("RES: ", result_data);
     if (task !== null) {
-      await models_shared.TaskQueue.updateOne({ _id: task_id }, { ack: 0, status: status, result_data: result_data, is_queued: 0 }, { upsert: false });
+      await models_shared.TaskQueue.findOneAndUpdate({ _id: task_id }, { ack: 0, status: status, result_data: result_data, is_queued: 0 }, { upsert: false });
     }
 
     if(browser != null) {
@@ -203,7 +203,7 @@ async function connectWorker(task_id) {
         code: err.code,
         raw: err.error
       };
-      await models.Accounts.updateOne({ _id: credentials_id }, { status: status_codes.BLOCKED, task_id: task_id }, { upsert: false });
+      await models.Accounts.findOneAndUpdate({ _id: credentials_id }, { status: status_codes.BLOCKED, task_id: task_id }, { upsert: false });
       
     } else {
       result_data = {
@@ -216,7 +216,7 @@ async function connectWorker(task_id) {
   } finally {
     console.log("RES: ", result_data);
     if (task !== null) {
-      await models_shared.TaskQueue.updateOne({ _id: task_id }, { ack: 0, status: status, result_data: result_data, is_queued: 0 }, { upsert: false });
+      await models_shared.TaskQueue.findOneAndUpdate({ _id: task_id }, { ack: 0, status: status, result_data: result_data, is_queued: 0 }, { upsert: false });
     }
 
     if(browser != null) {
@@ -296,7 +296,7 @@ async function messageWorker(task_id) {
         code: err.code,
         raw: err.error
       };
-      await models.Accounts.updateOne({ _id: credentials_id }, { status: status_codes.BLOCKED, task_id: task_id }, { upsert: false });
+      await models.Accounts.findOneAndUpdate({ _id: credentials_id }, { status: status_codes.BLOCKED, task_id: task_id }, { upsert: false });
       
     } else {
       result_data = {
@@ -309,7 +309,7 @@ async function messageWorker(task_id) {
   } finally {
     console.log("RES: ", result_data);
     if (task !== null) {
-      await models_shared.TaskQueue.updateOne({ _id: task_id }, { ack: 0, status: status, result_data: result_data, is_queued: 0 }, { upsert: false });
+      await models_shared.TaskQueue.findOneAndUpdate({ _id: task_id }, { ack: 0, status: status, result_data: result_data, is_queued: 0 }, { upsert: false });
     }
 
     if(browser != null) {
@@ -374,7 +374,7 @@ async function scribeWorker(task_id) {
         code: err.code,
         raw: err.error
       };
-      await models.Accounts.updateOne({ _id: credentials_id }, { status: status_codes.BLOCKED, task_id: task_id }, { upsert: false });
+      await models.Accounts.findOneAndUpdate({ _id: credentials_id }, { status: status_codes.BLOCKED, task_id: task_id }, { upsert: false });
       
     } else {
       result_data = {
@@ -387,7 +387,7 @@ async function scribeWorker(task_id) {
   } finally {
     console.log("RES: ", result_data);
     if (task !== null) {
-      await models_shared.TaskQueue.updateOne({ _id: task_id }, { ack: 0, status: status, result_data: result_data, is_queued: 0 }, { upsert: false });
+      await models_shared.TaskQueue.findOneAndUpdate({ _id: task_id }, { ack: 0, status: status, result_data: result_data, is_queued: 0 }, { upsert: false });
     }
 
     if(browser != null) {
@@ -452,7 +452,7 @@ async function messageCheckWorker(task_id) {
         code: err.code,
         raw: err.error
       };
-      await models.Accounts.updateOne({ _id: credentials_id }, { status: status_codes.BLOCKED, task_id: task_id }, { upsert: false });
+      await models.Accounts.findOneAndUpdate({ _id: credentials_id }, { status: status_codes.BLOCKED, task_id: task_id }, { upsert: false });
       
     } else {
       result_data = {
@@ -465,7 +465,7 @@ async function messageCheckWorker(task_id) {
   } finally {
     console.log("RES: ", result_data);
     if (task !== null) {
-      await models_shared.TaskQueue.updateOne({ _id: task_id }, { ack: 0, status: status, result_data: result_data, is_queued: 0 }, { upsert: false });
+      await models_shared.TaskQueue.findOneAndUpdate({ _id: task_id }, { ack: 0, status: status, result_data: result_data, is_queued: 0 }, { upsert: false });
     }
 
     if(browser != null) {
@@ -531,7 +531,7 @@ async function connectCheckWorker(task_id) {
         code: err.code,
         raw: err.error
       };
-      await models.Accounts.updateOne({ _id: credentials_id }, { status: status_codes.BLOCKED, task_id: task_id }, { upsert: false });
+      await models.Accounts.findOneAndUpdate({ _id: credentials_id }, { status: status_codes.BLOCKED, task_id: task_id }, { upsert: false });
       
     } else {
       result_data = {
@@ -544,7 +544,7 @@ async function connectCheckWorker(task_id) {
   } finally {
     console.log("RES: ", result_data);
     if (task !== null) {
-      await models_shared.TaskQueue.updateOne({ _id: task_id }, { ack: 0, status: status, result_data: result_data, is_queued: 0 }, { upsert: false });
+      await models_shared.TaskQueue.findOneAndUpdate({ _id: task_id }, { ack: 0, status: status, result_data: result_data, is_queued: 0 }, { upsert: false });
     }
 
     if(browser != null) {
@@ -608,7 +608,7 @@ async function visitProfileWorker(task_id) {
         code: err.code,
         raw: err.error
       };
-      await models.Accounts.updateOne({ _id: credentials_id }, { status: status_codes.BLOCKED, task_id: task_id }, { upsert: false });
+      await models.Accounts.findOneAndUpdate({ _id: credentials_id }, { status: status_codes.BLOCKED, task_id: task_id }, { upsert: false });
       
     } else {
       result_data = {
@@ -621,7 +621,7 @@ async function visitProfileWorker(task_id) {
   } finally {
     console.log("RES: ", result_data);
     if (task !== null) {
-      await models_shared.TaskQueue.updateOne({ _id: task_id }, { ack: 0, status: status, result_data: result_data, is_queued: 0 }, { upsert: false });
+      await models_shared.TaskQueue.findOneAndUpdate({ _id: task_id }, { ack: 0, status: status, result_data: result_data, is_queued: 0 }, { upsert: false });
     }
 
     if(browser != null) {

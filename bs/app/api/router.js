@@ -48,7 +48,7 @@ async function accountInput(req, res) {
         console.log("..... Error in accountInput : ..... ", err.stack);
 
         if (account != null) {
-            await models.Accounts.updateOne({ _id: credentials_id, status: status_codes.SOLVING_CAPTCHA }, { status: status_codes.FAILED });
+            await models.Accounts.findOneAndUpdate({ _id: credentials_id, status: status_codes.SOLVING_CAPTCHA }, { status: status_codes.FAILED });
             return res.json({ code: -1 }) // system error
         }
     }
@@ -102,8 +102,7 @@ async function accountStatus(req, res) {
         res.json({
             code: 4, // BROKEN_CREDENTIALS - NEED REPEAT
         })
-    } 
-    else {
+    } else {
         res.json({
             code: -1, // Unknown error - try again later
         })
@@ -111,7 +110,7 @@ async function accountStatus(req, res) {
 }
 
 
-async function accountlogin(req, res) {
+async function accountLogin(req, res) {
 	let credentials_id = req.body.credentials_id;
 	let login = req.body.login;
 	let password = req.body.password;
@@ -123,15 +122,10 @@ async function accountlogin(req, res) {
 	let account = null;
 	try {
         // check if it BROKEN_CREDENTIALS account
-        account = await models.Accounts.findOneAndUpdate({ _id: credentials_id, status: status_codes.BROKEN_CREDENTIALS }, {credentials_id: credentials_id, login: login, password: password, status: status_codes.IN_PROGRESS}, { new: true, upsert: false }); 
-        
-        if (account == null){
-            // if not - create new AVAILABLE account
-            account = await models.Accounts.findOneAndUpdate({ _id: credentials_id, status: status_codes.AVAILABLE }, {credentials_id: credentials_id, login: login, password: password, status: status_codes.IN_PROGRESS}, { new: true, upsert: true }); 
-        }
+        account = await models.Accounts.findOneAndUpdate({ _id: credentials_id, status: { $in: [status_codes.BROKEN_CREDENTIALS, status_codes.AVAILABLE] }}, {credentials_id: credentials_id, login: login, password: password, status: status_codes.IN_PROGRESS}, { new: true, upsert: true }); 
 
         if (account == null){
-            return res.json({ code: -1 }); // system error
+            return res.json({ code: 1 }); // IN_PROGRESS // it should be -1 FAILED, becouse if we didn't found account, we have to create one
         }
 
 		// login linkedin async
@@ -143,7 +137,7 @@ async function accountlogin(req, res) {
         console.log("..... Error in loginLinkedin : ..... ", err.stack);
 
 	    if (account != null) {
-            await models.Accounts.updateOne({ _id: credentials_id, status: status_codes.IN_PROGRESS }, { status: status_codes.AVAILABLE }, { upsert: false });
+            await models.Accounts.findOneAndUpdate({ _id: credentials_id, status: status_codes.IN_PROGRESS }, { status: status_codes.AVAILABLE }, { upsert: false });
             return res.json({ code: -1 }) // system error
         }
     }
@@ -151,9 +145,9 @@ async function accountlogin(req, res) {
 
 
 
-router.post('/input:credentials_id&user_data', accountInput)
-router.post('/status/:credentials_id', accountStatus)
-router.post('/login/:credentials_id&login&password', accountlogin)
+router.post('/input', accountInput)
+router.post('/status', accountStatus)
+router.post('/login', accountLogin)
 
 
 module.exports = router

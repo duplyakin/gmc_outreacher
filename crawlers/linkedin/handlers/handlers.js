@@ -46,7 +46,7 @@ async function bullConsumer() {
         raw: MyExceptions.HandlerError("HandlerError error: " + err).error
       };
       
-      await models_shared.TaskQueue.updateOne({ _id: job.data.task_id }, { status: -1, result_data: err_result }, function (err, res) {
+      await models_shared.TaskQueue.findOneAndUpdate({ _id: job.data.task_id }, { status: -1, result_data: err_result }, function (err, res) {
         if (err) throw MyExceptions.MongoDBError('MongoDB save err: ' + err);
         // updated!
         console.log('MongoDB save success.');
@@ -76,7 +76,7 @@ async function taskStatusListener() {
           };
           await bull_workers.add(data);
 
-          await models_shared.TaskQueue.updateOne({ _id: task.id }, { is_queued: 1 }, function (err, res) {
+          await models_shared.TaskQueue.findOneAndUpdate({ _id: task.id }, { is_queued: 1 }, function (err, res) {
             if (err) throw MyExceptions.MongoDBError('MongoDB updateOne TASK err: ' + err);
           });
 

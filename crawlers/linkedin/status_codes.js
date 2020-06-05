@@ -12,6 +12,8 @@ module.exports = {
     NEED_USER_ACTION_RESOLVED: 9,
     FAILED: -1,
 
+    ACTIVE: 1,
+
     // codes for account.status
     AVAILABLE: 0,
     //IN_PROGRESS: 1, // the same as task.status

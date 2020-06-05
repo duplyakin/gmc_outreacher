@@ -72,7 +72,7 @@ class LoginAction {
             }
         });
 
-        await models.Accounts.updateOne({ credentials_id: this.credentials_id }, { expires: new_expires, cookies: new_cookie }, { upsert: true }, function (err, res) {
+        await models.Accounts.findOneAndUpdate({ credentials_id: this.credentials_id }, { expires: new_expires, cookies: new_cookie }, { upsert: true }, function (err, res) {
             if (err) throw MyExceptions.MongoDBError('MongoDB find Account err: ' + err); 
         });
 

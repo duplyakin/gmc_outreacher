@@ -20,6 +20,10 @@ const found_form_and_input = async (page, input) => {
     let url = page.url();
     let res = -2;
 
+    if(!url) {
+        return -2;
+    }
+
     if(url.includes(links.CHALLENGE_LINK)) {
         res = await resolve_challenge(page, input);
 
@@ -134,8 +138,9 @@ const login = async(page, account) => {
         }
 
         await page.goto(links.SIGNIN_LINK);
+        await page.waitForNavigation({ waitUntil: 'networkidle0' }); // check it
 
-        await page.waitFor(1000);
+        //await page.waitFor(1000);
 
         try {
             await page.waitForSelector(selectors.USERNAME_SELECTOR, { timeout: 5000 });
@@ -148,8 +153,13 @@ const login = async(page, account) => {
         await page.keyboard.type(account.login);
         await page.click(selectors.PASSWORD_SELECTOR);
         await page.keyboard.type(account.password);
-        await page.click(selectors.CTA_SELECTOR);
-        await page.waitFor(1000);
+        //await page.click(selectors.CTA_SELECTOR);
+        //await page.waitFor(1000);
+
+        await Promise.all([
+            page.click(selectors.CTA_SELECTOR),
+            page.waitForNavigation({ waitUntil: 'networkidle0' }),
+        ]);
     
         let current_url = page.url();
 
@@ -175,16 +185,18 @@ const login = async(page, account) => {
 
 
 const get_context = async(browser, context, page) => {
+    await page.waitForNavigation({ waitUntil: 'networkidle0' }); // check it
+
     if(browser == null) {
-      throw new Error("Can't get_context. Browser is not defined.")
+      throw new Error("Can't get_context. Browser is not defined.");
     }
 
     if(context == null) {
-      throw new Error("Can't get_context. Context is not defined.")
+      throw new Error("Can't get_context. Context is not defined.");
     }
 
     if(page == null) {
-      throw new Error("Can't get_context. Page is not defined.")
+      throw new Error("Can't get_context. Page is not defined.");
     }
 
     await page.waitFor(10000); // wait 10 sec for lading and screenshot page
@@ -217,10 +229,12 @@ const validate_data = async(data) => {
         throw new Error('DATA BROKEN: no page_url');
     }
 
+    /*
     let screenshot = data.screenshot;
     if (!screenshot){
         throw new Error('DATA BROKEN: no screenshot');
     }
+    */
 
 }
 
@@ -318,12 +332,12 @@ const input_data = async (account, user_data) => {
 
         if(res == 0) {
             // block resolved
-            await models_shared.Credentials.updateOne({ _id: account.credentials_id }, { status: status_codes.AVAILABLE }, { upsert: false });
+            await models_shared.Credentials.findOneAndUpdate({ _id: account.credentials_id }, { status: status_codes.ACTIVE }, { upsert: false });
             if(account.task_id != null) {
-                await models_shared.TaskQueue.updateOne({ _id: account.task_id }, { status: status_codes.NEED_USER_ACTION_RESOLVED }, { upsert: false });
+                await models_shared.TaskQueue.findOneAndUpdate({ _id: account.task_id }, { status: status_codes.NEED_USER_ACTION_RESOLVED }, { upsert: false });
                 //await models.Accounts.findOneAndUpdate({ _id: account.credentials_id }, { task_id: null }, { upsert: false });
             }
-            await models.Accounts.updateOne({ _id: account.credentials_id }, { status: status_codes.AVAILABLE, task_id: null }, { upsert: false });
+            await models.Accounts.findOneAndUpdate({ _id: account.credentials_id }, { status: status_codes.AVAILABLE, task_id: null }, { upsert: false });
 
             await browser.close();
             browser.disconnect();
@@ -335,21 +349,21 @@ const input_data = async (account, user_data) => {
                 throw new Error("Error in input_data: context_obj is null.");
             }
 
-            await models.Accounts.updateOne({ _id: account.credentials_id }, { status: status_codes.BLOCKED, blocking_data: context_obj }, { upsert: false });
-            await models_shared.Credentials.updateOne({ _id: account.credentials_id }, { status: status_codes.FAILED }, { upsert: false });
+            await models.Accounts.findOneAndUpdate({ _id: account.credentials_id }, { status: status_codes.BLOCKED, blocking_data: context_obj }, { upsert: false });
+            await models_shared.Credentials.findOneAndUpdate({ _id: account.credentials_id }, { status: status_codes.FAILED }, { upsert: false });
+
+            browser.disconnect();
 
         } else if (res == -2) {
             // system error
-            await models.Accounts.updateOne({ _id: account.credentials_id }, { status: status_codes.FAILED }, { upsert: false });
+            await models.Accounts.findOneAndUpdate({ _id: account.credentials_id }, { status: status_codes.FAILED }, { upsert: false });
+            
             await browser.close();
             browser.disconnect();
         }
 
     } catch(err) {
-        let status = await findOne({ _id: account.credentials_id }, 'status');
-        if(status == status_codes.SOLVING_CAPTCHA) {
-            await models.Accounts.updateOne({ _id: account.credentials_id, status: status_codes.SOLVING_CAPTCHA }, { status: status_codes.BLOCKED }, { upsert: false });
-        }
+        await models.Accounts.findOneAndUpdate({ _id: account.credentials_id, status: status_codes.SOLVING_CAPTCHA }, { status: status_codes.BLOCKED }, { upsert: false });
 
         if(browser != null) {
             await browser.close();
@@ -376,9 +390,9 @@ const input_login = async (account) => {
 
         if(res == 0) {
             // login success
-            await models_shared.Credentials.updateOne({ _id: account.credentials_id }, { status: status_codes.AVAILABLE }, { upsert: false });
+            await models_shared.Credentials.findOneAndUpdate({ _id: account.credentials_id }, { status: status_codes.ACTIVE }, { upsert: false });
             if(account.task_id != null) {
-                await models_shared.TaskQueue.updateOne({ _id: account.task_id }, { status: status_codes.NEED_USER_ACTION_RESOLVED }, { upsert: false });
+                await models_shared.TaskQueue.findOneAndUpdate({ _id: account.task_id }, { status: status_codes.NEED_USER_ACTION_RESOLVED }, { upsert: false });
                 //await models.Accounts.findOneAndUpdate({ _id: account.credentials_id }, { task_id: null }, { upsert: false });
             }
             //await models.Accounts.findOneAndUpdate({ _id: account.credentials_id }, { status: status_codes.AVAILABLE, task_id: null }, { upsert: false });
@@ -400,7 +414,7 @@ const input_login = async (account) => {
                 expires: new_expires,
                 task_id: null, // !
             }
-            await models.Accounts.updateOne({ _id: account.credentials_id }, account_new, { upsert: false }); // upsert = false; because we have already created account object in DB
+            await models.Accounts.findOneAndUpdate({ _id: account.credentials_id }, account_new, { upsert: false }); // upsert = false; because we have already created account object in DB
 
             await browser.close();
             browser.disconnect();
@@ -412,8 +426,10 @@ const input_login = async (account) => {
                 throw new Error("Error in input_login: context_obj is null.");
             }
 
-            await models.Accounts.updateOne({ _id: account.credentials_id }, { status: status_codes.BLOCKED, blocking_data: context_obj }, { upsert: false });
-            await models_shared.Credentials.updateOne({ _id: account.credentials_id }, { status: status_codes.FAILED }, { upsert: false });
+            await models.Accounts.findOneAndUpdate({ _id: account.credentials_id }, { status: status_codes.BLOCKED, blocking_data: context_obj }, { upsert: false });
+            await models_shared.Credentials.findOneAndUpdate({ _id: account.credentials_id }, { status: status_codes.FAILED }, { upsert: false });
+
+            browser.disconnect();
 
         } else if (res == 1) {
             // wrong credentials - need one more try
@@ -422,21 +438,21 @@ const input_login = async (account) => {
                 throw new Error("Error in input_login: context_obj is null.");
             }
 
-            await models_shared.Credentials.updateOne({ _id: account.credentials_id }, { status: status_codes.FAILED }, { upsert: false });
-            await models.Accounts.updateOne({ _id: account.credentials_id }, { status: status_codes.BROKEN_CREDENTIALS }, { upsert: false });
-        
+            await models.Accounts.findOneAndUpdate({ _id: account.credentials_id }, { status: status_codes.BROKEN_CREDENTIALS }, { upsert: false });
+            await models_shared.Credentials.findOneAndUpdate({ _id: account.credentials_id }, { status: status_codes.FAILED }, { upsert: false });
+
+            browser.disconnect();
+
         } else if (res == -2) {
             // system error
-            await models.Accounts.updateOne({ _id: account.credentials_id }, { status: status_codes.FAILED }, { upsert: false });
+            await models.Accounts.findOneAndUpdate({ _id: account.credentials_id }, { status: status_codes.FAILED }, { upsert: false });
+            
             await browser.close();
             browser.disconnect();
         }
 
     } catch(err) {
-        let status = await findOne({ _id: account.credentials_id }, 'status');
-        if(status == status_codes.SOLVING_CAPTCHA) {
-            await models.Accounts.updateOne({ _id: account.credentials_id, status: status_codes.SOLVING_CAPTCHA }, { status: status_codes.BLOCKED }, { upsert: false });
-        }
+        await models.Accounts.findOneAndUpdate({ _id: account.credentials_id, status: status_codes.SOLVING_CAPTCHA }, { status: status_codes.BLOCKED }, { upsert: false });
 
         if(browser != null) {
             await browser.close();
