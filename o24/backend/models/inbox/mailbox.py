@@ -290,6 +290,9 @@ class TrackingDomains(db.Document):
 #format: via.outreacher24.com/<type>/<code>/<event>:
 class TrackEvents(db.Document):
     owner = db.ReferenceField('User')
+    
+    prospect_id = db.ObjectIdField()
+    campaign_id = db.ObjectIdField()
 
     code = db.StringField(required=True)
     mailbox_id = db.ReferenceField(MailBox)
@@ -312,11 +315,20 @@ class TrackEvents(db.Document):
         
         exist._commit()
 
+        return exist.prospect_id, exist.campaign_id
+
     @classmethod
     def get_create_tracking_event(cls, owner_id, mailbox_id):
         exist = cls.objects(owner=owner_id, mailbox_id=mailbox_id).first()
         if not exist:
             exist = cls()
+            
+            mailbox = MailBox.objects(id=mailbox_id).first()
+            if not mailbox:
+                raise Exception("get_create_tracking_event ERROR: can't find mailbox for id={0}".format(mailbox_id))
+                
+            exist.prospect_id = mailbox.prospect_id.id
+            exist.campaign_id = mailbox.campaign_id.id
 
             exist.owner = owner_id
             exist.mailbox_id = mailbox_id

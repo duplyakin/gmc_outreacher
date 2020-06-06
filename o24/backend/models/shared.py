@@ -195,6 +195,9 @@ class TaskQueueLock(db.Document):
 # When the new task created status = NEW
 # When the task added to job queue status = IN_PROGRESS
 class TaskQueue(db.Document):
+    owner_id = db.ObjectIdField()
+    stat_campaign_title = db.StringField()
+
     current_node = db.ReferenceField(Funnel, reverse_delete_rule=1)
     action_key = db.StringField()
 
@@ -309,7 +312,7 @@ class TaskQueue(db.Document):
             
             self.input_data['campaign_data'] = campaign.get_data()
             self.input_data['tracking_events'] = campaign.get_tracking_events()
-            
+
             if template_key:
                 template_data = campaign.get_template_data(template_key=template_key, medium=medium)
                 self.input_data['template_data'] = template_data
@@ -377,6 +380,10 @@ class TaskQueue(db.Document):
 
         self.current_node = next_node
         self.action_key = next_node.get_action_key()
+
+        _campaign = models.Campaign.objects(id=self.campaign_id).first()
+        if _campaign:
+            self.stat_campaign_title = _campaign.title
 
         self.credentials_id = models.Campaign.get_credentials_id(self.campaign_id, next_node)
         if not self.credentials_id:
@@ -528,6 +535,8 @@ class TaskQueue(db.Document):
     @classmethod
     def create_task(cls, campaign, prospect, test_crededentials_dict=None, _commit=False):
         new_task = cls()
+        new_task.owner_id = campaign.owner.id
+        new_task.stat_campaign_title = campaign.title
 
         _node = campaign.funnel
 
@@ -584,58 +593,3 @@ class TaskQueue(db.Document):
         self.save()
         if _reload:
             self.reload()
-
-#We put async tasks here. 
-class AsyncTaskQueue(db.Document):
-    campaign_id = db.ObjectIdField(unique=True)
-
-    input_data = db.DictField()
-    result_data = db.DictField()
-
-    def put_result_data(self, result_data):
-        self.result_data = result_data
-        self._commit()
-
-    @classmethod
-    def get_async_task(cls, campaign_id):
-        return cls.objects(campaign_id=campaign_id).first()
-
-    @classmethod
-    def create_async_task(cls, campaign_id, input_data=None):
-        if not campaign_id:
-            raise Exception("Can't create async task for campaign_id:{0}".format(campaign_id))
-
-        exist = cls.objects(campaign_id=campaign_id).first()
-        if exist:
-            return exist
-
-        new_task = cls()
-        if input_data:
-            new_task.input_data = input_data
-        
-        new_task.campaign_id = campaign_id
-        
-        new_task._commit()
-        return new_task
-
-    def _commit(self, _reload=False):
-        self.save()
-        if _reload:
-            self.reload()
-
-class OpenTracker(db.Document):
-    #open, reply
-    action_type = db.IntField()
-    
-    count = db.IntField()    
-    
-    #email, linkedin, twitter
-    medium = db.StringField()
-
-    #based on medium, check different tables: Mailbox, Linkedin, Twitter
-    ref = db.ObjectIdField()
-
-    action_meta = db.DictField()
-
-    created = db.DateTimeField( default=pytz.utc.localize(datetime.utcnow()) )
-
