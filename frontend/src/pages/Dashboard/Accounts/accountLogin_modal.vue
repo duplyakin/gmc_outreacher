@@ -12,16 +12,15 @@
             <el-input placeholder="Enter password" v-model="password" show-password></el-input>
         </div>
         <p> </p>
-        <div v-if="status != 0" class="notification">Loading. Please wait, it can take a minute...</div>
+        <div v-if="ack != 0" class="notification">Loading. Please wait, it can take a minute...</div>
 
         <div class="row">
             <div class="col-12 d-flex flex-row-reverse">
-                <button :disabled="status != 0" v-on:click="addAccount" type="button" class="btn btn-outline btn-wd btn-success mx-1">Login</button>
-                <button :disabled="status != 0" v-on:click="discard" type="button" class="btn btn-outline btn-wd btn-danger">Close</button>
+                <button :disabled="ack != 0" v-on:click="addAccount" type="button" class="btn btn-outline btn-wd btn-success mx-1">Login</button>
+                <button :disabled="ack != 0" v-on:click="discard" type="button" class="btn btn-outline btn-wd btn-danger">Close</button>
             </div>
         </div>
 
-        <div :v-if="test" class="notification">STATUS: {{status}}</div>
 </card>
 </div>
 </template>
@@ -37,22 +36,20 @@ export default {
         [Option.name]: Option,
     },
     props : {
-        status : Number,
-        accountLogin: Function,
-        accountStatus: Function,
+        accountStatusBS: Function,
+        accountLoginBS: Function,
     },
     data() {
         return {
             login: '',
             password: '',
+            ack: 0,
 
-            test: true,
         }
     },
     methods: {
         addAccount(){
-            console.log(typeof this.status)
-            console.log(this.status)
+            console.log(this.ack)
 
             if(!this.login) {
                 Notification.error({title: "Error", message: "Empty login"});
@@ -63,15 +60,11 @@ export default {
                 return;
             }
 
-            this.status = 1;
+            this.ack = 1;
 
-            console.log(typeof this.status)
-            console.log(this.status)
+            //await this.accountLogin(this.login, this.password);
 
-
-            //this.accountLogin(this.login, this.password);
-
-            setTimeout(this.accountStatus(), 3000);
+            setTimeout(this.accountStatusBS('123'), 3000);
         },
         discard(){
             this.$emit('close');

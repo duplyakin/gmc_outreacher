@@ -71,7 +71,9 @@
 </template>
 <script>
     import { Notification, Table, TableColumn, Select, Option } from 'element-ui'
-    import axios from '@/api/axios-auth';
+    import axios from '@/api/axios-auth'
+    import * as bs_axios from 'axios'
+
 
     const O24Pagination = () => import('src/components/O24Pagination.vue')
     const AccountEdit = () => import('./accountEdit.vue')
@@ -84,8 +86,8 @@
     const CREDENTIALS_API_ADD = '/credentials/add';
     //const CREDENTIALS_API_REFRESH = '/credentials/refresh';
 
-    const BS_API_STATUS = '/bs/api/status/';
-    const BS_API_LOGIN = '/bs/api/login/';
+    const BS_API_STATUS = 'http://127.0.0.1:3000/bs/api/status/';
+    const BS_API_LOGIN = 'http://127.0.0.1:3000/bs/api/login/';
 
 
     export default {
@@ -100,7 +102,6 @@
     },
     data () {
         return {
-            current_account_status: 0,
             status : {
                 0 : 'Active',
                 1 : 'Changed',
@@ -148,53 +149,11 @@
 
         },
         async loginLinkedinModal(credentials_id, row_index) {
-            const current_index = row_index;
-            //const _table = this.$refs.accounts_data_table;
             const _credentials_id = credentials_id;
 
-            this.current_account_status = 0;
-            
-            let _this = this;
-
             this.$modal.show(AccountLogin, {
-
-                status: _this.current_account_status,
-
-                accountStatus: async(_credentials_id) => {
-                    //_this.current_account_status = await _this.accountStatusBS(_credentials_id);
-                    await _this.accountStatusBS(_credentials_id);
-                    console.log("_this.current_account_status: ", _this.current_account_status);
-
-                    if(_this.current_account_status == -1) {
-                        Notification.error({title: "Error", message: "Something went wrong... Please, contact us."});
-                        this.$emit('close');
-                    }
-
-                    if(_this.current_account_status == 0) {
-                        Notification.success({title: "Success", message: "Success."});
-                        this.$emit('close');
-                    }
-
-                    if(_this.current_account_status == 1) {
-                        Notification.info({title: "Info", message: "In progress..."});
-                        setTimeout(accountStatus(), 3000);
-                    }
-
-                    if(_this.current_account_status == 2) {
-                        Notification.info({title: "Info", message: "Need action."});
-                        this.$emit('close');
-                        _this.inputLinkedinModal(_credentials_id);
-                    }
-
-                    if(_this.current_account_status == 4) {
-                        Notification.error({title: "Error", message: "Wrong login or password."});
-                    }
-                },
-
-                accountLogin: async(login, password) => {
-                    await _this.accountLoginBS(_credentials_id, login, password);
-                }
-
+                accountStatusBS: this.accountStatusBS,
+                accountLoginBS: this.accountLoginBS,
             },
             {
                 width: '620',
@@ -203,27 +162,59 @@
                 clickToClose: false
             })
         },
-        async inputLinkedinModal(credentials_id) {
+        async inputLinkedinModal(credentials_id, screenshot) {
             //
         },
-        accountStatusBS(credentials_id) {
+
+        async accountStatusBS(credentials_id) {
+            console.log("accountStatusBS started");
             const path = BS_API_STATUS;
 
             var data = new FormData();
             data.append("credentials_id", credentials_id);
 
-            axios
+            bs_axios
                 .post(path, data)
                 .then(res => {
                     var r = res.data;
-                    this.current_account_status = r.code;
+                    let status = JSON.parse(r.code);
+
+                    console.log("accountStatusBS status: ", status);
+
+                    if(status == -1) {
+                        Notification.error({title: "Error", message: "Something went wrong... Please, contact support."});
+                        this.$emit('close');
+                    }
+
+                    if(status == 0) {
+                        Notification.success({title: "Success", message: "Success."});
+                        this.$emit('close');
+                    }
+
+                    if(status == 1) {
+                        //Notification.info({title: "Info", message: "In progress..."});
+                        setTimeout(this.accountStatus, 3000);
+                    }
+
+                    if(status == 2) {
+                        Notification.info({title: "Info", message: "Need action."});
+                        this.$emit('close');
+                        this.inputLinkedinModal(_credentials_id);
+                    }
+
+                    if(status == 4) {
+                        Notification.error({title: "Error", message: "Wrong login or password."});
+                    }
+
                 })
                 .catch(error => {
-                    Notification.error({title: "Error", message: "Error status " + error});
-                    this.current_account_status = -1;
+                    //Notification.error({title: "Error", message: "Error status " + error});
+                    console.log("Error status ", error);
+                    Notification.error({title: "Error", message: "Something went wrong... Please, contact support."});
+                    this.$emit('close');
                 });
         },
-        accountLoginBS(credentials_id, login, password) {
+        async accountLoginBS(credentials_id, login, password) {
             const path = BS_API_LOGIN;
 
             var data = new FormData();
@@ -233,7 +224,7 @@
 
             //axios.defaults.baseURL = process.env.VUE_BS_APP_API_URL; // ??
 
-            axios
+            bs_axios
                 .post(path, data)
                 .then(res => {
                     var r = res.data;

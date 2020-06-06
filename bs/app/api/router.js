@@ -18,6 +18,7 @@ body = {
 
 */
 async function accountInput(req, res) {
+    res.setHeader('Access-Control-Allow-Origin', '*'); // TEST
     let credentials_id = req.body.credentials_id;
     let user_data = req.body.user_data;
 
@@ -66,6 +67,7 @@ response json:
 }
 */
 async function accountStatus(req, res) {
+    res.setHeader('Access-Control-Allow-Origin', '*'); // TEST
     let credentials_id = req.params.credentials_id;
 
     let account = await models.Accounts.findOne({ _id: credentials_id });
@@ -111,6 +113,7 @@ async function accountStatus(req, res) {
 
 
 async function accountLogin(req, res) {
+    res.setHeader('Access-Control-Allow-Origin', '*'); // TEST
 	let credentials_id = req.body.credentials_id;
 	let login = req.body.login;
 	let password = req.body.password;
