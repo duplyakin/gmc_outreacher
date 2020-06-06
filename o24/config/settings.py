@@ -71,8 +71,8 @@ class BaseConfig():
         '0' : 1 #snovio provider
     }
 
-    DEFAULT_SUBDOMAIN_PREFIX = 'email.'
-    DEAFULT_TRACKING_DOMAIN = 'via.outreacher24.com'
+    DEFAULT_SUBDOMAIN_PREFIX = 'https://email.'
+    DEAFULT_TRACKING_DOMAIN = 'https://via.outreacher24.com'
     DEFAULT_CODE_LENGTH = 13
 
 class DevConfig(BaseConfig):

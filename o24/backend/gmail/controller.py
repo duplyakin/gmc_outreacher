@@ -249,9 +249,11 @@ class GmailController():
                                 src=tracking_link)
             
             if soup.body:
-                soup.body.string.insert_before(tag)
+                soup.body.append(tag)
             elif soup.head:
-                soup.head.string.insert_before(tag)
+                soup.head.append(tag)
+            elif soup.html:
+                soup.html.append(tag)
 
 
             return str(soup)

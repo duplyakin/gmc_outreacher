@@ -362,7 +362,7 @@ class TrackEvents(db.Document):
 
 
     @classmethod
-    def _build_tracking_link(cls, event, tracking_domain=tracking_domain, code=code):
+    def _build_tracking_link(cls, event, tracking_domain, code=code):
         
         tracking_type = ''
         if event == 'open':
