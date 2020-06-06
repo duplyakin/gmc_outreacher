@@ -650,6 +650,7 @@ class Campaign(db.Document):
     campaign_type = db.IntField(default=0)
     
     custom_delays = db.DictField()
+    tracking_events = db.DictField(default=DEAFULT_TRACKING_EVENTS)
 
     title = db.StringField(required=True)
 
@@ -1045,6 +1046,12 @@ class Campaign(db.Document):
             return True
         
         return False
+
+    def get_tracking_events(self):
+        if not self.tracking_events:
+            return {}
+        
+        return self.tracking_events
 
     #Saved in days
     #Convert to seconds

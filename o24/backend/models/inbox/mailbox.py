@@ -35,10 +35,12 @@ month_map = {
 
 
 class MailBox(db.Document):
+    owner = db.ReferenceField('User')
     prospect_id = db.ReferenceField('Prospects')
     campaign_id = db.ReferenceField('Campaign')
 
     #it's incremented inside (prospect_id, campaign_id)
+    # we setup -1 for draft
     sequence = db.IntField(default=0)
 
     email_data = db.DictField()
@@ -67,15 +69,23 @@ class MailBox(db.Document):
         return int(created.timestamp()) - 30
 
     @classmethod
-    def get_create_draft(cls, prospect_id, campaign_id):
-        exist
+    def create_draft(cls, prospect_id, campaign_id):
+        campaign = models.Campaign.objects(id=campaign_id).first()
+        if not campaign:
+            raise Exception("create_draft ERROR: There is no campaign_id={0}".format(campaign_id))
+
         new_message = cls()
-        
+        new_message.owner = campaign.owner.id
+
+        new_message.sequence = -1
         new_message.prospect_id = prospect_id
         new_message.campaign_id = campaign_id
 
         new_message._commit(_reload=True)
         return new_message
+
+    def get_owner_id(self):
+        return self.owner.id    
 
     #need to redone
     def add_message(self, data, task_meta={}, message_type=1):
@@ -99,7 +109,7 @@ class MailBox(db.Document):
     
     @classmethod
     def get_parent(cls, prospect_id, campaign_id):
-        parent = cls.objects(Q(prospect_id=prospect_id) & Q(campaign_id=campaign_id)).order_by('-sequence').first()
+        parent = cls.objects(sequence__gte=0, prospect_id=prospect_id, campaign_id=campaign_id).order_by('-sequence').first()
         if not parent:
             return None
         
@@ -288,12 +298,19 @@ class TrackEvents(db.Document):
     clicked = db.IntField(default=0)
     
     @classmethod
-    def _random_code(cls, code_length=None):
-        if not code_length:
-            code_length = config.DEFAULT_CODE_LENGTH
-
-        letters = string.ascii_lowercase
-        return ''.join(random.choice(letters) for i in range(code_length))
+    def track_event(cls, code, event):
+        exist = cls.objects(code=code).first()
+        if not exist:
+            raise Exception("There is not TrackEvents registered for code:{0}".format(code))
+        
+        if event == 'open':
+            exist.opened = exist.opened + 1
+        elif event == 'click':
+            exist.clicked = exist.clicked + 1
+        else:
+            raise Exception("track_event ERROR: Unknown event={0}".format(event))
+        
+        exist._commit()
 
     @classmethod
     def get_create_tracking_event(cls, owner_id, mailbox_id):
@@ -308,24 +325,6 @@ class TrackEvents(db.Document):
             exist._commit(_reload=True)
 
         return exist
-
-    @classmethod
-    def _build_tracking_link(cls, event, tracking_domain=tracking_domain, code=code):
-        
-        tracking_type = ''
-        if event == 'open':
-            tracking_type = 'ot'
-        elif event == 'click':
-            tracking_type = 'ct'
-        else:
-            raise Exception("Unknown tracking event type={0}".format(event))
-
-        link = '{tracking_domain}/{tracking_type}/{code}/{event}'.format(tracking_domain=tracking_domain,
-                                                                        tracking_type=tracking_type,
-                                                                        code=code,
-                                                                        event=event)
-
-        return link
 
     @classmethod
     def get_tracking_link(cls, owner_id, mailbox_id, email, event='open'):
@@ -352,6 +351,34 @@ class TrackEvents(db.Document):
 
         
         return link
+
+    @classmethod
+    def _random_code(cls, code_length=None):
+        if not code_length:
+            code_length = config.DEFAULT_CODE_LENGTH
+
+        letters = string.ascii_lowercase
+        return ''.join(random.choice(letters) for i in range(code_length))
+
+
+    @classmethod
+    def _build_tracking_link(cls, event, tracking_domain=tracking_domain, code=code):
+        
+        tracking_type = ''
+        if event == 'open':
+            tracking_type = 'ot'
+        elif event == 'click':
+            tracking_type = 'ct'
+        else:
+            raise Exception("Unknown tracking event type={0}".format(event))
+
+        link = '{tracking_domain}/{tracking_type}/{code}/{event}'.format(tracking_domain=tracking_domain,
+                                                                        tracking_type=tracking_type,
+                                                                        code=code,
+                                                                        event=event)
+
+        return link
+
 
     def _commit(self, _reload=False):
         self.save()

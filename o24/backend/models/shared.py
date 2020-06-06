@@ -308,6 +308,7 @@ class TaskQueue(db.Document):
                 raise Exception("_fill_input_data ERROR: can't find campaign_id={0}".format(campaign_id))
             
             self.input_data['campaign_data'] = campaign.get_data()
+            self.input_data['tracking_events'] = campaign.get_tracking_events()
             
             if template_key:
                 template_data = campaign.get_template_data(template_key=template_key, medium=medium)

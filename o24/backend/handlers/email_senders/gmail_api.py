@@ -61,6 +61,9 @@ def send_email(task, **kwargs):
         if if_true:
             return reply
 
+    mailbox = MailBox.create_draft(prospect_id=kwargs['prospect_id'], campaign_id=kwargs['campaign_id'])
+
+    owner_id = mailbox.get_owner_id()
 
     email_from, 
     email_to,
@@ -68,9 +71,11 @@ def send_email(task, **kwargs):
     body_html,
     body_plain,
     message,
-    trail = construct_message(task=task, 
+    trail = construct_message(task=task,
+                                owner_id=owner_id, 
                                 gmail_controller=gmail_controller, 
-                                mailbox=parent_mailbox)
+                                mailbox=parent_mailbox,
+                                draft_id=mailbox.id)
 
     raw_message = gmail_controller.add_gmail_api_meta(message=message,
                                                     parent_mailbox=parent_mailbox)
@@ -97,7 +102,8 @@ def send_email(task, **kwargs):
     if parent_mailbox:
         message_type = 2
     
-    mailbox = MailBox.add_message(data, message_type=message_type)
+
+    mailbox.add_message(data, message_type=message_type)
 
     msg_id = mailbox.get_api_msg_id()
 

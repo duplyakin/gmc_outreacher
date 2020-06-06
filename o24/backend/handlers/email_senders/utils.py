@@ -1,6 +1,6 @@
 from o24.backend.utils.templates import *
 
-def construct_message(task, mail_controller, mailbox):
+def construct_message(task, owner_id, mail_controller, mailbox, draft_id):
     input_data = task.get_input_data()
     if not input_data:
         raise Exception("input_data error: can't construct message")
@@ -8,7 +8,7 @@ def construct_message(task, mail_controller, mailbox):
     template_data = input_data.get('template_data', None)
     if not template_data:
         raise Exception("template_data error: can't construct message")
-
+        
     prospect_data = input_data.get('prospect_data', None)
     if not prospect_data:
         raise Exception("prospect_data error: can't construct message")
@@ -42,6 +42,14 @@ def construct_message(task, mail_controller, mailbox):
     body_html = insert_tags(body_html, prospect_data)
     body_plain = insert_tags(body_plain, prospect_data)
 
+    #TODO - check if campaign tracking on
+    tracking_events = input_data.get('tracking_events', {})
+    if tracking_events:
+        body_html = mail_controller.insert_tracking(owner_id=owner_id,
+                                                    email=email_from,
+                                                    mailbox_id=draft_id, 
+                                                    body_html=body_html, 
+                                                    events=tracking_events)
 
     message, trail = mail_controller.create_multipart_message( 
                                                 email_from=email_from,

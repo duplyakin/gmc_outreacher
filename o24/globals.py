@@ -50,7 +50,7 @@ DEFAULT_INTERVAL=0
 
 DEFAULT_FROM_HOUR=7
 DEFAULT_TO_HOUR=21
-DEFAULT_SENDING_DAYS={
+DEFAULT_SENDING_DAYS = {
         '0' : True,
         '1' : True,
         '2' : True, 
@@ -58,6 +58,10 @@ DEFAULT_SENDING_DAYS={
         '4' : True,
         '5' : False,
         '6' : False
+}
+DEAFULT_TRACKING_EVENTS = {
+        'open' : True,
+        'click' : False
 }
 
 DEFAULT_TIME_ZONE = {
