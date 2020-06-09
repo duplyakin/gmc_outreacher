@@ -9,7 +9,7 @@ const status_codes = require('../status_codes')
 
 async function get_cookies(credentials_id) {
 
-  let account = await models.Accounts.findOne({ credentials_id: credentials_id }, function (err, res) {
+  let account = await models.Accounts.findOne({ _id: credentials_id }, function (err, res) {
     if (err) throw MyExceptions.MongoDBError('MongoDB find account err: ' + err);
   });
 
@@ -21,7 +21,7 @@ async function get_cookies(credentials_id) {
     await loginAction.login();
     await loginAction.closeBrowser();
 
-    account = await models.Accounts.findOne({ credentials_id: credentials_id }, function (err, res) {
+    account = await models.Accounts.findOne({ _id: credentials_id }, function (err, res) {
       if (err) throw MyExceptions.MongoDBError('MongoDB find account err: ' + err);
     });
 

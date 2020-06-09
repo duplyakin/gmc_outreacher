@@ -1,15 +1,21 @@
 <template>
 <div class="account-login-modal">
-<card>
+    <card>
         <h3>Linkedin login</h3>
 
-        <div class="col-6">
-            <div>Login</div>
-            <el-input placeholder="Enter login" v-model="login"></el-input>
+        <div class="row justify-content-center">
+            <div class="col-6">
+                <label>Login</label>
+                <el-input placeholder="Enter login" v-model="login"></el-input>
+            </div>
+
         </div>
-        <div class="col-6">
-            <div>Password</div>
-            <el-input placeholder="Enter password" v-model="password" show-password></el-input>
+        <div class="row justify-content-center">
+            <div class="col-6">
+                <label>Password</label>
+                <el-input placeholder="Enter password" v-model="password" show-password></el-input>
+            </div>
+
         </div>
         <p> </p>
         <div v-if="ack != 0" class="notification">Loading. Please wait, it can take a minute...</div>
@@ -21,7 +27,7 @@
             </div>
         </div>
 
-</card>
+    </card>
 </div>
 </template>
 
@@ -37,7 +43,6 @@ export default {
     },
     props : {
         credentials_id: String,
-        accountStatusBS: Function,
         accountLoginBS: Function,
     },
     data() {
@@ -63,9 +68,6 @@ export default {
             this.ack = 1;
 
             this.accountLoginBS(this.credentials_id, this.login, this.password);
-
-            let _this = this;
-            setTimeout(async function () {_this.accountStatusBS(_this.credentials_id)}, 3000);
         },
         discard(){
             this.$emit('close');

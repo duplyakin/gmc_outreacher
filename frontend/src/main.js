@@ -23,6 +23,8 @@ Vue.use(VModal, { dynamic: true })
 import VueYouTubeEmbed from 'vue-youtube-embed'
 Vue.use(VueYouTubeEmbed)
 
+//import directive from 'element-ui/packages/popover/src/directive';
+//Vue.directive('Loading', directive);
 
 // configure router
 const router = new VueRouter({

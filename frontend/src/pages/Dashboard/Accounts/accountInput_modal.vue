@@ -2,12 +2,15 @@
 <div class="account-login-modal">
 <card>
         <h3>Input code</h3>
-        <img v-bind:src="'data:image/jpeg;base64,' + screenshot" />
+        <card>
+            <img v-bind:src="'data:image/jpeg;base64,' + screenshot" />
+        </card>
 
         <div class="col-6">
             <div>Input</div>
             <el-input placeholder="Enter code" v-model="input"></el-input>
         </div>
+        
         <p> </p>
         <div v-if="ack != 0" class="notification">Loading. Please wait, it can take a minute...</div>
 
@@ -35,7 +38,6 @@ export default {
     props : {
         screenshot: String,
         credentials_id: String,
-        accountStatusBS: Function,
         accountInputBS: Function,
     },
     data() {
@@ -55,9 +57,6 @@ export default {
             this.ack = 1;
 
             this.accountInputBS(this.credentials_id, this.input);
-
-            let _this = this;
-            setTimeout(async function () {_this.accountStatusBS(_this.credentials_id)}, 3000);
         },
         discard(){
             this.$emit('close');

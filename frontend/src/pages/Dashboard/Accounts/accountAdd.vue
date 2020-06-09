@@ -96,13 +96,14 @@
 </template>
 
 <script>
-import { Popover, Notification, Select, Option } from 'element-ui'
+import { Button, Popover, Notification, Select, Option } from 'element-ui'
 import axios from '@/api/axios-auth';
 
 const OAUTH_SERVER = process.env.VUE_APP_API_URL;
 
 export default {
     components: {
+        [Button.name]: Button,
         [Select.name]: Select,
         [Option.name]: Option,
         [Popover.name]: Popover,

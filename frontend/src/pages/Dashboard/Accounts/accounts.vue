@@ -151,10 +151,9 @@
             });
 
         },
-        async loginLinkedinModal(credentials_id, row_index) {
+        async loginLinkedinModal(credentials_id) {
             this.$modal.show(AccountLogin, {
                 credentials_id: credentials_id,
-                accountStatusBS: this.accountStatusBS,
                 accountLoginBS: this.accountLoginBS,
             },
             {
@@ -168,7 +167,6 @@
             this.$modal.show(AccountInput, {
                 screenshot: screenshot,
                 credentials_id: credentials_id,
-                accountStatusBS: this.accountStatusBS,
                 accountInputBS: this.accountInputBS,
             },
             {
@@ -181,6 +179,7 @@
         async accountInputBS(credentials_id, input) {
             //console.log("accountInputBS started with credentials_id: ", credentials_id);
             const path = BS_API_INPUT;
+            let _this = this;
 
             var result = {
                 credentials_id: credentials_id,
@@ -191,20 +190,20 @@
                 .post(path, result)
                 .then(res => {
                     var r = res.data;
-
                     //console.log("accountInputBS status: ", r.code);
 
                     if(r.code == -1) {
                         Notification.error({title: "Error", message: "Something went wrong... Please, contact support."});
-                    } else {
-                        // ok
-                    }
+                        this.$refs["modal_login"].modals = [];
 
+                    } else if (r.code == 1) {
+                        setTimeout(async function () {_this.accountStatusBS(credentials_id)}, 3000); // in progress
+                    } 
                 })
                 .catch(error => {
                     console.log("Error status ", error);
                     Notification.error({title: "Error", message: "Something went wrong... Please, contact support."});
-                    this.$emit('close');
+                    this.$refs["modal_login"].modals = [];
                 });
         },
         async accountStatusBS(credentials_id) {
@@ -250,19 +249,21 @@
                     }
 
                     if(status == 4) {
-                        Notification.error({title: "Error", message: "Wrong login or password."});
+                        Notification.error({title: "Error", message: "Wrong login or password. Try again."});
+                        this.$refs["modal_login"].modals = [];
+                        this.loginLinkedinModal(credentials_id);
                     }
 
                 })
                 .catch(error => {
                     console.log("Error status ", error);
                     Notification.error({title: "Error", message: "Something went wrong... Please, contact support."});
-                    this.inputLinkedinModal(credentials_id);
                 });
         },
         async accountLoginBS(credentials_id, login, password) {
             const path = BS_API_LOGIN;
             //console.log("accountLoginBS started with credentials_id: ", credentials_id);
+            let _this = this;
 
             var result = {
                 credentials_id: credentials_id,
@@ -278,6 +279,8 @@
                         Notification.error({title: "Error", message: "Empty login or password."});
                     } else if (r.code == 1) {
                         Notification.info({title: "Info", message: "Login in progress."});
+                        
+                        setTimeout(async function () {_this.accountStatusBS(credentials_id)}, 3000);
                     } else {
                         Notification.error({title: "Error", message: "Something went wrong... Please, contact support."});
                     }

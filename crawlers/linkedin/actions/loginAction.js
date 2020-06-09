@@ -72,14 +72,14 @@ class LoginAction {
             }
         });
 
-        await models.Accounts.findOneAndUpdate({ credentials_id: this.credentials_id }, { expires: new_expires, cookies: new_cookie }, { upsert: true }, function (err, res) {
+        await models.Accounts.findOneAndUpdate({ _id: this.credentials_id }, { expires: new_expires, cookies: new_cookie }, { upsert: true }, function (err, res) {
             if (err) throw MyExceptions.MongoDBError('MongoDB find Account err: ' + err); 
         });
 
     }
 
     async get_account() {
-        let account = await models.Accounts.findOne({ credentials_id: this.credentials_id });
+        let account = await models.Accounts.findOne({ _id: this.credentials_id });
         if(account == null) {
             throw MyExceptions.LoginActionError("Account with credentials_id: " + this.credentials_id + " not exists.");
         }

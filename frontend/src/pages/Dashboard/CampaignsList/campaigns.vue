@@ -28,7 +28,7 @@
 <card>
         <div class="col-12">
             <el-table
-            :v-loading="true"
+            v-loading="loading"
             stripe
             ref="campaigns_data_table"
             style="width: 100%;"
@@ -94,8 +94,6 @@ import { Pagination as LPagination } from "src/components/index";
 
 import axios from '@/api/axios-auth';
 
-//const CampaignForm = () => import('./campaign_form.vue')
-
 const CAMPAIGNS_API_DATA = '/campaigns/data'
 const CAMPAIGNS_API_LIST = '/campaigns/list';
 
@@ -105,7 +103,8 @@ const CAMPAIGNS_API_PAUSE = '/campaigns/pause';
 
 export default {
 components: {
-    //CampaignForm,
+    [Loading.name]: Loading,
+    Loading,
     LPagination,
     [Select.name]: Select,
     [Option.name]: Option,
@@ -117,6 +116,8 @@ computed: {
 data() {
     return {
         test : false,
+        loading: true,
+        
         status : {
             0 : 'New',
             1 : 'In progress',
@@ -125,10 +126,10 @@ data() {
            '-2' : 'Unknown'
         },
         pagination : {
-                perPage : 0,
-                currentPage : 1,
-                perPageOptions: [5, 10, 25, 50],
-                total : 0
+            perPage : 0,
+            currentPage : 1,
+            perPageOptions: [5, 10, 25, 50],
+            total : 0
         },
         list_data : {
             columns : [],
@@ -307,6 +308,7 @@ async mounted() {
     setTimeout(() => { loading.close() }, 1000)
     // https://juejin.im/post/5c8e151df265da67eb15fe09
     */
+
     await this.load_campaigns();
 }
 };

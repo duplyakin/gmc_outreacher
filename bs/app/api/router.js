@@ -76,6 +76,11 @@ async function accountStatus(req, res) {
         return res.json({ code: -1 })
     }
 
+    if (!account.status) {
+        console.log("..... There is no account status: ..... ", account);
+        return res.json({ code: -1 })
+    }
+
     if (account.status == status_codes.BLOCKED) {
         if (account.blocking_data == null) {
             console.log("..... Empty account.blocking_data. ..... ", credentials_id);
@@ -129,10 +134,9 @@ async function accountLogin(req, res) {
 	let account = null;
 	try {
         // check if it BROKEN_CREDENTIALS account
-        //account = await models.Accounts.findOneAndUpdate({ _id: credentials_id, status: { $in: [status_codes.BROKEN_CREDENTIALS, status_codes.AVAILABLE] }}, {credentials_id: credentials_id, login: login, password: password, status: status_codes.IN_PROGRESS}, { new: true, upsert: true }); 
-        account = await models.Accounts.findOneAndUpdate({ _id: credentials_id }, {credentials_id: credentials_id, login: login, password: password, status: status_codes.IN_PROGRESS}, { new: true, upsert: true }); 
+        account = await models.Accounts.findOneAndUpdate({ _id: credentials_id, status: { $in: [status_codes.BROKEN_CREDENTIALS, status_codes.BLOCKED, status_codes.AVAILABLE] }}, { _id: credentials_id, login: login, password: password, status: status_codes.IN_PROGRESS }, { new: true, upsert: true }); 
 
-        if (account == null){
+        if (account == null){ // Never happend. It will be exception.
             return res.json({ code: 1 }); // IN_PROGRESS // it should be -1 FAILED, becouse if we didn't found account, we have to create one
         }
 
@@ -148,6 +152,8 @@ async function accountLogin(req, res) {
             await models.Accounts.findOneAndUpdate({ _id: credentials_id, status: status_codes.IN_PROGRESS }, { status: status_codes.AVAILABLE }, { upsert: false });
             return res.json({ code: -1 }) // system error
         }
+
+        return res.json({ code: 1 }); // IN_PROGRESS or FAILED ? //todo..
     }
 }
 

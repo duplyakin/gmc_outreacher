@@ -334,12 +334,11 @@ const input_data = async (account, input) => {
 
         if(res == 0) {
             // block resolved
-            await models_shared.Credentials.findOneAndUpdate({ _id: account.credentials_id }, { status: status_codes.ACTIVE }, { upsert: false });
+            await models_shared.Credentials.findOneAndUpdate({ _id: account._id }, { status: status_codes.ACTIVE }, { upsert: false });
             if(account.task_id != null) {
                 await models_shared.TaskQueue.findOneAndUpdate({ _id: account.task_id }, { status: status_codes.NEED_USER_ACTION_RESOLVED }, { upsert: false });
-                //await models.Accounts.findOneAndUpdate({ _id: account.credentials_id }, { task_id: null }, { upsert: false });
             }
-            await models.Accounts.findOneAndUpdate({ _id: account.credentials_id }, { status: status_codes.AVAILABLE, task_id: null }, { upsert: false });
+            await models.Accounts.findOneAndUpdate({ _id: account._id }, { status: status_codes.AVAILABLE, task_id: null }, { upsert: false });
 
             await browser.close();
             browser.disconnect();
@@ -351,14 +350,14 @@ const input_data = async (account, input) => {
                 throw new Error("Error in input_data: context_obj is null.");
             }
 
-            await models.Accounts.findOneAndUpdate({ _id: account.credentials_id }, { status: status_codes.BLOCKED, blocking_data: context_obj }, { upsert: false });
-            await models_shared.Credentials.findOneAndUpdate({ _id: account.credentials_id }, { status: status_codes.FAILED }, { upsert: false });
+            await models.Accounts.findOneAndUpdate({ _id: account._id }, { status: status_codes.BLOCKED, blocking_data: context_obj }, { upsert: false });
+            await models_shared.Credentials.findOneAndUpdate({ _id: account._id }, { status: status_codes.FAILED }, { upsert: false });
 
             browser.disconnect();
 
         } else if (res == -2) {
             // system error
-            await models.Accounts.findOneAndUpdate({ _id: account.credentials_id }, { status: status_codes.FAILED }, { upsert: false });
+            await models.Accounts.findOneAndUpdate({ _id: account._id }, { status: status_codes.FAILED }, { upsert: false });
             
             await browser.close();
             browser.disconnect();
@@ -367,7 +366,7 @@ const input_data = async (account, input) => {
     } catch(err) {
         console.log("..... Error in input_data : ..... ", err.stack);
 
-        await models.Accounts.findOneAndUpdate({ _id: account.credentials_id, status: status_codes.SOLVING_CAPTCHA }, { status: status_codes.BLOCKED }, { upsert: false });
+        await models.Accounts.findOneAndUpdate({ _id: account._id, status: status_codes.SOLVING_CAPTCHA }, { status: status_codes.FAILED }, { upsert: false });
 
         if(browser != null) {
             await browser.close();
@@ -394,12 +393,10 @@ const input_login = async (account) => {
 
         if(res === 0) {
             // login success
-            await models_shared.Credentials.findOneAndUpdate({ _id: account.credentials_id }, { status: status_codes.ACTIVE }, { upsert: false });
+            await models_shared.Credentials.findOneAndUpdate({ _id: account._id }, { status: status_codes.ACTIVE }, { upsert: false });
             if(account.task_id != null) {
                 await models_shared.TaskQueue.findOneAndUpdate({ _id: account.task_id }, { status: status_codes.NEED_USER_ACTION_RESOLVED }, { upsert: false });
-                //await models.Accounts.findOneAndUpdate({ _id: account.credentials_id }, { task_id: null }, { upsert: false });
             }
-            //await models.Accounts.findOneAndUpdate({ _id: account.credentials_id }, { status: status_codes.AVAILABLE, task_id: null }, { upsert: false });
 
             // get new cookies
             let new_cookies = await _get_current_cookie(page);
@@ -418,7 +415,7 @@ const input_login = async (account) => {
                 expires: new_expires,
                 task_id: null, // !
             }
-            await models.Accounts.findOneAndUpdate({ _id: account.credentials_id }, account_new, { upsert: false }); // upsert = false; because we have already created account object in DB
+            await models.Accounts.findOneAndUpdate({ _id: account._id }, account_new, { upsert: false }); // upsert = false; because we have already created account object in DB
 
             await browser.close();
             browser.disconnect();
@@ -431,8 +428,8 @@ const input_login = async (account) => {
                 throw new Error("Error in input_login: context_obj is null.");
             }
 
-            await models.Accounts.findOneAndUpdate({ _id: account.credentials_id }, { status: status_codes.BLOCKED, blocking_data: context_obj }, { upsert: false });
-            await models_shared.Credentials.findOneAndUpdate({ _id: account.credentials_id }, { status: status_codes.FAILED }, { upsert: false });
+            await models.Accounts.findOneAndUpdate({ _id: account._id }, { status: status_codes.BLOCKED, blocking_data: context_obj }, { upsert: false });
+            await models_shared.Credentials.findOneAndUpdate({ _id: account._id }, { status: status_codes.FAILED }, { upsert: false });
 
             browser.disconnect();
 
@@ -443,14 +440,15 @@ const input_login = async (account) => {
                 throw new Error("Error in input_login: context_obj is null.");
             }
 
-            await models.Accounts.findOneAndUpdate({ _id: account.credentials_id }, { status: status_codes.BROKEN_CREDENTIALS }, { upsert: false });
-            await models_shared.Credentials.findOneAndUpdate({ _id: account.credentials_id }, { status: status_codes.FAILED }, { upsert: false });
+            await models.Accounts.findOneAndUpdate({ _id: account._id }, { status: status_codes.BROKEN_CREDENTIALS }, { upsert: false });
+            await models_shared.Credentials.findOneAndUpdate({ _id: account._id }, { status: status_codes.FAILED }, { upsert: false });
 
+            await browser.close();
             browser.disconnect();
 
         } else if (res === -2) {
             // system error
-            await models.Accounts.findOneAndUpdate({ _id: account.credentials_id }, { status: status_codes.FAILED }, { upsert: false });
+            await models.Accounts.findOneAndUpdate({ _id: account._id }, { status: status_codes.FAILED }, { upsert: false });
             
             await browser.close();
             browser.disconnect();
@@ -459,7 +457,7 @@ const input_login = async (account) => {
     } catch(err) {
         console.log("..... Error in input_login : ..... ", err.stack);
 
-        await models.Accounts.findOneAndUpdate({ _id: account.credentials_id, status: status_codes.SOLVING_CAPTCHA }, { status: status_codes.BLOCKED }, { upsert: false });
+        await models.Accounts.findOneAndUpdate({ _id: account._id, status: status_codes.SOLVING_CAPTCHA }, { status: status_codes.FAILED }, { upsert: false });
 
         if(browser != null) {
             await browser.close();
