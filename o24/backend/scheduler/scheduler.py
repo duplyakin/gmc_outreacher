@@ -2,7 +2,7 @@ from o24.backend import db
 from o24.backend import app
 import o24.backend.dashboard.models as models
 
-from o24.backend.models.shared import TaskQueue, TaskQueueLock, Funnel, Action, AsyncTaskQueue
+from o24.backend.models.shared import TaskQueue, TaskQueueLock, Funnel, Action
 from o24.globals import *
 from .models import Priority, TaskLog
 import o24.backend.handlers.jobs_map as jobs_map
@@ -233,9 +233,6 @@ class Scheduler():
         
         self._setup_scheduler_data(campaign)
 
-        #campaign.update_status(status=IN_PROGRESS)
-        #create async action for campaign
-        #AsyncTaskQueue.create_async_task(campaign_id=campaign.id, input_data=input_data)
 
     def pause_campaign(self, campaign):
         if not campaign.inprogress():

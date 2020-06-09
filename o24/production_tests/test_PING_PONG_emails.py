@@ -143,7 +143,8 @@ class PingPongEmailsTest(unittest.TestCase):
         with app.test_request_context():
             try:                                
                 api_campaigns_pause(user=user, client=client, campaign_id=str(campaign.id))
-            except:
+            except Exception as e:
+                print(e)
                 print(".....Campaign already paused")
                 pass
 
@@ -155,7 +156,8 @@ class PingPongEmailsTest(unittest.TestCase):
 
             try:                                
                 api_campaigns_start(user=user, client=client, campaign_id=str(campaign.id))
-            except:
+            except Exception as e:
+                print(e)
                 print(".....Campaign already started")
                 pass
 

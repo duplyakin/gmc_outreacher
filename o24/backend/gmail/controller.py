@@ -13,6 +13,7 @@ import base64
 import html
 import uuid
 from bs4 import BeautifulSoup
+import traceback
 
 class GmailController():
     def __init__(self, email, credentials, credentials_id, smtp=False):
@@ -224,3 +225,40 @@ class GmailController():
 
     def check_reply(self, email_from, after=None):
         return self.provider.check_reply(email_from=email_from, after=after)
+    
+    def insert_tracking(self, owner_id, mailbox_id, email, body_html, events):
+        try:
+            if not events:
+                return body_html
+            
+            if not events.get('open', None):
+                return body_html
+
+            tracking_link = mailbox.TrackEvents.get_tracking_link(owner_id=owner_id, 
+                                                                mailbox_id=mailbox_id, 
+                                                                email=email, 
+                                                                event='open')
+
+            soup = BeautifulSoup(body_html, "html.parser")
+
+            tag = soup.new_tag('img', 
+                                width="1", 
+                                height="1", 
+                                style="display: block;", 
+                                alt="", 
+                                src=tracking_link)
+            
+            if soup.body:
+                soup.body.append(tag)
+            elif soup.head:
+                soup.head.append(tag)
+            elif soup.html:
+                soup.html.append(tag)
+
+
+            return str(soup)
+        except Exception as e:
+            print(e)
+            traceback.print_exc()
+
+            return body_html

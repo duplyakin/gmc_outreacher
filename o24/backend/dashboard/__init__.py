@@ -9,5 +9,5 @@ static_folder='static'
 
 from o24.backend.dashboard.controllers import settings, \
                                         prospects, credentials, campaigns, lists, users, admin, \
-                                        linkedin_enrichment, black_list
+                                        linkedin_enrichment, black_list, email_events_tracker
 

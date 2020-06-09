@@ -49,6 +49,7 @@ class BaseConfig():
     PER_PAGE = 10
     USER_PASSLIB_CRYPTCONTEXT_SCHEMES = ["pbkdf2_sha256"]
 
+    STATS_PER_PAGE = 100
     PROSPECTS_PER_PAGE = 100
     CREDENTIALS_PER_PAGE = 100
     CAMPAIGNS_PER_PAGE = 100
@@ -71,6 +72,9 @@ class BaseConfig():
         '0' : 1 #snovio provider
     }
 
+    DEFAULT_SUBDOMAIN_PREFIX = 'https://email.'
+    DEAFULT_TRACKING_DOMAIN = 'https://via.outreacher24.com'
+    DEFAULT_CODE_LENGTH = 13
 
 class DevConfig(BaseConfig):
     FLASK_ENV = 'development'

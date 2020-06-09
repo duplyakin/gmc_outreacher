@@ -648,6 +648,9 @@ class Campaign(db.Document):
     # 11 - archived (deleted)
     status = db.IntField(default=0)
     campaign_type = db.IntField(default=0)
+    
+    custom_delays = db.DictField()
+    tracking_events = db.DictField(default=DEAFULT_TRACKING_EVENTS)
 
     title = db.StringField(required=True)
 
@@ -1044,6 +1047,14 @@ class Campaign(db.Document):
         
         return False
 
+    def get_tracking_events(self):
+        if not self.tracking_events:
+            return {}
+        
+        return self.tracking_events
+
+    #Saved in days
+    #Convert to seconds
     def get_delay(self, template_key):
         if not self.templates:
             return None
@@ -1064,6 +1075,13 @@ class Campaign(db.Document):
         linkedin_template = linkedin_templates.get(template_key, {})
         if linkedin_template:
             delay_days = linkedin_template.get('interval', None)
+            if delay_days is not None:
+                delay = delay_days * DAY_TO_SECONDS
+                return delay
+
+        #Try custom delays
+        if self.custom_delays:
+            delay_days = self.custom_delays.get(template_key, None)
             if delay_days is not None:
                 delay = delay_days * DAY_TO_SECONDS
                 return delay
@@ -1115,6 +1133,9 @@ class Campaign(db.Document):
 
         new_campaign.funnel = shared.Funnel.get_linkedin_enrichment_funnel_id()
 
+        if self.custom_delays:
+            new_campaign.custom_delays = self.custom_delays
+        
         new_campaign.sending_days = self.sending_days
         new_campaign.from_hour = self.from_hour
         new_campaign.to_hour = self.to_hour
@@ -1397,7 +1418,7 @@ class Prospects(db.Document):
             self.tags.append(title)
         
         self._commit()
-        
+
     @classmethod
     def enrich_prospect(cls, owner_id, prospect_id, prospect_data):
         if not prospect_data:

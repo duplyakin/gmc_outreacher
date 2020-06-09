@@ -123,6 +123,13 @@ class ProdTestScenaries(unittest.TestCase):
     #UNASSIGN prospects and DELETE campaign
             self._campaigns_delete(user=user, client=client, campaign_id=CAMPAIGN_ID)
 
+    #CREATE Again to have in a database
+            CAMPAIGN_ID = self._campaigns_create(user=user, client=client)
+
+    #EDIT OUTREACH campaign
+            self._campaigns_edit(user=user, 
+                                client=client,
+                                campaign_id=CAMPAIGN_ID)
 
     def test_2_check_admin_handlers(self):
         user = User.objects(email=TEST_USER_EMAIL).first()

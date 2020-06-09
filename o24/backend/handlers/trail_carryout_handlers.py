@@ -3,7 +3,11 @@ import o24.backend.dashboard.models as models
 import o24.backend.scheduler.scheduler as scheduler
 
 from o24.globals import *
-import datetime
+from datetime import datetime  
+from datetime import timedelta  
+from pytz import timezone
+import pytz
+
 from mongoengine.queryset.visitor import Q
 import o24.config as config
 import o24.backend.handlers.enricher as enricher
@@ -114,7 +118,9 @@ def linkedin_search_action(task):
         campaign._safe_pause()
         start_linkedin_enrichment_campaign(task)
         return
-    
+
+    now = pytz.utc.localize(datetime.utcnow())
+    task.next_round = now + timedelta(seconds=DEFAULT_SEARCH_DELAY)
     task.update_status(status=NEW)
     return
 

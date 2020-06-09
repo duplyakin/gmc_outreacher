@@ -196,6 +196,9 @@ class TestUsersCampaignsProspects(unittest.TestCase):
                     list_id = prospects_list.id
                 
                 data = prospect.get('data')
+                campaign_id = None
+                if campaign:
+                    campaign_id = campaign.id
                 new_prospect = Prospects.create_prospect(owner_id=owner.id,
                                                         campaign_id=campaign_id,
                                                         list_id=list_id,

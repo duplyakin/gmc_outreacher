@@ -4,6 +4,9 @@ from o24.backend import db
 from mongoengine.queryset.visitor import Q
 from datetime import datetime
 import pytz
+import o24.config as config
+import string
+import random
 
 week_day_map = {
     0 : 'Mon',
@@ -32,10 +35,12 @@ month_map = {
 
 
 class MailBox(db.Document):
+    owner = db.ReferenceField('User')
     prospect_id = db.ReferenceField('Prospects')
     campaign_id = db.ReferenceField('Campaign')
 
     #it's incremented inside (prospect_id, campaign_id)
+    # we setup -1 for draft
     sequence = db.IntField(default=0)
 
     email_data = db.DictField()
@@ -46,7 +51,6 @@ class MailBox(db.Document):
     # 2 - Followup
     message_type = db.IntField(default=0)
 
-    tracker_token = db.StringField()
     # we don't use it now BUT
     # if we will need to create complex email sequence (with several intro's and followups) then
     # we will use this field to store task meta that this email belongs to 
@@ -65,34 +69,47 @@ class MailBox(db.Document):
         return int(created.timestamp()) - 30
 
     @classmethod
-    def add_message(cls, data, task_meta={}, tracker_token='', message_type=1):
+    def create_draft(cls, prospect_id, campaign_id):
+        campaign = models.Campaign.objects(id=campaign_id).first()
+        if not campaign:
+            raise Exception("create_draft ERROR: There is no campaign_id={0}".format(campaign_id))
+
         new_message = cls()
+        new_message.owner = campaign.owner.id
 
-        new_message.prospect_id = data.get('prospect_id')
-        new_message.campaign_id = data.get('campaign_id')
+        new_message.sequence = -1
+        new_message.prospect_id = prospect_id
+        new_message.campaign_id = campaign_id
 
-        has_parent = cls.get_parent(prospect_id=new_message.prospect_id,
-                                            campaign_id=new_message.campaign_id)
+        new_message._commit(_reload=True)
+        return new_message
+
+    def get_owner_id(self):
+        return self.owner.id    
+
+    #need to redone
+    def add_message(self, data, task_meta={}, message_type=1):
+
+        has_parent = MailBox.get_parent(prospect_id=self.prospect_id,
+                                            campaign_id=self.campaign_id)
         current_sequence = 0
         if has_parent:
             current_sequence = has_parent.sequence + 1
 
-        new_message.sequence = current_sequence
+        self.sequence = current_sequence
 
-        new_message.email_data = data.get('email_data')
-        new_message.sender_meta = data.get('sender_meta')
+        self.email_data = data.get('email_data')
+        self.sender_meta = data.get('sender_meta')
 
-        new_message.task_meta = task_meta
-        new_message.tracker_token = tracker_token
-        new_message.message_type = message_type
+        self.task_meta = task_meta
+        self.message_type = message_type
     
-
-        new_message._commit()
-        return new_message
+        self._commit()
+        return
     
     @classmethod
     def get_parent(cls, prospect_id, campaign_id):
-        parent = cls.objects(Q(prospect_id=prospect_id) & Q(campaign_id=campaign_id)).order_by('-sequence').first()
+        parent = cls.objects(sequence__gte=0, prospect_id=prospect_id, campaign_id=campaign_id).order_by('-sequence').first()
         if not parent:
             return None
         
@@ -167,6 +184,213 @@ class MailBox(db.Document):
         self._commit()
 
         return True
+
+    def _commit(self, _reload=False):
+        self.save()
+        if _reload:
+            self.reload()
+
+
+class TrackingDomains(db.Document):
+    #config.DEFAULT_SUBDOMAIN_PREFIX
+
+    owner = db.ReferenceField('User')
+
+    domain = db.StringField(required=True)
+    tracking_domain = db.StringField(required=True)
+    
+    used_by_emails = db.DictField()
+
+    status = db.IntField(default=0) 
+
+    NEW = 0 # just created
+    VERIFIED = 1 #Verified(1) - DNS checked
+    ACTIVE = 2 #Active(2) - certificate activated
+    
+
+    def domain_verified(self):
+        self.status = self.VERIFIED
+        self._commit()
+    
+    def domain_activated(self):
+        self.status = self.ACTIVE
+        self._commit()
+    
+    @classmethod
+    def _domain_from_email(cls, email):
+        splitted = email.split('@')
+        if len(splitted) < 2:
+            raise Exception("Wrong email format:{0}".format(email))
+
+        domain = splitted[1]
+        domain = domain.strip()
+
+        return domain
+
+    @classmethod
+    def _build_tracking_domain(cls, domain):
+        if not domain:
+            raise Exception("_build_tracking_domain ERROR: domain can't be empty:{0}".format(domain))
+        
+        tracking_domain = config.DEFAULT_SUBDOMAIN_PREFIX + domain
+        return tracking_domain
+
+    @classmethod
+    def get_tracking_domain(cls, owner_id, email):
+        domain = cls._domain_from_email(email=email)
+        if not domain:
+            raise Exception("get_tracking_domain ERROR: wrong email format:{0}".format(email))
+
+        found = config.DEAFULT_TRACKING_DOMAIN
+
+        exist = cls.objects(owner=owner_id, 
+                            domain=domain, 
+                            status=cls.ACTIVE).first()
+        if exist:
+            found = exist.tracking_domain
+        
+        if not found:
+            raise Exception("get_tracking_domain ERROR: tracking_domain can't be empty:{0}".format(found))
+
+        return found
+
+    @classmethod
+    def create_tracking_domain(cls, owner_id, email):
+        if not owner_id:
+            raise Exception("onwer_id can't be empty")
+        
+        domain = cls._domain_from_email(email=email)
+        if not domain:
+            raise Exception("Wrong domain format:{0}".format(email))
+
+        exist = cls.objects(owner=owner_id, domain=domain).first()
+        if exist:
+            if email not in exist.used_by_emails.keys():
+                exist.used_by_emails[email] = pytz.utc.localize(datetime.utcnow())
+                exist._commit()
+            return exist
+        
+        new_domain = cls()
+        new_domain.status = cls.NEW
+        new_domain.owner = owner_id
+
+        new_domain.domain = domain
+        new_domain.tracking_domain = cls._build_tracking_domain(domain)
+
+        new_domain.used_by_emails[email] = pytz.utc.localize(datetime.utcnow())
+        new_domain._commit()
+
+        return new_domain
+
+    def _commit(self, _reload=False):
+        self.save()
+
+
+#1 message = 1 uniqueue code
+#format: via.outreacher24.com/<type>/<code>/<event>:
+class TrackEvents(db.Document):
+    owner = db.ReferenceField('User')
+    
+    prospect_id = db.ObjectIdField()
+    campaign_id = db.ObjectIdField()
+
+    code = db.StringField(required=True)
+    mailbox_id = db.ReferenceField(MailBox)
+
+    opened = db.IntField(default=0)
+    clicked = db.IntField(default=0)
+    
+    @classmethod
+    def track_event(cls, code, event):
+        exist = cls.objects(code=code).first()
+        if not exist:
+            raise Exception("There is not TrackEvents registered for code:{0}".format(code))
+        
+        if event == 'open':
+            exist.opened = exist.opened + 1
+        elif event == 'click':
+            exist.clicked = exist.clicked + 1
+        else:
+            raise Exception("track_event ERROR: Unknown event={0}".format(event))
+        
+        exist._commit()
+
+        return exist.prospect_id, exist.campaign_id
+
+    @classmethod
+    def get_create_tracking_event(cls, owner_id, mailbox_id):
+        exist = cls.objects(owner=owner_id, mailbox_id=mailbox_id).first()
+        if not exist:
+            exist = cls()
+            
+            mailbox = MailBox.objects(id=mailbox_id).first()
+            if not mailbox:
+                raise Exception("get_create_tracking_event ERROR: can't find mailbox for id={0}".format(mailbox_id))
+                
+            exist.prospect_id = mailbox.prospect_id.id
+            exist.campaign_id = mailbox.campaign_id.id
+
+            exist.owner = owner_id
+            exist.mailbox_id = mailbox_id
+            exist.code = cls._random_code()
+
+            exist._commit(_reload=True)
+
+        return exist
+
+    @classmethod
+    def get_tracking_link(cls, owner_id, mailbox_id, email, event='open'):
+        tracking_domain = TrackingDomains.get_tracking_domain(owner_id=owner_id, 
+                                                                email=email)
+        if not tracking_domain:
+            raise Exception("get_tracking_link ERROR: tracking_domain can't be empty")
+        
+        exist = cls.get_create_tracking_event(owner_id=owner_id, mailbox_id=mailbox_id)
+        if not exist:
+            raise Exception("Can't get tracking event for owner_id={0} mailbox_id={1}".format(owner_id, mailbox_id))
+
+        code = exist.code
+        if not code:
+            raise Exception("code can't be empty={0}".format(code))
+        
+        link = None
+        if event == 'open':
+            link = cls._build_tracking_link(event=event,
+                                            tracking_domain=tracking_domain,
+                                            code=code)
+        else:
+            raise Exception("Unknown tracking event type={0}".format(event))
+
+        
+        return link
+
+    @classmethod
+    def _random_code(cls, code_length=None):
+        if not code_length:
+            code_length = config.DEFAULT_CODE_LENGTH
+
+        letters = string.ascii_lowercase
+        return ''.join(random.choice(letters) for i in range(code_length))
+
+
+    @classmethod
+    def _build_tracking_link(cls, event, tracking_domain, code=code):
+        
+        tracking_type = ''
+        if event == 'open':
+            tracking_type = 'ot'
+        elif event == 'click':
+            tracking_type = 'ct'
+        else:
+            raise Exception("Unknown tracking event type={0}".format(event))
+
+        link = '{tracking_domain}/{tracking_type}/{code}/{event}'.format(tracking_domain=tracking_domain,
+                                                                        tracking_type=tracking_type,
+                                                                        code=code,
+                                                                        event=event)
+
+        return link
+
 
     def _commit(self, _reload=False):
         self.save()
