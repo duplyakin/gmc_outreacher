@@ -2,20 +2,21 @@ var express = require('express')
 
 var app = express()
 
-app.use('/bs/api', require('./api/router'))
+var bodyParser = require('body-parser')
+
+// parse application/x-www-form-urlencoded
+app.use(bodyParser.urlencoded({ extended: false }))
+// parse application/json
+app.use(bodyParser.json())
+
 app.use(express.json())
 app.use(express.urlencoded())
-
-/* DON'T WORK
-var cors = require('cors');
-
-// use it before all route definitions
-app.use(cors({origin: 'http://192.168.43.202:8080'}));
 
 
 // Add headers
 app.use(function (req, res, next) {
 
+    /*
     // Website you wish to allow to connect
     res.setHeader('Access-Control-Allow-Origin', 'http://192.168.43.202:8080');
 
@@ -24,6 +25,12 @@ app.use(function (req, res, next) {
 
     // Request headers you wish to allow
     res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,content-type');
+    */
+    
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader("Access-Control-Allow-Methods", "GET, PUT, POST, DELETE");
+    res.setHeader("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization");
+
 
     // Set to true if you need the website to include cookies in the requests sent
     // to the API (e.g. in case you use sessions)
@@ -31,11 +38,13 @@ app.use(function (req, res, next) {
 
     // Pass to next layer of middleware
     next();
-});
-*/
+})
+
 
 // FINALLY, use any error handlers
 //app.use(require('app/errors/not-found'))
 
+
+app.use('/bs/api', require('./api/router')) // IT MUST BE HERE! DONT TOUCH.
 // Export the app instance for unit testing via supertest
 module.exports = app

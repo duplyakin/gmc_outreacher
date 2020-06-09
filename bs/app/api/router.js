@@ -18,11 +18,11 @@ body = {
 
 */
 async function accountInput(req, res) {
-    res.setHeader('Access-Control-Allow-Origin', '*'); // TEST
     let credentials_id = req.body.credentials_id;
-    let user_data = req.body.user_data;
+    let input = req.body.input;
+    console.log("accountInput started with body: ", input);
 
-    if(!credentials_id || !user_data) {
+    if(!credentials_id || !input) {
         return res.json({ code: -1 })
     }
 
@@ -39,7 +39,7 @@ async function accountInput(req, res) {
         }
 
         // get connect to pupeeter and input data ASYNC
-        utils.input_data(account, user_data);
+        utils.input_data(account, input);
 
         return res.json({
             code: 1 // IN_PROGRESS
@@ -67,13 +67,12 @@ response json:
 }
 */
 async function accountStatus(req, res) {
-    res.setHeader('Access-Control-Allow-Origin', '*'); // TEST
-    let credentials_id = req.params.credentials_id;
+    let credentials_id = req.body.credentials_id;
 
     let account = await models.Accounts.findOne({ _id: credentials_id });
 
     if (account == null) {
-        console.log("..... There is no account with credentials_id._id: ..... ", credentials_id);
+        console.log("..... There is no account with credentials_id: ..... ", credentials_id);
         return res.json({ code: -1 })
     }
 
@@ -90,7 +89,7 @@ async function accountStatus(req, res) {
 
         res.json({
             code: 2, // wait user action
-            blocking_data: account.blocking_data.screenshot,
+            screenshot: account.blocking_data.screenshot,
         })
     } else if (account.status == status_codes.IN_PROGRESS) {
         res.json({
@@ -113,10 +112,15 @@ async function accountStatus(req, res) {
 
 
 async function accountLogin(req, res) {
-    res.setHeader('Access-Control-Allow-Origin', '*'); // TEST
+    console.log("accountLogin started with body: ", req.body);
+    //req = JSON.parse(req);
+
 	let credentials_id = req.body.credentials_id;
 	let login = req.body.login;
-	let password = req.body.password;
+    let password = req.body.password;
+    
+    console.log("accountLogin started with credentials_id: ", credentials_id);
+    console.log("accountLogin started with login: ", login);
     
     if(!credentials_id || !login || !password) {
         return res.json({ code: -2 }); // empty credentials
@@ -125,7 +129,8 @@ async function accountLogin(req, res) {
 	let account = null;
 	try {
         // check if it BROKEN_CREDENTIALS account
-        account = await models.Accounts.findOneAndUpdate({ _id: credentials_id, status: { $in: [status_codes.BROKEN_CREDENTIALS, status_codes.AVAILABLE] }}, {credentials_id: credentials_id, login: login, password: password, status: status_codes.IN_PROGRESS}, { new: true, upsert: true }); 
+        //account = await models.Accounts.findOneAndUpdate({ _id: credentials_id, status: { $in: [status_codes.BROKEN_CREDENTIALS, status_codes.AVAILABLE] }}, {credentials_id: credentials_id, login: login, password: password, status: status_codes.IN_PROGRESS}, { new: true, upsert: true }); 
+        account = await models.Accounts.findOneAndUpdate({ _id: credentials_id }, {credentials_id: credentials_id, login: login, password: password, status: status_codes.IN_PROGRESS}, { new: true, upsert: true }); 
 
         if (account == null){
             return res.json({ code: 1 }); // IN_PROGRESS // it should be -1 FAILED, becouse if we didn't found account, we have to create one
@@ -137,7 +142,7 @@ async function accountLogin(req, res) {
         return res.json({ code: 1 }); // IN_PROGRESS
         
 	} catch (err) { 
-        console.log("..... Error in loginLinkedin : ..... ", err.stack);
+        console.log("..... Error in accountLogin : ..... ", err.stack);
 
 	    if (account != null) {
             await models.Accounts.findOneAndUpdate({ _id: credentials_id, status: status_codes.IN_PROGRESS }, { status: status_codes.AVAILABLE }, { upsert: false });

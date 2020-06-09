@@ -41,7 +41,7 @@
                     <a
                         v-tooltip.top-center="'Reconnect'"
                         class="btn-info btn-simple btn-link"
-                        @click.prevent="loginLinkedinModal(props.row._id.$oid, props.$index)"
+                        @click.prevent="loginLinkedinModal(props.row._id.$oid)"
                     >
                         <p class="small green" v-if="props.row.status != -1">Login linkedin</p>
                         <p class="small red" v-if="props.row.status == -1">Login linkedin required</p>
@@ -67,6 +67,7 @@
     </div>
     </div>
 
+<modals-container ref="modal_login"/>
 </div>
 </template>
 <script>
@@ -79,6 +80,7 @@
     const AccountEdit = () => import('./accountEdit.vue')
     const AccountAdd = () => import('./accountAdd.vue')
     const AccountLogin = () => import('./accountLogin_modal.vue')
+    const AccountInput = () => import('./accountInput_modal.vue')
 
     const CREDENTIALS_API_LIST = '/credentials/list';
     const CREDENTIALS_API_EDIT = '/credentials/edit';
@@ -88,6 +90,7 @@
 
     const BS_API_STATUS = 'http://127.0.0.1:3000/bs/api/status/';
     const BS_API_LOGIN = 'http://127.0.0.1:3000/bs/api/login/';
+    const BS_API_INPUT = 'http://127.0.0.1:3000/bs/api/input/';
 
 
     export default {
@@ -149,9 +152,8 @@
 
         },
         async loginLinkedinModal(credentials_id, row_index) {
-            const _credentials_id = credentials_id;
-
             this.$modal.show(AccountLogin, {
+                credentials_id: credentials_id,
                 accountStatusBS: this.accountStatusBS,
                 accountLoginBS: this.accountLoginBS,
             },
@@ -163,43 +165,88 @@
             })
         },
         async inputLinkedinModal(credentials_id, screenshot) {
-            //
+            this.$modal.show(AccountInput, {
+                screenshot: screenshot,
+                credentials_id: credentials_id,
+                accountStatusBS: this.accountStatusBS,
+                accountInputBS: this.accountInputBS,
+            },
+            {
+                width: '620',
+                height: 'auto',
+                scrollable: true,
+                clickToClose: false
+            })
         },
+        async accountInputBS(credentials_id, input) {
+            //console.log("accountInputBS started with credentials_id: ", credentials_id);
+            const path = BS_API_INPUT;
 
-        async accountStatusBS(credentials_id) {
-            console.log("accountStatusBS started");
-            const path = BS_API_STATUS;
+            var result = {
+                credentials_id: credentials_id,
+                input: input,
+            }
 
-            var data = new FormData();
-            data.append("credentials_id", credentials_id);
-
-            bs_axios
-                .post(path, data)
+            await bs_axios
+                .post(path, result)
                 .then(res => {
                     var r = res.data;
-                    let status = JSON.parse(r.code);
 
-                    console.log("accountStatusBS status: ", status);
+                    //console.log("accountInputBS status: ", r.code);
+
+                    if(r.code == -1) {
+                        Notification.error({title: "Error", message: "Something went wrong... Please, contact support."});
+                    } else {
+                        // ok
+                    }
+
+                })
+                .catch(error => {
+                    console.log("Error status ", error);
+                    Notification.error({title: "Error", message: "Something went wrong... Please, contact support."});
+                    this.$emit('close');
+                });
+        },
+        async accountStatusBS(credentials_id) {
+            //console.log("accountStatusBS started with credentials_id: ", credentials_id);
+            const path = BS_API_STATUS;
+            let _this = this;
+
+            var result = {
+                credentials_id: credentials_id,
+            }
+
+            await bs_axios
+                .post(path, result)
+                .then(res => {
+                    var r = res.data;
+                    let status = r.code;
+
+                    //console.log("accountStatusBS status: ", status);
 
                     if(status == -1) {
                         Notification.error({title: "Error", message: "Something went wrong... Please, contact support."});
-                        this.$emit('close');
+                        this.$refs["modal_login"].modals = [];
                     }
 
                     if(status == 0) {
                         Notification.success({title: "Success", message: "Success."});
-                        this.$emit('close');
+                        this.$refs["modal_login"].modals = [];
+                        this.loadCredentials(); // update table
                     }
 
                     if(status == 1) {
-                        //Notification.info({title: "Info", message: "In progress..."});
-                        setTimeout(this.accountStatus, 3000);
+                        setTimeout(async function () {_this.accountStatusBS(credentials_id)}, 3000); // in progress
                     }
 
                     if(status == 2) {
                         Notification.info({title: "Info", message: "Need action."});
-                        this.$emit('close');
-                        this.inputLinkedinModal(_credentials_id);
+                        this.$refs["modal_login"].modals = [];
+                        if(r.screenshot) {
+                            this.inputLinkedinModal(credentials_id, r.screenshot);
+                        } else {
+                            Notification.error({title: "Error", message: "Something went wrong... Please, contact support."});
+                        }
                     }
 
                     if(status == 4) {
@@ -208,31 +255,31 @@
 
                 })
                 .catch(error => {
-                    //Notification.error({title: "Error", message: "Error status " + error});
                     console.log("Error status ", error);
                     Notification.error({title: "Error", message: "Something went wrong... Please, contact support."});
-                    this.$emit('close');
+                    this.inputLinkedinModal(credentials_id);
                 });
         },
         async accountLoginBS(credentials_id, login, password) {
             const path = BS_API_LOGIN;
+            //console.log("accountLoginBS started with credentials_id: ", credentials_id);
 
-            var data = new FormData();
-            data.append("credentials_id", credentials_id);
-            data.append("login", login);
-            data.append("password", password);
+            var result = {
+                credentials_id: credentials_id,
+                login: login,
+                password: password,
+            }
 
-            //axios.defaults.baseURL = process.env.VUE_BS_APP_API_URL; // ??
-
-            bs_axios
-                .post(path, data)
+            await bs_axios
+                .post(path, result)
                 .then(res => {
                     var r = res.data;
-                    if (r.code <= 0) {
-                        //var msg = "Error login " + r.msg;
-                        //Notification.error({title: "Error", message: msg});
+                    if (r.code == -2) {
+                        Notification.error({title: "Error", message: "Empty login or password."});
+                    } else if (r.code == 1) {
+                        Notification.info({title: "Info", message: "Login in progress."});
                     } else {
-                        //Notification.success({title: "Success", message: "Login success."});
+                        Notification.error({title: "Error", message: "Something went wrong... Please, contact support."});
                     }
                 })
                 .catch(error => {

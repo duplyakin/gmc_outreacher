@@ -102,6 +102,7 @@ const check_block_url = (url) => {
     }
 
     if(url.includes(links.BAN_LINK) || url.includes(links.CHALLENGE_LINK)) {
+        console.log('check_block_url block happend: ', url);
         return true;
     }
 
@@ -138,9 +139,9 @@ const login = async(page, account) => {
         }
 
         await page.goto(links.SIGNIN_LINK);
-        await page.waitForNavigation({ waitUntil: 'networkidle0' }); // check it
 
         //await page.waitFor(1000);
+        //console.log("..... account.login: ..... ", account.login);
 
         try {
             await page.waitForSelector(selectors.USERNAME_SELECTOR, { timeout: 5000 });
@@ -153,13 +154,15 @@ const login = async(page, account) => {
         await page.keyboard.type(account.login);
         await page.click(selectors.PASSWORD_SELECTOR);
         await page.keyboard.type(account.password);
-        //await page.click(selectors.CTA_SELECTOR);
-        //await page.waitFor(1000);
+        await page.click(selectors.CTA_SELECTOR);
+        await page.waitFor(5000);
 
-        await Promise.all([
-            page.click(selectors.CTA_SELECTOR),
-            page.waitForNavigation({ waitUntil: 'networkidle0' }),
-        ]);
+        try {
+            //await page.waitForSelector(selectors.BLOCK_TOAST_SELECTOR, { timeout: 1000 }); // do smth // todo
+        } catch (err) {
+            console.log("Login FAILED - toast error.")
+            return -2;
+        }
     
         let current_url = page.url();
 
@@ -169,7 +172,7 @@ const login = async(page, account) => {
         }
 
         if (check_block_url(current_url)) {
-            return -1; // block not resolved
+            return -1; // block happend
         }
 
         if (current_url.includes(links.SIGNIN_SHORTLINK)) {
@@ -185,8 +188,6 @@ const login = async(page, account) => {
 
 
 const get_context = async(browser, context, page) => {
-    await page.waitForNavigation({ waitUntil: 'networkidle0' }); // check it
-
     if(browser == null) {
       throw new Error("Can't get_context. Browser is not defined.");
     }
@@ -209,6 +210,7 @@ const get_context = async(browser, context, page) => {
       screenshot: screenshot_str,
     }
     
+    console.log('get_context context_obj created: ', context_obj);
     return context_obj;
   }
 
@@ -291,9 +293,9 @@ const page_connect = async (context, page_url) => {
 }
 
 
-const input_data = async (account, user_data) => {
-    if (!user_data){
-        console.log("..... Empty user_data in input_data. ..... ");
+const input_data = async (account, input) => {
+    if (!input){
+        console.log("..... Empty input in input_data. ..... ");
     }
 
     if(account == null) {
@@ -328,7 +330,7 @@ const input_data = async (account, user_data) => {
             throw new Error("Can't connect to page.");
         }
 
-        let res = await found_form_and_input(page, user_data);
+        let res = await found_form_and_input(page, input);
 
         if(res == 0) {
             // block resolved
@@ -363,6 +365,8 @@ const input_data = async (account, user_data) => {
         }
 
     } catch(err) {
+        console.log("..... Error in input_data : ..... ", err.stack);
+
         await models.Accounts.findOneAndUpdate({ _id: account.credentials_id, status: status_codes.SOLVING_CAPTCHA }, { status: status_codes.BLOCKED }, { upsert: false });
 
         if(browser != null) {
@@ -388,7 +392,7 @@ const input_login = async (account) => {
 
         let res = await login(page, account);
 
-        if(res == 0) {
+        if(res === 0) {
             // login success
             await models_shared.Credentials.findOneAndUpdate({ _id: account.credentials_id }, { status: status_codes.ACTIVE }, { upsert: false });
             if(account.task_id != null) {
@@ -397,7 +401,7 @@ const input_login = async (account) => {
             }
             //await models.Accounts.findOneAndUpdate({ _id: account.credentials_id }, { status: status_codes.AVAILABLE, task_id: null }, { upsert: false });
 
-            // save cookies
+            // get new cookies
             let new_cookies = await _get_current_cookie(page);
             let new_expires = 0;
             new_cookies.forEach((item) => {
@@ -419,8 +423,9 @@ const input_login = async (account) => {
             await browser.close();
             browser.disconnect();
 
-        } else if (res == -1) {
+        } else if (res === -1) {
             // login failed - block happend
+            console.log('input_login res = -1');
             let context_obj = await get_context(browser, context, page);
             if(context_obj == null) {
                 throw new Error("Error in input_login: context_obj is null.");
@@ -431,7 +436,7 @@ const input_login = async (account) => {
 
             browser.disconnect();
 
-        } else if (res == 1) {
+        } else if (res === 1) {
             // wrong credentials - need one more try
             let context_obj = await get_context(browser, context, page);
             if(context_obj == null) {
@@ -443,7 +448,7 @@ const input_login = async (account) => {
 
             browser.disconnect();
 
-        } else if (res == -2) {
+        } else if (res === -2) {
             // system error
             await models.Accounts.findOneAndUpdate({ _id: account.credentials_id }, { status: status_codes.FAILED }, { upsert: false });
             
@@ -452,6 +457,8 @@ const input_login = async (account) => {
         }
 
     } catch(err) {
+        console.log("..... Error in input_login : ..... ", err.stack);
+
         await models.Accounts.findOneAndUpdate({ _id: account.credentials_id, status: status_codes.SOLVING_CAPTCHA }, { status: status_codes.BLOCKED }, { upsert: false });
 
         if(browser != null) {
@@ -476,5 +483,7 @@ const _get_current_cookie = async (page) => {
 }
 
 
-module.exports.input_data = input_data;
-module.exports.input_data = input_login;
+module.exports = {
+    input_data: input_data,
+    input_login: input_login
+  }

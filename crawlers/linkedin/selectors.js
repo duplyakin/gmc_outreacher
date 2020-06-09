@@ -2,6 +2,7 @@
 module.exports.USERNAME_SELECTOR = '#username';
 module.exports.PASSWORD_SELECTOR = '#password';
 module.exports.CTA_SELECTOR = '#app__container > main > div > form > div.login__form_action_container > button';
+module.exports.BLOCK_TOAST_SELECTOR = '#app__container > artdeco-toasts > artdeco-toast > div > p';
 
 // checkpoint
 module.exports.VERIFICATION_PIN_SELECTOR = '#input__email_verification_pin';

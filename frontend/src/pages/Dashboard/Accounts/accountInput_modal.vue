@@ -1,22 +1,19 @@
 <template>
 <div class="account-login-modal">
 <card>
-        <h3>Linkedin login</h3>
+        <h3>Input code</h3>
+        <img v-bind:src="'data:image/jpeg;base64,' + screenshot" />
 
         <div class="col-6">
-            <div>Login</div>
-            <el-input placeholder="Enter login" v-model="login"></el-input>
-        </div>
-        <div class="col-6">
-            <div>Password</div>
-            <el-input placeholder="Enter password" v-model="password" show-password></el-input>
+            <div>Input</div>
+            <el-input placeholder="Enter code" v-model="input"></el-input>
         </div>
         <p> </p>
         <div v-if="ack != 0" class="notification">Loading. Please wait, it can take a minute...</div>
 
         <div class="row">
             <div class="col-12 d-flex flex-row-reverse">
-                <button :disabled="ack != 0" v-on:click="addAccount" type="button" class="btn btn-outline btn-wd btn-success mx-1">Login</button>
+                <button :disabled="ack != 0" v-on:click="inputAccount" type="button" class="btn btn-outline btn-wd btn-success mx-1">Input</button>
                 <button :disabled="ack != 0" v-on:click="discard" type="button" class="btn btn-outline btn-wd btn-danger">Close</button>
             </div>
         </div>
@@ -36,33 +33,28 @@ export default {
         [Option.name]: Option,
     },
     props : {
+        screenshot: String,
         credentials_id: String,
         accountStatusBS: Function,
-        accountLoginBS: Function,
+        accountInputBS: Function,
     },
     data() {
         return {
-            login: '',
-            password: '',
+            input: '',
             ack: 0,
-
         }
     },
     methods: {
-        async addAccount(){
+        async inputAccount(){
 
-            if(!this.login) {
-                Notification.error({title: "Error", message: "Empty login"});
-                return;
-            }
-            if(!this.password) {
-                Notification.error({title: "Error", message: "Empty password"});
+            if(!this.input) {
+                Notification.error({title: "Error", message: "Empty input"});
                 return;
             }
 
             this.ack = 1;
 
-            this.accountLoginBS(this.credentials_id, this.login, this.password);
+            this.accountInputBS(this.credentials_id, this.input);
 
             let _this = this;
             setTimeout(async function () {_this.accountStatusBS(_this.credentials_id)}, 3000);
