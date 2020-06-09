@@ -366,7 +366,7 @@ const input_data = async (account, input) => {
     } catch(err) {
         console.log("..... Error in input_data : ..... ", err.stack);
 
-        await models.Accounts.findOneAndUpdate({ _id: account._id, status: status_codes.SOLVING_CAPTCHA }, { status: status_codes.FAILED }, { upsert: false });
+        await models.Accounts.findOneAndUpdate({ _id: account._id, status: status_codes.SOLVING_CAPTCHA }, { status: status_codes.AVAILABLE }, { upsert: false });
 
         if(browser != null) {
             await browser.close();
@@ -457,7 +457,7 @@ const input_login = async (account) => {
     } catch(err) {
         console.log("..... Error in input_login : ..... ", err.stack);
 
-        await models.Accounts.findOneAndUpdate({ _id: account._id, status: status_codes.SOLVING_CAPTCHA }, { status: status_codes.FAILED }, { upsert: false });
+        await models.Accounts.findOneAndUpdate({ _id: account._id, status: status_codes.IN_PROGRESS }, { status: status_codes.AVAILABLE }, { upsert: false });
 
         if(browser != null) {
             await browser.close();

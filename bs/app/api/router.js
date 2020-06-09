@@ -8,15 +8,7 @@ const utils = require('./utils')
 
 const MyExceptions = require('../../../crawlers/exceptions/exceptions.js');
 
-/*
-request:
-outreacher24.com/bs/api/captcha/put
-body = {
-    task_id: ...
-    user_data: ...
-}
 
-*/
 async function accountInput(req, res) {
     let credentials_id = req.body.credentials_id;
     let input = req.body.input;
@@ -56,16 +48,6 @@ async function accountInput(req, res) {
 }
 
 
-/*
-request:
-outreacher24.com/bs/api/captcha/status?task_id=<task_id>
-
-response json:
-{
-    code: 0,
-    screenshot: <base64>
-}
-*/
 async function accountStatus(req, res) {
     let credentials_id = req.body.credentials_id;
 
@@ -109,6 +91,7 @@ async function accountStatus(req, res) {
             code: 4, // BROKEN_CREDENTIALS - NEED REPEAT
         })
     } else {
+        console.log("..... Unexpected account.status: ..... ", account.status);
         res.json({
             code: -1, // Unknown error - try again later
         })
@@ -117,15 +100,11 @@ async function accountStatus(req, res) {
 
 
 async function accountLogin(req, res) {
-    console.log("accountLogin started with body: ", req.body);
-    //req = JSON.parse(req);
+    //console.log("accountLogin started with body: ", req.body);
 
 	let credentials_id = req.body.credentials_id;
 	let login = req.body.login;
     let password = req.body.password;
-    
-    console.log("accountLogin started with credentials_id: ", credentials_id);
-    console.log("accountLogin started with login: ", login);
     
     if(!credentials_id || !login || !password) {
         return res.json({ code: -2 }); // empty credentials
@@ -134,11 +113,7 @@ async function accountLogin(req, res) {
 	let account = null;
 	try {
         // check if it BROKEN_CREDENTIALS account
-        account = await models.Accounts.findOneAndUpdate({ _id: credentials_id, status: { $in: [status_codes.BROKEN_CREDENTIALS, status_codes.BLOCKED, status_codes.AVAILABLE] }}, { _id: credentials_id, login: login, password: password, status: status_codes.IN_PROGRESS }, { new: true, upsert: true }); 
-
-        if (account == null){ // Never happend. It will be exception.
-            return res.json({ code: 1 }); // IN_PROGRESS // it should be -1 FAILED, becouse if we didn't found account, we have to create one
-        }
+        account = await models.Accounts.findOneAndUpdate({ _id: credentials_id, status: { $in: [status_codes.BROKEN_CREDENTIALS, status_codes.AVAILABLE] }}, { _id: credentials_id, login: login, password: password, status: status_codes.IN_PROGRESS }, { new: true, upsert: true }); 
 
 		// login linkedin async
 		utils.input_login(account);
@@ -149,6 +124,8 @@ async function accountLogin(req, res) {
         console.log("..... Error in accountLogin : ..... ", err.stack);
 
 	    if (account != null) {
+            console.log(".... account: ....", account);
+
             await models.Accounts.findOneAndUpdate({ _id: credentials_id, status: status_codes.IN_PROGRESS }, { status: status_codes.AVAILABLE }, { upsert: false });
             return res.json({ code: -1 }) // system error
         }

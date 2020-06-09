@@ -32,11 +32,6 @@ let credentialsSchema = new Schema({
 
   status : Number,
 
-  ack : {
-    type: Number,
-    default: 0,
-  },
-
 }, { collection: 'credentials' } );
 
 

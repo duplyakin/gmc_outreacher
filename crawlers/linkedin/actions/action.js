@@ -46,63 +46,6 @@ class Action {
     }
   }
 
-/*
-  async check_success_selector(selector, page = this.page, data = null) {
-    if(!selector) {
-      throw new Error ('Empty selector.');
-    }
-
-    try {
-      await page.waitForSelector(selector, { timeout: 5000 });
-
-    } catch(err) {
-      if(this.check_block(page)) {
-        // not target page here
-        let context_obj = await this.get_context(); // todo: send here browser, page, context
-
-        if(context_obj != null) {
-          throw MyExceptions.ContextError('Can\'t goto url: ' + err, context_obj, data);
-
-        } else {
-          console.log( 'Never happend - empty context: ', err );
-          throw new Error('Can\'t goto url and empty context: ' + err);
-        }
-      }
- 
-      // uncknown page here
-      throw MyExceptions.NetworkError('Something wromg with connection or uncknown page: ' + err);
-    }
-  }
-
-
-async check_block(url, data = null) {
-  if(!url) {
-    throw new Error('Empty url in check_block.')
-  }
-
-  if(url.includes(links.BAN_LINK) || url.includes(links.CHALLENGE_LINK)) {
-    // not target page here
-    let context_obj = await this.get_context(); // todo: send here browser, page, context
-
-    if(context_obj != null) {
-      if(data != null) {
-        // add info to excisting result_data
-        data.code = MyExceptions.ContextError().code;
-        data.raw = MyExceptions.ContextError('Can\'t goto url: ' + url).error;
-        data.blocking_data = context_obj;
-      } 
-      throw MyExceptions.ContextError('Can\'t goto url: ' + url, context_obj, data);
-    } else {
-      console.log( 'Never happend - empty context in check_block.');
-      throw new Error('Can\'t goto url and empty context in check_block');
-    }
-
-  } else {
-    // all ok
-    return false;
-  }
-}
-*/
 
 async check_success_selector(selector, page = this.page) {
   if(!selector) {
@@ -116,11 +59,11 @@ async check_success_selector(selector, page = this.page) {
   } catch(err) {
     
     if(this.check_block(page.url())) {
-      throw MyExceptions.ContextError("Block happend.");
+      throw MyExceptions.ContextError("Block happend: " + page.url());
     }
 
     // uncknown page here
-    throw MyExceptions.NetworkError('Something wromg with connection or uncknown page: ' + err);
+    throw new Error('Uncknowm page here: ', current_url);
   }
 }
 
@@ -205,7 +148,11 @@ async check_success_selector(selector, page = this.page) {
         }
       }
     } catch (err) {
-      await this.check_block(page.url());
+      if(this.check_block(page.url())) {
+        throw MyExceptions.ContextError("Block happend.");
+      }
+
+      throw new Error('Uncknowm page here: ', page.url());
     }
   }
 

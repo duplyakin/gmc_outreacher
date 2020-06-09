@@ -157,7 +157,7 @@
                 accountLoginBS: this.accountLoginBS,
             },
             {
-                width: '620',
+                width: '420',
                 height: 'auto',
                 scrollable: true,
                 clickToClose: false
@@ -194,7 +194,7 @@
 
                     if(r.code == -1) {
                         Notification.error({title: "Error", message: "Something went wrong... Please, contact support."});
-                        this.$refs["modal_login"].modals = [];
+                        this.$refs["modal_login"].modals = []; // CLOSE MODAL
 
                     } else if (r.code == 1) {
                         setTimeout(async function () {_this.accountStatusBS(credentials_id)}, 3000); // in progress
@@ -203,7 +203,7 @@
                 .catch(error => {
                     console.log("Error status ", error);
                     Notification.error({title: "Error", message: "Something went wrong... Please, contact support."});
-                    this.$refs["modal_login"].modals = [];
+                    this.$refs["modal_login"].modals = []; // CLOSE MODAL
                 });
         },
         async accountStatusBS(credentials_id) {
@@ -221,26 +221,30 @@
                     var r = res.data;
                     let status = r.code;
 
-                    //console.log("accountStatusBS status: ", status);
+                    console.log("accountStatusBS status: ", status);
 
                     if(status == -1) {
+                        // SYSTEM ERROR
                         Notification.error({title: "Error", message: "Something went wrong... Please, contact support."});
-                        this.$refs["modal_login"].modals = [];
+                        this.$refs["modal_login"].modals = []; // CLOSE MODAL
                     }
 
                     if(status == 0) {
+                        // SUCCESS
                         Notification.success({title: "Success", message: "Success."});
-                        this.$refs["modal_login"].modals = [];
+                        this.$refs["modal_login"].modals = []; // CLOSE MODAL // CLOSE MODAL
                         this.loadCredentials(); // update table
                     }
 
                     if(status == 1) {
+                        // IN PROGRESS
                         setTimeout(async function () {_this.accountStatusBS(credentials_id)}, 3000); // in progress
                     }
 
                     if(status == 2) {
+                        // NEED ACTION - INPUT CAPTCHA
                         Notification.info({title: "Info", message: "Need action."});
-                        this.$refs["modal_login"].modals = [];
+                        this.$refs["modal_login"].modals = []; // CLOSE MODAL // CLOSE MODAL
                         if(r.screenshot) {
                             this.inputLinkedinModal(credentials_id, r.screenshot);
                         } else {
@@ -249,14 +253,16 @@
                     }
 
                     if(status == 4) {
+                        // NEED ACTION - REPEAT LOGIN\PASSWORD
                         Notification.error({title: "Error", message: "Wrong login or password. Try again."});
-                        this.$refs["modal_login"].modals = [];
+                        this.$refs["modal_login"].modals = []; // CLOSE MODAL // CLOSE MODAL
                         this.loginLinkedinModal(credentials_id);
                     }
 
                 })
                 .catch(error => {
-                    console.log("Error status ", error);
+                    console.log("Error accountStatusBS: ", error);
+                    this.$refs["modal_login"].modals = []; // CLOSE MODAL // CLOSE MODAL
                     Notification.error({title: "Error", message: "Something went wrong... Please, contact support."});
                 });
         },
@@ -277,16 +283,23 @@
                     var r = res.data;
                     if (r.code == -2) {
                         Notification.error({title: "Error", message: "Empty login or password."});
+                        this.$refs["modal_login"].modals = []; // CLOSE MODAL
+
                     } else if (r.code == 1) {
                         Notification.info({title: "Info", message: "Login in progress."});
                         
                         setTimeout(async function () {_this.accountStatusBS(credentials_id)}, 3000);
                     } else {
+                        console.log("accountLoginBS status: ", r.code);
+
                         Notification.error({title: "Error", message: "Something went wrong... Please, contact support."});
+                        this.$refs["modal_login"].modals = []; // CLOSE MODAL
+
                     }
                 })
                 .catch(error => {
                     Notification.error({title: "Error", message: "Error login " + error});
+                    this.$refs["modal_login"].modals = []; // CLOSE MODAL
                 });
         },
         editAccount(account_dict, row_index) {

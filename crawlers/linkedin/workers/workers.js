@@ -102,12 +102,13 @@ async function searchWorker(task_id) {
         raw: err.error
       };
     } else if (err.code == -1) {
+      status = status_codes.BLOCK_HAPPENED;
       // Context error
       result_data = {
         code: err.code,
         raw: err.error
       };
-      await models.Accounts.findOneAndUpdate({ _id: credentials_id }, { status: status_codes.BLOCKED, task_id: task_id }, { upsert: false });
+      await models.Accounts.findOneAndUpdate({ _id: credentials_id }, { task_id: task_id }, { upsert: false });
       
     } else {
       result_data = {
@@ -117,7 +118,8 @@ async function searchWorker(task_id) {
     }
 
   } finally {
-    console.log("RES: ", result_data);
+    console.log("SearchWorker RES: ", result_data);
+
     if (task !== null) {
       await models_shared.TaskQueue.findOneAndUpdate({ _id: task_id }, { ack: 0, status: status, result_data: result_data, is_queued: 0 }, { upsert: false });
     }
@@ -198,12 +200,13 @@ async function connectWorker(task_id) {
         raw: err.error
       };
     } else if (err.code == -1) {
+      status = status_codes.BLOCK_HAPPENED;
       // Context error
       result_data = {
         code: err.code,
         raw: err.error
       };
-      await models.Accounts.findOneAndUpdate({ _id: credentials_id }, { status: status_codes.BLOCKED, task_id: task_id }, { upsert: false });
+      await models.Accounts.findOneAndUpdate({ _id: credentials_id }, { task_id: task_id }, { upsert: false });
       
     } else {
       result_data = {
@@ -214,7 +217,8 @@ async function connectWorker(task_id) {
     status = status_codes.FAILED;
 
   } finally {
-    console.log("RES: ", result_data);
+    console.log("ConnectWorker RES: ", result_data);
+
     if (task !== null) {
       await models_shared.TaskQueue.findOneAndUpdate({ _id: task_id }, { ack: 0, status: status, result_data: result_data, is_queued: 0 }, { upsert: false });
     }
@@ -291,12 +295,13 @@ async function messageWorker(task_id) {
         raw: err.error
       };
     } else if (err.code == -1) {
+      status = status_codes.BLOCK_HAPPENED;
       // Context error
       result_data = {
         code: err.code,
         raw: err.error
       };
-      await models.Accounts.findOneAndUpdate({ _id: credentials_id }, { status: status_codes.BLOCKED, task_id: task_id }, { upsert: false });
+      await models.Accounts.findOneAndUpdate({ _id: credentials_id }, { task_id: task_id }, { upsert: false });
       
     } else {
       result_data = {
@@ -307,7 +312,8 @@ async function messageWorker(task_id) {
     status = status_codes.FAILED;
 
   } finally {
-    console.log("RES: ", result_data);
+    console.log("MessageWorker RES: ", result_data);
+
     if (task !== null) {
       await models_shared.TaskQueue.findOneAndUpdate({ _id: task_id }, { ack: 0, status: status, result_data: result_data, is_queued: 0 }, { upsert: false });
     }
@@ -369,12 +375,13 @@ async function scribeWorker(task_id) {
         raw: err.error
       };
     } else if (err.code == -1) {
+      status = status_codes.BLOCK_HAPPENED;
       // Context error
       result_data = {
         code: err.code,
         raw: err.error
       };
-      await models.Accounts.findOneAndUpdate({ _id: credentials_id }, { status: status_codes.BLOCKED, task_id: task_id }, { upsert: false });
+      await models.Accounts.findOneAndUpdate({ _id: credentials_id }, { task_id: task_id }, { upsert: false });
       
     } else {
       result_data = {
@@ -385,7 +392,8 @@ async function scribeWorker(task_id) {
     status = status_codes.FAILED;
 
   } finally {
-    console.log("RES: ", result_data);
+    console.log("ScribeWorker RES: ", result_data);
+    
     if (task !== null) {
       await models_shared.TaskQueue.findOneAndUpdate({ _id: task_id }, { ack: 0, status: status, result_data: result_data, is_queued: 0 }, { upsert: false });
     }
@@ -447,12 +455,13 @@ async function messageCheckWorker(task_id) {
         raw: err.error
       };
     } else if (err.code == -1) {
+      status = status_codes.BLOCK_HAPPENED;
       // Context error
       result_data = {
         code: err.code,
         raw: err.error
       };
-      await models.Accounts.findOneAndUpdate({ _id: credentials_id }, { status: status_codes.BLOCKED, task_id: task_id }, { upsert: false });
+      await models.Accounts.findOneAndUpdate({ _id: credentials_id }, { task_id: task_id }, { upsert: false });
       
     } else {
       result_data = {
@@ -463,7 +472,8 @@ async function messageCheckWorker(task_id) {
     status = status_codes.FAILED;
 
   } finally {
-    console.log("RES: ", result_data);
+    console.log("MessageCheckWorker RES: ", result_data);
+
     if (task !== null) {
       await models_shared.TaskQueue.findOneAndUpdate({ _id: task_id }, { ack: 0, status: status, result_data: result_data, is_queued: 0 }, { upsert: false });
     }
@@ -526,12 +536,13 @@ async function connectCheckWorker(task_id) {
         raw: err.error
       };
     } else if (err.code == -1) {
+      status = status_codes.BLOCK_HAPPENED;
       // Context error
       result_data = {
         code: err.code,
         raw: err.error
       };
-      await models.Accounts.findOneAndUpdate({ _id: credentials_id }, { status: status_codes.BLOCKED, task_id: task_id }, { upsert: false });
+      await models.Accounts.findOneAndUpdate({ _id: credentials_id }, { task_id: task_id }, { upsert: false });
       
     } else {
       result_data = {
@@ -542,7 +553,8 @@ async function connectCheckWorker(task_id) {
     status = status_codes.FAILED;
 
   } finally {
-    console.log("RES: ", result_data);
+    console.log("ConnectCheckWorker RES: ", result_data);
+
     if (task !== null) {
       await models_shared.TaskQueue.findOneAndUpdate({ _id: task_id }, { ack: 0, status: status, result_data: result_data, is_queued: 0 }, { upsert: false });
     }
@@ -603,12 +615,13 @@ async function visitProfileWorker(task_id) {
         raw: err.error
       };
     } else if (err.code == -1) {
+      status = status_codes.BLOCK_HAPPENED;
       // Context error
       result_data = {
         code: err.code,
         raw: err.error
       };
-      await models.Accounts.findOneAndUpdate({ _id: credentials_id }, { status: status_codes.BLOCKED, task_id: task_id }, { upsert: false });
+      await models.Accounts.findOneAndUpdate({ _id: credentials_id }, { task_id: task_id }, { upsert: false });
       
     } else {
       result_data = {
@@ -619,7 +632,8 @@ async function visitProfileWorker(task_id) {
     status = status_codes.FAILED;
 
   } finally {
-    console.log("RES: ", result_data);
+    console.log("VisitProfileWorker RES: ", result_data);
+
     if (task !== null) {
       await models_shared.TaskQueue.findOneAndUpdate({ _id: task_id }, { ack: 0, status: status, result_data: result_data, is_queued: 0 }, { upsert: false });
     }
