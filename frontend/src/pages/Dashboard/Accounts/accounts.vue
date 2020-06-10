@@ -38,15 +38,8 @@
                 </el-table-column>
                 <el-table-column :min-width="80" fixed="right">
                     <template slot-scope="props">
-                    <a
-                        v-if="props.row.medium == 'linkedin'"
-                        v-tooltip.top-center="'Relogin'"
-                        class="btn-simple btn-link"
-                        @click.prevent="loginLinkedinModal(props.row._id.$oid)"
-                    >
-                        <p class="small green" v-if="props.row.status != -1">Login linkedin</p>
-                        <p class="small red" v-if="props.row.status == -1">Login linkedin required</p>
-                    </a>
+                        <button v-if="props.row.medium == 'linkedin' && props.row.status != -1" v-on:click="loginLinkedinModal(props.row._id.$oid)"  type="button" class="btn btn-outline btn-wd btn-success mx-1">Login linkedin</button>
+                        <button v-if="props.row.medium == 'linkedin' && props.row.status == -1" v-on:click="loginLinkedinModal(props.row._id.$oid)"  type="button" class="btn btn-outline btn-wd btn-danger">Login linkedin required</button>
                     </template>
                 </el-table-column>
                 <el-table-column :min-width="40" fixed="right">
