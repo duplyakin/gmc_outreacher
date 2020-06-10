@@ -13,6 +13,7 @@ class ConnectAction extends action.Action {
   }
 
   async connect() {
+    await super.gotoLogin();
     await super.gotoChecker(this.url);
 
     await super.close_msg_box(this.page);

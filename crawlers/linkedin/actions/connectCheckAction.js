@@ -12,6 +12,7 @@ class ConnectCheckAction extends action.Action {
   }
 
   async connectCheck() {
+    await super.gotoLogin();
     await super.gotoChecker(links.CONNECTS_LINK);
 
     await this.page.waitForSelector(selectors.SEARCH_CONNECTS_SELECTOR, { timeout: 5000 });

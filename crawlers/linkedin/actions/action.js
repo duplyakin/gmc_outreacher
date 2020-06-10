@@ -155,6 +155,39 @@ async check_success_selector(selector, page = this.page) {
     }
   }
 
+
+  async gotoLogin(page = this.page) {
+    try {
+      await page.goto(links.SIGNIN_LINK);
+      let current_url = page.url();
+
+      if (current_url.includes('login') || current_url.includes('signup')) {
+
+        let loginAction = new LoginAction.LoginAction(this.credentials_id);
+        await loginAction.setContext(this.context);
+
+        let result = await loginAction.login();
+        if (result) {
+          await page.goto(url);
+        }
+      } else if (current_url.includes(links.START_PAGE_SHORTLINK)) {
+        return; // success
+      } else {
+        console.log('current_url: ', current_url);
+        console.log('url: ', url);
+        throw new Error("We cann't go to page, we got: " + current_url);
+      }
+
+    } catch (err) {
+      if(this.check_block(page.url())) {
+        throw MyExceptions.ContextError("Block happend.");
+      }
+
+      throw new Error('Uncknowm page here: ', page.url());
+    }
+  }
+
+
   async autoScroll(page) {
     await page.evaluate(async () => {
       await new Promise((resolve, reject) => {

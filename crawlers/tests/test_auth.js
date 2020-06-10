@@ -21,13 +21,13 @@ const MyExceptions = require('../exceptions/exceptions.js');
         
 
         await page.goto('https://www.linkedin.com/uas/login');
-        /*
+        
         await page.click(selectors.USERNAME_SELECTOR);
         await page.keyboard.type(credentials.username);
         await page.click(selectors.PASSWORD_SELECTOR);
         await page.keyboard.type(credentials.password);
         await page.click(selectors.CTA_SELECTOR);
-*/
+
 
         await page.waitFor(5000);
         let screenshot_str = await page.screenshot();
@@ -50,11 +50,8 @@ const MyExceptions = require('../exceptions/exceptions.js');
             console.log( '..........unsuccess.............',  )
         }
 
-        throw MyExceptions.ContextError('Something wromg with connection.', context_obj);
-
   } catch(err) {
       console.log( '..........err.............', err.stack )
-      console.log( '..........err.............', err )
   }
 
 })();

@@ -12,6 +12,7 @@ class MessageCheckAction extends action.Action {
   }
 
   async messageCheck() {
+    await super.gotoLogin();
     await super.gotoChecker(this.url);
 
     await super.close_msg_box(this.page);

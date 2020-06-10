@@ -11,6 +11,7 @@ class VisitProfileAction extends action.Action {
   }
 
   async visit() {
+    await super.gotoLogin();
     await super.gotoChecker(this.url);
     await this.page.waitFor(2000); // XZ how linkedin calculate visits?
 
