@@ -10,30 +10,37 @@
               <h3 class="card-title text-center">Login</h3>
             </div>
 
-            <div>
-              <p class="text">email</p>
-              <el-input
-                label="Email address"
-                placeholder="Enter email"
-                type="email"
-                v-model="model.email"
-              ></el-input>
+            <div class="mb-3">
+              <div class="row">
+                <div class="col-12">
+                  <label class="text">email</label>
+                  <el-input
+                    label="Email address"
+                    placeholder="Enter email"
+                    type="email"
+                    v-model="model.email"
+                  ></el-input>
+                </div>
+              </div>
 
-              <p class="text">password</p>
-              <el-input
-                label="passsword"
-                type="password"
-                placeholder="Password"
-                v-model="model.password"
-                show-password
-              ></el-input>
+              <div class="row">
+                <div class="col-12">
+                  <label class="text">password</label>
+                  <el-input
+                    label="passsword"
+                    type="password"
+                    placeholder="Password"
+                    v-model="model.password"
+                    show-password
+                  ></el-input>
+                </div>
+              </div>
 
               <div v-if="error" class="form-group">
                 <small class="text-danger">{{ error }}</small>
               </div>
             </div>
 
-            <p class="text"> </p>
             <div class="text-center">
               <button
                 type="submit"

@@ -39,8 +39,9 @@
                 <el-table-column :min-width="80" fixed="right">
                     <template slot-scope="props">
                     <a
-                        v-tooltip.top-center="'Reconnect'"
-                        class="btn-info btn-simple btn-link"
+                        v-if="props.row.medium == 'linkedin'"
+                        v-tooltip.top-center="'Relogin'"
+                        class="btn-simple btn-link"
                         @click.prevent="loginLinkedinModal(props.row._id.$oid)"
                     >
                         <p class="small green" v-if="props.row.status != -1">Login linkedin</p>

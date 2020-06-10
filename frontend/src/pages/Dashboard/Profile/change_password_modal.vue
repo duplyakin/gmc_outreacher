@@ -2,34 +2,45 @@
   <div class="test-modal">
     <card title="Change password form">
 
-        <p class="labels">Old password</p>
-        <el-input
-            placeholder="Enter Old Password"
-            rows="1"
-            name="Password_old"
-            v-model="password_old"
-            show-password>
-        </el-input>
+        <div class="row mb-3">
+          <div class="col-12">
+            <label>Old password</label>
+            <el-input
+                placeholder="Enter Old Password"
+                rows="1"
+                name="Password_old"
+                v-model="password_old"
+                show-password>
+            </el-input>
+          </div>
+        </div>
 
-        <p class="labels">New password</p>
-        <el-input
-            placeholder="Enter New Password"
-            rows="1"
-            name="Password_new"
-            v-model="password_new"
-            show-password>
-        </el-input>
+        <div class="row mb-3">
+          <div class="col-12">
+            <label>New password</label>
+            <el-input
+                placeholder="Enter New Password"
+                rows="1"
+                name="Password_new"
+                v-model="password_new"
+                show-password>
+            </el-input>
+          </div>
+        </div>
 
-        <p class="labels">Repeat new password</p>
-        <el-input
-            placeholder="Enter New Password"
-            rows="1"
-            name="Password_new_repeat"
-            v-model="password_new_repeat"
-            show-password>
-        </el-input>
+        <div class="row mb-3">
+          <div class="col-12">
+            <label>Repeat new password</label>
+            <el-input
+                placeholder="Enter New Password"
+                rows="1"
+                name="Password_new_repeat"
+                v-model="password_new_repeat"
+                show-password>
+            </el-input>
+          </div>
+        </div>
 
-        <p> </p>
 
         <div class="col-12 d-flex flex-row-reverse">
           <button
@@ -120,8 +131,6 @@ export default {
 };
 </script>
 <style>
-.labels {
-  color: #8b8c91;
-}
+
 </style>
   

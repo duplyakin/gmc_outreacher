@@ -28,7 +28,7 @@
 <card>
         <div class="col-12">
             <el-table
-            v-loading="loading"
+            :v-loading="loading"
             stripe
             ref="campaigns_data_table"
             style="width: 100%;"

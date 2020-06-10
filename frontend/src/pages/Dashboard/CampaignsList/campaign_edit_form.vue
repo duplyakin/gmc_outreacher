@@ -208,6 +208,8 @@
         <pre>{{ this.list_data}}</pre>
         </div>
     </div>
+
+    <modals-container/>
 </div>
 </template>
 <script>

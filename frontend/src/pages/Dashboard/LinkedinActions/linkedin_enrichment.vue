@@ -88,6 +88,7 @@
             </div>
         </div>
 
+<modals-container/>
 </div>
 </template>
 <script>

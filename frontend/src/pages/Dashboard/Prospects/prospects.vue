@@ -161,10 +161,7 @@
     </div>
 </div>
 
-<modal
-:width = "720"
-name="major_modal">
-</modal>
+<modals-container/>
 
 </div>
 </template>

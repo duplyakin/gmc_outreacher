@@ -45,6 +45,8 @@
     <div v-if="test" class="row">
       <div class="col-12">{{ this.list_data }}</div>
     </div>
+
+    <modals-container/>
   </div>
 </template>
 <script>

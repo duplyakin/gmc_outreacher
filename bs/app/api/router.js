@@ -106,9 +106,14 @@ async function accountLogin(req, res) {
 	let login = req.body.login;
     let password = req.body.password;
     
-    if(!credentials_id || !login || !password) {
+    if(!login || !password) {
         return res.json({ code: -2 }); // empty credentials
     }
+
+    if(!credentials_id) {
+        return res.json({ code: -1 }); // empty credentials_id
+    }
+
     
 	let account = null;
 	try {

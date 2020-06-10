@@ -72,10 +72,13 @@ class LoginAction {
             }
         });
 
-        await models.Accounts.findOneAndUpdate({ _id: this.credentials_id }, { expires: new_expires, cookies: new_cookie }, { upsert: true }, function (err, res) {
+        let account = await models.Accounts.findOneAndUpdate({ _id: this.credentials_id }, { expires: new_expires, cookies: new_cookie }, { upsert: false }, function (err, res) {
             if (err) throw MyExceptions.MongoDBError('MongoDB find Account err: ' + err); 
         });
 
+        if(account == null) {
+            throw MyExceptions.LoginActionError("Account with credentials_id: " + this.credentials_id + " not exists.");
+        }
     }
 
     async get_account() {
@@ -217,39 +220,18 @@ class LoginAction {
     }
 
     check_block(url) {
+        if(!url) {
+          throw new Error('Empty url in check_block.')
+        }
+    
         if(url.includes(links.BAN_LINK) || url.includes(links.CHALLENGE_LINK)) {
+          // not target page here
           return true;
         } else {
+          // all ok
           return false;
         }
-    }
-
-    async get_context() {
-        if(this.browser == null) {
-          throw new Error('Can\t get context. Browser is not defined.')
-        }
-    
-        if(this.context == null) {
-          throw new Error('Can\t get context. Context is not defined.')
-        }
-    
-        if(this.page == null) {
-          throw new Error('Can\t get context. Page is not defined.')
-        }
-    
-        await page.waitFor(10000); // wait 10 sec for lading and screenshot page
-        let screenshot_str = await this.page.screenshot();
-    
-        let context_obj = {
-          endpoint: this.browser.wsEndpoint(),
-          context_id: this.context._id,
-          page_url: this.page.url(),
-          screenshot: screenshot_str,
-        }
-        
-        return context_obj;
       }
-
 }
 
 module.exports = {

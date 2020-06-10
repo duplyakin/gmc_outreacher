@@ -3,27 +3,27 @@
     <card>
         <h3>Linkedin login</h3>
 
-        <div class="row justify-content-center">
-            <div class="col-6">
+        <div class="row justify-content-center mb-3">
+            <div class="col-12">
                 <label>Login</label>
                 <el-input placeholder="Enter login" v-model="login"></el-input>
             </div>
 
         </div>
-        <div class="row justify-content-center">
-            <div class="col-6">
+        <div class="row justify-content-center mb-3">
+            <div class="col-12">
                 <label>Password</label>
                 <el-input placeholder="Enter password" v-model="password" show-password></el-input>
             </div>
 
         </div>
         <p> </p>
-        <div v-if="ack != 0" class="notification">Loading. Please wait, it can take a minute...</div>
+        <div v-if="ack" class="notification">Loading. Please wait, it can take a minute...</div>
 
         <div class="row">
             <div class="col-12 d-flex flex-row-reverse">
-                <button :disabled="ack != 0" v-on:click="addAccount" type="button" class="btn btn-outline btn-wd btn-success mx-1">Login</button>
-                <button :disabled="ack != 0" v-on:click="discard" type="button" class="btn btn-outline btn-wd btn-danger">Close</button>
+                <button :disabled="ack" v-on:click="addAccount" type="button" class="btn btn-outline btn-wd btn-success mx-1">Login</button>
+                <button :disabled="ack" v-on:click="discard" type="button" class="btn btn-outline btn-wd btn-danger">Close</button>
             </div>
         </div>
 
@@ -49,7 +49,7 @@ export default {
         return {
             login: '',
             password: '',
-            ack: 0,
+            ack: false,
 
         }
     },
@@ -65,7 +65,7 @@ export default {
                 return;
             }
 
-            this.ack = 1;
+            this.ack = true;
 
             this.accountLoginBS(this.credentials_id, this.login, this.password);
         },

@@ -2,22 +2,25 @@
 <div class="account-login-modal">
 <card>
         <h3>Input code</h3>
+
+        <div class="row">
+            <div class="col-6">
+                <div>Input</div>
+                <el-input placeholder="Enter code" v-model="input"></el-input>
+            </div>
+        </div>
+
         <card>
             <img v-bind:src="'data:image/jpeg;base64,' + screenshot" />
         </card>
-
-        <div class="col-6">
-            <div>Input</div>
-            <el-input placeholder="Enter code" v-model="input"></el-input>
-        </div>
         
         <p> </p>
-        <div v-if="ack != 0" class="notification">Loading. Please wait, it can take a minute...</div>
+        <div v-if="ack" class="notification">Loading. Please wait, it can take a minute...</div>
 
         <div class="row">
             <div class="col-12 d-flex flex-row-reverse">
-                <button :disabled="ack != 0" v-on:click="inputAccount" type="button" class="btn btn-outline btn-wd btn-success mx-1">Input</button>
-                <button :disabled="ack != 0" v-on:click="discard" type="button" class="btn btn-outline btn-wd btn-danger">Close</button>
+                <button :disabled="ack" v-on:click="inputAccount" type="button" class="btn btn-outline btn-wd btn-success mx-1">Input</button>
+                <button :disabled="ack" v-on:click="discard" type="button" class="btn btn-outline btn-wd btn-danger">Close</button>
             </div>
         </div>
 
@@ -43,7 +46,7 @@ export default {
     data() {
         return {
             input: '',
-            ack: 0,
+            ack: false,
         }
     },
     methods: {
@@ -54,7 +57,7 @@ export default {
                 return;
             }
 
-            this.ack = 1;
+            this.ack = true;
 
             this.accountInputBS(this.credentials_id, this.input);
         },
