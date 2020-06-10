@@ -8,7 +8,6 @@ const MyExceptions = require('../../exceptions/exceptions.js');
 class Action {
   constructor(cookies, credentials_id) {
     this.cookies = cookies;
-    
     this.credentials_id = credentials_id;
   }
 

@@ -4,8 +4,8 @@ const action = require('./action.js');
 const MyExceptions = require('../../exceptions/exceptions.js');
 
 class ConnectAction extends action.Action {
-  constructor(credentials_id, url, template, data) {
-    super(credentials_id);
+  constructor(cookies, credentials_id, url, template, data) {
+    super(cookies, credentials_id);
 
     this.url = url;
     this.template = template;

@@ -4,8 +4,8 @@ const action = require('./action.js');
 const MyExceptions = require('../../exceptions/exceptions.js');
 
 class SearchAction extends action.Action {
-  constructor(credentials_id, searchUrl, interval_pages) {
-    super(credentials_id);
+  constructor(cookies, credentials_id, searchUrl, interval_pages) {
+    super(cookies, credentials_id);
 
     this.searchUrl = searchUrl;
     this.interval_pages = interval_pages;

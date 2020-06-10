@@ -39,7 +39,7 @@
                 <el-table-column :min-width="80" fixed="right">
                     <template slot-scope="props">
                         <button v-if="props.row.medium == 'linkedin' && props.row.status != -1" v-on:click="loginLinkedinModal(props.row._id.$oid)"  type="button" class="btn btn-outline btn-wd btn-success mx-1">Login linkedin</button>
-                        <button v-if="props.row.medium == 'linkedin' && props.row.status == -1" v-on:click="loginLinkedinModal(props.row._id.$oid)"  type="button" class="btn btn-outline btn-wd btn-danger">Login linkedin required</button>
+                        <button v-if="props.row.medium == 'linkedin' && props.row.status == -1" v-on:click="loginLinkedinModal(props.row._id.$oid)"  type="button" class="btn btn-outline btn-wd btn-danger">Login required</button>
                     </template>
                 </el-table-column>
                 <el-table-column :min-width="40" fixed="right">
@@ -171,7 +171,7 @@
             })
         },
         async accountInputBS(credentials_id, input) {
-            //console.log("accountInputBS started with credentials_id: ", credentials_id);
+            console.log("accountInputBS started with credentials_id: ", credentials_id);
             const path = BS_API_INPUT;
             let _this = this;
 
@@ -225,6 +225,8 @@
 
                     if(status == 0) {
                         // SUCCESS
+                        console.log("accountStatusBS status: ", this.$refs["modal_login"].modals);
+
                         Notification.success({title: "Success", message: "Success."});
                         this.$refs["modal_login"].modals = []; // CLOSE MODAL // CLOSE MODAL
                         this.loadCredentials(); // update table
@@ -262,7 +264,7 @@
         },
         async accountLoginBS(credentials_id, login, password) {
             const path = BS_API_LOGIN;
-            //console.log("accountLoginBS started with credentials_id: ", credentials_id);
+            console.log("accountLoginBS started with credentials_id: ", credentials_id);
             let _this = this;
 
             var result = {

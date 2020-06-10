@@ -49,7 +49,6 @@ const resolve_challenge = async(page, input) => {
 
         if(!input || input == '') {
             console.log("..... Input can't be empty in resolve_challenge. ..... ");
-            //throw MyExceptions.EmptyInputError("Input can't be empty in resolve_challenge.");
             return -2;
         }
 
@@ -58,14 +57,13 @@ const resolve_challenge = async(page, input) => {
             await page.waitForSelector(selectors.VERIFICATION_PIN_BTN_SELECTOR, { timeout: 5000 });
         } catch (err) {
             console.log("..... Challenge page selectors not found. ..... ");
-            //throw new Error('Challenge page selectors not found: ' + err);
             return -2;
         }
 
         await page.click(selectors.VERIFICATION_PIN_SELECTOR);
         await page.keyboard.type(input);
         await page.click(selectors.VERIFICATION_PIN_BTN_SELECTOR);
-        await page.waitFor(1000);
+        await page.waitFor(10000);
 
         let current_url = page.url();
 
@@ -82,7 +80,7 @@ const resolve_challenge = async(page, input) => {
         }
         */
 
-        return 0;
+        return 0; // resolved
 
     } catch(err) {
         console.log("..... Error in resolve_challenge: ..... ", err.stack);
@@ -102,7 +100,7 @@ const check_block_url = (url) => {
     }
 
     if(url.includes(links.BAN_LINK) || url.includes(links.CHALLENGE_LINK)) {
-        console.log('check_block_url block happend: ', url);
+        //console.log('check_block_url block happend: ', url);
         return true;
     }
 
@@ -125,7 +123,7 @@ const check_phone_page = (url) => {
 }
 
 
-// -2 = system err, -1 = block, 0 = resolved
+// -2 = system err, -1 = block, 0 = resolved, 4 = wrong credentials
 const login = async(page, account) => {
     try {
         if(!account.login || !account.password) {
@@ -140,9 +138,6 @@ const login = async(page, account) => {
 
         await page.goto(links.SIGNIN_LINK);
 
-        //await page.waitFor(1000);
-        //console.log("..... account.login: ..... ", account.login);
-
         try {
             await page.waitForSelector(selectors.USERNAME_SELECTOR, { timeout: 5000 });
         } catch (err) {
@@ -155,7 +150,7 @@ const login = async(page, account) => {
         await page.click(selectors.PASSWORD_SELECTOR);
         await page.keyboard.type(account.password);
         await page.click(selectors.CTA_SELECTOR);
-        await page.waitFor(5000);
+        await page.waitFor(10000);
 
         try {
             //await page.waitForSelector(selectors.BLOCK_TOAST_SELECTOR, { timeout: 1000 }); // do smth // todo
@@ -176,10 +171,10 @@ const login = async(page, account) => {
         }
 
         if (current_url.includes(links.SIGNIN_SHORTLINK)) {
-            return 1; // wrong credentials
+            return 4; // wrong credentials
         }
 
-        return 0; // resolved
+        return 0; // logged in
     } catch(err) {
         console.log("Error in login(): ", err.stack);
         return -2;
@@ -210,7 +205,7 @@ const get_context = async(browser, context, page) => {
       screenshot: screenshot_str,
     }
     
-    console.log('get_context context_obj created: ', context_obj);
+    //console.log('get_context context_obj created: ', context_obj);
     return context_obj;
   }
 
@@ -243,14 +238,18 @@ const validate_data = async(data) => {
 
 const context_connect = async (browser, context_id) => {
     let contexts = await browser.browserContexts();
-    if (contexts == null){
+    if (contexts == null) {
         throw new Error("Can't receive browser.browserContexts");
     }
 
+    if(context_id == null) {
+        throw new Error("Empty context_id in context_connect");
+    }
+
     let found_context = null;
-    for (cx in contexts){
-        if (cx._id == context_id){
-            found_context = cx;
+    for (var cx in contexts){
+        if (contexts[cx]._id == context_id){
+            found_context = contexts[cx];
             break;
         }
     }
@@ -278,9 +277,9 @@ const page_connect = async (context, page_url) => {
     }
 
     let found_page = null;
-    for (page in pages){ 
-        if (page.url() == page_url){ // here can be several pages with same url
-            found_page = page;
+    for (var p in pages){ 
+        if (pages[p].url() == page_url){ // here can be several pages with the same url
+            found_page = pages[p];
             break;
         }
     }
@@ -331,6 +330,7 @@ const input_data = async (account, input) => {
         }
 
         let res = await found_form_and_input(page, input);
+        //console.log('input_data res = ', res);
 
         if(res == 0) {
             // block resolved
@@ -338,10 +338,11 @@ const input_data = async (account, input) => {
             if(account.task_id != null) {
                 await models_shared.TaskQueue.findOneAndUpdate({ _id: account.task_id }, { status: status_codes.NEED_USER_ACTION_RESOLVED }, { upsert: false });
             }
-            await models.Accounts.findOneAndUpdate({ _id: account._id }, { status: status_codes.AVAILABLE, task_id: null }, { upsert: false });
+            await models.Accounts.findOneAndUpdate({ _id: account._id }, { status: status_codes.AVAILABLE, task_id: null, blocking_data: null }, { upsert: false });
 
             await browser.close();
             browser.disconnect();
+            //console.log("..... BLOCK RESOLVED. ..... ");
 
         } else if (res == -1) {
             // block didn't resolved
@@ -384,12 +385,13 @@ const input_login = async (account) => {
     let browser = null;
 
     try {
-        browser = await puppeteer.launch({ headless: false }); // test mode
-        //browser = await puppeteer.launch();
+        //browser = await puppeteer.launch({ headless: false }); // test mode
+        browser = await puppeteer.launch();
         context = await browser.createIncognitoBrowserContext();
         page = await context.newPage();
 
         let res = await login(page, account);
+        //console.log('input_login res = ', res);
 
         if(res === 0) {
             // login success
@@ -422,7 +424,6 @@ const input_login = async (account) => {
 
         } else if (res === -1) {
             // login failed - block happend
-            console.log('input_login res = -1');
             let context_obj = await get_context(browser, context, page);
             if(context_obj == null) {
                 throw new Error("Error in input_login: context_obj is null.");
@@ -433,12 +434,8 @@ const input_login = async (account) => {
 
             browser.disconnect();
 
-        } else if (res === 1) {
+        } else if (res === 4) {
             // wrong credentials - need one more try
-            let context_obj = await get_context(browser, context, page);
-            if(context_obj == null) {
-                throw new Error("Error in input_login: context_obj is null.");
-            }
 
             await models.Accounts.findOneAndUpdate({ _id: account._id }, { status: status_codes.BROKEN_CREDENTIALS }, { upsert: false });
             await models_shared.Credentials.findOneAndUpdate({ _id: account._id }, { status: status_codes.FAILED }, { upsert: false });

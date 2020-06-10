@@ -4,9 +4,9 @@
         <h3>Input code</h3>
 
         <div class="row">
-            <div class="col-6">
+            <div class="col-6 mb-5">
                 <div>Input</div>
-                <el-input placeholder="Enter code" v-model="input"></el-input>
+                <el-input placeholder="Enter code" v-model="input" :disabled="ack"></el-input>
             </div>
         </div>
 
@@ -15,7 +15,8 @@
         </card>
         
         <p> </p>
-        <div v-if="ack" class="notification">Loading. Please wait, it can take a minute...</div>
+
+        <div v-if="ack" class="o24_notification mb-3">Loading. Please wait, it can take a minute...</div>
 
         <div class="row">
             <div class="col-12 d-flex flex-row-reverse">
@@ -70,7 +71,7 @@ export default {
 }
 </script>
 <style>
-.notification {
+.o24_notification {
     color: rgb(56, 56, 179);
     text-transform: uppercase;
     font-size: 10px;

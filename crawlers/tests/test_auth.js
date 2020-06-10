@@ -13,16 +13,15 @@ const MyExceptions = require('../exceptions/exceptions.js');
         };
         
         var browser = await puppeteer.launch({ 
-            headless: true, 
+            headless: false, 
          });
         var context = await browser.createIncognitoBrowserContext();
         var page = await context.newPage();
         //console.log( '..........browserContext..........',  context)
         
-/*
-        await page.goto('https://www.linkedin.com/uas/login');
 
-        
+        await page.goto('https://www.linkedin.com/uas/login');
+        /*
         await page.click(selectors.USERNAME_SELECTOR);
         await page.keyboard.type(credentials.username);
         await page.click(selectors.PASSWORD_SELECTOR);
@@ -32,17 +31,17 @@ const MyExceptions = require('../exceptions/exceptions.js');
 
         await page.waitFor(5000);
         let screenshot_str = await page.screenshot();
+        let current_url = page.url();
 
         let context_obj = {
             endpoint: browser.wsEndpoint(),
             context_id: context._id,
-            url: page.url(),
-            screenshot: screenshot_str,
+            url: current_url,
+            //screenshot: screenshot_str,
           }
         
 
-        let current_url = await page.url();
-
+        //browser.disconnect();
         console.log( '..........context_obj..........',  context_obj)
 
         if (current_url === 'https://www.linkedin.com/feed/') { // add domain here

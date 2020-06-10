@@ -56,7 +56,7 @@ export default {
       campaign_type: {},
       campaign_types: [
         { label: "Add Leads from Linkedin search URL", description: "Cut and paste a Linkedin search URL to add leads." },
-        { label: "Add Leads for Linkedin profiles from CSV", description: "Enrich leads information from Linkedin: current leads job (website and Linkedin pages). > Import a list of LinkedIn profiles to enrich." }
+        { label: "Add Leads for Linkedin profiles from CSV", description: "Import a list of LinkedIn profiles to enrich." }
       ],
     };
   },

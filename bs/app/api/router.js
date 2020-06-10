@@ -12,7 +12,7 @@ const MyExceptions = require('../../../crawlers/exceptions/exceptions.js');
 async function accountInput(req, res) {
     let credentials_id = req.body.credentials_id;
     let input = req.body.input;
-    console.log("accountInput started with body: ", input);
+    //console.log("accountInput started with body: ", input);
 
     if(!credentials_id || !input) {
         return res.json({ code: -1 })
@@ -44,6 +44,10 @@ async function accountInput(req, res) {
             await models.Accounts.findOneAndUpdate({ _id: credentials_id, status: status_codes.SOLVING_CAPTCHA }, { status: status_codes.FAILED });
             return res.json({ code: -1 }) // system error
         }
+
+        return res.json({
+            code: 1 // IN_PROGRESS
+        });
     }
 }
 
@@ -58,10 +62,11 @@ async function accountStatus(req, res) {
         return res.json({ code: -1 })
     }
 
-    if (!account.status) {
+    if (account.status == null) {
         console.log("..... There is no account status: ..... ", account);
         return res.json({ code: -1 })
     }
+    console.log("..... status: ..... ", account.status);
 
     if (account.status == status_codes.BLOCKED) {
         if (account.blocking_data == null) {
@@ -78,7 +83,7 @@ async function accountStatus(req, res) {
             code: 2, // wait user action
             screenshot: account.blocking_data.screenshot,
         })
-    } else if (account.status == status_codes.IN_PROGRESS) {
+    } else if (account.status == status_codes.IN_PROGRESS || account.status == status_codes.SOLVING_CAPTCHA) {
         res.json({
             code: 1, // IN_PROGRESS
         })
@@ -90,9 +95,13 @@ async function accountStatus(req, res) {
         res.json({
             code: 4, // BROKEN_CREDENTIALS - NEED REPEAT
         })
+    } else if (account.status == status_codes.FAILED) {
+        res.json({
+            code: -1, // FAILED - need admin action
+        })
     } else {
         console.log("..... Unexpected account.status: ..... ", account.status);
-        res.json({
+        res.json({ // todo: add new code here
             code: -1, // Unknown error - try again later
         })
     }
@@ -100,8 +109,6 @@ async function accountStatus(req, res) {
 
 
 async function accountLogin(req, res) {
-    //console.log("accountLogin started with body: ", req.body);
-
 	let credentials_id = req.body.credentials_id;
 	let login = req.body.login;
     let password = req.body.password;
@@ -120,6 +127,8 @@ async function accountLogin(req, res) {
         // check if it BROKEN_CREDENTIALS account
         account = await models.Accounts.findOneAndUpdate({ _id: credentials_id, status: { $in: [status_codes.BROKEN_CREDENTIALS, status_codes.AVAILABLE] }}, { _id: credentials_id, login: login, password: password, status: status_codes.IN_PROGRESS }, { new: true, upsert: true }); 
 
+        //console.log("..... account status in accountLogin : ..... ", account.status);
+
 		// login linkedin async
 		utils.input_login(account);
 
@@ -135,7 +144,7 @@ async function accountLogin(req, res) {
             return res.json({ code: -1 }) // system error
         }
 
-        return res.json({ code: 1 }); // IN_PROGRESS or FAILED ? //todo..
+        return res.json({ code: 1 }); // IN_PROGRESS 
     }
 }
 
