@@ -306,16 +306,20 @@ class TrackEvents(db.Document):
         if not exist:
             raise Exception("There is not TrackEvents registered for code:{0}".format(code))
         
+        counter = 0
         if event == 'open':
             exist.opened = exist.opened + 1
+            counter = exist.opened
         elif event == 'click':
             exist.clicked = exist.clicked + 1
+            counter = exist.clicked
         else:
             raise Exception("track_event ERROR: Unknown event={0}".format(event))
         
         exist._commit()
 
-        return exist.prospect_id, exist.campaign_id
+        owner_id = exist.owner.id
+        return owner_id, counter, exist.prospect_id, exist.campaign_id
 
     @classmethod
     def get_create_tracking_event(cls, owner_id, mailbox_id):

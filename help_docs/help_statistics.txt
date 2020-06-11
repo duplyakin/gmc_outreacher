@@ -25,6 +25,7 @@
 - prospects_accepted_linkedin_total (Уникальное число проспектов, которые приняли мой linkedin request)
 - replied_total (Уникальное число ответов. Ответ на email и linkedin от одного и того же проспекта считается как 1)
 
+
 Ответ получаешь:
 - {
     pagination : {},

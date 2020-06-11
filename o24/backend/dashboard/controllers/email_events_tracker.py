@@ -25,11 +25,14 @@ def track_open(code, track_event):
     pixel_data = b64_image
 
     try:
-        prospect_id, campaign_id = mailbox.TrackEvents.track_event(code=code, event=track_event)
+        owner_id, counter, prospect_id, campaign_id = mailbox.TrackEvents.track_event(code=code, event=track_event)
         if not prospect_id or not campaign_id:
             raise Exception("track_open ERROR: Both should exist prospect_id={0} campaign_id={1}".format(prospect_id, campaign_id))
         
-        scheduler_models.TaskLog.track_email_open(prospect_id=prospect_id, campaign_id=campaign_id)
+        if counter == 1:
+            scheduler_models.ActionStats.log_email_open(owner_id=owner_id, 
+                                                        prospect_id=prospect_id, 
+                                                        campaign_id=campaign_id)
     except Exception as e:
         #TODO: change to loggin
         print(e)
