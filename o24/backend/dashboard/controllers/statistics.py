@@ -9,14 +9,11 @@ from o24.backend.dashboard import bp_dashboard
 from o24.globals import *
 from flask_cors import CORS
 import o24.config as config
-from o24.backend.utils.serialize import JSONEncoder
-from o24.backend.utils.helpers import template_key_dict, to_json_deep_dereference
 import json
 import traceback
 
 import o24.backend.models.shared as shared
-from o24.backend.dashboard.serializers import JSCampaignData
-import o24.backend.scheduler.scheduler as scheduler
+import o24.backend.scheduler.models as scheduler_models
 from o24.backend.utils.decors import auth_required
 
 
@@ -24,16 +21,7 @@ from o24.backend.utils.decors import auth_required
 COLUMNS = [
     {
         'label' : 'Campaign title',
-        'prop' : 'campaig'
-    },
-    {
-        'label' : 'Sequence title',
-        'prop' : 'status'
-    },
-    {
-        'label' : 'Leads list',
-        'prop' : 'funnel',
-        'field' : 'title',   
+        'prop' : 'campaign_title'
     },
     {
         'label' : 'Leads contacted',
@@ -95,7 +83,7 @@ def statistics_data():
 def statistics_list():
     current_user = g.user
 
-    per_page = config.CAMPAIGNS_PER_PAGE
+    per_page = config.STATS_PER_PAGE
     page = 1
 
     pagination = {
@@ -107,14 +95,22 @@ def statistics_list():
     result = {
         'code' : -1,
         'msg' : '',
-        'campaigns' : '',
-        'modified_fields' : json.dumps(modified_fields_on_create),
         'pagination' : json.dumps(pagination),
         'columns' : json.dumps(COLUMNS)
     }
 
     try:
         if request.method == 'POST':
+            page = request.form.get('_page', 1)
+            total, statistics = scheduler_models.ActionStats.stats_total(owner_id=current_user.id, 
+                                                                page=page)
+            if statistics:
+                result['statistics'] = statistics
+                result['pagination'] = json.dumps({
+                    'perPage' : per_page,
+                    'currentPage' : page,
+                    'total' : total
+                })
 
             result['code'] = 1
             result['msg'] = 'Success'
@@ -136,9 +132,7 @@ def statistics_campaign():
 
     result = {
         'code' : 1,
-        'msg' : '',
-        'campaign' : '',
-        'modified_fields': json.dumps(modified_fields_on_edit)
+        'msg' : ''
     }
 
     try:
@@ -146,24 +140,14 @@ def statistics_campaign():
             campaign_id = request.form.get('_campaign_id','')
             if not campaign_id:
                 raise Exception("Bad campaign_id")
-
-            campaign = Campaign.objects(owner=current_user.id, id=campaign_id).first()
-            if not campaign:
-                raise Exception("No such campaign")
-
-
-            if not campaign.valid_funnel():
-                modified_fields_on_edit['funnel'] = True
-                modified_fields_on_edit['credentials'] = True
-
-            #check that the list has prospects and funnel exists
             
-            campaign_dict = to_json_deep_dereference(campaign)
+            statistics = scheduler_models.ActionStats.stats_campaign(owner_id=current_user.id, 
+                                                                    campaign_id=campaign_id)
+            if statistics:
+                result['statistics'] = statistics
 
             result['code'] = 1
             result['msg'] = 'Success'
-            result['campaign'] = json.dumps(campaign_dict)
-            result['modified_fields'] = json.dumps(modified_fields_on_edit)
     except Exception as e:
         #TODO: change to loggin
         print(e)

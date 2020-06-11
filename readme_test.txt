@@ -60,3 +60,9 @@ python -m unittest o24.production_tests.test_prod_4_enrichment.EnricherTest.test
 python -m unittest o24.production_tests.test_stats.StatsTest.test_create_random_stats_data
 
 python -m unittest o24.production_tests.test_stats.StatsTest.test_list_stats
+
+python -m unittest o24.production_tests.test_stats.StatsTest.test_create_stats
+
+python -m unittest o24.production_tests.test_stats.StatsTest.test_show_stats
+
+python -m unittest o24.production_tests.test_stats.StatsTest.test_show_campaign_stats

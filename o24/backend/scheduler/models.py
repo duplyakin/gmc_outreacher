@@ -1,6 +1,8 @@
 from o24.backend import db
 from o24.backend import app
-import datetime
+from datetime import datetime
+from datetime import timedelta
+import pytz
 import uuid
 from mongoengine.queryset.visitor import Q
 import json
@@ -43,6 +45,153 @@ class Priority(db.Document):
         if _reload:
             self.reload()
 
+class ActionStats(db.Document):
+    owner_id = db.ObjectIdField()
+
+    prospect_id = db.ObjectIdField()
+    campaign_id = db.ObjectIdField()
+
+    campaign_title = db.StringField()
+
+    action_key = db.StringField()
+    medium = db.StringField()
+
+    result = db.IntField()
+
+    created = db.DateTimeField()
+
+    @classmethod
+    def log_email_open(cls, owner_id, prospect_id, campaign_id):
+        medium = 'email'
+        action_key = 'email-opened'
+
+        created = pytz.utc.localize(datetime.utcnow())
+
+        stat = cls(owner_id=owner_id,
+                    campaign_id=campaign_id,
+                    prospect_id=prospect_id,
+                    action_key=action_key,
+                    result=1,
+                    created=created,
+                    medium=medium)
+        
+        stat.save()
+
+
+    @classmethod
+    def log_stats(cls, owner_id, prospect_id, campaign_id, campaign_title, action_key, result, test_date=None):
+        medium = 'unknown'
+        if action_key in SPECIAL_ACTIONS:
+            medium = 'special-medium'
+        elif 'email' in action_key:
+            medium = 'email'
+        elif 'linkedin' in action_key:
+            medium = 'linkedin'
+
+        created = pytz.utc.localize(datetime.utcnow())
+        if test_date:
+            created = test_date
+
+        stat = cls(owner_id=owner_id,
+                    campaign_id=campaign_id,
+                    campaign_title=campaign_title,
+                    prospect_id=prospect_id,
+                    action_key=action_key,
+                    result=result,
+                    created=created,
+                    medium=medium)
+        
+        stat.save()
+
+    @classmethod
+    def stats_total(cls, owner_id, page=1, per_page=config.STATS_PER_PAGE):
+        if page <= 1:
+            page = 1
+        
+        db_query = cls.objects(owner_id=owner_id, result=1)
+        total = db_query.count()
+
+        pipeline = [
+            {"$group" : {
+                '_id': { "campaign_id" : "$campaign_id", "action_key" : "$action_key"},
+                "campaign_title": { "$first": "$campaign_title"}
+            }},
+            {"$group" : {
+                "_id" : "$_id.campaign_id",
+                "campaign_title" : {"$first" : "$campaign_title" },
+                "aggregated" : { "$push" : {
+                        "action_key" : "$_id.action_key",
+                        "count" : "$total"
+                    }
+                }
+                }
+            }
+        ]
+
+        stats = list(db_query.skip(per_page * (page-1)).limit(per_page).order_by('campaign_title').aggregate(*pipeline))
+
+        results = bson_dumps(stats)
+        
+        return total, results
+
+    
+    @classmethod
+    def stats_campaign(cls, owner_id, campaign_id, last_days=config.STATS_SHOW_LAST_DAYS):
+        
+        end_date = pytz.utc.localize(datetime.utcnow())
+        start_date = end_date - timedelta(days=last_days)
+
+        db_query = cls.objects(owner_id=owner_id, 
+                                campaign_id=campaign_id, 
+                                created__gte=start_date,
+                                created__lte=end_date,
+                                result=1)
+
+        pipeline = [
+            {"$group" : {
+                '_id': { 
+                    "year": { "$year": "$created" },
+                    "month" : {"$month" : "$created" },
+                    "day": { "$dayOfMonth": "$created"},
+                    "action_key" : "$action_key"
+                    },
+                "medium" : {"$first" : "$medium" },
+                "campaign_id" : {"$first" : "$campaign_id"},
+                "campaign_title" : {"$first" : "$campaign_title" }
+            }},
+            {"$group" : {
+                "_id" : "$prospect_id",
+                "prospects_total" : {"$sum" : 1 },
+                }
+            },
+            {"$group" : {
+                "_id" : {
+                    "medium" : "$medium",
+                    "year": "$_id.year",
+                    "month" : "$_id.month",
+                    "day": "$_id.day",
+                },
+                "campaign_title" : {"$first" : "$campaign_title" },
+                "prospects_contacted" : {"$first" : "$prospects_total" },
+                "campaign_id" : {"$first" : "$campaign_id"},
+                "medium" : {"$first" : "$medium"},
+                "aggregated" : { "$push" : {
+                        "action_key" : "$_id.action_key",
+                        "count" : "$total"
+                    }
+                }
+                }
+            }
+
+        ]
+
+
+        stats = list(db_query.order_by('created').aggregate(*pipeline))
+
+        results = bson_dumps(stats)
+
+        return results
+
 class TaskLog(db.Document):
     owner_id = db.ObjectIdField()
 
@@ -51,22 +200,9 @@ class TaskLog(db.Document):
 
     campaign_title = db.StringField()
 
-    actions = db.DictField()
-
     log = db.ListField(db.DictField())
 
-    #STATS THAT WE SHOW
-    email_sent = db.IntField(default=0)
-    email_open = db.IntField(default=0)
-    email_bounced = db.IntField(default=0)
-    email_replied = db.IntField(default=0)
-
-    ln_visit = db.IntField(default=0)
-    ln_messages_sent = db.IntField(default=0)
-    ln_messages_failed = db.IntField(default=0)
-    ln_connect_accepted = db.IntField(default=0)
-    ln_connect_sent = db.IntField(default=0)
-    ln_replied = db.IntField(default=0)
+    created = db.DateTimeField( default=pytz.utc.localize(datetime.utcnow()) )
 
     meta = {
         'indexes': [
@@ -76,84 +212,6 @@ class TaskLog(db.Document):
             }
         ]
     }
-
-    @classmethod
-    def track_email_open(cls, prospect_id, campaign_id):
-        exist = cls.objects(prospect_id=prospect_id, campaign_id=campaign_id).first()
-        if not exist:
-            raise Exception("TaskLog.track_email_open ERROR: no such log for prospect_id={0} campaign_id={1}".format(prospect_id, campaign_id))
-        
-        exist.email_open = exist.email_open + 1
-        exist._commit()
-
-    @classmethod
-    #TODO: uncomment
-    #def list_stats(cls, owner_id, page=1, per_page=config.STATS_PER_PAGE):
-    def list_stats(cls, page=1, per_page=config.STATS_PER_PAGE):
-        if page <= 1:
-            page = 1
-        
-        #db_query = cls.objects(owner_id=owner_id)
-        db_query = cls.objects()
-        total = db_query.count()
-
-        pipeline = [
-            {"$group" : {
-                '_id':"$campaign_id",
-                "campaign_title": { "$first": "$campaign_title"},
-
-                'prospects_contacted_total': { '$sum': 1 },
-                'prospects_email_opens_total': {'$sum': '$email_open'},
-                'email_bounced_total' : {'$sum' : '$email_bounced'},
-                'linkedin_messages_failed_total' : {'$sum' : '$ln_messages_failed'},
-                'prospects_accepted_linkedin_total' : {'$sum' : '$ln_connect_accepted'},
-                'emails_sent' : {'$sum' : '$email_sent'},
-                'emails_opened' : {'$sum' : '$email_open'},
-                'emails_replies_total' : {'$sum' : '$email_replied'},
-                'connect_request_total' : {'$sum' : '$ln_connect_sent'},
-                'connect_request_approved_total' : {'$sum' : '$ln_connect_accepted'},
-                'linkedin_messages_sent_total' : {'$sum' : '$ln_connect_sent'},
-                'linkedin_replies_received' : {'$sum' : '$ln_replied'}
-            }}
-        ]
-
-        stats = list(db_query.skip(per_page * (page-1)).limit(per_page).order_by('campaign_title').aggregate(*pipeline))
-
-        pprint(stats)
-        if stats:
-            results = json.dumps(stats)
-
-            return (total, results)
-        else:
-            return None, None
-    
-    def _log_stats(self, action_key, res):
-        if action_key == LINKEDIN_VISIT_PROFILE_ACTION:
-            if res:
-                self.ln_visit = self.ln_visit + 1
-        elif action_key == LINKEDIN_CONNECT_ACTION:
-            if res:
-                self.ln_connect_sent = self.ln_connect_sent + 1
-        elif action_key == LINKEDIN_SEND_MESSAGE_ACTION:
-            if res:
-                self.ln_messages_sent = self.ln_messages_sent + 1
-            else:
-                self.ln_messages_failed = self.ln_messages_failed + 1
-        elif action_key == LINKEDIN_CHECK_ACCEPT_ACTION:
-            if res:
-                self.ln_connect_accepted = self.ln_connect_accepted + 1
-        elif action_key == LINKEDIN_CHECK_REPLY_ACTION:
-            if res:
-                self.ln_replied = self.ln_replied + 1
-
-
-        elif action_key == EMAIL_SEND_MESSAGE_ACTION:
-            if res:
-                self.email_sent = self.email_sent + 1
-        elif action_key == EMAIL_CHECK_REPLY_ACTION:
-            if res:
-                self.email_replied = self.email_replied + 1
-
 
     @classmethod
     def create_log(cls, task):
@@ -168,11 +226,21 @@ class TaskLog(db.Document):
 
         action_key = task.action_key
         if action_key not in DONT_LOG:            
-            res = False
             if task.result_data:
                 res = task.result_data.get('if_true', False)
+                if res == True:
+                    res = 1
+                else:
+                    res = 0
+
+                ActionStats.log_stats(owner_id=exist.owner_id, 
+                                        prospect_id=exist.prospect_id, 
+                                        campaign_id=exist.campaign_id, 
+                                        campaign_title=exist.campaign_title, 
+                                        action_key=action_key, 
+                                        result=res)
             
-            exist.actions[action_key] = res
+            
         
         exist.log.append(task.to_mongo())
         return exist
