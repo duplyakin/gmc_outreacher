@@ -12,8 +12,8 @@ class Action {
   }
 
   async startBrowser() {
-    this.browser = await puppeteer.launch({ headless: false }); // test mode
-    //this.browser = await puppeteer.launch();
+    //this.browser = await puppeteer.launch({ headless: false }); // test mode
+    this.browser = await puppeteer.launch();
     this.context = await this.browser.createIncognitoBrowserContext();
     this.page = await this.context.newPage();
 
@@ -178,7 +178,7 @@ async check_success_selector(selector, page = this.page) {
         throw new Error("We cann't go to page, we got: " + current_url);
       }
 
-    } catch (err) {
+    } catch (err) { 
       if(this.check_block(page.url())) {
         throw MyExceptions.ContextError("Block happend.");
       }
