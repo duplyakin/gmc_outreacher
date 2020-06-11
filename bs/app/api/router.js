@@ -66,7 +66,7 @@ async function accountStatus(req, res) {
         console.log("..... There is no account status: ..... ", account);
         return res.json({ code: -1 })
     }
-    console.log("..... status: ..... ", account.status);
+    //console.log("..... status: ..... ", account.status);
 
     if (account.status == status_codes.BLOCKED) {
         if (account.blocking_data == null) {

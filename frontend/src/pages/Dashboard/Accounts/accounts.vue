@@ -100,10 +100,9 @@
     data () {
         return {
             status : {
-                0 : 'Active',
-                1 : 'Changed',
-                '-1' : 'Error',
-                '-2' : 'Unknown'
+                0 : 'New',
+                1 : 'Active',
+                '-1' : 'Failed',
             },
             accounts_data: {
                 columns : null,

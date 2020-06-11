@@ -5,7 +5,6 @@
 
         <div class="row">
             <div class="col-6 mb-5">
-                <div>Input</div>
                 <el-input placeholder="Enter code" v-model="input" :disabled="ack"></el-input>
             </div>
         </div>
