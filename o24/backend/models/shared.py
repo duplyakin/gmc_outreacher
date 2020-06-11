@@ -461,11 +461,9 @@ class TaskQueue(db.Document):
 
     @classmethod
     def get_trail_tasks(cls):
-        #next_round__lte=now
         active_campaigns = models.Campaign.objects(status=IN_PROGRESS).distinct('id')
 
-        now = pytz.utc.localize(datetime.utcnow())
-        return TaskQueue.objects(Q(next_round__lte=now) & Q(campaign_id__in=active_campaigns) & Q(status__in=TRAIL_STATUSES))
+        return TaskQueue.objects(Q(campaign_id__in=active_campaigns) & Q(status__in=TRAIL_STATUSES))
 
     @classmethod
     def get_execute_tasks(cls, do_next, followup_level, now):

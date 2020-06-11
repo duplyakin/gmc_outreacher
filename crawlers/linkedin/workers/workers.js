@@ -118,7 +118,7 @@ async function searchWorker(task_id) {
     }
 
   } finally {
-    console.log("SearchWorker RES: ", result_data);
+    //console.log("SearchWorker RES: ", result_data);
 
     if (task !== null) {
       await models_shared.TaskQueue.findOneAndUpdate({ _id: task_id }, { ack: 0, status: status, result_data: result_data, is_queued: 0 }, { upsert: false });
@@ -217,7 +217,7 @@ async function connectWorker(task_id) {
     status = status_codes.FAILED;
 
   } finally {
-    console.log("ConnectWorker RES: ", result_data);
+    //console.log("ConnectWorker RES: ", result_data);
 
     if (task !== null) {
       await models_shared.TaskQueue.findOneAndUpdate({ _id: task_id }, { ack: 0, status: status, result_data: result_data, is_queued: 0 }, { upsert: false });
@@ -312,7 +312,7 @@ async function messageWorker(task_id) {
     status = status_codes.FAILED;
 
   } finally {
-    console.log("MessageWorker RES: ", result_data);
+    //console.log("MessageWorker RES: ", result_data);
 
     if (task !== null) {
       await models_shared.TaskQueue.findOneAndUpdate({ _id: task_id }, { ack: 0, status: status, result_data: result_data, is_queued: 0 }, { upsert: false });
@@ -392,7 +392,7 @@ async function scribeWorker(task_id) {
     status = status_codes.FAILED;
 
   } finally {
-    console.log("ScribeWorker RES: ", result_data);
+   // console.log("ScribeWorker RES: ", result_data);
     
     if (task !== null) {
       await models_shared.TaskQueue.findOneAndUpdate({ _id: task_id }, { ack: 0, status: status, result_data: result_data, is_queued: 0 }, { upsert: false });
@@ -472,7 +472,7 @@ async function messageCheckWorker(task_id) {
     status = status_codes.FAILED;
 
   } finally {
-    console.log("MessageCheckWorker RES: ", result_data);
+   // console.log("MessageCheckWorker RES: ", result_data);
 
     if (task !== null) {
       await models_shared.TaskQueue.findOneAndUpdate({ _id: task_id }, { ack: 0, status: status, result_data: result_data, is_queued: 0 }, { upsert: false });
@@ -553,7 +553,7 @@ async function connectCheckWorker(task_id) {
     status = status_codes.FAILED;
 
   } finally {
-    console.log("ConnectCheckWorker RES: ", result_data);
+   // console.log("ConnectCheckWorker RES: ", result_data);
 
     if (task !== null) {
       await models_shared.TaskQueue.findOneAndUpdate({ _id: task_id }, { ack: 0, status: status, result_data: result_data, is_queued: 0 }, { upsert: false });
@@ -632,7 +632,7 @@ async function visitProfileWorker(task_id) {
     status = status_codes.FAILED;
 
   } finally {
-    console.log("VisitProfileWorker RES: ", result_data);
+   // console.log("VisitProfileWorker RES: ", result_data);
 
     if (task !== null) {
       await models_shared.TaskQueue.findOneAndUpdate({ _id: task_id }, { ack: 0, status: status, result_data: result_data, is_queued: 0 }, { upsert: false });

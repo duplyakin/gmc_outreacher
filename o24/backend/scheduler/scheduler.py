@@ -162,7 +162,7 @@ class Scheduler():
 
         models.Credentials.update_credentials(updated)
 
-        campaigns = Campaign.objects(status=IN_PROGRESS)
+        campaigns = models.Campaign.objects(status=IN_PROGRESS)
         campaigns_updated = []
         for campaign in campaigns:
             campaign.change_limits(now)

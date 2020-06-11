@@ -231,3 +231,20 @@ https://semaphoreci.com/community/tutorials/dockerizing-a-python-django-web-appl
 VUEJS login and register tutorial:
 https://jasonwatmore.com/post/2018/07/14/vue-vuex-user-registration-and-login-tutorial-example
 https://github.com/cornflourblue/vue-vuex-registration-login-example - example of login register app
+
+
+Список сервисов, которые запускаются:
+Celery beat - планировщик celery, который выполняет периодические задачи. Без его запуска периодические задачи не будут работать.
+    celery -A o24.backend.handlers.worker_start.celery beat
+
+Scheduler (celery) - отвечает за обработку задач в TaskQueue. Запускается через emit_cheduler. Запускается по крону каждые config.SCHEDULER_HANDLER_PERIOD (сейчас это 60 секунду)
+Enricher (celery) - выполняет задачи поиска емайлов. Задачи лежат в очереди . Запускается через emit_enricher (celery). Запускается по крону каждые config.ENRICHER_HANDLER_PERIOD (сейчас это 120 секунд).
+
+    celery -A o24.backend.handlers.worker_start.celery worker -E -l info -P gevent
+
+
+
+Linkedin handlers (nodejs) - выполняет linkedin action’ы из очереди. Запускается из crawlers/init.js
+    node init.js
+BS service (nodejs) - должен решать блокировки с Linkedin. Запускается из BS/app/server.js
+    node server.js

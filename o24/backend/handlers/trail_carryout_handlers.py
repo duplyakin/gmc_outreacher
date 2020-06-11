@@ -7,6 +7,7 @@ from datetime import datetime
 from datetime import timedelta  
 from pytz import timezone
 import pytz
+import json
 
 from mongoengine.queryset.visitor import Q
 import o24.config as config
@@ -90,12 +91,14 @@ def linkedin_search_action(task):
     list_id = campaign.get_list_id()
     update_existing = campaign.get_update_existing()
 
-    data = result_data.get('data', '')
-    if not data:
+    raw_data = result_data.get('data', '')
+    if not raw_data:
         print("linkedin_search_action WARNING: result_data.data is empty result_data={0}".format(result_data))
         task.update_status(status=FAILED)
         campaign._safe_pause()
-        return 
+        return
+    
+    data = json.loads(raw_data)
     
     prospects_arr = data.get('arr', [])
     if prospects_arr:
