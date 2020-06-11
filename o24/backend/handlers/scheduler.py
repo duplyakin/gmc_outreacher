@@ -11,8 +11,10 @@ import time
 from o24.backend.models.shared import TaskQueue
 
 
-@celery.task
+@celery.task(name='emit_scheduler')
 def emit_scheduler():
+    
+    scheduler = None
     try:
         scheduler = Scheduler.lock()
         if not scheduler:
@@ -35,8 +37,9 @@ def emit_scheduler():
         app.logger.error(".....emit_scheduler Exception:{0}".format(str(e)))
         traceback.print_exc()
         return {"status": False}
+        
     finally:
-        if scheduller:
+        if scheduler:
             scheduler.unlock()
 
     return {"status": True}

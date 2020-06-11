@@ -43,6 +43,8 @@ DAY_TO_SECONDS = 24 * 60 * 60
 
 FINISHED_KEYS = ['finished', 'success']
 
+#Activated mediums
+ACTIVATED_MEDIUMS = ['special-medium', 'email']
 
 #defaults
 DEFAULT_PER_DAY_LIMIT=10000

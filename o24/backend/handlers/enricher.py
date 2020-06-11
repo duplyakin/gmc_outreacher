@@ -96,6 +96,7 @@ def check_enriched_action(task_id):
     }
     status = FAILED
 
+    task = None
     try:
         task = shared.TaskQueue.lock(task_id)
         if not task:
@@ -161,6 +162,7 @@ def enrich_action(task_id):
     }
     status = FAILED
 
+    task = None
     try:
         task = shared.TaskQueue.lock(task_id)
         if not task:
@@ -218,8 +220,9 @@ def enrich_action(task_id):
     return result_data
 
 
-@celery.task
+@celery.task(name='emit_enricher')
 def emit_enricher():
+    controller = None
     try:
         controller = EnrichController.lock()
         if not controller:

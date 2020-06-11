@@ -9,7 +9,7 @@ import pytz
 import traceback
 from o24.globals import *
 import o24.backend.dashboard.models as models
-
+from mongoengine.errors import NotUniqueError
 from o24.enricher.providers.snovio import SnovioProvider
 
 PROVIDER_MAP = {
@@ -30,6 +30,9 @@ class EnrichController():
             controller = cls()
             return controller
         except Exception as e:
+            if type(e) == NotUniqueError:
+                return None
+                
             print(str(e))
             traceback.print_exc()
         

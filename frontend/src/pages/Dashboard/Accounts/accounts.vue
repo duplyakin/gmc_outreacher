@@ -82,9 +82,10 @@
     const CREDENTIALS_API_ADD = '/credentials/add';
     //const CREDENTIALS_API_REFRESH = '/credentials/refresh';
 
-    const BS_API_STATUS = 'http://127.0.0.1:3000/bs/api/status/';
-    const BS_API_LOGIN = 'http://127.0.0.1:3000/bs/api/login/';
-    const BS_API_INPUT = 'http://127.0.0.1:3000/bs/api/input/';
+    const BS_API_BASE_URL = process.env.VUE_APP_BS_URL;
+    const BS_API_STATUS = BS_API_BASE_URL + '/api/status/';
+    const BS_API_LOGIN = BS_API_BASE_URL + '/api/login/';
+    const BS_API_INPUT = BS_API_BASE_URL + '/api/input/';
 
 
     export default {
@@ -100,8 +101,8 @@
     data () {
         return {
             status : {
-                0 : 'Active',
-                1 : 'Changed',
+                0 : 'New',
+                1 : 'Active',
                 '-1' : 'Error',
                 '-2' : 'Unknown'
             },

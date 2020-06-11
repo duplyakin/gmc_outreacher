@@ -31,6 +31,10 @@ def create_app():
         "scheduler": {
             "task": config.SCHEDULER_HANDLER,
             "schedule": config.SCHEDULER_HANDLER_PERIOD
+        },
+        "enricher" : {
+            "task": config.ENRICHER_HANDLER,
+            "schedule": config.ENRICHER_HANDLER_PERIOD
         }
     }
 

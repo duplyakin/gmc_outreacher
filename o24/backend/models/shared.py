@@ -7,6 +7,7 @@ from mongoengine.queryset.visitor import Q
 from datetime import datetime
 from dateutil.parser import parse
 import pytz
+from mongoengine.errors import NotUniqueError
 
 class Action(db.Document):
     #shared field

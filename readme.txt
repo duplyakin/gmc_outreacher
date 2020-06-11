@@ -7,6 +7,7 @@ python 3.7, pip 19.2.3
 идем сюда: C:\Program Files\MongoDB\Server\4.2\bin
 в командной строке: ./mongod -f ./mongod.cfg
 
+$env:APP_ENV="Production"
 
 Все шаги делаем из корня: mc_outreacher\
 1. Устанвливаем тестовую переменную окружения (!!!)

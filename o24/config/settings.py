@@ -20,11 +20,13 @@ class BaseConfig():
     USER_ENABLE_EMAIL = True      # Disable email authentication
     USER_SEND_REGISTERED_EMAIL = False
 
+    #CELERY periodic tasks settings for Enricher
+    ENRICHER_HANDLER_PERIOD = 120
+    ENRICHER_HANDLER = 'emit_enricher'
 
-    #CELERY periodic tasks settings
-    SCHEDULER_HANDLER_PERIOD = 10
+    #CELERY periodic tasks settings for Scheduler
+    SCHEDULER_HANDLER_PERIOD = 60
     SCHEDULER_HANDLER = 'emit_scheduler'
-    #WATCH_DOG_HANDLER = 'emit_test_watch_dog'
     broker_transport_options = {"max_retries": 3, "interval_start": 0, "interval_step": 0.2, "interval_max": 0.5}
 
 
@@ -32,17 +34,17 @@ class BaseConfig():
     # using 2 per available processor cores - to handle
     # incoming requests using one and performing background
     # operations using the other.
-    THREADS_PER_PAGE = 2
+    THREADS_PER_PAGE = 4
 
     # Enable protection agains *Cross-site Request Forgery (CSRF)*
     CSRF_ENABLED     = True
 
     # Use a secure, unique and absolutely secret key for
     # signing the data. 
-    CSRF_SESSION_KEY = "secret"
+    CSRF_SESSION_KEY = "super-never-appatit-nomand-key-log-forget"
 
     # Secret key for signing cookies
-    SECRET_KEY = "secret"
+    SECRET_KEY = "repus-reven-appatit90-dnamon-yek-gol-tegrof"
     AES_SECRET = b'1234567890123456'
 
     #UI specific settings
@@ -100,6 +102,7 @@ class ProductionConfig(BaseConfig):
     FLASK_ENV = 'production'
     CELERY_BROKER = 'amqp://guest:guest@localhost:5672//'
     CELERY_BACKEND_RESULT_EXPIRES = 300
+    CELERY_TASK_ALWAYS_EAGER = False
     
     MONGODB_SETTINGS = {
         'db': 'O24Mc-prod',
@@ -119,17 +122,10 @@ class TestConfig(BaseConfig):
 
     TEST_USER_EMAIL = '1@email.com'
     WTF_CSRF_ENABLED = False
-    LOGIN_DISABLED=False
+    LOGIN_DISABLED = False
     MONGODB_SETTINGS = {
         'db': 'O24Mc-test',
         'host': '127.0.0.1',
         'port': 27017,
         'tz_aware':True
     }
-
-    SNOVIO_CREDENTIALS = {
-        'grant_type':'client_credentials',
-        'client_id':'5c543104ff5fc8cb5e12e3432883f42e',
-        'client_secret': '1a87f87d6ec80e754046a1d6aa2c05c3'
-    }
-    SNOVIO_API_URL = 'https://api.snov.io/v1'

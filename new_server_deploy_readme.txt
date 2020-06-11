@@ -42,3 +42,7 @@ sudo certbot --nginx -d outreacher24.com -d dv.outreacher24.com
 Стаим node последней версии
 curl -sL https://deb.nodesource.com/setup_12.x | sudo -E bash -
 sudo apt-get install -y nodejs
+
+#create production database
+$env:APP_ENV="Production"
+python -m unittest discover test_data_production -s .\o24\deployment_scripts\ -p "*deploy_data_to_database.py"

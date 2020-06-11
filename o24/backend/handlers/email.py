@@ -32,6 +32,7 @@ def email_check_reply(task_id):
     }
     status = FAILED
 
+    task = None
     try:
         task = shared.TaskQueue.lock(task_id)
         if not task:
@@ -118,7 +119,7 @@ def email_send_message(task_id):
         'error' : 'Unknown Error'
     }
     status = FAILED
-
+    task = None
     try:
         task = shared.TaskQueue.lock(task_id)
         if not task:

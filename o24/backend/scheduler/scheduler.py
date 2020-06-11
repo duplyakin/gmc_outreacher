@@ -7,6 +7,7 @@ from o24.globals import *
 from .models import Priority, TaskLog
 import o24.backend.handlers.jobs_map as jobs_map
 import o24.backend.handlers.trail_handlers as trail_handlers
+import traceback 
 
 from datetime import datetime
 import pytz
@@ -15,7 +16,7 @@ from mongoengine.queryset.visitor import Q
 
 from o24.exceptions.exception_with_code import ErrorCodeException
 from o24.exceptions.error_codes import *
-    
+from mongoengine.errors import NotUniqueError
     
 class Scheduler():
     def __init__(self):
@@ -31,6 +32,9 @@ class Scheduler():
             scheduler = cls()
             return scheduler
         except Exception as e:
+            if type(e) == NotUniqueError:
+                return None 
+
             print(str(e))
             traceback.print_exc()
         
@@ -109,7 +113,9 @@ class Scheduler():
             TaskQueue.update_tasks(for_update)
     
     
-    def execute(self, now):
+    def execute(self):
+        now = pytz.utc.localize(datetime.utcnow())
+
         current_priority = Priority.get_priority()
         do_next = current_priority.do_next
         followup_level = current_priority.followup_level

@@ -66,3 +66,6 @@ python -m unittest o24.production_tests.test_stats.StatsTest.test_create_stats
 python -m unittest o24.production_tests.test_stats.StatsTest.test_show_stats
 
 python -m unittest o24.production_tests.test_stats.StatsTest.test_show_campaign_stats
+
+
+python -m unittest o24.tests.test_lock.TestLock.test_lock

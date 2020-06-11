@@ -824,3 +824,20 @@ GOOGLE_APP_SETTINGS = [{
 }]
 
 
+GOOGLE_APP_SETTINGS_PRODUCTION = [{
+    'title': 'Outreacher24 - web app credentials - PRODUCTION',
+    'credentials': {"web":{"client_id":"606646624276-k7p37f77u8rp2np03hd8up7p6amshpl2.apps.googleusercontent.com","project_id":"outreacher24","auth_uri":"https://accounts.google.com/o/oauth2/auth","token_uri":"https://oauth2.googleapis.com/token","auth_provider_x509_cert_url":"https://www.googleapis.com/oauth2/v1/certs","client_secret":"9YrijbGJA8J0YZCA9HDzckMx","redirect_uris":["https://outreacher24.com/oauth/callback"],"javascript_origins":["https://outreacher24.com"]}},
+    'redirect_uri': 'https://outreacher24.com/oauth/callback',
+
+    'gmail_scopes': ['https://mail.google.com/', 'https://www.googleapis.com/auth/gmail.send', 'https://www.googleapis.com/auth/gmail.modify', 'https://www.googleapis.com/auth/gmail.metadata'],
+    'gmail_access_type': 'offline',
+    'gmail_include_granted_scopes': 'true',
+
+    'gmail_api_name': 'gmail',
+    'gmail_api_version': 'v1',
+
+    'active' : True
+}]
+
+
+

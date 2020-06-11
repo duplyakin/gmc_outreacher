@@ -382,7 +382,10 @@ class Credentials(db.Document):
         exist.medium = medium
         exist.data = new_data
         
-        exist.status = 0
+        if medium in ACTIVATED_MEDIUMS:
+            exist.status = 1
+        else:
+            exist.status = 0
         
         exist._commit(_reload=True)
 
