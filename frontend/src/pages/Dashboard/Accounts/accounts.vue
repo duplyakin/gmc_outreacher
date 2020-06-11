@@ -36,7 +36,7 @@
                             <template v-else> {{ show_data(scope.row, column) }} </template>
                         </template>
                 </el-table-column>
-                <el-table-column :min-width="80" fixed="right">
+                <el-table-column :min-width="115" fixed="right">
                     <template slot-scope="props">
                         <button v-if="props.row.medium == 'linkedin' && props.row.status != -1" v-on:click="loginLinkedinModal(props.row._id.$oid)"  type="button" class="btn btn-outline btn-wd btn-success mx-1">Login linkedin</button>
                         <button v-if="props.row.medium == 'linkedin' && props.row.status == -1" v-on:click="loginLinkedinModal(props.row._id.$oid)"  type="button" class="btn btn-outline btn-wd btn-danger">Login required</button>
@@ -103,7 +103,7 @@
             status : {
                 0 : 'New',
                 1 : 'Active',
-                '-1' : 'Error',
+                '-1' : 'Failed',
                 '-2' : 'Unknown'
             },
             accounts_data: {

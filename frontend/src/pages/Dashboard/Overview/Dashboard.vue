@@ -31,7 +31,7 @@ export default {
   methods: {},
   mounted() {
     this.videoId = getIdFromURL(
-      "https://www.youtube.com/watch?v=6pqOZq9eBBg&list=LLFo6SCt0GGcF5D7c-yGNuUQ&index=18&t=0s"
+      "https://www.youtube.com/watch?v=9AwsM4Cuyrw"
     );
   }
 };
