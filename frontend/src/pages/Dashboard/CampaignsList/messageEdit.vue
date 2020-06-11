@@ -4,35 +4,45 @@
     <card>
       <h4>{{template.title}}</h4>
       <form v-if="template" @submit.prevent="submitData">
+
         <card v-if="template_type === 'email'">
-          <div class="col-12">
-            <el-input label="Subject"
-                placeholder="Enter Subject"
-                name="Subject"
-                maxlength="100"
-                show-word-limit
-                v-model="subject">
-            </el-input>
-            <fg-input label=" ">
-              <editor
-                name="body text"
-                output-format="html"
-                v-model="template.body"
-                api-key="o5wuoncsvrewlx7zeflsjb4wo2a252lvnrnlslv30ohh31ex"
-                :init="editorSettings"
-              />
-            </fg-input>
+
+          <div class="row">
+            <div class="col-12 mb-3">
+              <el-input label="Subject"
+                  placeholder="Enter Subject"
+                  name="Subject"
+                  maxlength="100"
+                  show-word-limit
+                  v-model="subject">
+              </el-input>
+            </div>
           </div>
-          <div class="container">
-            <p
-              class="interval_text"
-            >If no reply is received for previous email, this email will be sent after</p>
-            <div class="col-2">
-              <fg-input label>
-                <el-input-number v-model="interval" placeholder="ex: 1.00" :min="1" :max="365"></el-input-number>
+
+          <div class="row">
+            <div class="col-12 mb-3">
+              <fg-input>
+                <editor
+                  name="body text"
+                  output-format="html"
+                  v-model="template.body"
+                  api-key="o5wuoncsvrewlx7zeflsjb4wo2a252lvnrnlslv30ohh31ex"
+                  :init="editorSettings"
+                />
               </fg-input>
             </div>
-            <p class="interval_text">day(s) from previous email</p>
+          </div>
+
+          <div class="container">
+            <div class="row">
+              <div class="col-7 o24_interval_text">If no reply is received for previous email, this email will be sent after</div>
+              <div class="col-2">
+                <fg-input>
+                  <el-input-number v-model="interval" placeholder="ex: 1.00" :min="1" :max="365"></el-input-number>
+                </fg-input>
+              </div>
+              <div class="col-3 o24_interval_text">day(s) from previous email</div>
+            </div>
           </div>
         </card>
 
@@ -49,16 +59,17 @@
               />
             </fg-input>
           </div>
+
           <div class="container">
-            <p
-              class="interval_text"
-            >If no reply is received for previous message, this message will be sent after</p>
-            <div class="col-2">
-              <fg-input label>
-                <el-input-number v-model="interval" placeholder="ex: 1.00" :min="1" :max="365"></el-input-number>
-              </fg-input>
+            <div class="row">
+              <div class="col-7 o24_interval_text">If no reply is received for previous message, this message will be sent after</div>
+              <div class="col-2">
+                <fg-input>
+                  <el-input-number v-model="interval" placeholder="ex: 1.00" :min="1" :max="365"></el-input-number>
+                </fg-input>
+              </div>
+              <div class="col-3 o24_interval_text">day(s) from previous message</div>
             </div>
-            <p class="interval_text">day(s) from previous message</p>
           </div>
         </card>
 
@@ -108,45 +119,13 @@ export default {
         plugins: [
           "advlist autolink lists link image charmap print preview anchor",
           "searchreplace visualblocks code fullscreen",
-          "insertdatetime media table paste code help wordcount autoresize"
+          "insertdatetime media table paste code help wordcount autoresize emoticons"
         ],
         toolbar:
           "undo redo | formatselect | bold italic backcolor | \
            alignleft aligncenter alignright alignjustify | \
            bullist numlist outdent indent | removeformat | help \
-           image | link | autolink",
-    /*    
-        max_chars: 1000, // max. allowed chars
-        setup: function (ed) {
-          var allowedKeys = [8, 37, 38, 39, 40, 46]; // backspace, delete and cursor keys
-          ed.on('keydown', function (e) {
-              if (allowedKeys.indexOf(e.keyCode) != -1) return true;
-              if (tinymce_getContentLength() + 1 > this.settings.max_chars) {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  return false;
-              }
-              return true;
-          });
-          ed.on('keyup', function (e) {
-              tinymce_updateCharCounter(this, tinymce_getContentLength());
-          });
-        },
-        init_instance_callback: function () { // initialize counter div
-            $('#' + this.id).prev().append('<div class="char_count" style="text-align:right"></div>');
-            tinymce_updateCharCounter(this, tinymce_getContentLength());
-        },
-        paste_preprocess: function (plugin, args) {
-            var editor = tinymce.get(tinymce.activeEditor.id);
-            var len = editor.contentDocument.body.innerText.length;
-            var text = $(args.content).text();
-            if (len + text.length > editor.settings.max_chars) {
-                alert('Pasting this exceeds the maximum allowed number of ' + editor.settings.max_chars + ' characters.');
-                args.content = '';
-            } else {
-                tinymce_updateCharCounter(editor, len + text.length);
-            }
-        }*/
+           image | link | autolink | emoticons",
       },
       modelValidations: {
         message_data: {
@@ -159,15 +138,6 @@ export default {
     };
   },
   methods: {
-    /*
-    tinymce_updateCharCounter(el, len) {
-        $('#' + el.id).prev().find('.char_count').text(len + '/' + el.settings.max_chars);
-    },
-    tinymce_getContentLength() {
-       return tinymce.get(tinymce.activeEditor.id).contentDocument.body.innerText.length;
-    },
-    */
-
     convertToPlainText(htmlText) {
       let res = htmlText.replace(/<style([\s\S]*?)<\/style>/gi, "");
       res = res.replace(/<script([\s\S]*?)<\/script>/gi, "");
@@ -253,16 +223,7 @@ export default {
 };
 </script>
 <style>
-label {
-  color: black;
-}
-.container {
-  display: flex;
-  justify-content: space-around;
-  align-items: flex-start;
-  padding: 10px 20px;
-}
-.interval_text {
+.o24_interval_text {
   display: flex;
   align-items: flex-start;
   font-size: 17px;

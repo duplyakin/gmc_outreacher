@@ -3,7 +3,7 @@
     <card>
     <div class="row">
         <div class="col-6 d-flex align-self-center">
-            <span font-><h3><i class="nc-icon nc-single-02"></i> Accounts managment</h3></span>
+            <span font-><h3><i class="nc-icon nc-single-02"></i>Accounts managment</h3></span>
         </div>
         <div class="col-6 d-flex flex-row-reverse align-self-center">
             <button @click.prevent="addAccount" type="button" class="btn btn-default btn-success mx-1">Add account</button>
@@ -36,18 +36,13 @@
                             <template v-else> {{ show_data(scope.row, column) }} </template>
                         </template>
                 </el-table-column>
-                <el-table-column :min-width="50" fixed="right" label="Reconnect">
+                <el-table-column :min-width="80" fixed="right">
                     <template slot-scope="props">
-                    <a
-                        v-tooltip.top-center="'Reconnect'"
-                        class="btn-info btn-simple btn-link"
-                        @click.prevent="refreshCredentials(props.row._id.$oid, props.$index)"
-                    >
-                        <i class="fa fa-refresh"></i>
-                    </a>
+                        <button v-if="props.row.medium == 'linkedin' && props.row.status != -1" v-on:click="loginLinkedinModal(props.row._id.$oid)"  type="button" class="btn btn-outline btn-wd btn-success mx-1">Login linkedin</button>
+                        <button v-if="props.row.medium == 'linkedin' && props.row.status == -1" v-on:click="loginLinkedinModal(props.row._id.$oid)"  type="button" class="btn btn-outline btn-wd btn-danger">Login required</button>
                     </template>
                 </el-table-column>
-                <el-table-column :min-width="50" fixed="right" label="Delete">
+                <el-table-column :min-width="40" fixed="right">
                     <template slot-scope="props">
                     <a
                         v-tooltip.top-center="'Delete'"
@@ -66,21 +61,30 @@
     </div>
     </div>
 
+<modals-container ref="modal_login"/>
 </div>
 </template>
 <script>
     import { Notification, Table, TableColumn, Select, Option } from 'element-ui'
-    import axios from '@/api/axios-auth';
+    import axios from '@/api/axios-auth'
+    import * as bs_axios from 'axios'
+
 
     const O24Pagination = () => import('src/components/O24Pagination.vue')
     const AccountEdit = () => import('./accountEdit.vue')
     const AccountAdd = () => import('./accountAdd.vue')
+    const AccountLogin = () => import('./accountLogin_modal.vue')
+    const AccountInput = () => import('./accountInput_modal.vue')
 
     const CREDENTIALS_API_LIST = '/credentials/list';
     const CREDENTIALS_API_EDIT = '/credentials/edit';
     const CREDENTIALS_API_DELETE = '/credentials/delete';
     const CREDENTIALS_API_ADD = '/credentials/add';
-    const CREDENTIALS_API_REFRESH = '/credentials/refresh';
+    //const CREDENTIALS_API_REFRESH = '/credentials/refresh';
+
+    const BS_API_STATUS = 'http://127.0.0.1:3000/bs/api/status/';
+    const BS_API_LOGIN = 'http://127.0.0.1:3000/bs/api/login/';
+    const BS_API_INPUT = 'http://127.0.0.1:3000/bs/api/input/';
 
 
     export default {
@@ -141,51 +145,178 @@
             });
 
         },
-        refreshCredentials(credentials_id, row_index) {
-            const current_index = row_index;
-            const _table = this.$refs.accounts_data_table;
-
-            const path = CREDENTIALS_API_REFRESH;
-
-            var data = new FormData();
-            data.append('_credentials_id', credentials_id);
-
-            axios.post(path, data)
-            .then((res) => {
-                var r = res.data;
-                if (r.code > 0) {
-                    this.$set(this.accounts_data.credentials, current_index, JSON.parse(r.credentials));
-                    _table.$forceUpdate();
-                    Notification.success({title: "Success", message: "Account reconnected"});
-                } else {
-                    var msg = 'Server Error loading credentials ' + r.msg;
-                    Notification.error({title: "Error", message: msg});
-                }
+        async loginLinkedinModal(credentials_id) {
+            this.$modal.show(AccountLogin, {
+                credentials_id: credentials_id,
+                accountLoginBS: this.accountLoginBS,
+            },
+            {
+                width: '420',
+                height: 'auto',
+                scrollable: true,
+                clickToClose: false
             })
-            .catch((error) => {
-                var msg = 'Error loading credentials ' + error;
-                Notification.error({title: "Error", message: msg});
-            });
+        },
+        async inputLinkedinModal(credentials_id, screenshot) {
+            this.$modal.show(AccountInput, {
+                screenshot: screenshot,
+                credentials_id: credentials_id,
+                accountInputBS: this.accountInputBS,
+            },
+            {
+                width: '620',
+                height: 'auto',
+                scrollable: true,
+                clickToClose: false
+            })
+        },
+        async accountInputBS(credentials_id, input) {
+            console.log("accountInputBS started with credentials_id: ", credentials_id);
+            const path = BS_API_INPUT;
+            let _this = this;
+
+            var result = {
+                credentials_id: credentials_id,
+                input: input,
+            }
+
+            await bs_axios
+                .post(path, result)
+                .then(res => {
+                    var r = res.data;
+                    //console.log("accountInputBS status: ", r.code);
+
+                    if(r.code == -1) {
+                        Notification.error({title: "Error", message: "Something went wrong... Please, contact support."});
+                        this.$refs["modal_login"].modals = []; // CLOSE MODAL
+
+                    } else if (r.code == 1) {
+                        setTimeout(async function () {_this.accountStatusBS(credentials_id)}, 3000); // in progress
+                    } 
+                })
+                .catch(error => {
+                    console.log("Error status ", error);
+                    Notification.error({title: "Error", message: "Something went wrong... Please, contact support."});
+                    this.$refs["modal_login"].modals = []; // CLOSE MODAL
+                });
+        },
+        async accountStatusBS(credentials_id) {
+            //console.log("accountStatusBS started with credentials_id: ", credentials_id);
+            const path = BS_API_STATUS;
+            let _this = this;
+
+            var result = {
+                credentials_id: credentials_id,
+            }
+
+            await bs_axios
+                .post(path, result)
+                .then(res => {
+                    var r = res.data;
+                    let status = r.code;
+
+                    console.log("accountStatusBS status: ", status);
+
+                    if(status == -1) {
+                        // SYSTEM ERROR
+                        Notification.error({title: "Error", message: "Something went wrong... Please, contact support."});
+                        this.$refs["modal_login"].modals = []; // CLOSE MODAL
+                    }
+
+                    if(status == 0) {
+                        // SUCCESS
+                        console.log("accountStatusBS status: ", this.$refs["modal_login"].modals);
+
+                        Notification.success({title: "Success", message: "Success."});
+                        this.$refs["modal_login"].modals = []; // CLOSE MODAL // CLOSE MODAL
+                        this.loadCredentials(); // update table
+                    }
+
+                    if(status == 1) {
+                        // IN PROGRESS
+                        setTimeout(async function () {_this.accountStatusBS(credentials_id)}, 3000); // in progress
+                    }
+
+                    if(status == 2) {
+                        // NEED ACTION - INPUT CAPTCHA
+                        Notification.info({title: "Info", message: "Need action."});
+                        this.$refs["modal_login"].modals = []; // CLOSE MODAL // CLOSE MODAL
+                        if(r.screenshot) {
+                            this.inputLinkedinModal(credentials_id, r.screenshot);
+                        } else {
+                            Notification.error({title: "Error", message: "Something went wrong... Please, contact support."});
+                        }
+                    }
+
+                    if(status == 4) {
+                        // NEED ACTION - REPEAT LOGIN\PASSWORD
+                        Notification.error({title: "Error", message: "Wrong login or password. Try again."});
+                        this.$refs["modal_login"].modals = []; // CLOSE MODAL // CLOSE MODAL
+                        this.loginLinkedinModal(credentials_id);
+                    }
+
+                })
+                .catch(error => {
+                    console.log("Error accountStatusBS: ", error);
+                    this.$refs["modal_login"].modals = []; // CLOSE MODAL // CLOSE MODAL
+                    Notification.error({title: "Error", message: "Something went wrong... Please, contact support."});
+                });
+        },
+        async accountLoginBS(credentials_id, login, password) {
+            const path = BS_API_LOGIN;
+            console.log("accountLoginBS started with credentials_id: ", credentials_id);
+            let _this = this;
+
+            var result = {
+                credentials_id: credentials_id,
+                login: login,
+                password: password,
+            }
+
+            await bs_axios
+                .post(path, result)
+                .then(res => {
+                    var r = res.data;
+                    if (r.code == -2) {
+                        Notification.error({title: "Error", message: "Empty login or password."});
+                        this.$refs["modal_login"].modals = []; // CLOSE MODAL
+
+                    } else if (r.code == 1) {
+                        Notification.info({title: "Info", message: "Login in progress."});
+                        
+                        setTimeout(async function () {_this.accountStatusBS(credentials_id)}, 3000);
+                    } else {
+                        console.log("accountLoginBS status: ", r.code);
+
+                        Notification.error({title: "Error", message: "Something went wrong... Please, contact support."});
+                        this.$refs["modal_login"].modals = []; // CLOSE MODAL
+
+                    }
+                })
+                .catch(error => {
+                    Notification.error({title: "Error", message: "Error login " + error});
+                    this.$refs["modal_login"].modals = []; // CLOSE MODAL
+                });
         },
         editAccount(account_dict, row_index) {
 
-        const current_index = row_index;
-        const _table = this.$refs.accounts_data_table;
+            const current_index = row_index;
+            const _table = this.$refs.accounts_data_table;
 
-        this.$modal.show(AccountEdit, {
-            accountObj: account_dict,
-            api_url : CREDENTIALS_API_EDIT,
-            modalTitle: "Account edit",
-            valueUpdated:(newValue) => {
-                this.$set(this.accounts_data.credentials, current_index, newValue);
-                _table.$forceUpdate();
-                Notification.success({title: "Success", message: "Account changed"});
-            }
+            this.$modal.show(AccountEdit, {
+                accountObj: account_dict,
+                api_url : CREDENTIALS_API_EDIT,
+                modalTitle: "Account edit",
+                valueUpdated:(newValue) => {
+                    this.$set(this.accounts_data.credentials, current_index, newValue);
+                    _table.$forceUpdate();
+                    Notification.success({title: "Success", message: "Account changed"});
+                }
             },
             {
-            width: '720',
-            height: 'auto',
-            scrollable: true
+                width: '720',
+                height: 'auto',
+                scrollable: true
             })
         },
         delete_credentials(credentials_id, row_index){
@@ -228,31 +359,32 @@
             })
         },
         show_data(scope_row, column){
-        var data = column.data || '';
-        if (data){
-            return scope_row.data[column.prop] || '';
-        }else{
-            var field = column.field || '';
-            if (field){
-                return scope_row[column.prop][field] || '';
-            }else{
-                return scope_row[column.prop] || '';
+            var data = column.data || '';
+            if (data){
+                return scope_row.data[column.prop] || '';
+            } else {
+                var field = column.field || '';
+                if (field){
+                    return scope_row[column.prop][field] || '';
+                }else{
+                    return scope_row[column.prop] || '';
+                }
             }
-        }
 
-        return '';
-    },
+            return '';
+        },
 
-    },
-    mounted () {
-        this.loadCredentials();
-    },
-    created() {
-    },
+        },
+        mounted () {
+            this.loadCredentials();
+        },
     }
 </script>
 <style>
 .red {
 color: red;
+}
+.green {
+color: rgb(3, 212, 3);
 }
 </style>

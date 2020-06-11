@@ -8,8 +8,10 @@
               <i class="nc-icon nc-chart-bar-32"></i> Campaign Detalization
             </h3>
           </div>
+        </div>
+        <div class="row">
           <div class="col-4">
-            <p>Filter by medium</p>
+            <label>Filter by medium</label>
             <el-select
               class="select-default mb-3"
               v-on:change="onChangeMedium"
@@ -32,38 +34,42 @@
 
       <card>
         <div class="container">
-          <div>
-            <p class="data-caption">Title</p>
-            <p class="info">{{list_data.campaign.title}}</p>
-          </div>
-          <div>
-            <p class="data-caption">Funnel</p>
-            <p class="info">{{list_data.campaign.funnel.title}}</p>
-          </div>
-          <div>
-            <p class="data-caption">Accounts</p>
-            <div v-for="acc in list_data.campaign.credentials">
-              <p class="purple">{{acc.medium}}: </p><p class="info">{{acc.data.email}}</p>
+          <div class="row">
+            <div class="col-4">
+              <p class="o24_data-caption">Title</p>
+              <p class="o24_info">{{list_data.campaign.title}}</p>
+            </div>
+            <div class="col-4">
+              <p class="o24_data-caption">Funnel</p>
+              <p class="o24_info">{{list_data.campaign.funnel.title}}</p>
+            </div>
+            <div class="col-4">
+              <p class="o24_data-caption">Accounts</p>
+              <div v-for="acc in list_data.campaign.credentials">
+                <p class="purple">{{acc.medium}}: </p><p class="o24_info">{{acc.data.email}}</p>
+              </div>
             </div>
           </div>
         </div>
       </card>
 
-      <card v-if="filter!=''">
+      <card v-if="filter != ''">
         <h3>{{filter}} Statistics</h3>
         <div class="container" @mouseover="mouseOver" v-show="mouse_active">
-          <div v-for="obj in medium_data">
-            <div v-bind:class="obj.class">{{obj.value}}</div>
-            <p class="data-caption">{{obj.label}}</p>
+          <div class="row">
+            <div v-for="obj in medium_data" class="col-2">
+              <p v-bind:class="obj.class">{{obj.value}}</p>
+              <p class="o24_data-caption">{{obj.label}}</p>
+            </div>
           </div>
         </div>
 
         <div class="container" v-show="!mouse_active" @mouseleave="mouseLeave">
-          <div v-for="obj in medium_data">
-            <div
-              v-bind:class="obj.class"
-            >{{obj.relatively !== '' ? calcPercent(obj.value, medium_data[obj.relatively].value)+'%' : obj.value}}</div>
-            <p class="data-caption">{{obj.label}}</p>
+          <div class="row">
+            <div v-for="obj in medium_data" class="col-2">
+              <p v-bind:class="obj.class">{{obj.relatively !== '' ? calcPercent(obj.value, medium_data[obj.relatively].value)+'%' : obj.value}}</p>
+              <p class="o24_data-caption">{{obj.label}}</p>
+            </div>
           </div>
         </div>
       </card>
@@ -135,41 +141,41 @@ export default {
       medium_data: {},
       email_data: {
         days: {
-          class: "data-percent grey",
+          class: "o24_data-percent grey",
           relatively: "",
           label: "Days",
           value: 0
         },
         prospects_contacted: {
-          class: "data-percent blue",
+          class: "o24_data-percent blue",
           relatively: "",
           label: "Prospects contacted",
           chart_color: "rgb(16, 53, 99)",
           value: 0
         },
         emails_sent: {
-          class: "data-percent purple",
+          class: "o24_data-percent purple",
           relatively: "",
           label: "Emails sent",
           chart_color: "rgb(85, 153, 199)",
           value: 0
         },
         emails_bounced: {
-          class: "data-percent red",
+          class: "o24_data-percent red",
           relatively: "emails_sent",
           label: "Emails bounced",
           chart_color: "rgb(204, 0, 0)",
           value: 0
         },
         emails_opened: {
-          class: "data-percent green",
+          class: "o24_data-percent green",
           relatively: "emails_sent",
           label: "Emails opened",
           chart_color: "rgb(97, 184, 97)",
           value: 0
         },
         emails_replies: {
-          class: "data-percent yellow",
+          class: "o24_data-percent yellow",
           relatively: "emails_sent",
           label: "Emails replied",
           chart_color: "rgb(255, 158, 74)",
@@ -179,41 +185,41 @@ export default {
 
       linkedin_data: {
         days: {
-          class: "data-percent grey",
+          class: "o24_data-percent grey",
           relatively: "",
           label: "Days",
           value: 0
         },
         prospects_contacted: {
-          class: "data-percent purple",
+          class: "o24_data-percent purple",
           relatively: "",
           label: "Prospects contacted",
           chart_color: "rgb(16, 53, 99)",
           value: 0
         },
         connect_request: {
-          class: "data-percent blue",
+          class: "o24_data-percent blue",
           relatively: "",
           label: "Connect request sended",
           chart_color: "rgb(85, 153, 199)",
           value: 0
         },
         connect_request_approved: {
-          class: "data-percent purple",
+          class: "o24_data-percent purple",
           relatively: "connect_request",
           label: "Connect request approved",
           chart_color: "rgb(121, 88, 148)",
           value: 0
         },
         messages_sent: {
-          class: "data-percent green",
+          class: "o24_data-percent green",
           relatively: "",
           label: "Messages sended",
           chart_color: "rgb(97, 184, 97)",
           value: 0
         },
         replies_received: {
-          class: "data-percent yellow",
+          class: "o24_data-percent yellow",
           relatively: "messages_sent",
           label: "Replies resieved",
           chart_color: "rgb(255, 158, 74)",
@@ -454,7 +460,7 @@ export default {
 };
 </script>
 <style lang="scss">
-.info {
+.o24_info {
   display: flex;
   justify-content: space-around;
   align-items: flex-start;
@@ -464,13 +470,13 @@ export default {
   line-height: 0px;
   color: rgb(119, 119, 119);
 }
-.container {
+.o24_container {
   display: flex;
   justify-content: space-around;
   align-items: flex-start;
   padding: 10px 20px;
 }
-.data {
+.o24_data {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;

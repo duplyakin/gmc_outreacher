@@ -6,19 +6,14 @@ const selectors = require("../selectors");
 const MyExceptions = require('../../exceptions/exceptions.js');
 
 class Action {
-  constructor(email, password, li_at, cookies, credentials_id) {
-    this.email = email;
-    this.password = password;
-    this.li_at = li_at;
-
+  constructor(cookies, credentials_id) {
     this.cookies = cookies;
-    
     this.credentials_id = credentials_id;
   }
 
   async startBrowser() {
-    this.browser = await puppeteer.launch({ headless: false }); // test mode
-    //this.browser = await puppeteer.launch();
+    //this.browser = await puppeteer.launch({ headless: false }); // test mode
+    this.browser = await puppeteer.launch();
     this.context = await this.browser.createIncognitoBrowserContext();
     this.page = await this.context.newPage();
 
@@ -35,33 +30,7 @@ class Action {
     return null;
   }
 
-  async get_context(browser = this.browser, context = this.context, page = this.page) {
-    if(browser == null) {
-      throw new Error('Can\t get context. Browser is not defined.')
-    }
 
-    if(context == null) {
-      throw new Error('Can\t get context. Context is not defined.')
-    }
-
-    if(page == null) {
-      throw new Error('Can\t get context. Page is not defined.')
-    }
-
-    await page.waitFor(10000); // wait 10 sec for lading and screenshot page
-    let screenshot_str = await page.screenshot();
-
-    let context_obj = {
-      endpoint: browser.wsEndpoint(),
-      context_id: context._id,
-      page_url: page.url(),
-      screenshot: screenshot_str,
-    }
-    
-    return context_obj;
-  }
-
-/*
   check_block(url) {
     if(!url) {
       throw new Error('Empty url in check_block.')
@@ -76,79 +45,28 @@ class Action {
     }
   }
 
-  async check_success_selector(selector, page = this.page, data = null) {
-    if(!selector) {
-      throw new Error ('Empty selector.');
-    }
 
-    try {
-      await page.waitForSelector(selector, { timeout: 5000 });
-
-    } catch(err) {
-      if(this.check_block(page)) {
-        // not target page here
-        let context_obj = await this.get_context(); // todo: send here browser, page, context
-
-        if(context_obj != null) {
-          throw MyExceptions.ContextError('Can\'t goto url: ' + err, context_obj, data);
-
-        } else {
-          console.log( 'Never happend - empty context: ', err );
-          throw new Error('Can\'t goto url and empty context: ' + err);
-        }
-      }
- 
-      // uncknown page here
-      throw MyExceptions.NetworkError('Something wromg with connection or uncknown page: ' + err);
-    }
-  }
-*/
-
-async check_block(url, data = null) {
-  if(!url) {
-    throw new Error('Empty url in check_block.')
-  }
-
-  if(url.includes(links.BAN_LINK) || url.includes(links.CHALLENGE_LINK)) {
-    // not target page here
-    let context_obj = await this.get_context(); // todo: send here browser, page, context
-
-    if(context_obj != null) {
-      if(data != null) {
-        // add info to excisting result_data
-        data.code = MyExceptions.ContextError().code;
-        data.raw = MyExceptions.ContextError('Can\'t goto url: ' + url).error;
-        data.blocking_data = context_obj;
-      } 
-      throw MyExceptions.ContextError('Can\'t goto url: ' + url, context_obj, data);
-    } else {
-      console.log( 'Never happend - empty context in check_block.');
-      throw new Error('Can\'t goto url and empty context in check_block');
-    }
-
-  } else {
-    // all ok
-    return false;
-  }
-}
-
-async check_success_selector(selector, page = this.page, data = null) {
+async check_success_selector(selector, page = this.page) {
   if(!selector) {
     throw new Error ('Empty selector.');
   }
 
   try {
     await page.waitForSelector(selector, { timeout: 5000 });
+    return true;
 
   } catch(err) {
-    await this.check_block(page.url(), data);
+    
+    if(this.check_block(page.url())) {
+      throw MyExceptions.ContextError("Block happend: " + page.url());
+    }
 
     // uncknown page here
-    throw MyExceptions.NetworkError('Something wromg with connection or uncknown page: ' + err);
+    throw new Error('Uncknowm page here: ', current_url);
   }
 }
 
-  async check_success_page(required_url, page = this.page, data = null) {
+  async check_success_page(required_url, page = this.page) {
     if(!required_url) {
       throw new Error ('Empty required_url.');
     }
@@ -159,7 +77,9 @@ async check_success_selector(selector, page = this.page, data = null) {
       return true;
     }
 
-    await this.check_block(page.url(), data);
+    if(this.check_block(page.url())) {
+      throw MyExceptions.ContextError("Block happend.");
+    }
 
     // uncknown page here
     throw new Error('Uncknowm page here: ', current_url);
@@ -213,7 +133,7 @@ async check_success_selector(selector, page = this.page, data = null) {
       if (current_url !== url) {
         if (current_url.includes('login') || current_url.includes('signup')) {
 
-          let loginAction = new LoginAction.LoginAction(this.email, this.password, this.li_at, this.credentials_id);
+          let loginAction = new LoginAction.LoginAction(this.credentials_id);
           await loginAction.setContext(this.context);
 
           let result = await loginAction.login();
@@ -223,13 +143,50 @@ async check_success_selector(selector, page = this.page, data = null) {
         } else {
           console.log('current_url: ', current_url);
           console.log('url: ', url);
-          throw new Error('We cann\'t go to page, we got: ' + current_url);
+          throw new Error("We cann't go to page, we got: " + current_url);
         }
       }
     } catch (err) {
-      await this.check_block(page.url());
+      if(this.check_block(page.url())) {
+        throw MyExceptions.ContextError("Block happend.");
+      }
+
+      throw new Error('Uncknowm page here: ', page.url());
     }
   }
+
+
+  async gotoLogin(page = this.page) {
+    try {
+      await page.goto(links.SIGNIN_LINK);
+      let current_url = page.url();
+
+      if (current_url.includes('login') || current_url.includes('signup')) {
+
+        let loginAction = new LoginAction.LoginAction(this.credentials_id);
+        await loginAction.setContext(this.context);
+
+        let result = await loginAction.login();
+        if (result) {
+          await page.goto(url);
+        }
+      } else if (current_url.includes(links.START_PAGE_SHORTLINK)) {
+        return; // success
+      } else {
+        console.log('current_url: ', current_url);
+        console.log('url: ', url);
+        throw new Error("We cann't go to page, we got: " + current_url);
+      }
+
+    } catch (err) { 
+      if(this.check_block(page.url())) {
+        throw MyExceptions.ContextError("Block happend.");
+      }
+
+      throw new Error('Uncknowm page here: ', page.url());
+    }
+  }
+
 
   async autoScroll(page) {
     await page.evaluate(async () => {

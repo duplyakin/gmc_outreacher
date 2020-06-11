@@ -3,59 +3,37 @@
 <card :title="modalTitle">
     <form @submit.prevent="submitAccountData">
         <card>
-        <div class="row">
-            <div class="col-12">
-            <fg-input name="limits_per_day"
-                label="Limits per day"
-                class="mb-3"
-                v-model="account_data.limit_per_day"/>
-            </div>
-        </div>
-        <div v-if="account_data.medium === 'linkedin'">
+
             <div class="row">
-                <div class="col-12">
-                    <fg-input name="linkedin_account"
-                        label="Linkedin account"
+                <div class="col-6">
+                    <fg-input name="limits_per_day"
+                        label="Limits per day"
                         class="mb-3"
-                        v-model="account_data.data.account"
-                        placeholder="example: linkedin.com/your_account"/>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-12">
-                    <fg-input name="linkedin_login"
-                        label="Linkedin login"
-                        class="mb-3"
-                        v-model="account_data.data.login"/>
+                        v-model="account_data.limit_per_day"/>
                 </div>
             </div>
 
+            <div v-if="account_data.medium === 'linkedin'">
                 <div class="row">
-                <div class="col-12">
-                    <fg-input name="linkedin_password"
-                        label="Linkedin password"
-                        class="mb-3"
-                        v-model="account_data.data.password"/>
+                    <div class="col-6">
+                        <fg-input name="linkedin_account"
+                            label="Linkedin account"
+                            class="mb-3"
+                            v-model="account_data.data.account"
+                            placeholder="example: linkedin.com/your_account"/>
+                    </div>
                 </div>
             </div>
 
-                <div class="row">
-                <div class="col-12">
-                    <fg-input name="linkedin_cookie (li_at)"
-                        label="li_at cookie value"
-                        class="mb-3"
-                        v-model="account_data.data.li_at"/>
-                </div>
-            </div>
-
-        </div>
         </card>
+
         <div class="row">
-                <div class="col-12 d-flex flex-row-reverse">
-                    <button type="submit" class="btn btn-outline btn-wd btn-success mx-1">Save</button>
-                    <button v-on:click="discardEdit" type="button" class="btn btn-outline btn-wd btn-danger">Discard</button>
-                </div>
+            <div class="col-12 d-flex flex-row-reverse">
+                <button type="submit" class="btn btn-outline btn-wd btn-success mx-1">Save</button>
+                <button v-on:click="discardEdit" type="button" class="btn btn-outline btn-wd btn-danger">Discard</button>
+            </div>
         </div>
+        
     </form>  
 </card>
 </div>
@@ -82,9 +60,7 @@ export default {
             account_data : {
                 medium : '',
                 limit_per_day : 0,
-                data : {
-
-                }
+                data : {},
             }
         }
     },

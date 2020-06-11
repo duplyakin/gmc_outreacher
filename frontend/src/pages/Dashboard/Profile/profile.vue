@@ -28,7 +28,10 @@
         class="btn btn-fill btn-info btn-round btn-wd"
       >Logout</button>
     </card>
+
+    <modals-container/>
   </div>
+
 </template>
 <script>
 import axios from "@/api/axios-auth";

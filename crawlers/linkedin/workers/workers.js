@@ -7,36 +7,36 @@ const MyExceptions = require('../../exceptions/exceptions.js');
 const status_codes = require('../status_codes')
 
 
-async function get_cookies(email, password, li_at, credentials_id) {
+async function get_cookies(credentials_id) {
 
-  let cookies = await models.Cookies.findOne({ credentials_id: credentials_id }, function (err, res) {
-    if (err) throw MyExceptions.MongoDBError('MongoDB find COOKIE err: ' + err);
+  let account = await models.Accounts.findOne({ _id: credentials_id }, function (err, res) {
+    if (err) throw MyExceptions.MongoDBError('MongoDB find account err: ' + err);
   });
 
-  let is_expired = check_expired(cookies); // true if we have to update cookies
+  let is_expired = check_expired(account); // true if we have to update cookies
 
-  if (cookies == null || is_expired) {
-    let loginAction = new modules.loginAction.LoginAction(email, password, li_at, credentials_id);
+  if (account == null || is_expired) {
+    let loginAction = new modules.loginAction.LoginAction(credentials_id);
     await loginAction.startBrowser();
     await loginAction.login();
     await loginAction.closeBrowser();
 
-    cookies = await models.Cookies.findOne({ credentials_id: credentials_id }, function (err, res) {
-      if (err) throw MyExceptions.MongoDBError('MongoDB find COOKIE err: ' + err);
+    account = await models.Accounts.findOne({ _id: credentials_id }, function (err, res) {
+      if (err) throw MyExceptions.MongoDBError('MongoDB find account err: ' + err);
     });
 
-    return cookies.data;
+    return account.cookies;
   }
 
-  return cookies.data;
+  return account.cookies;
 }
 
 
-function check_expired(cookies) {
-  if (cookies == null) {
+function check_expired(account) {
+  if (account == null) {
     return true;
   }
-  return (Date.now() / 1000 > cookies.expires);
+  return (Date.now() / 1000 > account.expires);
 }
 
 
@@ -47,7 +47,6 @@ function serialize_data(input_data) {
 
   let task_data = {};
 
-  task_data['credentials_data'] = input_data.credentials_data;
   task_data['campaign_data'] = input_data.campaign_data;
   task_data['template_data'] = input_data.template_data;
   task_data['prospect_data'] = input_data.prospect_data;
@@ -60,16 +59,17 @@ async function searchWorker(task_id) {
   let status = status_codes.FAILED;
   let result_data = {};
   let task = null;
+  let credentials_id = null;
 
   let browser = null;
   try {
-    task = await models_shared.TaskQueue.findOneAndUpdate({ _id: task_id, ack: 0 }, { ack: 1 }, { new: true });
+    task = await models_shared.TaskQueue.findOneAndUpdate({ _id: task_id, ack: 0 }, { ack: 1 }, { new: true, upsert: false });
     if (task == null) {
       console.log("..... task not found or locked: .....");
       return;
     }
 
-    let credentials_id = task.credentials_id;
+    credentials_id = task.credentials_id;
     if (!credentials_id) {
       throw new Error('there is no task.credentials_id');
     }
@@ -80,10 +80,10 @@ async function searchWorker(task_id) {
     let task_data = serialize_data(input_data);
     //console.log("..... task_data: .....", task_data);
 
-    let cookies = await get_cookies(task_data.credentials_data.email, task_data.credentials_data.password, task_data.credentials_data.li_at, credentials_id);
+    let cookies = await get_cookies(credentials_id);
 
     // start work
-    searchAction = new modules.searchAction.SearchAction(task_data.credentials_data.email, task_data.credentials_data.password, task_data.credentials_data.li_at, cookies, credentials_id, task_data.campaign_data.search_url, task_data.campaign_data.interval_pages);
+    searchAction = new modules.searchAction.SearchAction(cookies, credentials_id, task_data.campaign_data.search_url, task_data.campaign_data.interval_pages);
     browser = await searchAction.startBrowser();
     result_data = await searchAction.search();
     browser = await searchAction.closeBrowser();
@@ -102,23 +102,14 @@ async function searchWorker(task_id) {
         raw: err.error
       };
     } else if (err.code == -1) {
-      // Context error
-      if (err.context == null) {
-        // something went wromg...
-        console.log('Never happend: credentials_id or err.context is null in CONTEXT_ERROR in worker: ', err);
-        console.log('err.context: ', err.context);
-        throw new Error('Never happend: credentials_id or err.context is null in CONTEXT_ERROR in worker: ', err);
-      }
       status = status_codes.BLOCK_HAPPENED;
-      if (err.data == null) {
-        result_data = {
-          code: err.code,
-          raw: err.error,
-          blocking_data: err.context
-        };
-      } else {
-        result_data = err.data;
-      }
+      // Context error
+      result_data = {
+        code: err.code,
+        raw: err.error
+      };
+      await models.Accounts.findOneAndUpdate({ _id: credentials_id }, { task_id: task_id }, { upsert: false });
+      
     } else {
       result_data = {
         code: MyExceptions.SearchWorkerError().code,
@@ -127,15 +118,14 @@ async function searchWorker(task_id) {
     }
 
   } finally {
-    console.log("RES: ", result_data);
+    console.log("SearchWorker RES: ", result_data);
+
     if (task !== null) {
-      await models_shared.TaskQueue.findOneAndUpdate({ _id: task_id }, { ack: 0, status: status, result_data: result_data, is_queued: 0 });
+      await models_shared.TaskQueue.findOneAndUpdate({ _id: task_id }, { ack: 0, status: status, result_data: result_data, is_queued: 0 }, { upsert: false });
     }
 
-    if (browser !== null) {
-      if (status !== status_codes.BLOCK_HAPPENED) {
-        await browser.close();
-      }
+    if(browser != null) {
+      await browser.close();
       browser.disconnect();
     }
   }
@@ -146,16 +136,17 @@ async function connectWorker(task_id) {
   let status = status_codes.FAILED;
   let result_data = {};
   let task = null;
+  let credentials_id = null;
 
   let browser = null;
   try {
-    task = await models_shared.TaskQueue.findOneAndUpdate({ _id: task_id, ack: 0 }, { ack: 1 }, { new: true });
+    task = await models_shared.TaskQueue.findOneAndUpdate({ _id: task_id, ack: 0 }, { ack: 1 }, { new: true, upsert: false });
     if (task == null) {
       console.log("..... task not found or locked: .....");
       return;
     }
 
-    let credentials_id = task.credentials_id;
+    credentials_id = task.credentials_id;
     if (!credentials_id) {
       throw new Error('there is no task.credentials_id');
     }
@@ -165,13 +156,13 @@ async function connectWorker(task_id) {
     }
     let task_data = serialize_data(input_data);
 
-    let cookies = await get_cookies(task_data.credentials_data.email, task_data.credentials_data.password, task_data.credentials_data.li_at, credentials_id);
+    let cookies = await get_cookies(credentials_id);
 
     let prospect_full_name = task_data.prospect_data.first_name + ' ' + task_data.prospect_data.last_name;
 
     // start work
     // check connect
-    let connectCheckAction = new modules.connectCheckAction.ConnectCheckAction(task_data.credentials_data.email, task_data.credentials_data.password, task_data.credentials_data.li_at, cookies, credentials_id, prospect_full_name);
+    let connectCheckAction = new modules.connectCheckAction.ConnectCheckAction(cookies, credentials_id, prospect_full_name);
     browser = await connectCheckAction.startBrowser();
     let resCheck = await connectCheckAction.connectCheck();
     browser = await connectCheckAction.closeBrowser();
@@ -184,7 +175,7 @@ async function connectWorker(task_id) {
           message = task_data.template_data.message;
       }
       // connect if not connected
-      let connectAction = new modules.connectAction.ConnectAction(task_data.credentials_data.email, task_data.credentials_data.password, task_data.credentials_data.li_at, cookies, credentials_id, task_data.prospect_data.linkedin, message, task_data.prospect_data);
+      let connectAction = new modules.connectAction.ConnectAction(cookies, credentials_id, task_data.prospect_data.linkedin, message, task_data.prospect_data);
       browser = await connectAction.startBrowser();
       res = await connectAction.connect();
       browser = await connectAction.closeBrowser();
@@ -209,23 +200,14 @@ async function connectWorker(task_id) {
         raw: err.error
       };
     } else if (err.code == -1) {
-      // Context error
-      if (err.context == null) {
-        // something went wromg...
-        console.log('Never happend: credentials_id or err.context is null in CONTEXT_ERROR in worker: ', err);
-        console.log('err.context: ', err.context);
-        throw new Error('Never happend: credentials_id or err.context is null in CONTEXT_ERROR in worker: ', err);
-      }
       status = status_codes.BLOCK_HAPPENED;
-      if (err.data == null) {
-        result_data = {
-          code: err.code,
-          raw: err.error,
-          blocking_data: err.context
-        };
-      } else {
-        result_data = err.data;
-      }
+      // Context error
+      result_data = {
+        code: err.code,
+        raw: err.error
+      };
+      await models.Accounts.findOneAndUpdate({ _id: credentials_id }, { task_id: task_id }, { upsert: false });
+      
     } else {
       result_data = {
         code: MyExceptions.ConnectWorkerError().code,
@@ -235,15 +217,14 @@ async function connectWorker(task_id) {
     status = status_codes.FAILED;
 
   } finally {
-    console.log("RES: ", result_data);
+    console.log("ConnectWorker RES: ", result_data);
+
     if (task !== null) {
-      await models_shared.TaskQueue.findOneAndUpdate({ _id: task_id }, { ack: 0, status: status, result_data: result_data, is_queued: 0 }, { new: true });
+      await models_shared.TaskQueue.findOneAndUpdate({ _id: task_id }, { ack: 0, status: status, result_data: result_data, is_queued: 0 }, { upsert: false });
     }
 
-    if (browser !== null) {
-      if (status !== status_codes.BLOCK_HAPPENED) {
-        await browser.close();
-      }
+    if(browser != null) {
+      await browser.close();
       browser.disconnect();
     }
   }
@@ -254,16 +235,17 @@ async function messageWorker(task_id) {
   let status = status_codes.FAILED;
   let result_data = {};
   let task = null;
+  let credentials_id = null;
 
   let browser = null;
   try {
-    task = await models_shared.TaskQueue.findOneAndUpdate({ _id: task_id, ack: 0 }, { ack: 1 }, { new: true });
+    task = await models_shared.TaskQueue.findOneAndUpdate({ _id: task_id, ack: 0 }, { ack: 1 }, { new: true, upsert: false });
     if (task == null) {
       console.log("..... task not found or locked: .....");
       return;
     }
 
-    let credentials_id = task.credentials_id;
+    credentials_id = task.credentials_id;
     if (!credentials_id) {
       throw new Error('there is no task.credentials_id');
     }
@@ -273,18 +255,18 @@ async function messageWorker(task_id) {
     }
     let task_data = serialize_data(input_data);
 
-    let cookies = await get_cookies(task_data.credentials_data.email, task_data.credentials_data.password, task_data.credentials_data.li_at, credentials_id);
+    let cookies = await get_cookies(credentials_id);
 
     // start work
     // check reply
-    let messageCheckAction = new modules.messageCheckAction.MessageCheckAction(task_data.credentials_data.email, task_data.credentials_data.password, task_data.credentials_data.li_at, cookies, credentials_id, task_data.prospect_data.linkedin);
+    let messageCheckAction = new modules.messageCheckAction.MessageCheckAction(cookies, credentials_id, task_data.prospect_data.linkedin);
     browser = await messageCheckAction.startBrowser();
     let resCheckMsg = await messageCheckAction.messageCheck();
     browser = await messageCheckAction.closeBrowser();
 
     if (resCheckMsg.message === '') {
       // if no reply - send msg
-      let messageAction = new modules.messageAction.MessageAction(task_data.credentials_data.email, task_data.credentials_data.password, task_data.credentials_data.li_at, cookies, credentials_id, task_data.prospect_data.linkedin, task_data.prospect_data, task_data.template_data.message);
+      let messageAction = new modules.messageAction.MessageAction(cookies, credentials_id, task_data.prospect_data.linkedin, task_data.prospect_data, task_data.template_data.message);
       browser = await messageAction.startBrowser();
       let res = await messageAction.message();
       browser = await messageAction.closeBrowser();
@@ -313,23 +295,14 @@ async function messageWorker(task_id) {
         raw: err.error
       };
     } else if (err.code == -1) {
-      // Context error
-      if (err.context == null) {
-        // something went wromg...
-        console.log('Never happend: credentials_id or err.context is null in CONTEXT_ERROR in worker: ', err);
-        console.log('err.context: ', err.context);
-        throw new Error('Never happend: credentials_id or err.context is null in CONTEXT_ERROR in worker: ', err);
-      }
       status = status_codes.BLOCK_HAPPENED;
-      if (err.data == null) {
-        result_data = {
-          code: err.code,
-          raw: err.error,
-          blocking_data: err.context
-        };
-      } else {
-        result_data = err.data;
-      }
+      // Context error
+      result_data = {
+        code: err.code,
+        raw: err.error
+      };
+      await models.Accounts.findOneAndUpdate({ _id: credentials_id }, { task_id: task_id }, { upsert: false });
+      
     } else {
       result_data = {
         code: MyExceptions.MessageWorkerError().code,
@@ -339,15 +312,14 @@ async function messageWorker(task_id) {
     status = status_codes.FAILED;
 
   } finally {
-    console.log("RES: ", result_data);
+    console.log("MessageWorker RES: ", result_data);
+
     if (task !== null) {
-      await models_shared.TaskQueue.findOneAndUpdate({ _id: task_id }, { ack: 0, status: status, result_data: result_data, is_queued: 0 }, { new: true });
+      await models_shared.TaskQueue.findOneAndUpdate({ _id: task_id }, { ack: 0, status: status, result_data: result_data, is_queued: 0 }, { upsert: false });
     }
 
-    if (browser !== null) {
-      if (status !== status_codes.BLOCK_HAPPENED) {
-        await browser.close();
-      }
+    if(browser != null) {
+      await browser.close();
       browser.disconnect();
     }
   }
@@ -358,16 +330,17 @@ async function scribeWorker(task_id) {
   let status = status_codes.FAILED;
   let result_data = {};
   let task = null;
+  let credentials_id = null;
 
   let browser = null;
   try {
-    task = await models_shared.TaskQueue.findOneAndUpdate({ _id: task_id, ack: 0 }, { ack: 1 }, { new: true });
+    task = await models_shared.TaskQueue.findOneAndUpdate({ _id: task_id, ack: 0 }, { ack: 1 }, { new: true, upsert: false });
     if (task == null) {
       console.log("..... task not found or locked: .....");
       return;
     }
 
-    let credentials_id = task.credentials_id;
+    credentials_id = task.credentials_id;
     if (!credentials_id) {
       throw new Error('there is no task.credentials_id');
     }
@@ -377,10 +350,10 @@ async function scribeWorker(task_id) {
     }
     let task_data = serialize_data(input_data);
 
-    let cookies = await get_cookies(task_data.credentials_data.email, task_data.credentials_data.password, task_data.credentials_data.li_at, credentials_id);
+    let cookies = await get_cookies(credentials_id);
 
     // start work
-    let scribeAction = new modules.scribeAction.ScribeAction(task_data.credentials_data.email, task_data.credentials_data.password, task_data.credentials_data.li_at, cookies, credentials_id, task_data.prospect_data.linkedin);
+    let scribeAction = new modules.scribeAction.ScribeAction(cookies, credentials_id, task_data.prospect_data.linkedin);
     browser = await scribeAction.startBrowser();
     let res = await scribeAction.scribe();
     browser = await scribeAction.closeBrowser();
@@ -402,23 +375,14 @@ async function scribeWorker(task_id) {
         raw: err.error
       };
     } else if (err.code == -1) {
-      // Context error
-      if (err.context == null) {
-        // something went wromg...
-        console.log('Never happend: credentials_id or err.context is null in CONTEXT_ERROR in worker: ', err);
-        console.log('err.context: ', err.context);
-        throw new Error('Never happend: credentials_id or err.context is null in CONTEXT_ERROR in worker: ', err);
-      }
       status = status_codes.BLOCK_HAPPENED;
-      if (err.data == null) {
-        result_data = {
-          code: err.code,
-          raw: err.error,
-          blocking_data: err.context
-        };
-      } else {
-        result_data = err.data;
-      }
+      // Context error
+      result_data = {
+        code: err.code,
+        raw: err.error
+      };
+      await models.Accounts.findOneAndUpdate({ _id: credentials_id }, { task_id: task_id }, { upsert: false });
+      
     } else {
       result_data = {
         code: MyExceptions.ScribeWorkerError().code,
@@ -428,15 +392,14 @@ async function scribeWorker(task_id) {
     status = status_codes.FAILED;
 
   } finally {
-    console.log("RES: ", result_data);
+    console.log("ScribeWorker RES: ", result_data);
+    
     if (task !== null) {
-      await models_shared.TaskQueue.findOneAndUpdate({ _id: task_id }, { ack: 0, status: status, result_data: result_data, is_queued: 0 }, { new: true });
+      await models_shared.TaskQueue.findOneAndUpdate({ _id: task_id }, { ack: 0, status: status, result_data: result_data, is_queued: 0 }, { upsert: false });
     }
 
-    if (browser !== null) {
-      if (status !== status_codes.BLOCK_HAPPENED) {
-        await browser.close();
-      }
+    if(browser != null) {
+      await browser.close();
       browser.disconnect();
     }
   }
@@ -447,16 +410,17 @@ async function messageCheckWorker(task_id) {
   let status = status_codes.FAILED;
   let result_data = {};
   let task = null;
+  let credentials_id = null;
 
   let browser = null;
   try {
-    task = await models_shared.TaskQueue.findOneAndUpdate({ _id: task_id, ack: 0 }, { ack: 1 }, { new: true });
+    task = await models_shared.TaskQueue.findOneAndUpdate({ _id: task_id, ack: 0 }, { ack: 1 }, { new: true, upsert: false });
     if (task == null) {
       console.log("..... task not found or locked: .....");
       return;
     }
 
-    let credentials_id = task.credentials_id;
+    credentials_id = task.credentials_id;
     if (!credentials_id) {
       throw new Error('there is no task.credentials_id');
     }
@@ -466,10 +430,10 @@ async function messageCheckWorker(task_id) {
     }
     let task_data = serialize_data(input_data);
 
-    let cookies = await get_cookies(task_data.credentials_data.email, task_data.credentials_data.password, task_data.credentials_data.li_at, credentials_id);
+    let cookies = await get_cookies(credentials_id);
 
     // start work
-    let messageCheckAction = new modules.messageCheckAction.MessageCheckAction(task_data.credentials_data.email, task_data.credentials_data.password, task_data.credentials_data.li_at, cookies, credentials_id, task_data.prospect_data.linkedin);
+    let messageCheckAction = new modules.messageCheckAction.MessageCheckAction(cookies, credentials_id, task_data.prospect_data.linkedin);
     browser = await messageCheckAction.startBrowser();
     let res = await messageCheckAction.messageCheck();
     browser = await messageCheckAction.closeBrowser();
@@ -491,23 +455,14 @@ async function messageCheckWorker(task_id) {
         raw: err.error
       };
     } else if (err.code == -1) {
-      // Context error
-      if (err.context == null) {
-        // something went wromg...
-        console.log('Never happend: credentials_id or err.context is null in CONTEXT_ERROR in worker: ', err);
-        console.log('err.context: ', err.context);
-        throw new Error('Never happend: credentials_id or err.context is null in CONTEXT_ERROR in worker: ', err);
-      }
       status = status_codes.BLOCK_HAPPENED;
-      if (err.data == null) {
-        result_data = {
-          code: err.code,
-          raw: err.error,
-          blocking_data: err.context
-        };
-      } else {
-        result_data = err.data;
-      }
+      // Context error
+      result_data = {
+        code: err.code,
+        raw: err.error
+      };
+      await models.Accounts.findOneAndUpdate({ _id: credentials_id }, { task_id: task_id }, { upsert: false });
+      
     } else {
       result_data = {
         code: MyExceptions.MessageCheckWorkerError().code,
@@ -517,15 +472,14 @@ async function messageCheckWorker(task_id) {
     status = status_codes.FAILED;
 
   } finally {
-    console.log("RES: ", result_data);
+    console.log("MessageCheckWorker RES: ", result_data);
+
     if (task !== null) {
-      await models_shared.TaskQueue.findOneAndUpdate({ _id: task_id }, { ack: 0, status: status, result_data: result_data, is_queued: 0 }, { new: true });
+      await models_shared.TaskQueue.findOneAndUpdate({ _id: task_id }, { ack: 0, status: status, result_data: result_data, is_queued: 0 }, { upsert: false });
     }
 
-    if (browser !== null) {
-      if (status !== status_codes.BLOCK_HAPPENED) {
-        await browser.close();
-      }
+    if(browser != null) {
+      await browser.close();
       browser.disconnect();
     }
   }
@@ -536,16 +490,17 @@ async function connectCheckWorker(task_id) {
   let status = status_codes.FAILED;
   let result_data = {};
   let task = null;
+  let credentials_id = null;
 
   let browser = null;
   try {
-    task = await models_shared.TaskQueue.findOneAndUpdate({ _id: task_id, ack: 0 }, { ack: 1 }, { new: true });
+    task = await models_shared.TaskQueue.findOneAndUpdate({ _id: task_id, ack: 0 }, { ack: 1 }, { new: true, upsert: false });
     if (task == null) {
       console.log("..... task not found or locked: .....");
       return;
     }
 
-    let credentials_id = task.credentials_id;
+    credentials_id = task.credentials_id;
     if (!credentials_id) {
       throw new Error('there is no task.credentials_id');
     }
@@ -557,10 +512,10 @@ async function connectCheckWorker(task_id) {
 
     let prospect_full_name = task_data.prospect_data.first_name + ' ' + task_data.prospect_data.last_name;
 
-    let cookies = await get_cookies(task_data.credentials_data.email, task_data.credentials_data.password, task_data.credentials_data.li_at, credentials_id);
+    let cookies = await get_cookies(credentials_id);
 
     // start work
-    let connectCheckAction = new modules.connectCheckAction.ConnectCheckAction(task_data.credentials_data.email, task_data.credentials_data.password, task_data.credentials_data.li_at, cookies, credentials_id, prospect_full_name);
+    let connectCheckAction = new modules.connectCheckAction.ConnectCheckAction(cookies, credentials_id, prospect_full_name);
     browser = await connectCheckAction.startBrowser();
     let res = await connectCheckAction.connectCheck();
     browser = await connectCheckAction.closeBrowser();
@@ -581,23 +536,14 @@ async function connectCheckWorker(task_id) {
         raw: err.error
       };
     } else if (err.code == -1) {
-      // Context error
-      if (err.context == null) {
-        // something went wromg...
-        console.log('Never happend: credentials_id or err.context is null in CONTEXT_ERROR in worker: ', err);
-        console.log('err.context: ', err.context);
-        throw new Error('Never happend: credentials_id or err.context is null in CONTEXT_ERROR in worker: ', err);
-      }
       status = status_codes.BLOCK_HAPPENED;
-      if (err.data == null) {
-        result_data = {
-          code: err.code,
-          raw: err.error,
-          blocking_data: err.context
-        };
-      } else {
-        result_data = err.data;
-      }
+      // Context error
+      result_data = {
+        code: err.code,
+        raw: err.error
+      };
+      await models.Accounts.findOneAndUpdate({ _id: credentials_id }, { task_id: task_id }, { upsert: false });
+      
     } else {
       result_data = {
         code: MyExceptions.ConnectCheckWorkerError().code,
@@ -607,15 +553,14 @@ async function connectCheckWorker(task_id) {
     status = status_codes.FAILED;
 
   } finally {
-    console.log("RES: ", result_data);
+    console.log("ConnectCheckWorker RES: ", result_data);
+
     if (task !== null) {
-      await models_shared.TaskQueue.findOneAndUpdate({ _id: task_id }, { ack: 0, status: status, result_data: result_data, is_queued: 0 }, { new: true });
+      await models_shared.TaskQueue.findOneAndUpdate({ _id: task_id }, { ack: 0, status: status, result_data: result_data, is_queued: 0 }, { upsert: false });
     }
 
-    if (browser !== null) {
-      if (status !== status_codes.BLOCK_HAPPENED) {
-        await browser.close();
-      }
+    if(browser != null) {
+      await browser.close();
       browser.disconnect();
     }
   }
@@ -626,16 +571,17 @@ async function visitProfileWorker(task_id) {
   let status = status_codes.FAILED;
   let result_data = {};
   let task = null;
+  let credentials_id = null;
 
   let browser = null;
   try {
-    task = await models_shared.TaskQueue.findOneAndUpdate({ _id: task_id, ack: 0 }, { ack: 1 }, { new: true });
+    task = await models_shared.TaskQueue.findOneAndUpdate({ _id: task_id, ack: 0 }, { ack: 1 }, { new: true, upsert: false });
     if (task == null) {
       console.log("..... task not found or locked: .....");
       return;
     }
 
-    let credentials_id = task.credentials_id;
+    credentials_id = task.credentials_id;
     if (!credentials_id) {
       throw new Error('there is no task.credentials_id');
     }
@@ -645,10 +591,10 @@ async function visitProfileWorker(task_id) {
     }
     let task_data = serialize_data(input_data);
 
-    let cookies = await get_cookies(task_data.credentials_data.email, task_data.credentials_data.password, task_data.credentials_data.li_at, credentials_id);
+    let cookies = await get_cookies(credentials_id);
 
     // start work
-    let visitProfileAction = new modules.visitProfileAction.VisitProfileAction(task_data.credentials_data.email, task_data.credentials_data.password, task_data.credentials_data.li_at, cookies, credentials_id, task_data.prospect_data.linkedin);
+    let visitProfileAction = new modules.visitProfileAction.VisitProfileAction(cookies, credentials_id, task_data.prospect_data.linkedin);
     browser = await visitProfileAction.startBrowser();
     let res = await visitProfileAction.visit();
     browser = await visitProfileAction.closeBrowser();
@@ -669,23 +615,14 @@ async function visitProfileWorker(task_id) {
         raw: err.error
       };
     } else if (err.code == -1) {
-      // Context error
-      if (err.context == null) {
-        // something went wromg...
-        console.log('Never happend: credentials_id or err.context is null in CONTEXT_ERROR in worker: ', err);
-        console.log('err.context: ', err.context);
-        throw new Error('Never happend: credentials_id or err.context is null in CONTEXT_ERROR in worker: ', err);
-      }
       status = status_codes.BLOCK_HAPPENED;
-      if (err.data == null) {
-        result_data = {
-          code: err.code,
-          raw: err.error,
-          blocking_data: err.context
-        };
-      } else {
-        result_data = err.data;
-      }
+      // Context error
+      result_data = {
+        code: err.code,
+        raw: err.error
+      };
+      await models.Accounts.findOneAndUpdate({ _id: credentials_id }, { task_id: task_id }, { upsert: false });
+      
     } else {
       result_data = {
         code: MyExceptions.VisitProfileWorkerError().code,
@@ -695,15 +632,14 @@ async function visitProfileWorker(task_id) {
     status = status_codes.FAILED;
 
   } finally {
-    console.log("RES: ", result_data);
+    console.log("VisitProfileWorker RES: ", result_data);
+
     if (task !== null) {
-      await models_shared.TaskQueue.findOneAndUpdate({ _id: task_id }, { ack: 0, status: status, result_data: result_data, is_queued: 0 }, { new: true });
+      await models_shared.TaskQueue.findOneAndUpdate({ _id: task_id }, { ack: 0, status: status, result_data: result_data, is_queued: 0 }, { upsert: false });
     }
 
-    if (browser !== null) {
-      if (status !== status_codes.BLOCK_HAPPENED) {
-        await browser.close();
-      }
+    if(browser != null) {
+      await browser.close();
       browser.disconnect();
     }
   }

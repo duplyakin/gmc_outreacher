@@ -11,6 +11,8 @@
   "dependencies": {
     "bole": "^4.0.0",
     "boll": "^0.1.1",
+    "connect": "^3.7.0",
+    "cors": "^2.8.5",
     "express": "^4.17.1",
     "puppeteer": "^3.2.0"
   }

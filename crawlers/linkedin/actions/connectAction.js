@@ -4,8 +4,8 @@ const action = require('./action.js');
 const MyExceptions = require('../../exceptions/exceptions.js');
 
 class ConnectAction extends action.Action {
-  constructor(email, password, li_at, cookies, credentials_id, url, template, data) {
-    super(email, password, li_at, cookies, credentials_id);
+  constructor(cookies, credentials_id, url, template, data) {
+    super(cookies, credentials_id);
 
     this.url = url;
     this.template = template;
@@ -13,6 +13,7 @@ class ConnectAction extends action.Action {
   }
 
   async connect() {
+    await super.gotoLogin();
     await super.gotoChecker(this.url);
 
     await super.close_msg_box(this.page);

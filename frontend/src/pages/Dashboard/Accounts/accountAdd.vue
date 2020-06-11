@@ -1,113 +1,74 @@
 <template>
 <div class="account-add-modal">
-<card >
-        <div v-if="error" class="text-center text-danger invalid-feedback" style="display: block;">
-                {{ error_message }}
-        </div>        
+<card > 
         <card>
         <div class="row">
-            <div class="col-12">
-                <p>Select account type</p>
+            <div class="col-6">
+                <label>Select account type</label>
                 <el-select
-                class="select-default mb-3"
-                placeholder="Select type"
-                v-model="model.credentials_type">
-                    <el-option
-                    class="select-default"
-                    v-for="(a_type,index) in account_types"
-                    :key="index"
-                    :label="a_type"
-                    :value="a_type">
-                    </el-option>
+                    class="select-default mb-3"
+                    placeholder="Select type"
+                    v-model="model.credentials_type">
+                        <el-option
+                        class="select-default"
+                        v-for="(a_type,index) in account_types"
+                        :key="index"
+                        :label="a_type"
+                        :value="a_type">
+                        </el-option>
                 </el-select>
             </div>
         </div>
-        <div v-if="model.credentials_type == 'linkedin'" class="row">
+        
+        <div v-if="model.credentials_type == 'linkedin'">
 
-                <p class="labels">Linkedin profile URL</p>
-                <div class="col-12">
-                    <fg-input name="linkedin_account"
-                        class="mb-3"
-                        v-model="model.data.account"
-                        placeholder="example: linkedin.com/myaccount"/>
-                </div>
-
-                <p class="labels">Linkedin login
-                <el-popover
-                    placement="top-start"
-                    title="Why login better then li_at?"
-                    width="200"
-                    trigger="hover"
-                    content="It's safer for prevent linkedin blocking.">
-                    <el-button slot="reference"><i class='el-icon-question'></i></el-button>
-                </el-popover>
-                </p>
-                <div class="col-12">
-                    <fg-input name="linkedin_login"
-                        class="mb-3"
-                        v-model="model.data.login"
-                        placeholder="example: myemail@gmail.com"/>
-                </div>
-
-                <p class="labels">Linkedin password</p>
-                <div class="col-12">
-                    <fg-input name="linkedin_password"
-                        class="mb-3"
-                        v-model="model.data.password"/>
-                </div>
-
-                <p class="labels">Linkedin li_at cookie
-                <el-popover
-                    placement="top-start"
-                    title="What is li_at?"
-                    width="200"
-                    trigger="hover"
-                    content='li_at allows us to login linkedin without user password. Get li_at here: //www.some_link.here'>
-                    <el-button slot="reference"><i class='el-icon-question'></i></el-button>
-                </el-popover>
-                </p>
-                <div class="col-12">
-                    <fg-input name="linkedin_li_at"
-                        class="mb-3"
-                        v-model="model.data.li_at"/>
+                <div class="row">
+                    <div class="col-6">
+                        <label>Linkedin profile URL</label>
+                        <fg-input name="linkedin_account"
+                            v-model="model.data.account"
+                            placeholder="example: linkedin.com/myaccount"/>
+                    </div>
                 </div>
   
-                <p class="labels">Limits per day
-                <el-popover
-                    placement="top-start"
-                    title="What is limits?"
-                    width="200"
-                    trigger="hover"
-                    content='Limits - maximum messages from current account allowd by Linkedin.'>
-                    <el-button slot="reference"><i class='el-icon-question'></i></el-button>
-                </el-popover>
-                </p>
-                <div class="col-12">
-                    <fg-input name="limits_per_day"
-                    class="mb-3"
-                    v-model="model.limit_per_day"/>
+                <div class="row">
+                    <div class="col-6">
+                        <label>Limits per day
+                        <el-popover
+                            placement="top-start"
+                            title="What is limits?"
+                            width="auto"
+                            trigger="hover"
+                            content='Limits - maximum messages from current account allowd by Linkedin.'>
+                            <el-button slot="reference" size="mini" icon="el-icon-question" circle></el-button>
+                        </el-popover>
+                        </label>
+                        <fg-input name="limits_per_day"
+                        v-model="model.limit_per_day"/>
+                    </div>
                 </div>
             </div>    
         </card>
 
         <div class="row">
-                <div class="col-12 d-flex flex-row-reverse">
-                    <button v-if="model.credentials_type" v-on:click="addAccount"  type="button" class="btn btn-outline btn-wd btn-success mx-1">Add</button>
-                    <button v-on:click="discard" type="button" class="btn btn-outline btn-wd btn-danger">Close</button>
-                </div>
+            <div class="col-12 d-flex flex-row-reverse">
+                <button v-if="model.credentials_type" v-on:click="addAccount"  type="button" class="btn btn-outline btn-wd btn-success mx-1">Add</button>
+                <button v-on:click="discard" type="button" class="btn btn-outline btn-wd btn-danger">Close</button>
+            </div>
         </div>
 </card>
 </div>
 </template>
 
 <script>
-import { Popover, Notification, Select, Option } from 'element-ui'
+import { Button, Popover, Notification, Select, Option } from 'element-ui'
 import axios from '@/api/axios-auth';
 
 const OAUTH_SERVER = process.env.VUE_APP_API_URL;
 
 export default {
     components: {
+        [Button.name]: Button,
         [Select.name]: Select,
         [Option.name]: Option,
         [Popover.name]: Popover,
@@ -119,7 +80,6 @@ export default {
     },
     data() {
         return {
-            error_message : '',
             error : false,
             account_types : ['gmail/gsuite', 'linkedin'],
 
@@ -128,9 +88,6 @@ export default {
                 credentials_type : '',
                 data :{
                     account : '',
-                    login : '',
-                    password : '',
-                    li_at: ''
                 }
             }
         }
@@ -155,10 +112,6 @@ export default {
                 this.model.data.account = this.model.data.account.substring(this.model.data.account.indexOf("www"), this.model.data.account.length -1);
                 console.log('acc: ', this.model.data.account)
 
-                if (((this.model.data.login == '') || (this.model.data.password == '')) && (this.model.data.li_at == '')) {
-                    Notification.error({title: "Error", message: "Input your login and password or li_at cookie"});
-                    return false;
-                }
             }
 
             if (confirm("Are you sure?")) {
@@ -199,29 +152,7 @@ export default {
 }
 </script>
 <style>
-label {
-    color:black;
-}
-.el-icon-question {
-    font-size: 16px;
-    color: #c0c4cc;
-    margin: 12px 0 16px;
-    line-height: 0px;
-}
-.labels {
-  text-transform: uppercase;
-  /*text-align: left;*/
-  font-size: 12px;
-  font-weight: 100;
-  padding: 0px 20px;
-  color: #8b8c91;
-}
-.container {
-  display: flex;
-  justify-content: space-around;
-  padding: 0px 20px;
-  align-items: flex-start;
-  max-width: 260px;
-}
+
+
 </style>
     

@@ -4,8 +4,8 @@ const action = require('./action.js');
 const MyExceptions = require('../../exceptions/exceptions.js');
 
 class MessageAction extends action.Action {
-  constructor(email, password, li_at, cookies, credentials_id, url, data, template) {
-    super(email, password, li_at, cookies, credentials_id);
+  constructor(cookies, credentials_id, url, data, template) {
+    super(cookies, credentials_id);
 
     this.url = url;
     this.data = data;
@@ -13,6 +13,7 @@ class MessageAction extends action.Action {
   }
 
   async message() {
+    await super.gotoLogin();
     await super.gotoChecker(this.url);
 
     const page = await this.context.newPage();  // feature (critical)

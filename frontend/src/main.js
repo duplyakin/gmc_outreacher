@@ -18,11 +18,13 @@ axios.defaults.baseURL = process.env.VUE_APP_API_URL;
 // plugin setup
 Vue.use(VueRouter)
 Vue.use(LightBootstrap)
-Vue.use(VModal, { dynamic: true, injectModalsContainer: true })
+Vue.use(VModal, { dynamic: true })
 
 import VueYouTubeEmbed from 'vue-youtube-embed'
 Vue.use(VueYouTubeEmbed)
 
+//import directive from 'element-ui/packages/popover/src/directive';
+//Vue.directive('Loading', directive);
 
 // configure router
 const router = new VueRouter({

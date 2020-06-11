@@ -5,7 +5,7 @@
         <el-popover
             placement="top-start"
             title="Upload from excel"
-            width="200"
+            width="auto"
             trigger="hover"
             content='Here you can upload leads from .csv file and then ussign them to linkedin or email campaign.'>
             <el-button slot="reference"><i class='el-icon-question'></i></el-button>

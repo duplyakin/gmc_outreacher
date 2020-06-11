@@ -37,11 +37,9 @@ const NetworkError = (message) => ({
 });
 
 //------Custom error that required user action to continue task-------
-const ContextError = (message, context, data = null) => ({
+const ContextError = (message) => ({
   error: new Error(message),
   code: ERROR_CODES.CONTEXT_ERROR,
-  context: context, // object - context of the last page // delete it?
-  data: data, // object - part of the result_data
 });
 
 //------Workers-------

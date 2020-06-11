@@ -4,14 +4,15 @@ const action = require('./action.js');
 const MyExceptions = require('../../exceptions/exceptions.js');
 
 class MessageCheckAction extends action.Action {
-  constructor(email, password, li_at, cookies, credentials_id, url) {
-    super(email, password, li_at, cookies, credentials_id);
+  constructor(cookies, credentials_id, url) {
+    super(cookies, credentials_id);
 
     // CONNECT URL
     this.url = url;
   }
 
   async messageCheck() {
+    await super.gotoLogin();
     await super.gotoChecker(this.url);
 
     await super.close_msg_box(this.page);

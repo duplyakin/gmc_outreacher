@@ -4,8 +4,8 @@ const action = require('./action.js');
 const MyExceptions = require('../../exceptions/exceptions.js');
 
 class SearchAction extends action.Action {
-  constructor(email, password, li_at, cookies, credentials_id, searchUrl, interval_pages) {
-    super(email, password, li_at, cookies, credentials_id);
+  constructor(cookies, credentials_id, searchUrl, interval_pages) {
+    super(cookies, credentials_id);
 
     this.searchUrl = searchUrl;
     this.interval_pages = interval_pages;
@@ -16,6 +16,7 @@ class SearchAction extends action.Action {
       throw new Error('Empty search url.');
     }
     
+    await super.gotoLogin();
     await super.gotoChecker(this.searchUrl);
 
     let currentPage = 1;
@@ -29,11 +30,6 @@ class SearchAction extends action.Action {
     };
     
     try {
-      await super.autoScroll(this.page);
-
-      // wait selector here
-      await super.check_success_selector(selectors.SEARCH_ELEMENT_SELECTOR, this.page, result_data);
-      //await this.page.waitForSelector(selectors.SEARCH_ELEMENT_SELECTOR, { timeout: 5000 });
 
       let mySelectors = {
         selector1: selectors.SEARCH_ELEMENT_SELECTOR,
@@ -43,6 +39,20 @@ class SearchAction extends action.Action {
       };
 
       while (currentPage <= this.interval_pages) {
+        await super.autoScroll(this.page);
+
+        // wait selector here
+        //await super.check_success_selector(selectors.SEARCH_ELEMENT_SELECTOR, this.page, result_data);
+
+        if (await this.page.$(selectors.SEARCH_ELEMENT_SELECTOR) == null) {
+          // TODO: add check-selector for BAN page
+          // perhaps it was BAN
+          result_data.code = MyExceptions.SearchActionError().code;
+          result_data.raw = MyExceptions.SearchActionError('It is BAN (?) in searchAction.').error;
+          console.log('something went wrong - selector not found!');
+          break;
+        }
+
         let newData = await this.page.evaluate((mySelectors) => {
 
           let results = [];
@@ -64,7 +74,6 @@ class SearchAction extends action.Action {
         result_data.data.arr = result_data.data.arr.concat(newData);
         result_data.data.link = this.page.url();
 
-       /*
         if (await this.page.$(selectors.NEXT_PAGE_SELECTOR) == null) {
           // TODO: add check-selector for BAN page
           // perhaps it was BAN
@@ -73,10 +82,9 @@ class SearchAction extends action.Action {
           console.log('something went wrong - selector not found!');
           break;
         }
-        */
 
         // wait selector here
-        await super.check_success_selector(selectors.NEXT_PAGE_SELECTOR, this.page, result_data);
+        //await super.check_success_selector(selectors.NEXT_PAGE_SELECTOR, this.page, result_data);
 
         if (await this.page.$(selectors.NEXT_PAGE_MUTED_SELECTOR) != null) {
           // all awailable pages has been scribed

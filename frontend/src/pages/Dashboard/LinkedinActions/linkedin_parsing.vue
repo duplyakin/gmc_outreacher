@@ -53,24 +53,22 @@
       </card>
 
       <card v-if="modified_fields['total_pages'] || modified_fields['interval_pages']">
-      <p>LinkedIn limits</p>
+        <p>LinkedIn limits</p>
+        <div class="container">
+            <div class="row">
 
-          <div class="raw">
+              <div class="col-6" v-if="modified_fields['total_pages']">
+                <h5 class="title">Crawl the first X pages</h5>
+                <el-input-number v-model="campaign_data.data.total_pages" placeholder="ex: 100.00" :min="1" :max="1000000"></el-input-number>
+              </div>
 
-            <div class="col-6" v-if="modified_fields['total_pages']">
-              <p class="interval_text">Crawl the first X pages</p>
-              <el-input-number v-model="campaign_data.data.total_pages" placeholder="ex: 100.00" :min="1" :max="100000000"></el-input-number>
+              <div class="col-6" v-if="modified_fields['interval_pages']">
+                <h5 class="title">Number of pages per launch (20 recommended)</h5>
+                <el-input-number v-model="campaign_data.data.interval_pages" placeholder="ex: 10.00" :min="1" :max="1000"></el-input-number>
+              </div>
+
             </div>
-
-            <p class="interval_text"></p>
-
-            <div class="col-6" v-if="modified_fields['interval_pages']">
-              <p class="interval_text">Number of pages per launch (20 recommended)</p>
-              <el-input-number v-model="campaign_data.data.interval_pages" placeholder="ex: 10.00" :min="1" :max="1000"></el-input-number>
-            </div>
-
-          </div>
-
+        </div>
       </card>
 
       <card v-if="modified_fields['time_table']">
