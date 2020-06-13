@@ -301,10 +301,14 @@ class Scheduler():
         prospects_without_campaign = models.Prospects.filter_no_campaign(owner_id=owner_id, prospects_ids=prospects_ids)
         if not prospects_without_campaign:
             return 0
+
+        ids = [p.id for p in prospects_without_campaign]
         
         scheduler = cls()
+        res = models.Prospects._assign_campaign(owner_id=owner_id, prospects_ids=ids, campaign_id=campaign.id)
 
-        res = scheduler.add_prospects(owner=owner_id, campaign=campaign, prospects=prospects_without_campaign)
+        #It's strange - we don't need to create task when we assign campaign
+        #res = scheduler.add_prospects(owner=owner_id, campaign=campaign, prospects=prospects_without_campaign)
 
         if type(res) != list:
             return 0

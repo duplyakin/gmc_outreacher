@@ -192,6 +192,36 @@ class ActionStats(db.Document):
 
         return results
 
+class ResultDataLog(db.Document):
+    owner_id = db.ObjectIdField()
+
+    prospect_id = db.ObjectIdField()
+    campaign_id = db.ObjectIdField()
+
+    action_key = db.StringField()
+    input_data = db.DictField()
+    result_data = db.DictField()
+
+    created = db.DateTimeField( default=pytz.utc.localize(datetime.utcnow()) )
+
+    @classmethod
+    def log_data(cls, task):
+        now = pytz.utc.localize(datetime.utcnow())
+        log = cls(
+            owner_id=task.owner_id,
+            prospect_id=task.prospect_id,
+            campaign_id=task.campaign_id,
+            action_key=task.action_key,
+            input_data=task.input_data,
+            result_data=task.result_data,
+            created=now
+        )
+
+        log._commit()
+    
+    def _commit(self):
+        self.save()
+
 class TaskLog(db.Document):
     owner_id = db.ObjectIdField()
 

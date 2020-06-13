@@ -212,7 +212,7 @@ class TaskQueue(db.Document):
     result_data = db.DictField()
 
     credentials_id = db.ObjectIdField()
-    prospect_id = db.ObjectIdField(unique=True)
+    prospect_id = db.ObjectIdField(unique=True, sparse=True)
     campaign_id = db.ObjectIdField()
     
     record_type = db.IntField(default=0)
@@ -537,9 +537,9 @@ class TaskQueue(db.Document):
         new_task.owner_id = campaign.owner.id
         new_task.stat_campaign_title = campaign.title
 
-        _node = campaign.funnel
-
-        new_task.current_node = _node
+        funnel_id = campaign.funnel.id
+        new_task.current_node = funnel_id
+        _node = Funnel.objects(id=funnel_id).first()
 
         new_task.action_key = _node.get_action_key()
         new_task.credentials_id = models.Campaign.get_credentials_id(campaign.id, _node)

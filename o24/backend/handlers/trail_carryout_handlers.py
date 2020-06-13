@@ -1,6 +1,7 @@
 import o24.backend.models.shared as shared
 import o24.backend.dashboard.models as models
 import o24.backend.scheduler.scheduler as scheduler
+import o24.backend.scheduler.models as scheduler_models
 
 from o24.globals import *
 from datetime import datetime  
@@ -20,6 +21,9 @@ def default_handler(task):
     result_data = task.get_result_data()
     if not result_data:
         raise Exception("default_handler ERROR: wrong result_data:{0}".format(result_data))
+
+    #log for analysis
+    scheduler_models.ResultDataLog.log_data(task)
 
     code = result_data.get('code', 0)
     if code == SUCCESS_CODE:
@@ -82,6 +86,10 @@ def linkedin_search_action(task):
     if not result_data:
         raise Exception("linkedin_search_action ERROR: wrong or empty result_data={0}".format(result_data))
     
+    #log for analysis
+    scheduler_models.ResultDataLog.log_data(task)
+
+
     campaign = task.get_campaign()
     if not campaign:
         task.update_status(status=FAILED)
@@ -122,6 +130,8 @@ def linkedin_search_action(task):
         start_linkedin_enrichment_campaign(task)
         return
 
+    task.refresh_input_data()
+
     now = pytz.utc.localize(datetime.utcnow())
     task.next_round = now + timedelta(seconds=DEFAULT_SEARCH_DELAY)
     task.update_status(status=NEW)
@@ -138,6 +148,9 @@ def linkedin_parse_profile_action(task):
     result_data = task.get_result_data()
     if not result_data:
         raise Exception("linkedin_parse_profile_action ERROR: wrong or empty result_data={0}".format(result_data))
+    
+    #log for analysis
+    scheduler_models.ResultDataLog.log_data(task)
 
     code = int(result_data.get('code', 0))
     if code < 0:
@@ -158,3 +171,14 @@ def linkedin_parse_profile_action(task):
 def email_check_reply(task):
     if task.status != CARRYOUT:
         raise Exception("WRONG STATUS: email_check_reply should be called for CARRYOUT status. task.id={0} task.status={1}".format(task.id, task.status))
+
+    result_data = task.get_result_data()
+    if not result_data:
+        raise Exception("default_handler ERROR: wrong result_data:{0}".format(result_data))
+
+    #log for analysis
+    scheduler_models.ResultDataLog.log_data(task)
+
+    task.update_status(status=READY)
+    return 
+
