@@ -166,15 +166,12 @@ async check_success_selector(selector, page = this.page) {
         let loginAction = new LoginAction.LoginAction(this.credentials_id);
         await loginAction.setContext(this.context);
 
-        let result = await loginAction.login();
-        if (result) {
-          await page.goto(url);
-        }
+        await loginAction.login(); // if unsaccess - throw eeror
+        
       } else if (current_url.includes(links.START_PAGE_SHORTLINK)) {
         return; // success
       } else {
         console.log('current_url: ', current_url);
-        console.log('url: ', url);
         throw new Error("We cann't go to page, we got: " + current_url);
       }
 

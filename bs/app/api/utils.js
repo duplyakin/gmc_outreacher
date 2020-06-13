@@ -338,7 +338,25 @@ const input_data = async (account, input) => {
             if(account.task_id != null) {
                 await models_shared.TaskQueue.findOneAndUpdate({ _id: account.task_id }, { status: status_codes.NEED_USER_ACTION_RESOLVED }, { upsert: false });
             }
-            await models.Accounts.findOneAndUpdate({ _id: account._id }, { status: status_codes.AVAILABLE, task_id: null, blocking_data: null }, { upsert: false });
+
+            // get new cookies
+            let new_cookies = await _get_current_cookie(page);
+            let new_expires = 0;
+            new_cookies.forEach((item) => {
+                if (item.name === 'li_at') {
+                    new_expires = item.expires;
+                }
+            });
+
+            let account_update = {
+                status: status_codes.AVAILABLE,
+                task_id: null, 
+                blocking_data: null, 
+                cookies: new_cookies,
+                expires: new_expires,
+            }
+
+            await models.Accounts.findOneAndUpdate({ _id: account._id }, account_update, { upsert: false });
 
             await browser.close();
             browser.disconnect();
