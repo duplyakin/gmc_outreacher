@@ -451,19 +451,17 @@ class TaskQueue(db.Document):
     @classmethod
     def get_ready(cls):
         active_campaigns = models.Campaign.objects(status=IN_PROGRESS).distinct('id')
-        active_credentials = models.Credentials.objects(status=IN_PROGRESS).distinct('id')
 
         now = pytz.utc.localize(datetime.utcnow())
-        return TaskQueue.objects(status=READY, 
+        return TaskQueue.objects(status=READY,
                                 campaign_id__in=active_campaigns,
-                                credentials_id__in=active_credentials,
                                 next_round__lte=now)
 
     @classmethod
     def get_trail_tasks(cls):
         active_campaigns = models.Campaign.objects(status=IN_PROGRESS).distinct('id')
 
-        return TaskQueue.objects(Q(campaign_id__in=active_campaigns) & Q(status__in=TRAIL_STATUSES))
+        return TaskQueue.objects(campaign_id__in=active_campaigns, status__in=TRAIL_STATUSES)
 
     @classmethod
     def get_execute_tasks(cls, do_next, followup_level, now):

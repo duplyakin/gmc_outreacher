@@ -375,8 +375,8 @@ class Credentials(db.Document):
             exist.limit_interval = limit_interval
 
         if medium == 'special-medium':
-            exist.limit_per_day = 100000
-            exist.limit_interval = 1
+            exist.limit_per_day = SM_DEFAULT_PER_DAY_LIMIT
+            exist.limit_interval = SM_DEFAULT_INTERVAL
 
         exist.owner = owner
         exist.medium = medium
@@ -580,15 +580,6 @@ class Credentials(db.Document):
 
         self._commit()
 
-    def resume(self):
-        self.error_message = ''
-        self.status = 0
-
-        self._commit()
-
-    def is_refreshed(self):
-        return self.status == 1
-
     def change_status(self, status):
         self.status = status
         self._commit()
@@ -773,7 +764,10 @@ class Campaign(db.Document):
         campaign = cls.objects(id=campaign_id).get()
 
         medium = funnel_node.action.medium
-            
+
+        if medium == 'special-medium':
+            return campaign.get_special_medium_id()
+        
         for c in campaign.credentials:
             if c.medium == medium:
                 return c.id
@@ -787,6 +781,15 @@ class Campaign(db.Document):
 
         for c in campaigns:
             c._commit()
+
+    def get_special_medium_id(self):
+        owner_id = self.owner.id
+
+        special_medium = Credentials.objects(owner=owner_id, medium='special-medium').first()
+        if not special_medium:
+            return None
+        
+        return special_medium.id
 
     #Only for LINKEDIN_ENRICHMENT_CAMPAIGN_TYPE
     def get_parsed_list(self):

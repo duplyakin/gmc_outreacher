@@ -439,7 +439,6 @@ def start_linkedin_campaign():
             
             #SAFE reassign in case there are new prospects
             parsed_list_id = campaign.get_parsed_list()
-            print(parsed_list_id)
             Prospects.check_new_parsed_prospects(campaign_id=campaign.id, 
                                                 list_id=parsed_list_id)
 

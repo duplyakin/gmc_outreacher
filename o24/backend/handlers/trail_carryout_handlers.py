@@ -157,10 +157,11 @@ def linkedin_parse_profile_action(task):
         task.update_status(status=FAILED)
         return
     
-    data = result_data.get('data', '')
-    if not data:
+    raw_data = result_data.get('data', '')
+    if not raw_data:
         raise Exception("linkedin_parse_profile_action: no data for task.id={0}".format(task.id))
 
+    data = json.loads(raw_data)
     prospect.update_data_partly(new_data=data)
 
     task.update_status(status=READY)

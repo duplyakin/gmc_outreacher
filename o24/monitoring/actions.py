@@ -26,25 +26,36 @@ def linkedin_parse_metrics(en):
 
     all_result_data = en.get('all_result_data', [])
     uniqueue_profiles = {}
+    num_fields = {}
     for r in all_result_data:
         result_data = r.get('data', None)
+        input_data = r.get('input_data', {})
         if result_data:
             raw_data = result_data.get('data', '')
+            linkedin_profile = ''
+            prospect_data = input_data.get('prospect_data', '')
+            if prospect_data:
+                linkedin_profile = prospect_data.get('linkedin', '')
             if raw_data:
                 json_data = json.loads(raw_data)
                 if json_data:
                     total_profiles_parsed = total_profiles_parsed + 1
                     has_keys = len(list(json_data.keys()))
-                    if uniqueue_profiles.get(str(has_keys), None) is None:
-                        uniqueue_profiles[str(has_keys)] = 1
+                    if num_fields.get(str(has_keys), None) is None:
+                        num_fields[str(has_keys)] = 1
                     else:
-                        uniqueue_profiles[str(has_keys)] = uniqueue_profiles[str(has_keys)] + 1
+                        num_fields[str(has_keys)] = num_fields[str(has_keys)] + 1
+                    if linkedin_profile:
+                        uniqueue_profiles[linkedin_profile] = True
     
-    for k, v in uniqueue_profiles.items():
-        by_num_of_fields = by_num_of_fields + '--' + str(k) + ':' + str(v)
-    metrics = 'total_profiles_parsed:{total_profiles_parsed}*\
+    for k, v in num_fields.items():
+        by_num_of_fields = by_num_of_fields + '-Col(' + str(k) + '):num(' + str(v) + ')'
+    
+    total_uniqueue_profiles = len(list(uniqueue_profiles.keys()))
+    metrics = 'total_profiles_parsed:{total_profiles_parsed}**uniqueue_profiles:{total_uniqueue_profiles}**\
 by_num_of_fields:{by_num_of_fields}'.format(total_profiles_parsed=total_profiles_parsed,
-                                            by_num_of_fields=by_num_of_fields)
+                                            by_num_of_fields=by_num_of_fields,
+                                            total_uniqueue_profiles=total_uniqueue_profiles)
     return metrics
 
 def count_search_total(json_data, uniqueue_profiles):
@@ -111,7 +122,8 @@ def show_actions():
                     }
                 },
                 "all_result_data" : { "$push" : {
-                        "data" : "$result_data"
+                        "data" : "$result_data",
+                        "input_data" : "$input_data"
                     }
                 }
             }

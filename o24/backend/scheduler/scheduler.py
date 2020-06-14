@@ -100,11 +100,17 @@ class Scheduler():
         logs = []
     
         for task in tasks:
-            log = self._switch(task)
-            
-            for_update.append(task)
-            if log:
-                logs.append(log)
+            try:
+                log = self._switch(task)
+                
+                for_update.append(task)
+                if log:
+                    logs.append(log)
+            except Exception as e:
+                print(str(e))
+                traceback.print_exc()
+                continue
+
     
         if logs:
             TaskLog.update_logs(logs)
@@ -128,18 +134,24 @@ class Scheduler():
     
         #TODO: for each task based on type create job and send it to the queue
         for task in tasks:
-            if task.action_key in NON_3RD_PARTY_ACTION_KEYS:
-                handler = jobs_map.JOBS_MAP.get(task.action_key, None)
-                if not handler:
-                    raise Exception("There is no handler for key:{0}".format(task.action_key))
-                
-                job = handler.s(str(task.id))
-                jobs.append(job)
-    
-            task.status = IN_PROGRESS
-            task_update.append(task)
+            try:
+                if task.action_key in NON_3RD_PARTY_ACTION_KEYS:
+                    handler = jobs_map.JOBS_MAP.get(task.action_key, None)
+                    if not handler:
+                        raise Exception("There is no handler for key:{0}".format(task.action_key))
+                    
+                    job = handler.s(str(task.id))
+                    jobs.append(job)
+        
+                task.status = IN_PROGRESS
+                task_update.append(task)
 
-            credential_update.append(task.credentials_id)
+                credential_update.append(task.credentials_id)
+            except Exception as e:
+                print(str(e))
+                traceback.print_exc()
+                continue
+
         
         if task_update:
             TaskQueue.update_tasks(task_update)
@@ -157,48 +169,64 @@ class Scheduler():
 
         updated = []
         for c in credentials:
-            c.change_limits(now)
-            updated.append(c)
+            try:
+                c.change_limits(now)
+                updated.append(c)
+            except Exception as e:
+                print(str(e))
+                traceback.print_exc()
+                continue
 
         models.Credentials.update_credentials(updated)
 
         campaigns = models.Campaign.objects(status=IN_PROGRESS)
         campaigns_updated = []
         for campaign in campaigns:
-            campaign.change_limits(now)
-            campaigns_updated.append(campaign)
+            try:
+                campaign.change_limits(now)
+                campaigns_updated.append(campaign)
+            except Exception as e:
+                print(str(e))
+                traceback.print_exc()
+                continue
         
         models.Campaign.update_campaigns(campaigns_updated)
 
     def trail(self):
         tasks = TaskQueue.get_trail_tasks()
         for task in tasks:
-            if task.status == FAILED:
-                error_code = task.get_code()
-                handler = trail_handlers.FAILED_HANDLERS.get(error_code, None)
-                if handler is None:
-                    handler = trail_handlers.FAILED_HANDLERS[TRAIL_UNKNOWN_ERROR]
-                
-                handler(task)
-                continue
+            try:
+                if task.status == FAILED:
+                    error_code = task.get_code()
+                    handler = trail_handlers.FAILED_HANDLERS.get(error_code, None)
+                    if handler is None:
+                        handler = trail_handlers.FAILED_HANDLERS[TRAIL_UNKNOWN_ERROR]
+                    
+                    handler(task)
+                    continue
 
-            elif task.status == CARRYOUT:
-                action_key = task.action_key
-                handler = trail_handlers.CARRYOUT_HANDLERS.get(action_key, None)
-                if handler is None:
-                    handler = trail_handlers.CARRYOUT_HANDLERS[CARRYOUT_DEFAULT_HANDLER]
-                
-                handler(task)
-                continue
-            elif task.status in [BLOCK_HAPPENED, NEED_USER_ACTION_RESOLVED]:
-                handler = trail_handlers.BLOCK_HANDLERS.get(tasks.status, None)
-                if handler is None:
-                    handler = trail_handlers.BLOCK_HANDLERS[BLOCK_DEFAULT_HANDLER]
-                
-                handler(task)
-                continue
-            else:
-                print("Trail unknown status task.id={0} task.status={1} task.action_key={2}".format(task.id, task.status, task.action_key))
+                elif task.status == CARRYOUT:
+                    action_key = task.action_key
+                    handler = trail_handlers.CARRYOUT_HANDLERS.get(action_key, None)
+                    if handler is None:
+                        handler = trail_handlers.CARRYOUT_HANDLERS[CARRYOUT_DEFAULT_HANDLER]
+                    
+                    handler(task)
+                    continue
+
+                elif task.status in [BLOCK_HAPPENED, NEED_USER_ACTION_RESOLVED]:
+                    handler = trail_handlers.BLOCK_HANDLERS.get(tasks.status, None)
+                    if handler is None:
+                        handler = trail_handlers.BLOCK_HANDLERS[BLOCK_DEFAULT_HANDLER]
+                    
+                    handler(task)
+                    continue
+                else:
+                    print("Trail unknown status task.id={0} task.status={1} task.action_key={2}".format(task.id, task.status, task.action_key))
+                    continue
+            except Exception as e:
+                print(str(e))
+                traceback.print_exc()
                 continue
             
 
