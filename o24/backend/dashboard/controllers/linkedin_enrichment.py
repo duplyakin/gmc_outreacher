@@ -437,6 +437,11 @@ def start_linkedin_campaign():
                 raise Exception("No such campaign")
 
             
+            #SAFE reassign in case there are new prospects
+            parsed_list_id = campaign.get_parsed_list()
+            Prospects.check_new_parsed_prospects(campaign_id=campaign.id, 
+                                                list_id=parsed_list_id)
+
             scheduler.Scheduler.safe_start_campaign(owner=current_user.id, campaign=campaign)
             campaign.reload()
 

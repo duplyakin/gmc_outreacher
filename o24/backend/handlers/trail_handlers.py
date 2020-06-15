@@ -7,11 +7,6 @@ from o24.globals import *
 
 
 FAILED_HANDLERS = {
-    BAN_ERROR: failed_handlers.banned,
-    LOGIN_ACTION_ERROR: failed_handlers.credentials_error,
-    LOGIN_ERROR: failed_handlers.credentials_error,
-    LOGIN_PAGE_ERROR: failed_handlers.credentials_error,
-    SEARCH_ACTION_ERROR: failed_handlers.credentials_error,
     TRAIL_UNKNOWN_ERROR: failed_handlers.system_error
 }
 

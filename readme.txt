@@ -2,6 +2,8 @@
 #HOW to launch server to test frontend
 python 3.7, pip 19.2.3
 
+#Monitoring scripts
+python -m o24.monitoring.taskqueue
 
 0. Запускаем монгу (на винде):
 идем сюда: C:\Program Files\MongoDB\Server\4.2\bin

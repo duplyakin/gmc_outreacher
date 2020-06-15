@@ -375,8 +375,8 @@ class Credentials(db.Document):
             exist.limit_interval = limit_interval
 
         if medium == 'special-medium':
-            exist.limit_per_day = 100000
-            exist.limit_interval = 1
+            exist.limit_per_day = SM_DEFAULT_PER_DAY_LIMIT
+            exist.limit_interval = SM_DEFAULT_INTERVAL
 
         exist.owner = owner
         exist.medium = medium
@@ -580,15 +580,6 @@ class Credentials(db.Document):
 
         self._commit()
 
-    def resume(self):
-        self.error_message = ''
-        self.status = 0
-
-        self._commit()
-
-    def is_refreshed(self):
-        return self.status == 1
-
     def change_status(self, status):
         self.status = status
         self._commit()
@@ -660,6 +651,9 @@ class Campaign(db.Document):
     credentials = db.ListField(db.ReferenceField(Credentials, reverse_delete_rule=1))
 
     funnel = db.ReferenceField(shared.Funnel, reverse_delete_rule=1)
+
+    #in case it's a fork campaign
+    fork_from = db.ObjectIdField()
     
     #get from timeTable
     sending_days = db.DictField(default=DEFAULT_SENDING_DAYS)
@@ -770,7 +764,10 @@ class Campaign(db.Document):
         campaign = cls.objects(id=campaign_id).get()
 
         medium = funnel_node.action.medium
-            
+
+        if medium == 'special-medium':
+            return campaign.get_special_medium_id()
+        
         for c in campaign.credentials:
             if c.medium == medium:
                 return c.id
@@ -785,6 +782,33 @@ class Campaign(db.Document):
         for c in campaigns:
             c._commit()
 
+    def get_special_medium_id(self):
+        owner_id = self.owner.id
+
+        special_medium = Credentials.objects(owner=owner_id, medium='special-medium').first()
+        if not special_medium:
+            return None
+        
+        return special_medium.id
+
+    #Only for LINKEDIN_ENRICHMENT_CAMPAIGN_TYPE
+    def get_parsed_list(self):
+        if self.campaign_type != LINKEDIN_ENRICHMENT_CAMPAIGN_TYPE:
+            return None
+        
+        if not self.fork_from:
+            return None
+
+        forked_from_campaign = Campaign.objects(id=self.fork_from).first()
+        if not forked_from_campaign:
+            return None
+        
+        list_id = forked_from_campaign.data.get('list_id', None)
+        if not list_id:
+            return None
+        
+        return list_id
+
     def parsing_switch(self, next_url):
         is_finished = False
 
@@ -798,7 +822,10 @@ class Campaign(db.Document):
         pages_done = pages_done + interval_pages
 
         #UPDATE DATA - will be pass to handler through input_data
-        self.data['next_url'] = next_url
+        if self.data.get('start_url', None) is None:
+            self.data['start_url'] = self.data.get('search_url', '')
+
+        self.data['search_url'] = next_url
         self.data['pages_done'] = pages_done
 
         if pages_done >= pages_total:
@@ -1128,6 +1155,7 @@ class Campaign(db.Document):
             raise Exception("fork_linkedin_enrichment_campaign ERROR: wrong campaign_type".format(self.campaign_type))
         
         new_campaign = Campaign()
+        new_campaign.fork_from = self.id
 
         new_campaign.title = "Linkedin enrichment for {0}".format(self.title)
         new_campaign.owner = self.owner
@@ -1149,8 +1177,9 @@ class Campaign(db.Document):
         new_campaign.time_zone = self.time_zone
 
         new_campaign.status = NEW
+        new_campaign.campaign_type = LINKEDIN_ENRICHMENT_CAMPAIGN_TYPE
 
-        new_campaign._commit()
+        new_campaign._commit(_reload=True)
 
         return new_campaign
 
@@ -1823,6 +1852,10 @@ class Prospects(db.Document):
         results = bson_dumps(prospects)
 
         return (total, results)
+
+    @classmethod
+    def check_new_parsed_prospects(cls, campaign_id, list_id):
+        cls.objects(assign_to_list=list_id, assign_to=None).update(assign_to=campaign_id, status=NEW)
 
     @classmethod
     def get_prospects(cls, status=None, campaign_id=None):
