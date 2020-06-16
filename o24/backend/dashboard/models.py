@@ -671,15 +671,16 @@ class Credentials(db.Document):
         return
 
     def change_limits(self, action_key):
-        # If 24-hour period ended all limits are refreshed
-        self._check_inactivity_days()
-        self._check_day_changed()
-
         has_limits = self.check_limits(action_key=action_key)
 
         #None - action_key or medium is unlimited
         if has_limits is None:
             return True
+
+        # If 24-hour period ended all limits are refreshed
+        self._check_inactivity_days()
+        self._check_day_changed()
+
 
         # we don't have limits left for this action_key
         if has_limits == False:

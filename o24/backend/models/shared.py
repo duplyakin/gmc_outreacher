@@ -520,7 +520,7 @@ class TaskQueue(db.Document):
         now = pytz.utc.localize(datetime.utcnow())
 
         new_tasks = list(TaskQueue.objects(status=NEW, next_round__lte=now).aggregate(*pipeline))
-        tasks_ids = [x.get('task_id') for x in new_tasks]
+        tasks_ids = [x.get('_id') for x in new_tasks]
 
         execute_tasks = TaskQueue.objects(id__in=tasks_ids)
         return execute_tasks
