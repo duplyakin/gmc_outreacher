@@ -61,8 +61,10 @@ class TestUsersCampaignsProspects(unittest.TestCase):
 
                 medium = next_cred.get('medium')
                 new_data = next_cred.get('data')
+                modification = next_cred.get('modification', None)
                 new_credentials = Credentials.create_credentials(owner=owner,
                                         medium=medium,
+                                        modification=modification,
                                         new_data=new_data)
                 self.assertTrue(new_credentials is not None, "new_credentials is None")
 
@@ -73,8 +75,10 @@ class TestUsersCampaignsProspects(unittest.TestCase):
 
             medium = v.get('medium')
             new_data = v.get('data')
+            modification = v.get('modification', None)
             new_credentials = Credentials.create_credentials(owner=owner,
                                     medium=medium,
+                                    modification=modification,
                                     new_data=new_data)
             self.assertTrue(new_credentials is not None, "new_credentials is None")
             

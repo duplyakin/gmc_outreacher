@@ -11,15 +11,18 @@ USERS = [
      'credentials' : [
          {
          'data' : { 'sender' : 'smtp', 'account' : 'ks.shilov@gmail.com'},
-         'medium' : 'email'
+         'medium' : 'email',
+         'modification' : 'smtp'
          },
         {
          'data' : { 'sender' : 'api', 'account' : 'ks.shilov@howtotoken.com'},
-         'medium' : 'email'
+         'medium' : 'email',
+         'modification' : 'api'
          },
          {
          'data' : { 'sender' : 'linkedin', 'account' : 'linkedin.com/ksshilov', 'password' : 'linkedin1-password'},
-         'medium' : 'linkedin'
+         'medium' : 'linkedin',
+         'modification' : 'premium'
          },
          {
          'data' : { 'sender' : 'special-medium'},
@@ -33,15 +36,18 @@ USERS = [
       'credentials' : [
          {
          'data' : { 'sender' : 'smtp'},
-         'medium' : 'email'
+         'medium' : 'email',
+         'modification' : 'smtp'
          },
         {
          'data' : { 'sender' : 'api'},
-         'medium' : 'email'
+         'medium' : 'email',
+         'modification' : 'api'
          },
          {
          'data' : { 'email' : 'linkedin2-email', 'password' : 'linkedin2-password'},
-         'medium' : 'linkedin'
+         'medium' : 'linkedin',
+         'modification' : 'basic'
          },
          {
          'data' : { 'sender' : 'special-medium'},
@@ -55,169 +61,24 @@ USERS = [
       'credentials' : [
          {
          'data' : { 'sender' : 'smtp'},
-         'medium' : 'email'
+         'medium' : 'email',
+         'modification' : 'smtp'
          },
          {
          'data' : { 'email' : 'linkedin3-email', 'password' : 'linkedin3-password'},
-         'medium' : 'linkedin'
+         'medium' : 'linkedin',
+         'modification' : 'premium'
          },
-   {
+         {
          'data' : { 'sender' : 'special-medium'},
          'medium' : 'special-medium'
          },
      ]
 
     },
-    {'email' : '4@email.com',
-     'password' : 'password4',
-     'active' : True,
-      'credentials' : [
-         {
-         'data' : { 'sender' : 'smtp'},
-         'medium' : 'email'
-         },
-         {
-         'data' : { 'email' : 'linkedin4-email', 'password' : 'linkedin4-password'},
-         'medium' : 'linkedin'
-         },
-   {
-         'data' : { 'sender' : 'special-medium'},
-         'medium' : 'special-medium'
-         },
-      ]
-    },
-    
-    {'email' : '5@email.com',
-     'password' : 'password5',
-     'active' : True,
-     'credentials' : [
-         {
-         'data' : { 'sender' : 'smtp'},
-         'medium' : 'email'
-         },
-         {
-         'data' : { 'email' : 'linkedin5-email', 'password' : 'linkedin5-password'},
-         'medium' : 'linkedin'
-         },
-   {
-         'data' : { 'sender' : 'special-medium'},
-         'medium' : 'special-medium'
-         },
-      ]
-    },
-    {'email' : '6@email.com',
-     'password' : 'password6',
-     'active' : True,
-     'credentials' : [
-         {
-         'data' : { 'sender' : 'smtp'},
-         'medium' : 'email'
-         },
-         {
-         'data' : { 'email' : 'linkedin6-email', 'password' : 'linkedin6-password'},
-         'medium' : 'linkedin'
-         },
-   {
-         'data' : { 'sender' : 'special-medium'},
-         'medium' : 'special-medium'
-         },
-      ]
-
-    },
-    {'email' : '7@email.com',
-     'password' : 'password7',
-     'active' : True,
-     'credentials' : [
-         {
-         'data' : { 'sender' : 'smtp'},
-         'medium' : 'email'
-         },
-         {
-         'data' : { 'email' : 'linkedin7-email', 'password' : 'linkedin7-password'},
-         'medium' : 'linkedin'
-         },
-   {
-         'data' : { 'sender' : 'special-medium'},
-         'medium' : 'special-medium'
-         },
-      ]
-
-    },
-    {'email' : '8@email.com',
-     'password' : 'password8',
-     'active' : True,
-     'credentials' : [
-         {
-         'data' : { 'sender' : 'smtp'},
-         'medium' : 'email'
-         },
-         {
-         'data' : { 'email' : 'linkedin8-email', 'password' : 'linkedin8-password'},
-         'medium' : 'linkedin'
-         },
-   {
-         'data' : { 'sender' : 'special-medium'},
-         'medium' : 'special-medium'
-         },
-      ]
-    },
-    {'email' : '9@email.com',
-     'password' : 'password9',
-     'active' : True,
-     'credentials' : [
-         {
-         'data' : { 'sender' : 'smtp'},
-         'medium' : 'email'
-         },
-         {
-         'data' : { 'email' : 'linkedin9-email', 'password' : 'linkedin9-password'},
-         'medium' : 'linkedin'
-         },
-         {
-         'data' : { 'sender' : 'special-medium'},
-         'medium' : 'special-medium'
-         },
-      ]
-
-    },
-    {'email' : '10@email.com',
-     'password' : 'password10',
-     'active' : True,
-     'credentials' : [
-         {
-         'data' : { 'sender' : 'smtp'},
-         'medium' : 'email'
-         },
-         {
-         'data' : { 'email' : 'linkedin10-email', 'password' : 'linkedin10-password'},
-         'medium' : 'linkedin'
-         },
-         {
-         'data' : { 'sender' : 'special-medium'},
-         'medium' : 'special-medium'
-         },         
-      ]
-
-    },
-    {
-        'email' : '11@email.com',
-        'password' : 'password11',
-        'active' : True,
-        'credentials' : []
-    }
 ]
 
 TEAMS = [
-    {
-        'admin' : '3@email.com',
-        'title' : 'team1-3@email.com',
-        'members' : ['4@email.com', '5@email.com', '6@email.com']
-    },
-    {
-        'admin' : '7@email.com',
-        'title' : 'team2-7@email.com',
-        'members' : ['8@email.com', '9@email.com', '10@email.com']
-    }
 ]
 
 TEST_CREDENTIALS = {
@@ -225,6 +86,7 @@ TEST_CREDENTIALS = {
         'owner' : '1@email.com',
         'title' : 'test_gsuite_handlers',
         'medium' : 'email',
+        'modification' : 'api',
         'data' : {
                 "email" : "ks.shilov@howtotoken.com",
                 "account" : "ks.shilov@howtotoken.com",
@@ -247,6 +109,7 @@ TEST_CREDENTIALS = {
         'owner' : '1@email.com',
         'title' : 'test_email_handlers',
         'medium' : 'email',
+        'modification' : 'smtp',
         'data' : {
                 "email" : "ks.shilov@gmail.com",
                 "account" : "ks.shilov@gmail.com",
@@ -269,6 +132,7 @@ TEST_CREDENTIALS = {
         'owner' : '1@email.com',
         'title' : 'test_linkedin_handlers',
         'medium' : 'linkedin',
+        'modification' : 'premium',
         'data' : {
             'email' : 'grinnbob@rambler.ru',
             'password' : 'linked123'

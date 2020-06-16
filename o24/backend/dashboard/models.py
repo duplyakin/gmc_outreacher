@@ -356,7 +356,7 @@ class Credentials(db.Document):
         
         modification_limits = medium_limits.get(modification, '')
         if not modification_limits:
-            raise Exception("setup_limits ERROR: Unknown modification={0}".format(modification))
+            raise Exception("setup_limits ERROR: Unknown modification={0} for medium={1}".format(modification, medium))
         
         self.limits = modification_limits.get('limits')
         self.warmup_limits = modification_limits.get('warmup')
@@ -459,7 +459,7 @@ class Credentials(db.Document):
         return ids
 
     @classmethod
-    def create_credentials(cls, owner, new_data, medium, modification, limit_per_day=None):
+    def create_credentials(cls, owner, new_data, medium, modification=None, limit_per_day=None):
         exist = None
 
         #hash password
