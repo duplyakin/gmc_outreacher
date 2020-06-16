@@ -640,6 +640,12 @@ class Credentials(db.Document):
             random_interval = randrange(interval, interval * RANDOM_INTERVAL_MAX)
             self.next_action = now + timedelta(seconds=random_interval)        
 
+        #INCREASE action_counter
+        current_counter = self.current_actions_count.get(action_key, 0)
+        
+        new_counter = current_counter + 1
+        self.current_actions_count[action_key] = new_counter
+
     def _check_inactivity_days(self):
         now = pytz.utc.localize(datetime.utcnow())
         
