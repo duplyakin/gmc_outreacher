@@ -342,6 +342,7 @@ class Credentials(db.Document):
     current_actions_count = db.DictField()
 
     current_daily_counter = db.IntField(default=0)
+    limit_per_day = db.IntField(default=0) #Used only for DISPLAY
 
     #FOR test purpose only
     test_title = db.StringField(default='')
@@ -365,12 +366,19 @@ class Credentials(db.Document):
 
         if limit_per_day and (limit_per_day > 0) and (limit_per_day < account_maximum):
             self.limits['account_maximum'] = limit_per_day
+            
+            warmup_account_maximum = self.warmup_limits.get('account_maximum')
+            if warmup_account_maximum > limit_per_day:
+                self.warmup_limits['account_maximum'] = limit_per_day
+
+        #TODO: remove it, need to fix frontend
+        self.limit_per_day = self.limits['account_maximum']
 
         if _commit:
             self._commit()
 
     def update_modification(self, modification, _commit=False):
-        if medium in NO_LIMITS_MEDIUMS:
+        if self.medium in NO_LIMITS_MEDIUMS:
             return True
 
         if self.modification == modification:
@@ -386,6 +394,10 @@ class Credentials(db.Document):
         
         self.limits = modification_limits.get('limits')
         self.warmup_limits = modification_limits.get('warmup')
+
+        #TODO: remove it, need to fix frontend
+        self.limit_per_day = self.limits['account_maximum']
+        self.modification = modification
 
         if _commit:
             self._commit()
@@ -403,16 +415,33 @@ class Credentials(db.Document):
 
         medium_limits = LIMITS_BASED_ON_MEDIUM.get(self.medium, '')
         if not medium_limits:
-            raise Exception("setup_limits ERROR: Unknown medium={0}".format(self.medium))
+            raise Exception("update_account_maximum ERROR: Unknown medium={0}".format(self.medium))
         
         modification_limits = medium_limits.get(self.modification, '')
         if not modification_limits:
-            raise Exception("setup_limits ERROR: Unknown modification={0}".format(self.modification))
+            raise Exception("update_account_maximum ERROR: Unknown modification={0}".format(self.modification))
         
         account_maximum = modification_limits.get('limits').get('account_maximum')
+        warmup_account_maximum_default = modification_limits.get('warmup').get('account_maximum')
 
         if limit_per_day and (limit_per_day > 0) and (limit_per_day < account_maximum):
             self.limits['account_maximum'] = limit_per_day
+
+            warmup_account_maximum = self.warmup_limits.get('account_maximum')
+            if warmup_account_maximum > limit_per_day:
+                self.warmup_limits['account_maximum'] = limit_per_day
+            elif limit_per_day > warmup_account_maximum_default and warmup_account_maximum < warmup_account_maximum_default:
+                self.warmup_limits['account_maximum'] = warmup_account_maximum_default
+            elif limit_per_day < warmup_account_maximum_default and limit_per_day > warmup_account_maximum:
+                self.warmup_limits['account_maximum'] = limit_per_day
+
+        elif limit_per_day and (limit_per_day > 0) and (limit_per_day > account_maximum):
+            self.limits['account_maximum'] = account_maximum
+            self.warmup_limits['account_maximum'] = warmup_account_maximum_default
+
+
+        #TODO: remove it, need to fix frontend
+        self.limit_per_day = self.limits['account_maximum']
 
         if _commit:
             self._commit()
@@ -474,6 +503,8 @@ class Credentials(db.Document):
         if not exist:
             exist = cls()
 
+        if modification:
+            exist.modification = modification
 
         exist.setup_limits(medium=medium, 
                             modification=modification, 
@@ -547,7 +578,7 @@ class Credentials(db.Document):
             query['medium'] = medium
 
         db_query = cls.objects(__raw__=query, medium__in=cls.SHOWED_MEDIUM). \
-                    only('id', 'data', 'status', 'error_message', 'medium', 'modification', 'last_action', 'next_action', 'current_daily_counter')
+                    only('id', 'data', 'status', 'error_message', 'medium', 'modification', 'limit_per_day', 'last_action', 'next_action', 'current_daily_counter')
         
         total = db_query.count()
         results = []
@@ -686,9 +717,15 @@ class Credentials(db.Document):
         if limit_per_day:
             self.update_account_maximum(limit_per_day=limit_per_day)
         
-        data = credentials_data.get_data()
-        if data:
-            self.update_data(new_data=data, _commit=False)
+        if self.medium != 'email':
+            data = credentials_data.get_data()
+            
+            if data:
+                #TODO: Check data serialization
+                if data.get('expiry', None) is not None:
+                    data.pop('expiry', None) 
+
+                self.update_data(new_data=data, _commit=False)
         
         self._commit(_reload=_reload)
 
@@ -704,9 +741,6 @@ class Credentials(db.Document):
             if val is not None:
                 self.data[key] = val
         
-        #refreshed data
-        self.status = 1
-
         if _commit:
             self._commit()
     

@@ -13,25 +13,25 @@
                 </div>
             </div>
 
-            <div class="row">
-                <div class="col-6">
-                    <label>Linkedin account type</label>
-                    <el-select
-                        class="select-default mb-3"
-                        placeholder="Select type"
-                        v-model="account_data.modification">
-                            <el-option
-                            class="select-default"
-                            v-for="(a_type,index) in linkedin_account_types"
-                            :key="index"
-                            :label="a_type"
-                            :value="a_type">
-                            </el-option>
-                    </el-select>
-                </div>
-            </div>
-
             <div v-if="account_data.medium === 'linkedin'">
+                <div class="row">
+                    <div class="col-6">
+                        <label>Linkedin account type</label>
+                        <el-select
+                            class="select-default mb-3"
+                            placeholder="Select type"
+                            v-model="account_data.modification">
+                                <el-option
+                                class="select-default"
+                                v-for="(a_type,index) in linkedin_account_types"
+                                :key="index"
+                                :label="a_type"
+                                :value="a_type">
+                                </el-option>
+                        </el-select>
+                    </div>
+                </div>
+    
                 <div class="row">
                     <div class="col-6">
                         <fg-input name="linkedin_account"
@@ -92,9 +92,12 @@ export default {
                 Notification.error({title: "Error", message: "Data can't be empty"});
                 return false;
             }
-            if(!this.account_data.data.account.includes('linkedin')) {
-                Notification.error({title: "Error", message: "Linkedin profile URL field must be like: www.linkedin.com/example_user/"});
-                return false;
+            
+            if (this.account_data.medium === 'linkedin'){
+                if(!this.account_data.data.account.includes('linkedin')) {
+                    Notification.error({title: "Error", message: "Linkedin profile URL field must be like: www.linkedin.com/example_user/"});
+                    return false;
+                }
             }
 
             console.log('acc: ', this.account_data)

@@ -103,6 +103,9 @@ class JSCredentialsData(JSObject):
     def get_modification(self):
         return self._custom_attr(attr='modification', default=None)
 
+    def __str__(self):
+        return str(self.__dict__)
+
 class JSUserData(JSObject):
     def __init__(self, raw_data):
         super().__init__(raw_data)
