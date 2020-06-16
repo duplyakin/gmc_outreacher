@@ -177,9 +177,11 @@ def add_credentials():
             new_credentials = None
             if credentials_type == 'linkedin':
                 medium='linkedin'
+                modification = credentials_data.get_modification()
                 new_credentials = Credentials.create_credentials(owner=current_user.id, 
                                                                 new_data=credentials_data.get_data(), 
-                                                                medium=medium, 
+                                                                medium=medium,
+                                                                modification=modification,
                                                                 limit_per_day=credentials_data.get_limit_per_day())
             elif credentials_type == 'gmail/gsuite':
                 result['code'] = 1

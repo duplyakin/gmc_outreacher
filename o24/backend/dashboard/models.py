@@ -5,6 +5,7 @@ from datetime import datetime
 from datetime import timedelta  
 from pytz import timezone
 import pytz
+from math import ceil
 
 import uuid
 from mongoengine.queryset.visitor import Q
@@ -27,6 +28,7 @@ from o24.backend.utils.helpers import template_key_dict
 from o24.backend.dashboard.serializers import JSCampaignData
 import string
 import random
+from random import randrange
 from urllib.parse import unquote, urlparse
 
 def generate_invite_code(stringLength=10):
@@ -55,9 +57,7 @@ class User(db.Document):
         if not exist:
             exist = Credentials.create_credentials(owner=self.id, 
                                                     new_data={}, 
-                                                    medium='special-medium', 
-                                                    limit_per_day=10000,
-                                                    limit_interval=1)
+                                                    medium='special-medium')
 
         return True
 
@@ -329,6 +329,7 @@ class Credentials(db.Document):
     ack = db.IntField(default=0)
 
     medium = db.StringField()
+    modification = db.StringField()
 
     data = db.DictField()
     
@@ -336,15 +337,120 @@ class Credentials(db.Document):
     last_action = db.DateTimeField(default=pytz.utc.localize(datetime.utcnow()))
     next_action = db.DateTimeField(default=pytz.utc.localize(datetime.utcnow()))
 
-    #limits and schedule
-    limit_per_day = db.IntField(default=DEFAULT_PER_DAY_LIMIT)
-
-    limit_interval = db.IntField(default=DEFAULT_INTERVAL) #in seconds
+    limits = db.DictField()
+    warmup_limits = db.DictField()
+    current_actions_count = db.DictField()
 
     current_daily_counter = db.IntField(default=0)
 
     #FOR test purpose only
     test_title = db.StringField(default='')
+
+    def setup_limits(self, medium, modification, limit_per_day=None, _commit=False):
+        if medium in NO_LIMITS_MEDIUMS:
+            return True
+
+        medium_limits = LIMITS_BASED_ON_MEDIUM.get(medium, '')
+        if not medium_limits:
+            raise Exception("setup_limits ERROR: Unknown medium={0}".format(medium))
+        
+        modification_limits = medium_limits.get(modification, '')
+        if not modification_limits:
+            raise Exception("setup_limits ERROR: Unknown modification={0}".format(modification))
+        
+        self.limits = modification_limits.get('limits')
+        self.warmup_limits = modification_limits.get('warmup')
+
+        account_maximum = self.limits.get('account_maximum')
+
+        if limit_per_day and (limit_per_day > 0) and (limit_per_day < account_maximum):
+            self.limits['account_maximum'] = limit_per_day
+
+        if _commit:
+            self._commit()
+
+    def update_modification(self, modification, _commit=False):
+        if medium in NO_LIMITS_MEDIUMS:
+            return True
+
+        if self.modification == modification:
+            return
+
+        medium_limits = LIMITS_BASED_ON_MEDIUM.get(self.medium, '')
+        if not medium_limits:
+            raise Exception("setup_limits ERROR: Unknown medium={0}".format(self.medium))
+        
+        modification_limits = medium_limits.get(modification, '')
+        if not modification_limits:
+            raise Exception("setup_limits ERROR: Unknown modification={0}".format(modification))
+        
+        self.limits = modification_limits.get('limits')
+        self.warmup_limits = modification_limits.get('warmup')
+
+        if _commit:
+            self._commit()
+
+    def update_account_maximum(self, limit_per_day, _commit=False):
+        if self.medium in NO_LIMITS_MEDIUMS:
+            return False
+        
+        if not limit_per_day or limit_per_day < 0:
+            return
+
+        current_maximum = self.limits.get('account_maximum')
+        if limit_per_day == current_maximum:
+            return
+
+        medium_limits = LIMITS_BASED_ON_MEDIUM.get(self.medium, '')
+        if not medium_limits:
+            raise Exception("setup_limits ERROR: Unknown medium={0}".format(self.medium))
+        
+        modification_limits = medium_limits.get(self.modification, '')
+        if not modification_limits:
+            raise Exception("setup_limits ERROR: Unknown modification={0}".format(self.modification))
+        
+        account_maximum = modification_limits.get('limits').get('account_maximum')
+
+        if limit_per_day and (limit_per_day > 0) and (limit_per_day < account_maximum):
+            self.limits['account_maximum'] = limit_per_day
+
+        if _commit:
+            self._commit()
+
+    def check_limits(self, action_key):
+        # True - if we have limits
+        # False - if we don't have limits
+        # None - Unlimited
+        # Here is the sequence to check
+        # 1. Is medium unlimitted?
+        # 2. Is action_key unlimitted?
+        # 3. Do we exceed account maximum?
+        # 4. Do we exceed action_key maximum?
+
+        if self.medium in NO_LIMITS_MEDIUMS:
+            return None
+           
+        #Do we have limits for this action_key?
+        action_key_maximum = self.warmup_limits.get(action_key, None)
+        if action_key_maximum is None:
+            return None
+
+        current_action_key_counter = self.current_actions_count.get(action_key, 0)
+        if current_action_key_counter > action_key_maximum:
+            return False
+
+        #Do we exceed account_maximum?
+        account_maximum = self.warmup_limits.get('account_maximum', None)
+        if account_maximum is None:
+            print("NEVER HAPPENED: there is no account_maximum for warmup_limits for credentials_id={0}".format(self.id))
+            return False
+
+        if self.current_daily_counter > account_maximum:
+            return False
+
+
+        return True
+
 
     @classmethod
     def ready_ids(cls, utc_now):
@@ -353,7 +459,7 @@ class Credentials(db.Document):
         return ids
 
     @classmethod
-    def create_credentials(cls, owner, new_data, medium, limit_per_day=None, limit_interval=None):
+    def create_credentials(cls, owner, new_data, medium, modification, limit_per_day=None):
         exist = None
 
         #hash password
@@ -368,15 +474,10 @@ class Credentials(db.Document):
         if not exist:
             exist = cls()
 
-        if (limit_per_day is not None) and (limit_per_day > 0):
-            exist.limit_per_day = limit_per_day
 
-        if (limit_interval is not None) and (limit_interval > 0):
-            exist.limit_interval = limit_interval
-
-        if medium == 'special-medium':
-            exist.limit_per_day = SM_DEFAULT_PER_DAY_LIMIT
-            exist.limit_interval = SM_DEFAULT_INTERVAL
+        exist.setup_limits(medium=medium, 
+                            modification=modification, 
+                            limit_per_day=limit_per_day)
 
         exist.owner = owner
         exist.medium = medium
@@ -446,7 +547,7 @@ class Credentials(db.Document):
             query['medium'] = medium
 
         db_query = cls.objects(__raw__=query, medium__in=cls.SHOWED_MEDIUM). \
-                    only('id', 'data', 'status', 'error_message', 'medium', 'limit_per_day', 'last_action', 'next_action', 'current_daily_counter')
+                    only('id', 'data', 'status', 'error_message', 'medium', 'modification', 'last_action', 'next_action', 'current_daily_counter')
         
         total = db_query.count()
         results = []
@@ -483,32 +584,80 @@ class Credentials(db.Document):
     def get_medium(self):
         return self.medium
 
-    def _check_day_changed(self, now):
+    def _refresh_limits(self, _commit=False):
+        self.current_daily_counter = 0
+        self.current_actions_count = {}
+
+        if _commit:
+            self._commit()
+
+    def _increase_action_counter(self, action_key):
+        now = pytz.utc.localize(datetime.utcnow())
+
+        self.current_daily_counter = self.current_daily_counter + 1
+        self.last_action = self.next_action
+        
+        account_maximum = self.warmup_limits.get('account_maximum')
+        interval = self.warmup_limits.get('interval_sec')
+
+        if self.current_daily_counter >= account_maximum:
+            #switch action to the next day
+            self.next_action = now + timedelta(seconds=LIMITS_24_PERIOD_SECS)
+            self._refresh_limits()
+            self.warmup()
+        else:
+            random_interval = randrange(interval, interval * RANDOM_INTERVAL_MAX)
+            self.next_action = now + timedelta(seconds=random_interval)        
+
+    def _check_inactivity_days(self):
+        now = pytz.utc.localize(datetime.utcnow())
+        
+        diff = now - self.last_action
+        diff_days = diff.days
+
+        max_inactivity_days = self.warmup_limits.get('days_inactivity')
+        if diff_days > max_inactivity_days:
+            self.warmup_refresh()
+
+    def _check_day_changed(self):
+        now = pytz.utc.localize(datetime.utcnow())
 
         diff = now - self.day_first_action
-        diff_days = diff.days
-        if diff_days < 0:
-            diff_days = diff_days * -1
+        diff_seconds = diff.seconds
+        if diff_seconds < 0:
+            diff_seconds = diff_seconds * -1
         
-        if diff_days >= 1:
-            self.current_daily_counter = 0
+        if diff_seconds >= LIMITS_24_PERIOD_SECS:
             self.day_first_action = now
+            self._refresh_limits()
 
         return
 
-    def change_limits(self, now):
-        self._check_day_changed(now)
+    def change_limits(self, action_key):
+        # If 24-hour period ended all limits are refreshed
+        self._check_inactivity_days()
+        self._check_day_changed()
 
-        self.current_daily_counter = self.current_daily_counter + 1
+        has_limits = self.check_limits(action_key=action_key)
 
-        self.last_action = self.next_action
-        if self.current_daily_counter >= self.limit_per_day:
-            #switch action to the next day
-            self.next_action = now + timedelta(days=1)
-            self.current_daily_counter = 0
-            self.warmup()
-        else:
-            self.next_action = now + timedelta(seconds=self.limit_interval)        
+        #None - action_key or medium is unlimited
+        if has_limits is None:
+            return True
+
+        # we don't have limits left for this action_key
+        if has_limits == False:
+            return False
+
+        #We have limits left need to:
+        # 1. Increase daily_counter (total actions on this account)
+        # 2. Increase counter for action_key
+        # 3. Change next_action if exceeded:
+             # we have exceed account_maximum, need to move to 24 hour in the future
+             # warmup account
+        # 4. Change next_action to interval if exceeded
+        self._increase_action_counter(action_key=action_key)
+
+        return True
 
     def _inc_next_action(seconds, _commit=True):
         now = pytz.utc.localize(datetime.utcnow())
@@ -529,9 +678,13 @@ class Credentials(db.Document):
                 raise Exception(error)
 
     def safe_update_credentials(self, credentials_data, _reload=False):
+        modification = credentials_data.get_modification()
+        if modification and self.modification != modification:
+            self.update_modification(modification=modification)
+
         limit_per_day = credentials_data.get_limit_per_day()
         if limit_per_day:
-            self.limit_per_day = limit_per_day
+            self.update_account_maximum(limit_per_day=limit_per_day)
         
         data = credentials_data.get_data()
         if data:
@@ -584,8 +737,41 @@ class Credentials(db.Document):
         self.status = status
         self._commit()
 
-    def warmup(self):
-        self.limit_per_day = round(self.limit_per_day * 1.3)
+    def warmup_refresh(self, _commit=False):
+        if self.medium in NO_LIMITS_MEDIUMS:
+            return True
+
+        medium_limits = LIMITS_BASED_ON_MEDIUM.get(self.medium, '')
+        if not medium_limits:
+            raise Exception("warmup_refresh ERROR: Unknown medium={0}".format(self.medium))
+        
+        modification_limits = medium_limits.get(self.modification, '')
+        if not modification_limits:
+            raise Exception("warmup_refresh ERROR: Unknown modification={0}".format(self.modification))
+        
+        self.warmup_limits = modification_limits.get('warmup')
+
+        if _commit:
+            self._commit()
+
+
+    def warmup(self, _commit=False):
+        if not self.warmup_limits:
+            raise Exception("NEVER HAPPENED: there is no warmup_limits for cr_id={0}".format(self.id))
+        
+        increase = self.warmup_limits.get('increase')
+        for action, counter in self.warmup_limits.items():
+            max_counter = self.limits.get(action)
+            next_counter = ceil(counter * increase)
+
+            if next_counter > max_counter:
+                self.warmup_limits[action] = max_counter
+            else:
+                self.warmup_limits[action] = next_counter
+
+        if _commit:
+            self._commit()
+
 
     def _commit(self, _reload=False):
         self.save()
@@ -932,7 +1118,9 @@ class Campaign(db.Document):
         
         return self.next_action   
 
-    def change_limits(self, now):
+    def change_limits(self):
+        now = pytz.utc.localize(datetime.utcnow())
+
         current_hour = now.hour
         current_day = now.day
         

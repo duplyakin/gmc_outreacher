@@ -99,6 +99,9 @@ class JSCredentialsData(JSObject):
 
     def get_limit_per_day(self):
         return self._custom_attr(attr='limit_per_day', default=None)
+    
+    def get_modification(self):
+        return self._custom_attr(attr='modification', default=None)
 
 class JSUserData(JSObject):
     def __init__(self, raw_data):

@@ -464,8 +464,9 @@ class TaskQueue(db.Document):
         return TaskQueue.objects(campaign_id__in=active_campaigns, status__in=TRAIL_STATUSES)
 
     @classmethod
-    def get_execute_tasks(cls, do_next, followup_level, now):
-        
+    def get_execute_tasks(cls, do_next, followup_level):
+        now = pytz.utc.localize(datetime.utcnow())
+
         # next_round__lte=now
         # Which tasks are ready for execution:
         # OUTPUT: list of UNIQUE(credentials_id)
@@ -509,7 +510,11 @@ class TaskQueue(db.Document):
                 } 
              },
              query,
-            {"$group" : {"_id": "$credentials_id", "task_id" : { "$first" : "$_id" }}},
+#            {"$group" : {
+#                "_id": "$credentials_id", 
+#                "task_id" : { "$first" : "$_id" }
+#                }
+#            },
         ]
 
         now = pytz.utc.localize(datetime.utcnow())
@@ -517,7 +522,7 @@ class TaskQueue(db.Document):
         new_tasks = list(TaskQueue.objects(status=NEW, next_round__lte=now).aggregate(*pipeline))
         tasks_ids = [x.get('task_id') for x in new_tasks]
 
-        execute_tasks = TaskQueue.objects(Q(id__in=tasks_ids))
+        execute_tasks = TaskQueue.objects(id__in=tasks_ids)
         return execute_tasks
 
 
