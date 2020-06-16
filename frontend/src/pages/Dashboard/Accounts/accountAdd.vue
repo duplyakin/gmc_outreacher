@@ -24,6 +24,24 @@
 
                 <div class="row">
                     <div class="col-6">
+                        <label>Select Linkedin account type</label>
+                        <el-select
+                            class="select-default mb-3"
+                            placeholder="Select type"
+                            v-model="model.modification">
+                                <el-option
+                                class="select-default"
+                                v-for="(a_type,index) in linkedin_account_types"
+                                :key="index"
+                                :label="a_type"
+                                :value="a_type">
+                                </el-option>
+                        </el-select>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-6">
                         <label>Linkedin profile URL</label>
                         <fg-input name="linkedin_account"
                             v-model="model.data.account"
@@ -39,7 +57,7 @@
                             title="What is limits?"
                             width="auto"
                             trigger="hover"
-                            content='Limits - maximum messages from current account allowd by Linkedin.'>
+                            content="Limits - maximum messages from current account per day.">
                             <el-button slot="reference" size="mini" icon="el-icon-question" circle></el-button>
                         </el-popover>
                         </label>
@@ -80,14 +98,16 @@ export default {
     },
     data() {
         return {
-            error : false,
-            account_types : ['gmail/gsuite', 'linkedin'],
+            error: false,
+            account_types: ['gmail/gsuite', 'linkedin'],
+            linkedin_account_types: ['basic', 'premium'],
 
-            model : {
-                limit_per_day : 50,
-                credentials_type : '',
-                data :{
-                    account : '',
+            model: {
+                limit_per_day: 50,
+                credentials_type: '',
+                modification: '',
+                data: {
+                    account: '',
                 }
             }
         }
@@ -101,16 +121,20 @@ export default {
             } else if (this.model.credentials_type == 'linkedin') {
 
                 if (this.model.data.account == '') {
-                    Notification.error({title: "Error", message: "Input your linkedin profile URL"});
+                    Notification.error({title: "Error", message: "Input your Linkedin profile URL"});
                     return false;
                 }
                 if(!this.model.data.account.includes('linkedin')) {
                     Notification.error({title: "Error", message: "Linkedin profile URL field must be like: www.linkedin.com/example_user/"});
                     return false;
                 }
+                if (this.model.modification == '') {
+                    Notification.error({title: "Error", message: "Select Linkedin account type"});
+                    return false;
+                }
                 
                 this.model.data.account = this.model.data.account.substring(this.model.data.account.indexOf("www"), this.model.data.account.length -1);
-                console.log('acc: ', this.model.data.account)
+                console.log('acc: ', this.model)
 
             }
 
