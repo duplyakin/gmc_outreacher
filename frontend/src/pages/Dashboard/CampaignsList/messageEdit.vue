@@ -34,41 +34,41 @@
           </div>
 
           <div class="container">
-            <div class="row">
-              <div class="col-7 o24_interval_text">If no reply is received for previous email, this email will be sent after</div>
+            <div class="row justify-content-start">
+              <div class="col-8 o24_interval_text">If no reply is received for previous email, this email will be sent after (days)</div>
               <div class="col-2">
                 <fg-input>
                   <el-input-number v-model="interval" placeholder="ex: 1.00" :min="1" :max="365"></el-input-number>
                 </fg-input>
               </div>
-              <div class="col-3 o24_interval_text">day(s) from previous email</div>
             </div>
           </div>
         </card>
 
 
         <card v-if="template_type === 'linkedin'">
-          <div class="col-12">
-            <fg-input>
-              <editor
-                name="body text"
-                output-format="html"
-                v-model="template.message"
-                api-key="o5wuoncsvrewlx7zeflsjb4wo2a252lvnrnlslv30ohh31ex"
-                :init="editorSettings"
-              />
-            </fg-input>
+          <div class="row">
+            <div class="col-12">
+              <fg-input>
+                <editor
+                  name="body text"
+                  output-format="html"
+                  v-model="template.message"
+                  api-key="o5wuoncsvrewlx7zeflsjb4wo2a252lvnrnlslv30ohh31ex"
+                  :init="editorSettings"
+                />
+              </fg-input>
+            </div>
           </div>
 
           <div class="container">
-            <div class="row">
-              <div class="col-7 o24_interval_text">If no reply is received for previous message, this message will be sent after</div>
+            <div class="row justify-content-start">
+              <div class="col-8 o24_interval_text">If no reply is received for previous message, this message will be sent after (days)</div>
               <div class="col-2">
                 <fg-input>
                   <el-input-number v-model="interval" placeholder="ex: 1.00" :min="1" :max="365"></el-input-number>
                 </fg-input>
               </div>
-              <div class="col-3 o24_interval_text">day(s) from previous message</div>
             </div>
           </div>
         </card>
