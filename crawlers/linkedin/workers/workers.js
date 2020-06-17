@@ -158,31 +158,17 @@ async function connectWorker(task_id) {
 
     let cookies = await get_cookies(credentials_id);
 
-    let prospect_full_name = task_data.prospect_data.first_name + ' ' + task_data.prospect_data.last_name;
-
     // start work
-    // check connect
-    let connectCheckAction = new modules.connectCheckAction.ConnectCheckAction(cookies, credentials_id, prospect_full_name);
-    browser = await connectCheckAction.startBrowser();
-    let resCheck = await connectCheckAction.connectCheck();
-    browser = await connectCheckAction.closeBrowser();
-
-    let res = false;
-    if (!resCheck) {
-      let message = '';
-      if(task_data.template_data != null) {
-        if(task_data.template_data.message != null)
-          message = task_data.template_data.message;
-      }
-      // connect if not connected
-      let connectAction = new modules.connectAction.ConnectAction(cookies, credentials_id, task_data.prospect_data.linkedin, message, task_data.prospect_data);
-      browser = await connectAction.startBrowser();
-      res = await connectAction.connect();
-      browser = await connectAction.closeBrowser();
-    } else {
-      res = true;
-      //throw MyExceptions.ConnectActionError('Connect is already connected: ' + err);
+    let message = '';
+    if (task_data.template_data != null) {
+      if (task_data.template_data.message != null)
+        message = task_data.template_data.message;
     }
+
+    let connectAction = new modules.connectAction.ConnectAction(cookies, credentials_id, task_data.prospect_data.linkedin, message, task_data.prospect_data);
+    browser = await connectAction.startBrowser();
+    res = await connectAction.connect();
+    browser = await connectAction.closeBrowser();
 
     result_data = {
       code: 0,
@@ -510,12 +496,10 @@ async function connectCheckWorker(task_id) {
     }
     let task_data = serialize_data(input_data);
 
-    let prospect_full_name = task_data.prospect_data.first_name + ' ' + task_data.prospect_data.last_name;
-
     let cookies = await get_cookies(credentials_id);
 
     // start work
-    let connectCheckAction = new modules.connectCheckAction.ConnectCheckAction(cookies, credentials_id, prospect_full_name);
+    let connectCheckAction = new modules.connectCheckAction.ConnectCheckAction(cookies, credentials_id, task_data.prospect_data.linkedin);
     browser = await connectCheckAction.startBrowser();
     let res = await connectCheckAction.connectCheck();
     browser = await connectCheckAction.closeBrowser();

@@ -57,12 +57,12 @@ async check_success_selector(selector, page = this.page) {
 
   } catch(err) {
     
-    if(this.check_block(page.url())) {
+    if (this.check_block(page.url())) {
       throw MyExceptions.ContextError("Block happend: " + page.url());
     }
 
     // uncknown page here
-    throw new Error('Uncknowm page here: ', current_url);
+    return false;
   }
 }
 
@@ -83,6 +83,7 @@ async check_success_selector(selector, page = this.page) {
 
     // uncknown page here
     throw new Error('Uncknowm page here: ', current_url);
+    //return false;
   }
 
   async close_msg_box(page = this.page) {

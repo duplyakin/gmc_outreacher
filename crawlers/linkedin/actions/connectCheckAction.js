@@ -5,42 +5,48 @@ const action = require('./action.js');
 const MyExceptions = require('../../exceptions/exceptions.js');
 
 class ConnectCheckAction extends action.Action {
-  constructor(cookies, credentials_id, prospect_full_name) {
-    super(cookies, credentials_id);
+  constructor(cookies, credentials_id, url) {
+    super(cookies, credentials_id)
 
-    this.prospect_full_name = prospect_full_name;
+    this.url = url
   }
 
   async connectCheck() {
-    await super.gotoLogin();
-    await super.gotoChecker(links.CONNECTS_LINK);
-
-    await this.page.waitForSelector(selectors.SEARCH_CONNECTS_SELECTOR, { timeout: 5000 });
-
-    await this.page.click(selectors.SEARCH_CONNECTS_SELECTOR);
-    await this.page.keyboard.type(this.prospect_full_name);
+    await super.gotoLogin()
+    await super.gotoChecker(this.url)
 
     // wait selector here
-    await super.check_success_selector(selectors.CONNECTOR_SELECTOR);
-
-    await this.page.waitFor(1000);  // wait linkedIn loading process
-
-    let selector = selectors.CONNECTOR_SELECTOR;
-    let connect = await this.page.evaluate((selector) => {
-      let a = document.querySelector(selector);
-      if (a !== null) {
-        a = a.innerText;
-      };
-      return a;
-    }, selector);
-
-    if (connect === this.prospect_full_name) {
-      console.log("..... connect found - success: .....", connect)
-      return true;
+    let check_selector = await super.check_success_selector(selectors.CONNECT_DEGREE_SELECTOR)
+    if(!check_selector) {
+      console.log("..... connection NOT found (selector not foumd): .....", this.url)
+      return false
     }
 
-    console.log("..... connect NOT found: .....", connect)
-    return false;
+    await this.page.waitFor(1000)  // wait linkedIn loading process
+
+    let selector = selectors.CONNECT_DEGREE_SELECTOR
+    let connect = await this.page.evaluate((selector) => {
+
+      let a = document.querySelector(selector)
+
+      if (a != null) {
+        return a.innerText
+      } else {
+        return null
+      }
+    }, selector)
+
+    if (connect == null || connect == '') {
+      console.log("..... connection NOT found (selector result is NULL or empty): .....", this.url)
+      return false
+
+    } else if (connect.includes("1")) {
+      console.log("..... connection found - success: .....", connect)
+      return true
+    }
+
+    console.log("..... connection NOT found (not 1st degree): .....", connect + " for " + this.url)
+    return false
   }
 }
 

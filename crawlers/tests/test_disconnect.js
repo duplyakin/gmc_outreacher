@@ -4,7 +4,7 @@ const models = require("../models/shared.js");
 // test running
 
 (async () => {
-  console.log("..... 1 started: .....", __filename);
+  console.log("..... disconnecct-close test started: .....", __filename);
   browser = await puppeteer.launch({ headless: false }); // test mode
   //browser = await puppeteer.launch();
   context = await browser.createIncognitoBrowserContext();
@@ -13,7 +13,7 @@ const models = require("../models/shared.js");
   
   browser.disconnect();
   await browser.close();
-
+/*
   await browser.close();
   browser.disconnect();
 
@@ -27,5 +27,6 @@ const models = require("../models/shared.js");
   });
 
   console.log('task: ', task);
+  */
 
 })();

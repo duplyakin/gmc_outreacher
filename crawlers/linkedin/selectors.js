@@ -50,3 +50,4 @@ module.exports.JOB_SELECTOR = '.t-16.t-black.t-bold';
 // connect check
 module.exports.SEARCH_CONNECTS_SELECTOR = '#mn-connections-search-input';
 module.exports.CONNECTOR_SELECTOR = 'span.mn-connection-card__name';
+module.exports.CONNECT_DEGREE_SELECTOR = '.pv-top-card--list .dist-value';
