@@ -96,6 +96,9 @@ class Scheduler():
         self.switch_priority()
     
         tasks = TaskQueue.get_ready()
+        if tasks:
+            print("...scheduler.plan(): found {0} tasks from get_ready".format(tasks.count()))
+
         for_update = []
         logs = []
     
@@ -125,7 +128,9 @@ class Scheduler():
         followup_level = current_priority.followup_level
 
         tasks = TaskQueue.get_execute_tasks(do_next=do_next, followup_level=followup_level)
-        
+        if tasks:
+            print("...scheduler.execute(): found {0} tasks from get_execute_tasks".format(tasks.count()))
+
         jobs = []
         cr_next_actions = {}
 
@@ -188,6 +193,9 @@ class Scheduler():
 
     def trail(self):
         tasks = TaskQueue.get_trail_tasks()
+        if tasks:
+            print("...scheduler.trail(): found {0} tasks from get_trail_tasks".format(tasks.count()))
+
         for task in tasks:
             try:
                 if task.status == FAILED:

@@ -11,9 +11,9 @@ from o24.backend.handlers.email import *
 from o24.backend.handlers.enricher import *
 from o24.backend.handlers.general import *
 
-env = os.environ.get('APP_ENV', None)
-if env == "Test":
-    from .dummy import *
+#env = os.environ.get('APP_ENV', None)
+#if env == "Test":
+#    from .dummy import *
 
 
 #celery -A o24.backend.handlers.worker_start.celery worker -E -l info -P gevent

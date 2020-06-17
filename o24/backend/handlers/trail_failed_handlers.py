@@ -13,7 +13,7 @@ def system_error(task):
     
     code = result_data.get('code', None)
     
-    if code and code != -4080:
-        task.update_status(status=NEW)
-    
-    print("system_error trail_failed_handlers: can't fix for task.id={0} result_data={1} just setted to status=NEW".format(task.id, result_data))
+    #if code and code != -4080:
+    #    task.update_status(status=NEW)
+    #else:
+    print("system_error trail_failed_handlers: can't fix for task.id={0} result_data={1}".format(task.id, result_data))

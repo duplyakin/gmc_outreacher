@@ -29,10 +29,12 @@ def emit_scheduler():
 
         #Create jobs for all NEW tasks that are ready
         jobs = scheduler.execute()
+        print("...emit_scheduler: scheduler.execute() returned {0} jobs".format(len(jobs)))
 
         group_jobs = group(jobs)
 
-        return group_jobs.apply_async()
+        group_jobs.apply_async()
+        return {"status": True}
     except Exception as e:
         app.logger.error(".....emit_scheduler Exception:{0}".format(str(e)))
         traceback.print_exc()

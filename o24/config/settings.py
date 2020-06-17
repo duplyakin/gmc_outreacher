@@ -21,6 +21,7 @@ class BaseConfig():
     USER_SEND_REGISTERED_EMAIL = False
 
     #CELERY periodic tasks settings for Enricher
+    task_acks_late = True
     ENRICHER_HANDLER_PERIOD = 120
     ENRICHER_HANDLER = 'emit_enricher'
 
@@ -115,7 +116,7 @@ class TestConfig(BaseConfig):
     FLASK_ENV = 'test'
     DEBUG = True
     TESTING = True
-    CELERY_TASK_ALWAYS_EAGER = True
+    CELERY_TASK_ALWAYS_EAGER = False #change to True if you need sync execution
     CELERY_BROKER = 'amqp://guest:guest@localhost:5672//'
     CELERY_BACKEND_RESULT_EXPIRES = 300
     os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
