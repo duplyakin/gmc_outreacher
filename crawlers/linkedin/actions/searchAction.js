@@ -2,6 +2,7 @@ const selectors = require("../selectors");
 const action = require('./action.js');
 
 const MyExceptions = require('../../exceptions/exceptions.js');
+var log = require('loglevel').getLogger("o24_logger");
 
 class SearchAction extends action.Action {
   constructor(cookies, credentials_id, searchUrl, interval_pages) {
@@ -42,14 +43,14 @@ class SearchAction extends action.Action {
         await super.autoScroll(this.page);
 
         // wait selector here
-        //await super.check_success_selector(selectors.SEARCH_ELEMENT_SELECTOR, this.page, result_data);
+        //await super.check_success_selector(selectors.SEARCH_ELEMENT_SELECTOR, this.page);
 
         if (await this.page.$(selectors.SEARCH_ELEMENT_SELECTOR) == null) {
           // TODO: add check-selector for BAN page
           // perhaps it was BAN
           result_data.code = MyExceptions.SearchActionError().code;
-          result_data.raw = MyExceptions.SearchActionError('It is BAN (?) in searchAction.').error;
-          console.log('something went wrong - selector not found!');
+          result_data.raw = MyExceptions.SearchActionError('something went wrong - NEXT_PAGE_SELECTOR not found! page.url: ' + this.page.url()).error;
+          log.error('SearchAction: something went wrong - NEXT_PAGE_SELECTOR not found! page.url: ', this.page.url());
           break;
         }
 
@@ -78,8 +79,8 @@ class SearchAction extends action.Action {
           // TODO: add check-selector for BAN page
           // perhaps it was BAN
           result_data.code = MyExceptions.SearchActionError().code;
-          result_data.raw = MyExceptions.SearchActionError('It is BAN (?) in searchAction.').error;
-          console.log('something went wrong - selector not found!');
+          result_data.raw = MyExceptions.SearchActionError('something went wrong - NEXT_PAGE_SELECTOR not found! page.url: ' + this.page.url()).error;
+          log.error('SearchAction: something went wrong - NEXT_PAGE_SELECTOR not found! page.url: ', this.page.url());
           break;
         }
 
@@ -89,7 +90,7 @@ class SearchAction extends action.Action {
         if (await this.page.$(selectors.NEXT_PAGE_MUTED_SELECTOR) != null) {
           // all awailable pages has been scribed
           result_data.code = 1000;
-          console.log('All contacts scribed!');
+          log.debug('SearchAction: All awailable pages has been scribed!');
           break;
         }
 
@@ -101,16 +102,13 @@ class SearchAction extends action.Action {
         currentPage++;
       }
     } catch (err) {
-      console.log("..... we catch it: .....", err);
-      //result_data.code = -1 // it should be = 0 !
-      //result_data.if_true = false // ?
+      log.error("SearchAction: we catch something strange:", err);
       result_data.data = JSON.stringify(result_data.data);
       return result_data;
-      //throw MyExceptions.SearchActionError('It is BAN (?) in searchAction: '+ err);
     }
 
-    //console.log("..... Reult Data: .....", result_data)
-    //console.log("..... Users Data: .....", result_data.data.arr)
+    //log.debug("SearchAction: Reult Data: ", result_data)
+    //log.debug("SearchAction: Users Data: ", result_data.data.arr)
     result_data.data = JSON.stringify(result_data.data);
     return result_data;
   }

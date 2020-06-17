@@ -2,6 +2,7 @@ const selectors = require("../selectors");
 const action = require('./action.js');
 
 const MyExceptions = require('../../exceptions/exceptions.js');
+var log = require('loglevel').getLogger("o24_logger");
 
 class ConnectAction extends action.Action {
   constructor(cookies, credentials_id, url, template, data) {
@@ -18,7 +19,7 @@ class ConnectAction extends action.Action {
 
     let check = await this.connectCheck();
     if(check) {
-      console.log('You are already connected with ' + this.url);
+      log.debug('ConnectAction: You are already connected with ' + this.url);
       return true;
     }
 
@@ -26,7 +27,7 @@ class ConnectAction extends action.Action {
 
     //await this.page.waitForSelector(selectors.CONNECT_SELECTOR);
     if (await this.page.$(selectors.CONNECT_SELECTOR) === null) {
-      console.log('You can\'t connect ' + this.url);
+      log.debug('ConnectAction: You can\'t connect ' + this.url);
 
       // TODO: add logic for FOLLOW-UP (for famous contacts) and MESSAGE (for premium acc's)
       return false;
@@ -36,7 +37,7 @@ class ConnectAction extends action.Action {
     // check - if CONNECT btm exists, but muted, then you have already sent request
     //await this.page.waitForSelector(selectors.ADD_MSG_BTN_SELECTOR);
     if (await this.page.$(selectors.ADD_MSG_BTN_SELECTOR) === null) {
-      console.log('You have already sent request (or you can\'t) ' + this.url);
+      log.debug('ConnectAction: You have already sent request (or you can\'t) ' + this.url);
       return true;
     }
     await this.page.click(selectors.ADD_MSG_BTN_SELECTOR);
@@ -49,7 +50,6 @@ class ConnectAction extends action.Action {
 
     await this.page.keyboard.type(text);
     await this.page.click(selectors.SEND_INVITE_TEXT_BTN_SELECTOR);
-    //await this.page.waitFor(100000); // to see result
 
     // wait page here
     await this.page.waitFor(2000);
@@ -62,7 +62,7 @@ class ConnectAction extends action.Action {
     // wait selector here
     let check_selector = await super.check_success_selector(selectors.CONNECT_DEGREE_SELECTOR)
     if(!check_selector) {
-      console.log("..... connection NOT found (selector not foumd): .....", this.url)
+      log.debug("ConnectAction: connection NOT found (selector not foumd):", this.url)
       return false
     }
 
@@ -81,15 +81,15 @@ class ConnectAction extends action.Action {
     }, selector)
 
     if (connect == null || connect == '') {
-      console.log("..... connection NOT found (selector result is NULL or empty): .....", this.url)
+      log.debug("ConnectAction: connection NOT found (selector result is NULL or empty):", this.url)
       return false
 
     } else if (connect.includes("1")) {
-      console.log("..... connection found - success: .....", connect)
+      log.debug("ConnectAction: connection found - success:", connect)
       return true
     }
 
-    console.log("..... connection NOT found (not 1st degree): .....", connect + " for " + this.url)
+    log.debug("ConnectAction: connection NOT found (not 1st degree):", connect + " for " + this.url)
     return false
   }
 }

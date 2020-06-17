@@ -2,6 +2,7 @@ const selectors = require("../selectors");
 const action = require('./action.js');
 
 const MyExceptions = require('../../exceptions/exceptions.js');
+var log = require('loglevel').getLogger("o24_logger");
 
 class MessageAction extends action.Action {
   constructor(cookies, credentials_id, url, data, template) {
@@ -16,8 +17,7 @@ class MessageAction extends action.Action {
     await super.gotoLogin();
     await super.gotoChecker(this.url);
 
-    const page = await this.context.newPage();  // feature (critical)
-    //await page.goto(this.url); // old
+    const page = await this.context.newPage(); // feature (critical)
     await super.gotoChecker(this.url, page);
 
     //TODO: add logic for 'closed' for message accounts
@@ -25,7 +25,7 @@ class MessageAction extends action.Action {
     await super.close_msg_box(page);
 
     if (await this.page.$(selectors.WRITE_MSG_BTN_SELECTOR) === null) {
-      console.log('You can\'t write messages to ' + this.url);
+      log.debug('MessageAction: You can\'t write messages to ' + this.url);
       return false; 
     }
 

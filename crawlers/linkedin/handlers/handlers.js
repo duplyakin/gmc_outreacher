@@ -8,6 +8,9 @@ const cron = require('node-cron');
 const actionKeys = require('./actionKeys.js');
 const status_codes = require('../status_codes')
 
+const MyExceptions = require('../../exceptions/exceptions.js');
+var log = require('loglevel').getLogger("o24_logger");
+
 
 async function bullConsumer() {
   bull_workers.process(async job => {
@@ -36,10 +39,11 @@ async function bullConsumer() {
           break;
 
         default:
+          //log.debug('unknown action_key: ', job.data.action_key);
           break;
       }
     } catch (err) {
-      console.log('Bull queue - something went wrong: ', err);
+      log.error('Bull queue error - something went wrong: ', err.stack);
 
       let err_result = {
         code: MyExceptions.HandlerError().code,
@@ -49,7 +53,6 @@ async function bullConsumer() {
       await models_shared.TaskQueue.findOneAndUpdate({ _id: job.data.task_id }, { status: -1, result_data: err_result }, function (err, res) {
         if (err) throw MyExceptions.MongoDBError('MongoDB save err: ' + err);
         // updated!
-        console.log('MongoDB save success.');
       });
     }
   });
@@ -80,15 +83,15 @@ async function taskStatusListener() {
             if (err) throw MyExceptions.MongoDBError('MongoDB updateOne TASK err: ' + err);
           });
 
-          console.log('task added in handler, status: ' + task.status + ' action_key: ' + task.action_key); // test
+          log.debug('taskStatusListener: task added in handler, status: ' + task.status + ' action_key: ' + task.action_key); // test
         });
 
         handler_lock = 0;
-        console.log('CRON log - TASKs ADDED in queue');
+        log.debug('taskStatusListener: TASKs ADDED in queue');
       }
     }
 
-    console.log('this message logs every minute - CRON is active');
+    log.debug('taskStatusListener: ....this message logs every minute - CRON is active....');
   });
 }
 
