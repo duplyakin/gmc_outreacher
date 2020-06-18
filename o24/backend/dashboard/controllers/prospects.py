@@ -63,6 +63,10 @@ COLUMNS = [
         'data' : True
     },
     {
+        'label' : 'Tags',
+        'prop' : 'tags'
+    },
+    {
         'label' : 'Campaign',
         'prop' : 'assign_to',
         'field' : 'title'

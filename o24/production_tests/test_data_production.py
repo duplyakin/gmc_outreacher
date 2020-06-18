@@ -149,6 +149,7 @@ FUNNELS = [
             'key' : LINKEDIN_VISIT_PROFILE_ACTION ,
             'title' : 'Linkedin only sequence',
             'funnel_type' : GENERAL_FUNNEL_TYPE,
+            'list_of_contacts' : 'linkedin',
             'root' : True,
             'if_true' : 'visit-delay-1',
             'if_false' : 'visit-delay-1',
@@ -428,8 +429,9 @@ FUNNELS = [
   {
         'root' : {
             'key' : LINKEDIN_VISIT_PROFILE_ACTION ,
-            'title' : 'Linedin + Email simple sequence',
+            'title' : 'Linkedin + Email simple sequence',
             'funnel_type' : GENERAL_FUNNEL_TYPE,
+            'list_of_contacts' : 'linkedin',
             'root' : True,
             'if_true' : 'visit-delay-1',
             'if_false' : 'visit-delay-1',
@@ -580,8 +582,9 @@ FUNNELS = [
     {
         'root' : {
             'key' : LINKEDIN_VISIT_PROFILE_ACTION ,
-            'title' : 'Linedin + Email sequence',
+            'title' : 'Linkedin + Email sequence',
             'funnel_type' : GENERAL_FUNNEL_TYPE,
+            'list_of_contacts' : 'linkedin',
             'root' : True,
             'if_true' : 'visit-delay-1',
             'if_false' : 'visit-delay-1',

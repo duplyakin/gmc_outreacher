@@ -12,6 +12,8 @@ from o24.backend.gmail.controller import GmailController
 from o24.backend.models.inbox.mailbox import MailBox
 from o24.backend.handlers.email_senders import gmail_smtp, gmail_api, yandex_smtp, mailru_smtp
 
+import o24.backend.scheduler.models as scheduler_models
+
 SEND_ACTION_HANDLERS = {
     'smtp' : gmail_smtp.send_email,
     'api' : gmail_api.send_email
@@ -106,7 +108,9 @@ def email_check_reply(task_id):
             unlocked = shared.TaskQueue.unlock(task_id=task_id, result_data=result_data, status=status)
             if not unlocked:
                 raise Exception("Can't unlock email_check_reply")
-        
+
+            #log task
+            scheduler_models.ActionLog.log(task, step='handler', description="email_check_reply")
         return result_data
 
     return result_data
@@ -193,7 +197,9 @@ def email_send_message(task_id):
             unlocked = shared.TaskQueue.unlock(task_id=task_id, result_data=result_data, status=status)
             if not unlocked:
                 raise Exception("Can't unlock email_send_message")
-        
+
+            #log task
+            scheduler_models.ActionLog.log(task, step='handler', description="email_send_message")
         return result_data
     
     return result_data

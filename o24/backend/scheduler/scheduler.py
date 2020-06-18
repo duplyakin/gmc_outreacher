@@ -4,7 +4,7 @@ import o24.backend.dashboard.models as models
 
 from o24.backend.models.shared import TaskQueue, TaskQueueLock, Funnel, Action
 from o24.globals import *
-from .models import Priority, TaskLog
+from .models import Priority, ActionLog
 import o24.backend.handlers.jobs_map as jobs_map
 import o24.backend.handlers.trail_handlers as trail_handlers
 import traceback 
@@ -100,23 +100,18 @@ class Scheduler():
             print("...scheduler.plan(): found {0} tasks from get_ready".format(tasks.count()))
 
         for_update = []
-        logs = []
     
         for task in tasks:
             try:
-                log = self._switch(task)
+                #log task
+                ActionLog.log(task, step='plan', description="scheduler.plan()")
+                self._switch(task)
                 
                 for_update.append(task)
-                if log:
-                    logs.append(log)
             except Exception as e:
                 print(str(e))
                 traceback.print_exc()
                 continue
-
-    
-        if logs:
-            TaskLog.update_logs(logs)
         
         if for_update:
             TaskQueue.update_tasks(for_update)
@@ -164,7 +159,9 @@ class Scheduler():
                 task._commit()
                 credentials._commit()
                 cr_next_actions[credentials.id] = credentials.next_action
-            
+
+                #log task
+                ActionLog.log(task, step='execute', description="scheduler.execute(): sent to execution")
             except Exception as e:
                 print(str(e))
                 traceback.print_exc()
@@ -238,11 +235,10 @@ class Scheduler():
         
         next_node = Funnel.next_node(task.current_node, 
                                     task.result_data)
-        log = TaskLog.create_log(task)
         if next_node:
             task.switch_task(next_node) 
 
-        return log
+        return
     ###################################### CAMPAIGN START/PAUSE/RESUME ##################################
     #####################################################################################################
     def start_campaign(self, owner, campaign, input_data=None):
@@ -332,8 +328,19 @@ class Scheduler():
         if not prospects_without_campaign:
             return 0
 
-        ids = [p.id for p in prospects_without_campaign]
-        
+        ids = []
+        need_data = campaign.need_contacts()
+
+        for p in prospects_without_campaign:
+            tags = p.has_all_data(need_data)
+            if tags:
+                p.add_tags(tags)
+                continue
+            ids.append(p.id)
+
+        if not ids:
+            return 0
+
         scheduler = cls()
         res = models.Prospects._assign_campaign(owner_id=owner_id, prospects_ids=ids, campaign_id=campaign.id)
 
@@ -404,9 +411,21 @@ class Scheduler():
     def _load_prospects(self, campaign, prospects):
         tasks = []
 
+        need_data = campaign.need_contacts()
+
         for prospect in prospects:
-            task = TaskQueue.create_task(campaign, prospect)
-            tasks.append(task)
+            try:
+                tags = prospect.has_all_data(need_data)
+                if tags:
+                    prospect.add_tags(tags)
+                    continue
+
+                task = TaskQueue.create_task(campaign, prospect)
+                tasks.append(task)
+            except Exception as e:
+                print("_load_prospects error: Can't create task for prospect_id={0}".format(prospect.id))
+                print(str(e))
+                continue
 
         inserted_tasks = TaskQueue.insert_tasks(tasks)
         prospect_ids = [t.prospect_id for t in inserted_tasks]

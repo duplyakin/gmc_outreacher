@@ -52,6 +52,8 @@ class Funnel(db.Document):
     #2 - Linkedin Enrichment funnel
     funnel_type = db.IntField(default=0)
 
+    need_contacts = db.ListField(db.StringField())
+
     json_key_title = db.StringField()
 
     title = db.StringField()
@@ -120,6 +122,12 @@ class Funnel(db.Document):
 
         return new_funnel
 
+    def list_of_contacts(self):
+        if not self.need_contacts:
+            return []
+        
+        return self.need_contacts
+
     def get_delay(self):
         if not self.data:
             return None
@@ -161,6 +169,13 @@ class Funnel(db.Document):
             
             if title:
                 self.title = title
+            
+            if root:
+                need_contacts = json.get('list_of_contacts', '')
+                if need_contacts:
+                    need_contacts = need_contacts.strip()
+                    self.need_contacts = need_contacts.split(',')
+
 
         if data.get('json_key_title', None):
             self.json_key_title = data.get('json_key_title')
@@ -478,7 +493,7 @@ class TaskQueue(db.Document):
         # now >= campaign.next_action
         # tasks.record_type == Priority.do_next
         # if tasks.followup_level == 1 then check tasks.followup_level == Priority.followup_level
-        credentials_ids_in_progress = TaskQueue.objects(status=IN_PROGRESS).distinct('credentials_id')
+        credentials_ids_in_progress = TaskQueue.objects(status=IN_PROGRESS, action_key__nin=SPECIAL_ACTIONS).distinct('credentials_id')
         
         query = {"$match": {"record_type" : {"$eq" : INTRO} }}
         if (do_next == 1):

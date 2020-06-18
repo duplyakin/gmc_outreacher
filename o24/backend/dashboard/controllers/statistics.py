@@ -102,15 +102,6 @@ def statistics_list():
     try:
         if request.method == 'POST':
             page = request.form.get('_page', 1)
-            total, statistics = scheduler_models.ActionStats.stats_total(owner_id=current_user.id, 
-                                                                page=page)
-            if statistics:
-                result['statistics'] = statistics
-                result['pagination'] = json.dumps({
-                    'perPage' : per_page,
-                    'currentPage' : page,
-                    'total' : total
-                })
 
             result['code'] = 1
             result['msg'] = 'Success'
@@ -141,11 +132,6 @@ def statistics_campaign():
             if not campaign_id:
                 raise Exception("Bad campaign_id")
             
-            statistics = scheduler_models.ActionStats.stats_campaign(owner_id=current_user.id, 
-                                                                    campaign_id=campaign_id)
-            if statistics:
-                result['statistics'] = statistics
-
             result['code'] = 1
             result['msg'] = 'Success'
     except Exception as e:

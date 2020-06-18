@@ -30,9 +30,9 @@ def track_open(code, track_event):
             raise Exception("track_open ERROR: Both should exist prospect_id={0} campaign_id={1}".format(prospect_id, campaign_id))
         
         if counter == 1:
-            scheduler_models.ActionStats.log_email_open(owner_id=owner_id, 
-                                                        prospect_id=prospect_id, 
-                                                        campaign_id=campaign_id)
+            pass
+            #TODO: log open actiona
+            
     except Exception as e:
         #TODO: change to loggin
         print(e)

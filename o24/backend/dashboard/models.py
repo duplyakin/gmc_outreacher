@@ -566,17 +566,19 @@ class Credentials(db.Document):
         return results
 
     @classmethod
-    def async_credentials(cls, owner, page=None, medium=None, per_page=config.CREDENTIALS_PER_PAGE):
+    def async_credentials(cls, owner, page=None, medium=None, per_page=config.CREDENTIALS_PER_PAGE, active_only=False):
         if page and page <= 1:
             page = 1
 
         query = {
             'owner' : owner
         }
+        if active_only:
+            query['status'] = 1
 
         if medium:
             query['medium'] = medium
-
+        
         db_query = cls.objects(__raw__=query, medium__in=cls.SHOWED_MEDIUM). \
                     only('id', 'data', 'status', 'error_message', 'medium', 'modification', 'limit_per_day', 'last_action', 'next_action', 'current_daily_counter')
         
@@ -1008,6 +1010,10 @@ class Campaign(db.Document):
 
         for c in campaigns:
             c._commit()
+
+    #show which contacts need to be in prospect to execute this campaign 
+    def need_contacts(self):
+        return self.funnel.list_of_contacts()
 
     def get_special_medium_id(self):
         owner_id = self.owner.id
@@ -1680,6 +1686,32 @@ class Prospects(db.Document):
         
         self._commit()
 
+    def add_tags(self, tags):
+        for tag in tags:
+            if tag not in self.tags:
+                self.tags.append(tag)
+
+        self._commit()
+
+    def has_all_data(self, need_data):
+        tags = []
+        if not need_data:
+            return tags
+        
+        linkedin = self.data.get('linkedin', '')
+        email = self.data.get('email', '')
+
+        for d in need_data:
+            if d == 'email':
+                if not email:
+                    tags.append('no_email')
+            
+            if d == 'linkedin':
+                if not linkedin:
+                    tags.append('no_linkedin')
+
+        return tags
+
     @classmethod
     def enrich_prospect(cls, owner_id, prospect_id, prospect_data):
         if not prospect_data:
@@ -2072,6 +2104,7 @@ class Prospects(db.Document):
                 "data" : 1,
                 "assign_to" : 1,
                 "status" : 1,
+                "tags" : 1,
                 "assign_to_list" : 1
             }}
         ]
