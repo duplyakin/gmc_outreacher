@@ -1087,6 +1087,11 @@ class Campaign(db.Document):
 
     def get_template_data(self, template_key, medium):
         templates_for_medium = self.templates.get(medium, '')
+        
+        #only plain supported for linkedin
+        if medium == 'linkedin':
+            templates_for_medium = self.templates.get('linkedin_plain', '')
+
         if not templates_for_medium:
             return {}
         

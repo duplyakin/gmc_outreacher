@@ -2,8 +2,9 @@ from mongoengine.fields import ReferenceField, ListField
 import json
 import html2text
 
-def convert_email_template_to_plain(template):
-    body = template.get('body', None)
+
+def convert_template_to_plain(template, data_key):
+    body = template.get(data_key, None)
     if not body:
         return None
     
@@ -13,13 +14,13 @@ def convert_email_template_to_plain(template):
     converter.ignore_tables = True
 
     plain_template = template.copy()
-    html_body = plain_template.get('body')
+    html_body = plain_template.get(data_key)
     
     plain_body = converter.handle(html_body)
     if not plain_body:
         raise Exception("Can't convert html to plain")
     
-    plain_template['body'] = plain_body
+    plain_template[data_key] = plain_body
     return plain_template
 
 #return mapped_templates
@@ -47,15 +48,16 @@ def template_key_dict(js_templates, _validate=True):
                         raise Exception(message)
 
 
-                html = convert_email_template_to_plain(template)
-                if html is not None:
-                    plain[template_key] = html
+                plain_template = convert_template_to_plain(template, data_key='body')
+                if plain_template is not None:
+                    plain[template_key] = plain_template
 
         res['plain'] = plain
 
     linkedin_templates = js_templates.get('linkedin','')
     if linkedin_templates:
         res['linkedin'] = {}
+        plain_linkedin = {}
         for template in linkedin_templates:
             template_key = template.get('template_key')
             res['linkedin'][template_key] = template
@@ -66,6 +68,12 @@ def template_key_dict(js_templates, _validate=True):
                     message = "Linkedin message can't be empty, template:{0}".format(template.get('title', template_key))
                     raise Exception(message)
 
+            linkedin_plain_template = convert_template_to_plain(template, data_key='message')
+            if linkedin_plain_template is not None:
+                plain_linkedin[template_key] = linkedin_plain_template
+
+        res['linkedin_plain'] = plain_linkedin
+    
     return res
     
 

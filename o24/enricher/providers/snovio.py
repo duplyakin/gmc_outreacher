@@ -317,8 +317,11 @@ class SnovioProvider():
         if not data:
             return {}
         
+        if type(data) == str:
+            data = json.loads(data)
+        
         prospect_details = {}
-        for prospect in data:
+        for prospect in data:                
             first_name = prospect.get('firstName', '')
             if first_name:
                 prospect_details['first_name'] = first_name

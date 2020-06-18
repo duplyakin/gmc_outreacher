@@ -106,16 +106,13 @@ class Scheduler():
                 #log task
                 ActionLog.log(task, step='plan', description="scheduler.plan()")
                 self._switch(task)
+                task._commit()
                 
-                for_update.append(task)
             except Exception as e:
                 print(str(e))
                 traceback.print_exc()
                 continue
         
-        if for_update:
-            TaskQueue.update_tasks(for_update)
-    
     
     def execute(self):
         current_priority = Priority.get_priority()

@@ -240,8 +240,8 @@ def create_campaign():
             if not new_campaign or not new_campaign.id:
                 raise Exception("Something went wrong contact support.")
 
-            #ALWAYS need this: as we create objecId from Json, need mongo to update it with object
-            new_campaign.reload()
+            #Already reloaded in async_create
+            #new_campaign.reload()
             
             #assign prospects
             prospects = Prospects.objects(owner=current_user.id, assign_to_list=prospects_list.id)
