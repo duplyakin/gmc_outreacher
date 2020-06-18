@@ -6,6 +6,7 @@ from o24.globals import *
 import datetime
 from mongoengine.queryset.visitor import Q
 import o24.config as config
+import o24.backend.scheduler.models as scheduler_models
 
 def block_happend(task):
     credentials_id = task.credentials_id
@@ -21,6 +22,9 @@ def block_happend(task):
 
     task.status = NEED_USER_ACTION
     task._commit()
+
+    #log task
+    scheduler_models.ActionLog.log(task, step='block_handler', description="block_happend")
     return
 
 def block_resolved(task):
@@ -41,3 +45,7 @@ def block_resolved(task):
 
 def block_default(task):
     print("MUST NEVER HAPPENED: block_default for task.id={0}".format(task.id))
+
+    #log task
+    scheduler_models.ActionLog.log(task, step='block_handler', description="block_default: NEVER HAPPENED")
+

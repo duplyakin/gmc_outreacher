@@ -26,7 +26,6 @@ from o24.production_tests.campaigns_api import *
 from o24.production_tests.utils import *
 from o24.backend.utils.templates import *
 from o24.backend.utils.decors import get_token
-from o24.backend.scheduler.models import TaskLog, ActionStats
 
 CAMPAIGN_TITLE = "Stats campaign title XX - {0}"
 

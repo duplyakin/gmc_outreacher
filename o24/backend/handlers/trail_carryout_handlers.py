@@ -13,6 +13,7 @@ import json
 from mongoengine.queryset.visitor import Q
 import o24.config as config
 import o24.backend.handlers.enricher as enricher
+import o24.backend.scheduler.models as scheduler_models
 
 def default_handler(task):
     if task.status != CARRYOUT:
@@ -22,9 +23,6 @@ def default_handler(task):
     if not result_data:
         raise Exception("default_handler ERROR: wrong result_data:{0}".format(result_data))
 
-    #log for analysis
-    scheduler_models.ResultDataLog.log_data(task)
-
     code = result_data.get('code', 0)
     if code == SUCCESS_CODE:
         task.update_status(status=FINISHED)
@@ -32,6 +30,9 @@ def default_handler(task):
         return
 
     task.update_status(status=READY)
+
+    #log task
+    scheduler_models.ActionLog.log(task, step='carryout_handler', description="default_handler")
     return 
 
 
@@ -70,7 +71,9 @@ def start_linkedin_enrichment_campaign(task):
 
     scheduler.Scheduler.safe_start_campaign(owner=owner_id, 
                                             campaign=new_campaign)
-    
+
+    #log task
+    scheduler_models.ActionLog.log(task, step='start_linkedin_enrichment_campaign', description="start_linkedin_enrichment_campaign")
     return
 
 def linkedin_search_action(task):
@@ -86,9 +89,6 @@ def linkedin_search_action(task):
     if not result_data:
         raise Exception("linkedin_search_action ERROR: wrong or empty result_data={0}".format(result_data))
     
-    #log for analysis
-    scheduler_models.ResultDataLog.log_data(task)
-
 
     campaign = task.get_campaign()
     if not campaign:
@@ -135,6 +135,9 @@ def linkedin_search_action(task):
     now = pytz.utc.localize(datetime.utcnow())
     task.next_round = now + timedelta(seconds=DEFAULT_SEARCH_DELAY)
     task.update_status(status=NEW)
+
+    #log task
+    scheduler_models.ActionLog.log(task, step='carryout_handler', description="linkedin_search_action")
     return
 
 def linkedin_parse_profile_action(task):
@@ -149,9 +152,6 @@ def linkedin_parse_profile_action(task):
     if not result_data:
         raise Exception("linkedin_parse_profile_action ERROR: wrong or empty result_data={0}".format(result_data))
     
-    #log for analysis
-    scheduler_models.ResultDataLog.log_data(task)
-
     code = int(result_data.get('code', 0))
     if code < 0:
         task.update_status(status=FAILED)
@@ -166,6 +166,8 @@ def linkedin_parse_profile_action(task):
 
     task.update_status(status=READY)
 
+    #log task
+    scheduler_models.ActionLog.log(task, step='carryout_handler', description="linkedin_parse_profile_action")
     return
 
     
@@ -177,9 +179,9 @@ def email_check_reply(task):
     if not result_data:
         raise Exception("default_handler ERROR: wrong result_data:{0}".format(result_data))
 
-    #log for analysis
-    scheduler_models.ResultDataLog.log_data(task)
-
     task.update_status(status=READY)
+
+    #log task
+    scheduler_models.ActionLog.log(task, step='carryout_handler', description="email_check_reply")
     return 
 

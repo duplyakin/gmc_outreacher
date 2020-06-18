@@ -1,4 +1,5 @@
 FAILED = -1
+FAILED_NEED_ACTION = -2
 
 #scheduler statuses
 NEW = 0 #this status can be get by execution stage

@@ -84,7 +84,7 @@ def data_campaigns():
             if lists:
                 result['lists'] = lists.to_json()
 
-            total, credentials = Credentials.async_credentials(owner=current_user.id)
+            total, credentials = Credentials.async_credentials(owner=current_user.id, active_only=True)
             if credentials:
                 result['credentials'] = credentials
             
@@ -241,12 +241,20 @@ def create_campaign():
                 raise Exception("Something went wrong contact support.")
 
             #ALWAYS need this: as we create objecId from Json, need mongo to update it with object
-            #new_campaign.reload()
+            new_campaign.reload()
             
             #assign prospects
             prospects = Prospects.objects(owner=current_user.id, assign_to_list=prospects_list.id)
             if prospects:
-                ids = [p.id for p in prospects]
+                ids = []
+                need_data = new_campaign.need_contacts()
+                for p in prospects:
+                    tags = p.has_all_data(need_data)
+                    if tags:
+                        p.add_tags(tags)
+                        continue
+
+                    ids.append(p.id)
                 if ids:
                     Prospects._assign_campaign_on_create(owner_id=current_user.id, campaign_id=new_campaign.id, prospects_ids=ids)
 

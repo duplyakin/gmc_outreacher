@@ -12,6 +12,7 @@ import time
 import o24.backend.dashboard.models as models
 import o24.backend.models.shared as shared
 from o24.enricher.models import EnrichTaskQueue
+import o24.backend.scheduler.models as sheduler_models
 
 def restart_prospect_enrichment(prospect, providers=None):
     if not providers:
@@ -148,7 +149,10 @@ def check_enriched_action(task_id):
             unlocked = shared.TaskQueue.unlock(task_id=task_id, result_data=result_data, status=status)
             if not unlocked:
                 raise Exception("Can't unlock check_enriched_action")
-        
+
+            #log task
+            sheduler_models.ActionLog.log(task, step='handler', description="check_enriched_action")
+
         return result_data
 
     return result_data
@@ -170,6 +174,7 @@ def enrich_action(task_id):
             print("CONCURRENCY in enrich_action attempt")
             return 
         
+
         prospect_id = task.prospect_id
         prospect = models.Prospects.objects(id=prospect_id).first()
         if not prospect:
@@ -215,7 +220,9 @@ def enrich_action(task_id):
             unlocked = shared.TaskQueue.unlock(task_id=task_id, result_data=result_data, status=status)
             if not unlocked:
                 raise Exception("Can't unlock enrich_action")
-        
+
+            #log task
+            sheduler_models.ActionLog.log(task, step='handler', description="enrich_action")
         return result_data
 
     return result_data

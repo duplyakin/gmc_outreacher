@@ -285,9 +285,15 @@ methods: {
         if (data){
             value = scope_row.data[column.prop] || '-';
         }else{
-            var field = scope_row[column.prop] || '-';
-            if (field){
-                value = field[column.field] || '-';
+            var field = column.field || ''; 
+            if (field !== ''){
+                if (scope_row[column.prop]){
+                    value = scope_row[column.prop][column.field] || '-';
+                }else{
+                    value = '-';
+                }
+            }else{
+                value = scope_row[column.prop] || '-';
             }
         }
 
