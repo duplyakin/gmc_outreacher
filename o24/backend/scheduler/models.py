@@ -45,6 +45,24 @@ class Priority(db.Document):
         if _reload:
             self.reload()
 
+class ActionLog(db.Document):
+    owner_id = db.ObjectIdField()
+    task_id = db.ObjectIdField()
+    
+    status = db.ObjectIdField()
+
+
+
+    prospect_id = db.ObjectIdField()
+    campaign_id = db.ObjectIdField()
+
+    action_key = db.StringField()
+    input_data = db.DictField()
+    result_data = db.DictField()
+
+    created = db.DateTimeField( default=pytz.utc.localize(datetime.utcnow()) )
+
+
 class ActionStats(db.Document):
     owner_id = db.ObjectIdField()
 
