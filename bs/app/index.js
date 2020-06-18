@@ -38,6 +38,6 @@ app.use(function (req, res, next) {
 //app.use(require('app/errors/not-found'))
 
 
-app.use('/bs/api', require('./api/router')) // IT MUST BE HERE! DONT TOUCH.
+app.use('/bs/api', require('./api/router')) // IT MUST BE HERE! DON'T TOUCH.
 // Export the app instance for unit testing via supertest
 module.exports = app

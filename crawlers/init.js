@@ -12,7 +12,7 @@ var log = require('loglevel').getLogger("o24_logger");
             log.setLevel("TRACE") // TRACE: 0, DEBUG: 1, INFO: 2, WARN: 3, ERROR: 4, SILENT: 5
         }
         
-        log.debug("..... init started in mode: .....", process.env.APP_ENV)
+        log.debug("..... init started in mode: .....", APP_ENV == null ? 'Test' : APP_ENV)
 
         await handlers.bullConsumer()
         await handlers.taskStatusListener()

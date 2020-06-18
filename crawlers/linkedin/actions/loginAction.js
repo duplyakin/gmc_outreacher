@@ -91,9 +91,10 @@ class LoginAction {
     }
 
     async login_with_email() {
-        await this.page.goto(links.SIGNIN_LINK);
-
-        //await this.page.waitFor(1000);
+        await this.page.goto(links.SIGNIN_LINK, {
+            waitUntil: 'load',
+            timeout: 60000 // it may load too long! critical here
+        });
 
         try {
             await this.page.waitForSelector(selectors.USERNAME_SELECTOR, { timeout: 5000 });

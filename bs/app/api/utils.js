@@ -8,12 +8,13 @@ const models = require('../../../crawlers/models/models')
 const models_shared = require('../../../crawlers/models/shared')
 
 const MyExceptions = require('../../../crawlers/exceptions/exceptions.js');
+var log = require('loglevel').getLogger("o24_logger");
 
 
 // -2 = system err, -1 = block, 0 = resolved
 const found_form_and_input = async (page, input) => {
     if(page == null) {
-        console.log('Empty page in found_form_and_input.');
+        log.error('Empty page in found_form_and_input.');
         return -2;
     }
 
@@ -31,7 +32,8 @@ const found_form_and_input = async (page, input) => {
         res = await resolve_ban(page, input);
 
     } else {
-        console.log('UNCKNOWN page found: ', url);
+        //todo: add logic for empty page (try again status or smth like that)
+        log.error('UNCKNOWN page found_form_and_input: ', url);
         return -2;
     }
 
@@ -43,12 +45,12 @@ const found_form_and_input = async (page, input) => {
 const resolve_challenge = async(page, input) => {
     try {
         if(page == null) {
-            console.log("..... Empty page in resolve_challenge. ..... ");
+            log.erro("..... Empty page in resolve_challenge. ..... ");
             return -2;
         }
 
         if(!input || input == '') {
-            console.log("..... Input can't be empty in resolve_challenge. ..... ");
+            log.error("..... Input can't be empty in resolve_challenge. ..... ");
             return -2;
         }
 
@@ -56,7 +58,7 @@ const resolve_challenge = async(page, input) => {
             await page.waitForSelector(selectors.VERIFICATION_PIN_SELECTOR, { timeout: 5000 });
             await page.waitForSelector(selectors.VERIFICATION_PIN_BTN_SELECTOR, { timeout: 5000 });
         } catch (err) {
-            console.log("..... Challenge page selectors not found. ..... ");
+            log.error("..... Challenge page selectors not found in resolve_challenge. ..... ");
             return -2;
         }
 
@@ -83,7 +85,7 @@ const resolve_challenge = async(page, input) => {
         return 0; // resolved
 
     } catch(err) {
-        console.log("..... Error in resolve_challenge: ..... ", err.stack);
+        log.error("..... Error in resolve_challenge: ..... ", err.stack);
         return -2;
     }
 }
@@ -100,7 +102,7 @@ const check_block_url = (url) => {
     }
 
     if(url.includes(links.BAN_LINK) || url.includes(links.CHALLENGE_LINK)) {
-        //console.log('check_block_url block happend: ', url);
+        log.debug('check_block_url block happend: ', url);
         return true;
     }
 
@@ -127,21 +129,24 @@ const check_phone_page = (url) => {
 const login = async(page, account) => {
     try {
         if(!account.login || !account.password) {
-            console.log("Empty login or password in login().")
+            log.error("Empty login or password in login.")
             return -2; 
         }
 
         if(page == null) {
-            console.log("Empty page in login().")
+            log.error("Empty page in login.")
             return -2;
         }
 
-        await page.goto(links.SIGNIN_LINK);
+        await page.goto(links.SIGNIN_LINK, {
+            waitUntil: 'load',
+            timeout: 60000 // it may load too long! critical here
+        });
 
         try {
             await page.waitForSelector(selectors.USERNAME_SELECTOR, { timeout: 5000 });
         } catch (err) {
-            console.log("Login page is not available in login().")
+            log.error("Login page is not available in login, current url = ", page.url())
             return -2;
         }
 
@@ -153,9 +158,10 @@ const login = async(page, account) => {
         await page.waitFor(10000);
 
         try {
-            //await page.waitForSelector(selectors.BLOCK_TOAST_SELECTOR, { timeout: 1000 }); // do smth // todo
+            // todo: chack toast by url (?)
+            //await page.waitForSelector(selectors.BLOCK_TOAST_SELECTOR, { timeout: 1000 }); // todo: add status - wait a day and try again
         } catch (err) {
-            console.log("Login FAILED - toast error.")
+            log.error("Login FAILED - toast error.")
             return -2;
         }
     
@@ -167,16 +173,19 @@ const login = async(page, account) => {
         }
 
         if (check_block_url(current_url)) {
+            log.debug("Block happend in login.")
             return -1; // block happend
         }
 
         if (current_url.includes(links.SIGNIN_SHORTLINK)) {
+            log.debug("Wrong credentials in login.")
             return 4; // wrong credentials
         }
 
+        log.debug("login success.")
         return 0; // logged in
     } catch(err) {
-        console.log("Error in login(): ", err.stack);
+        log.error("Error in login(): ", err.stack);
         return -2;
     }
 }
@@ -205,7 +214,8 @@ const get_context = async(browser, context, page) => {
       screenshot: screenshot_str,
     }
     
-    //console.log('get_context context_obj created: ', context_obj);
+    log.debug('get_context - context_obj created.');
+    //log.debug('get_context - context_obj = ', context_obj);
     return context_obj;
   }
 
@@ -294,16 +304,16 @@ const page_connect = async (context, page_url) => {
 
 const input_data = async (account, input) => {
     if (!input){
-        console.log("..... Empty input in input_data. ..... ");
+        log.debug("..... Empty input in input_data. ..... ");
     }
 
     if(account == null) {
-        console.log("..... Empty account in input_data. ..... ");
+        log.debug("..... Empty account in input_data. ..... ");
         throw new Error('Empty account in input_data.');
     }
 
     if (account.blocking_data == null) {
-        console.log("..... There is no account.blocking_data. ..... ");
+        log.debug("..... There is no account.blocking_data. ..... ");
         throw new Error('There is no account.blocking_data.');
     }
 
@@ -330,7 +340,7 @@ const input_data = async (account, input) => {
         }
 
         let res = await found_form_and_input(page, input);
-        //console.log('input_data res = ', res);
+        log.debug('input_data res = ', res);
 
         if(res == 0) {
             // block resolved
@@ -360,7 +370,7 @@ const input_data = async (account, input) => {
 
             await browser.close();
             browser.disconnect();
-            //console.log("..... BLOCK RESOLVED. ..... ");
+            log.debug("..... BLOCK RESOLVED. ..... ");
 
         } else if (res == -1) {
             // block didn't resolved
@@ -383,7 +393,8 @@ const input_data = async (account, input) => {
         }
 
     } catch(err) {
-        console.log("..... Error in input_data : ..... ", err.stack);
+        log.error("..... Error in input_data account._id: ..... ", account._id);
+        log.error("..... Error in input_data : ..... ", err.stack);  
 
         await models.Accounts.findOneAndUpdate({ _id: account._id, status: status_codes.SOLVING_CAPTCHA }, { status: status_codes.AVAILABLE }, { upsert: false });
 
@@ -409,7 +420,7 @@ const input_login = async (account) => {
         page = await context.newPage();
 
         let res = await login(page, account);
-        //console.log('input_login res = ', res);
+        log.debug('input_login res = ', res);
 
         if(res === 0) {
             // login success
@@ -470,7 +481,8 @@ const input_login = async (account) => {
         }
 
     } catch(err) {
-        console.log("..... Error in input_login : ..... ", err.stack);
+        log.error("..... Error in input_login account._id: ..... ", account._id);
+        log.error("..... Error in input_login : ..... ", err.stack);
 
         await models.Accounts.findOneAndUpdate({ _id: account._id, status: status_codes.IN_PROGRESS }, { status: status_codes.AVAILABLE }, { upsert: false });
 
@@ -489,7 +501,7 @@ const _get_current_cookie = async (page) => {
 
     let newCookies = await page.cookies();
     if (!newCookies) {
-        throw new Error("Can't get cookie.");
+        throw new Error("Can't get cookie."); //todo: don't throw error here (?)
     }
 
     return newCookies;
