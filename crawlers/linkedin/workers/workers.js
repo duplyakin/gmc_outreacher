@@ -3,8 +3,9 @@ const models_shared = require("../../models/shared.js");
 const models = require("../../models/models.js");
 
 const MyExceptions = require('../../exceptions/exceptions.js');
+var log = require('loglevel').getLogger("o24_logger");
 
-const status_codes = require('../status_codes')
+const status_codes = require('../status_codes');
 
 
 async function get_cookies(credentials_id) {
@@ -65,7 +66,7 @@ async function searchWorker(task_id) {
   try {
     task = await models_shared.TaskQueue.findOneAndUpdate({ _id: task_id, ack: 0 }, { ack: 1 }, { new: true, upsert: false });
     if (task == null) {
-      console.log("..... task not found or locked: .....");
+      log.debug("..... task not found or locked: .....");
       return;
     }
 
@@ -78,7 +79,6 @@ async function searchWorker(task_id) {
       throw new Error('there is no task.input_data');
     }
     let task_data = serialize_data(input_data);
-    //console.log("..... task_data: .....", task_data);
 
     let cookies = await get_cookies(credentials_id);
 
@@ -92,7 +92,7 @@ async function searchWorker(task_id) {
 
   } catch (err) {
 
-    console.log(err.stack)
+    log.error("searchWorker error:", err.stack)
 
     status = status_codes.FAILED;
 
@@ -118,7 +118,7 @@ async function searchWorker(task_id) {
     }
 
   } finally {
-    //console.log("SearchWorker RES: ", result_data);
+    log.debug("SearchWorker RES: ", result_data);
 
     if (task !== null) {
       await models_shared.TaskQueue.findOneAndUpdate({ _id: task_id }, { ack: 0, status: status, result_data: result_data, is_queued: 0 }, { upsert: false });
@@ -142,7 +142,7 @@ async function connectWorker(task_id) {
   try {
     task = await models_shared.TaskQueue.findOneAndUpdate({ _id: task_id, ack: 0 }, { ack: 1 }, { new: true, upsert: false });
     if (task == null) {
-      console.log("..... task not found or locked: .....");
+      log.debug("..... task not found or locked: .....");
       return;
     }
 
@@ -158,31 +158,17 @@ async function connectWorker(task_id) {
 
     let cookies = await get_cookies(credentials_id);
 
-    let prospect_full_name = task_data.prospect_data.first_name + ' ' + task_data.prospect_data.last_name;
-
     // start work
-    // check connect
-    let connectCheckAction = new modules.connectCheckAction.ConnectCheckAction(cookies, credentials_id, prospect_full_name);
-    browser = await connectCheckAction.startBrowser();
-    let resCheck = await connectCheckAction.connectCheck();
-    browser = await connectCheckAction.closeBrowser();
-
-    let res = false;
-    if (!resCheck) {
-      let message = '';
-      if(task_data.template_data != null) {
-        if(task_data.template_data.message != null)
-          message = task_data.template_data.message;
-      }
-      // connect if not connected
-      let connectAction = new modules.connectAction.ConnectAction(cookies, credentials_id, task_data.prospect_data.linkedin, message, task_data.prospect_data);
-      browser = await connectAction.startBrowser();
-      res = await connectAction.connect();
-      browser = await connectAction.closeBrowser();
-    } else {
-      res = true;
-      //throw MyExceptions.ConnectActionError('Connect is already connected: ' + err);
+    let message = '';
+    if (task_data.template_data != null) {
+      if (task_data.template_data.message != null)
+        message = task_data.template_data.message;
     }
+
+    let connectAction = new modules.connectAction.ConnectAction(cookies, credentials_id, task_data.prospect_data.linkedin, message, task_data.prospect_data);
+    browser = await connectAction.startBrowser();
+    res = await connectAction.connect();
+    browser = await connectAction.closeBrowser();
 
     result_data = {
       code: 0,
@@ -192,7 +178,7 @@ async function connectWorker(task_id) {
 
   } catch (err) {
 
-    console.log(err.stack)
+    log.error("connectWorker error:", err.stack)
 
     if (err.code != null && err.code != -1) {
       result_data = {
@@ -217,7 +203,7 @@ async function connectWorker(task_id) {
     status = status_codes.FAILED;
 
   } finally {
-    //console.log("ConnectWorker RES: ", result_data);
+    log.debug("ConnectWorker RES: ", result_data);
 
     if (task !== null) {
       await models_shared.TaskQueue.findOneAndUpdate({ _id: task_id }, { ack: 0, status: status, result_data: result_data, is_queued: 0 }, { upsert: false });
@@ -241,7 +227,7 @@ async function messageWorker(task_id) {
   try {
     task = await models_shared.TaskQueue.findOneAndUpdate({ _id: task_id, ack: 0 }, { ack: 1 }, { new: true, upsert: false });
     if (task == null) {
-      console.log("..... task not found or locked: .....");
+      log.debug("..... task not found or locked: .....");
       return;
     }
 
@@ -287,7 +273,7 @@ async function messageWorker(task_id) {
 
   } catch (err) {
 
-    console.log(err.stack)
+    log.error("messageWorker error:", err.stack)
 
     if (err.code != null && err.code != -1) {
       result_data = {
@@ -312,7 +298,7 @@ async function messageWorker(task_id) {
     status = status_codes.FAILED;
 
   } finally {
-    //console.log("MessageWorker RES: ", result_data);
+    log.debug("MessageWorker RES: ", result_data);
 
     if (task !== null) {
       await models_shared.TaskQueue.findOneAndUpdate({ _id: task_id }, { ack: 0, status: status, result_data: result_data, is_queued: 0 }, { upsert: false });
@@ -336,7 +322,7 @@ async function scribeWorker(task_id) {
   try {
     task = await models_shared.TaskQueue.findOneAndUpdate({ _id: task_id, ack: 0 }, { ack: 1 }, { new: true, upsert: false });
     if (task == null) {
-      console.log("..... task not found or locked: .....");
+      log.debug("..... task not found or locked: .....");
       return;
     }
 
@@ -367,7 +353,7 @@ async function scribeWorker(task_id) {
 
   } catch (err) {
 
-    console.log(err.stack)
+    log.error("scribeWorker error:", err.stack)
 
     if (err.code != null && err.code != -1) {
       result_data = {
@@ -392,7 +378,7 @@ async function scribeWorker(task_id) {
     status = status_codes.FAILED;
 
   } finally {
-   // console.log("ScribeWorker RES: ", result_data);
+   log.debug("ScribeWorker RES: ", result_data);
     
     if (task !== null) {
       await models_shared.TaskQueue.findOneAndUpdate({ _id: task_id }, { ack: 0, status: status, result_data: result_data, is_queued: 0 }, { upsert: false });
@@ -416,7 +402,7 @@ async function messageCheckWorker(task_id) {
   try {
     task = await models_shared.TaskQueue.findOneAndUpdate({ _id: task_id, ack: 0 }, { ack: 1 }, { new: true, upsert: false });
     if (task == null) {
-      console.log("..... task not found or locked: .....");
+      log.debug("..... task not found or locked: .....");
       return;
     }
 
@@ -447,7 +433,7 @@ async function messageCheckWorker(task_id) {
 
   } catch (err) {
 
-    console.log(err.stack)
+    log.error("messageCheckWorker error:", err.stack)
 
     if (err.code != null && err.code != -1) {
       result_data = {
@@ -472,7 +458,7 @@ async function messageCheckWorker(task_id) {
     status = status_codes.FAILED;
 
   } finally {
-   // console.log("MessageCheckWorker RES: ", result_data);
+   log.debug("MessageCheckWorker RES: ", result_data);
 
     if (task !== null) {
       await models_shared.TaskQueue.findOneAndUpdate({ _id: task_id }, { ack: 0, status: status, result_data: result_data, is_queued: 0 }, { upsert: false });
@@ -496,7 +482,7 @@ async function connectCheckWorker(task_id) {
   try {
     task = await models_shared.TaskQueue.findOneAndUpdate({ _id: task_id, ack: 0 }, { ack: 1 }, { new: true, upsert: false });
     if (task == null) {
-      console.log("..... task not found or locked: .....");
+      log.debug("..... task not found or locked: .....");
       return;
     }
 
@@ -510,12 +496,10 @@ async function connectCheckWorker(task_id) {
     }
     let task_data = serialize_data(input_data);
 
-    let prospect_full_name = task_data.prospect_data.first_name + ' ' + task_data.prospect_data.last_name;
-
     let cookies = await get_cookies(credentials_id);
 
     // start work
-    let connectCheckAction = new modules.connectCheckAction.ConnectCheckAction(cookies, credentials_id, prospect_full_name);
+    let connectCheckAction = new modules.connectCheckAction.ConnectCheckAction(cookies, credentials_id, task_data.prospect_data.linkedin);
     browser = await connectCheckAction.startBrowser();
     let res = await connectCheckAction.connectCheck();
     browser = await connectCheckAction.closeBrowser();
@@ -528,7 +512,7 @@ async function connectCheckWorker(task_id) {
 
   } catch (err) {
 
-    console.log(err.stack)
+    log.error("connectCheckWorker error:", err.stack)
 
     if (err.code != null && err.code != -1) {
       result_data = {
@@ -553,7 +537,7 @@ async function connectCheckWorker(task_id) {
     status = status_codes.FAILED;
 
   } finally {
-   // console.log("ConnectCheckWorker RES: ", result_data);
+   log.debug("ConnectCheckWorker RES: ", result_data);
 
     if (task !== null) {
       await models_shared.TaskQueue.findOneAndUpdate({ _id: task_id }, { ack: 0, status: status, result_data: result_data, is_queued: 0 }, { upsert: false });
@@ -577,7 +561,7 @@ async function visitProfileWorker(task_id) {
   try {
     task = await models_shared.TaskQueue.findOneAndUpdate({ _id: task_id, ack: 0 }, { ack: 1 }, { new: true, upsert: false });
     if (task == null) {
-      console.log("..... task not found or locked: .....");
+      log.debug("..... task not found or locked: .....");
       return;
     }
 
@@ -607,7 +591,7 @@ async function visitProfileWorker(task_id) {
 
   } catch (err) {
 
-    console.log(err.stack)
+    log.error("visitProfileWorker error:", err.stack)
 
     if (err.code != null && err.code != -1) {
       result_data = {
@@ -632,7 +616,7 @@ async function visitProfileWorker(task_id) {
     status = status_codes.FAILED;
 
   } finally {
-   // console.log("VisitProfileWorker RES: ", result_data);
+   log.debug("visitProfileWorker RES: ", result_data);
 
     if (task !== null) {
       await models_shared.TaskQueue.findOneAndUpdate({ _id: task_id }, { ack: 0, status: status, result_data: result_data, is_queued: 0 }, { upsert: false });

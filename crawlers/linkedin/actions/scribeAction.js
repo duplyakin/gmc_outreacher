@@ -2,6 +2,7 @@ const selectors = require("../selectors");
 const action = require('./action.js');
 
 const MyExceptions = require('../../exceptions/exceptions.js');
+var log = require('loglevel').getLogger("o24_logger");
 
 class ScribeAction extends action.Action {
   constructor(cookies, credentials_id, url) {
@@ -32,7 +33,7 @@ class ScribeAction extends action.Action {
       }, selector);
 
     } catch(err) {
-      //console.log("..... empty country for this profile: .....", this.url)
+      log.debug("ScribeAction: empty country for this profile: ", this.url)
     }
 
     if(country){
@@ -60,7 +61,7 @@ class ScribeAction extends action.Action {
       res.link = document.querySelector(mySelectors.selector1).href;
       res.job_title = document.querySelector(mySelectors.selector1).querySelector(mySelectors.selector2).innerText;
 
-      console.log("..... res: .....", res);
+      //log.debug("ScribeAction: job:", res);
       return res;
     }, mySelectors);
 
@@ -89,12 +90,11 @@ class ScribeAction extends action.Action {
 
     if (!scribe_result.link) {
       // company don't have linkedin page -> we can't continue scribe
-      //console.log("..... link-null: .....", link)
+      //log.debug("ScribeAction: company_linkedin_page is null: ", link)
       return result;
     }
     result.company_linkedin_page = scribe_result.link;
 
-    //await this.page.goto(link + '/about');
     await super.gotoChecker(scribe_result.link + 'about/');
 
     try {
@@ -110,15 +110,15 @@ class ScribeAction extends action.Action {
       return res;
     }, selector);
 
-    //console.log("..... company_website: .....", company_website)
+    //log.debug("ScribeAction: company_website: ", company_website)
     if (!company_website) {
-      //console.log("..... company_website not found: .....", company_website)
-      //console.log("..... result: .....", result);
+      //log.debug("ScribeAction: company_website not found: ", company_website)
+      //log.debug("ScribeAction: result: ", result);
       return result;
     }
 
     result.company_url = company_website;
-    //console.log("..... result: .....", result);
+    //log.debug("ScribeAction: result: ", result);
     return result;
   }
 }

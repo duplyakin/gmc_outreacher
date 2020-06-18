@@ -4,6 +4,7 @@ const models = require("../../models/models.js");
 const puppeteer = require("puppeteer");
 
 const MyExceptions = require('../../exceptions/exceptions.js');
+var log = require('loglevel').getLogger("o24_logger");
 
 class LoginAction {
     constructor(credentials_id) {
@@ -31,7 +32,7 @@ class LoginAction {
 
     async set_cookie(cookies) {
         if (cookies != undefined && cookies != null) {
-            //console.log('cooooookiieeeess: ', cookies)
+            //log.debug('cooooookiieeeess: ', cookies)
             await this.page.setCookie(...cookies);
             return true;
         }
@@ -126,7 +127,7 @@ class LoginAction {
     async login_with_li_at() {
         let domain_var = await this._get_domain();
         if(domain_var == null || domain_var == '') {
-            console.log('Never happend: domain_var is broken.')
+            log.debug('Never happend: domain_var is broken.')
             return;
         }
         let cookies_data = [{
@@ -162,7 +163,7 @@ class LoginAction {
             throw MyExceptions.ContextError("Can't goto url: " + current_url);
         }
 
-        console.log("Can't login, url: ", current_url);
+        log.debug("LoginAction: Can't login, current url: ", current_url);
         // login failed
         return false;
     }
@@ -221,7 +222,7 @@ class LoginAction {
 
     check_block(url) {
         if(!url) {
-          throw new Error('Empty url in check_block.')
+          throw new Error('Empty url in check_block in LoginAction.')
         }
     
         if(url.includes(links.BAN_LINK) || url.includes(links.CHALLENGE_LINK)) {

@@ -2,6 +2,7 @@ const selectors = require("../selectors");
 const action = require('./action.js');
 
 const MyExceptions = require('../../exceptions/exceptions.js');
+var log = require('loglevel').getLogger("o24_logger");
 
 class VisitProfileAction extends action.Action {
   constructor(cookies, credentials_id, url) {

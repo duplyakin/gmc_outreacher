@@ -3,6 +3,8 @@ const LoginAction = require('./loginAction.js');
 const links = require("../links");
 const selectors = require("../selectors");
 
+var log = require('loglevel').getLogger("o24_logger");
+
 const MyExceptions = require('../../exceptions/exceptions.js');
 
 class Action {
@@ -17,7 +19,7 @@ class Action {
     this.context = await this.browser.createIncognitoBrowserContext();
     this.page = await this.context.newPage();
 
-    //console.log('cooooookiieeeess: ', this.cookies)
+    //log.debug('cooooookiieeeess: ', this.cookies)
     await this.page.setCookie(...this.cookies);
 
     return this.browser;
@@ -57,12 +59,12 @@ async check_success_selector(selector, page = this.page) {
 
   } catch(err) {
     
-    if(this.check_block(page.url())) {
+    if (this.check_block(page.url())) {
       throw MyExceptions.ContextError("Block happend: " + page.url());
     }
 
     // uncknown page here
-    throw new Error('Uncknowm page here: ', current_url);
+    return false;
   }
 }
 
@@ -83,6 +85,7 @@ async check_success_selector(selector, page = this.page) {
 
     // uncknown page here
     throw new Error('Uncknowm page here: ', current_url);
+    //return false;
   }
 
   async close_msg_box(page = this.page) {
@@ -96,13 +99,14 @@ async check_success_selector(selector, page = this.page) {
       await page.click(selectors.CLOSE_MSG_BOX_SELECTOR);
       await page.waitFor(2000);  // wait linkedIn loading process
     } catch (err) {
-      console.log("..... CLOSE_MSG_BOX_SELECTOR not found .....");
+      log.debug("action.close_msg_box: CLOSE_MSG_BOX_SELECTOR not found.");
     }
   }
 
   // format message
   formatMessage(message, data) {
     if(!message || message == '') {
+      log.debug("action.formatMessage: Empty message.");
       //throw new Error('Empty message.');
       return '';
     }
@@ -122,12 +126,16 @@ async check_success_selector(selector, page = this.page) {
 
   // do 1 trie to connect URL or goto login
   async gotoChecker(url, page = this.page) {
-    //console.log('........url......: ', url);
+    //log.debug('gotoChecker - url: ', url);
     if(!url) {
-      throw new Error ('Empty url.');
+      throw new Error('Empty url.');
     }
     try {
-      await page.goto(url);
+      await page.goto(url, {
+        waitUntil: 'load',
+        timeout: 60000 // it may load too long! critical here
+      });
+
       let current_url = page.url();
 
       if (current_url !== url) {
@@ -141,9 +149,9 @@ async check_success_selector(selector, page = this.page) {
             await page.goto(url);
           }
         } else {
-          console.log('current_url: ', current_url);
-          console.log('url: ', url);
-          throw new Error("We cann't go to page, we got: " + current_url);
+          log.error('gotoChecker - current url: ', current_url);
+          log.error('gotoChecker - required url: ', url);
+          throw new Error("gotoChecker - We cann't go to page, we got: " + current_url);
         }
       }
     } catch (err) {
@@ -158,7 +166,11 @@ async check_success_selector(selector, page = this.page) {
 
   async gotoLogin(page = this.page) {
     try {
-      await page.goto(links.SIGNIN_LINK);
+      await page.goto(links.SIGNIN_LINK, {
+        waitUntil: 'load',
+        timeout: 60000 // it may load too long! critical here
+      });
+
       let current_url = page.url();
 
       if (current_url.includes('login') || current_url.includes('signup')) {
@@ -166,21 +178,21 @@ async check_success_selector(selector, page = this.page) {
         let loginAction = new LoginAction.LoginAction(this.credentials_id);
         await loginAction.setContext(this.context);
 
-        await loginAction.login(); // if unsaccess - throw eeror
+        await loginAction.login(); // if unsuccess - throw eeror
         
       } else if (current_url.includes(links.START_PAGE_SHORTLINK)) {
         return; // success
       } else {
-        console.log('current_url: ', current_url);
-        throw new Error("We cann't go to page, we got: " + current_url);
+        log.debug('gotoLogin - current url: ', current_url);
+        throw new Error("gotoLogin - We cann't go to page, we got: " + current_url);
       }
 
     } catch (err) { 
       if(this.check_block(page.url())) {
-        throw MyExceptions.ContextError("Block happend.");
+        throw MyExceptions.ContextError("gotoLogin - Block happend.");
       }
 
-      throw new Error('Uncknowm page here: ', page.url());
+      throw new Error('gotoLogin - Uncknowm page here: ', page.url());
     }
   }
 

@@ -1,5 +1,5 @@
 const workers = require('./../linkedin/workers/workers.js');
-
+var log = require('loglevel').getLogger("o24_logger");
 
 const SEARCH_URL = "https://www.linkedin.com/search/results/all/?keywords=acronis&origin=GLOBAL_SEARCH_HEADER&page=97";
 const CONNECT_URL = "https://www.linkedin.com/in/bersheva/";
@@ -8,7 +8,9 @@ const MY_URL = "https://www.linkedin.com/in/grigoriy-polyanitsin/";
 // test running
 
 (async () => {
-  console.log("..... test_db started: .....", __filename);
+  console.log("..... test started: .....", __filename);
+
+  log.setLevel("DEBUG");
 
   let task_old = {
     input_data: {
@@ -36,11 +38,11 @@ const MY_URL = "https://www.linkedin.com/in/grigoriy-polyanitsin/";
   };
 
   //task = JSON.stringify(task);
-  let task = "5ed54712ad1aa4da0718c623";
+  let task = "000003a80a2de70af2b00000";
 
   //await workers.loginWorker(task);
-  await workers.searchWorker(task);
-  //await workers.connectWorker(task);
+  //await workers.searchWorker(task);
+  await workers.connectWorker(task);
   //await workers.messageWorker(task);
   //await workers.scribeWorker(task);
   //await workers.messageCheckWorker(task);

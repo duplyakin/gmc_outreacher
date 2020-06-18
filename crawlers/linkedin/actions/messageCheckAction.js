@@ -2,6 +2,7 @@ const selectors = require("../selectors");
 const action = require('./action.js');
 
 const MyExceptions = require('../../exceptions/exceptions.js');
+var log = require('loglevel').getLogger("o24_logger");
 
 class MessageCheckAction extends action.Action {
   constructor(cookies, credentials_id, url) {
@@ -18,7 +19,7 @@ class MessageCheckAction extends action.Action {
     await super.close_msg_box(this.page);
 
     if (await this.page.$(selectors.WRITE_MSG_BTN_SELECTOR) === null) {
-      console.log('You can\'t write messages to ' + this.url);
+      log.debug('MessageCheckAction: You can\'t write messages to ' + this.url);
       return { message: '' }; // TODO: send (code = ...) here in result_data
     }
 
@@ -40,11 +41,11 @@ class MessageCheckAction extends action.Action {
     }, mySelectors);
 
     if (lastSender.res === this.url) {
-      //console.log("..... new message: .....", lastSender);
+      log.debug("MessageCheckAction: new message:", lastSender);
       return { message: lastSender.text };
     }
 
-    //console.log("..... NO new messages: .....", lastSender);
+    log.debug("MessageCheckAction: NO new messages:", lastSender);
     return { message: '' };
   }
 
