@@ -5,6 +5,8 @@ python 3.7, pip 19.2.3
 #Monitoring scripts
 python -m o24.monitoring.taskqueue
 
+celery flower -A o24.backend.handlers.worker_start.celery --address=127.0.0.1 --port=5555
+
 0. Запускаем монгу (на винде):
 идем сюда: C:\Program Files\MongoDB\Server\4.2\bin
 в командной строке: ./mongod -f ./mongod.cfg

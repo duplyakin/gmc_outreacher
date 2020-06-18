@@ -122,6 +122,8 @@ DEFAULT_PROFILE_ENRICH_DELAY = 705
 NON_3RD_PARTY_ACTION_KEYS = [EMAIL_SEND_MESSAGE_ACTION,
                                 EMAIL_CHECK_REPLY_ACTION,
                                 DELAY_ACTION,
+                                EMAIL_ENRICH,
+                                EMAIL_CHECK_ENRICHED,
                                 FINISHED_ACTION,
                                 SUCCESS_ACTION]
 
@@ -171,3 +173,93 @@ SMTP_RECEIPENT_REJECTED = 541
 SMTP_NON_EXISTENT_EMAIL = 550
 
 SMTP_UNKNOWN_ERROR = -1
+
+
+#LIMITS:
+
+EMAIL_LIMITS_DAILY = {
+        'smtp' : {
+                'limits' : {
+                        'account_maximum' : 250,
+                        EMAIL_SEND_MESSAGE_ACTION: 250
+                },
+                'warmup' : {
+                        'account_maximum' : 25,
+                        EMAIL_SEND_MESSAGE_ACTION: 25,
+
+                        'interval_sec' : 60,
+                        'increase' : 1.33,
+                        'days_inactivity' : 5
+                }
+        },
+        'api' : {
+                'limits' : {
+                        'account_maximum' : 500,
+                        EMAIL_SEND_MESSAGE_ACTION: 500,
+                },
+                'warmup' : {
+                        'account_maximum' : 40,
+                        EMAIL_SEND_MESSAGE_ACTION: 40,
+
+                        'interval_sec' : 60,
+                        'increase' : 1.33,
+                        'days_inactivity' : 5   
+                }
+        }
+}
+
+LINKEDIN_LIMITS_DAILY = {
+        'basic' : {
+                'limits' : {
+                        'account_maximum' : 240,
+                        LINKEDIN_SEARCH_ACTION: 100,
+                        LINKEDIN_PARSE_PROFILE_ACTION: 120,
+                        LINKEDIN_VISIT_PROFILE_ACTION: 500,
+                        LINKEDIN_CONNECT_ACTION: 100,
+                        LINKEDIN_SEND_MESSAGE_ACTION: 100
+                },
+                'warmup' : {
+                        'account_maximum' : 80,
+                        LINKEDIN_SEARCH_ACTION: 10,
+                        LINKEDIN_PARSE_PROFILE_ACTION: 20,
+                        LINKEDIN_VISIT_PROFILE_ACTION: 100,
+                        LINKEDIN_CONNECT_ACTION: 20,
+                        LINKEDIN_SEND_MESSAGE_ACTION: 10,
+
+                        'interval_sec' : 60,
+                        'increase' : 1.33,
+                        'days_inactivity' : 5
+                }
+        },
+        'premium' : {
+                'limits' : {
+                        'account_maximum' : 250,
+                        LINKEDIN_SEARCH_ACTION: 200,
+                        LINKEDIN_PARSE_PROFILE_ACTION: 300,
+                        LINKEDIN_VISIT_PROFILE_ACTION: 500,
+                        LINKEDIN_CONNECT_ACTION: 300,
+                        LINKEDIN_SEND_MESSAGE_ACTION: 300
+                },
+                'warmup' : {
+                        'account_maximum' : 100,
+                        LINKEDIN_SEARCH_ACTION: 20,
+                        LINKEDIN_PARSE_PROFILE_ACTION: 40,
+                        LINKEDIN_VISIT_PROFILE_ACTION: 150,
+                        LINKEDIN_CONNECT_ACTION: 30,
+                        LINKEDIN_SEND_MESSAGE_ACTION: 20,
+
+                        'interval_sec' : 60,
+                        'increase' : 1.33,
+                        'days_inactivity' : 5
+                }
+        }
+}
+
+LIMITS_BASED_ON_MEDIUM = {
+        'email' : EMAIL_LIMITS_DAILY,
+        'linkedin' : LINKEDIN_LIMITS_DAILY
+}
+
+NO_LIMITS_MEDIUMS = ['special-medium']
+LIMITS_24_PERIOD_SECS = 86500  #24 hours period in seconds
+RANDOM_INTERVAL_MAX = 5 # will calculate interval = randrange(interval_sec, interval_sec * RANDOM_INTERVAL_MAX)

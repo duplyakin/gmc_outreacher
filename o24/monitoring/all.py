@@ -9,3 +9,5 @@ if __name__ == '__main__':
     show_credentials()
     show_funnels()
     show_actions()
+
+# python -m o24.monitoring.all

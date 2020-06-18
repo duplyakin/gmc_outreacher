@@ -96,6 +96,9 @@ class Scheduler():
         self.switch_priority()
     
         tasks = TaskQueue.get_ready()
+        if tasks:
+            print("...scheduler.plan(): found {0} tasks from get_ready".format(tasks.count()))
+
         for_update = []
         logs = []
     
@@ -120,21 +123,34 @@ class Scheduler():
     
     
     def execute(self):
-        now = pytz.utc.localize(datetime.utcnow())
-
         current_priority = Priority.get_priority()
         do_next = current_priority.do_next
         followup_level = current_priority.followup_level
 
-        tasks = TaskQueue.get_execute_tasks(do_next=do_next, followup_level=followup_level, now=now)
-        
-        task_update = []
-        credential_update = []
+        tasks = TaskQueue.get_execute_tasks(do_next=do_next, followup_level=followup_level)
+        if tasks:
+            print("...scheduler.execute(): found {0} tasks from get_execute_tasks".format(tasks.count()))
+
         jobs = []
-    
-        #TODO: for each task based on type create job and send it to the queue
+        cr_next_actions = {}
+
         for task in tasks:
             try:
+                now = pytz.utc.localize(datetime.utcnow())
+
+                if cr_next_actions.get(task.credentials_id, None) is not None:
+                    next_action = cr_next_actions.get(task.credentials_id)
+                    if now <= next_action:
+                        continue
+
+                credentials = models.Credentials.objects(id=task.credentials_id).first()
+                if not credentials:
+                    raise Exception("NEVER HAPPENED: can't find credentials_id={0}".format(task.credentials_id))
+
+                has_limits = credentials.change_limits(action_key=task.action_key)
+                if not has_limits:
+                    continue
+
                 if task.action_key in NON_3RD_PARTY_ACTION_KEYS:
                     handler = jobs_map.JOBS_MAP.get(task.action_key, None)
                     if not handler:
@@ -144,46 +160,29 @@ class Scheduler():
                     jobs.append(job)
         
                 task.status = IN_PROGRESS
-                task_update.append(task)
 
-                credential_update.append(task.credentials_id)
+                task._commit()
+                credentials._commit()
+                cr_next_actions[credentials.id] = credentials.next_action
+            
             except Exception as e:
                 print(str(e))
                 traceback.print_exc()
                 continue
 
-        
-        if task_update:
-            TaskQueue.update_tasks(task_update)
-        
-        if credential_update:
-            self.refresh_limits(credential_update)
+
+        self.refresh_campaigns_limits()
     
         return jobs
     
     #Inc counters for each credential (It will change next_action)
     #Refresh next_action for campaigns
-    def refresh_limits(self, credential_ids):
-        credentials = models.Credentials.list_credentials(credential_ids)
-        now = pytz.utc.localize(datetime.utcnow())
-
-        updated = []
-        for c in credentials:
-            try:
-                c.change_limits(now)
-                updated.append(c)
-            except Exception as e:
-                print(str(e))
-                traceback.print_exc()
-                continue
-
-        models.Credentials.update_credentials(updated)
-
+    def refresh_campaigns_limits(self):
         campaigns = models.Campaign.objects(status=IN_PROGRESS)
         campaigns_updated = []
         for campaign in campaigns:
             try:
-                campaign.change_limits(now)
+                campaign.change_limits()
                 campaigns_updated.append(campaign)
             except Exception as e:
                 print(str(e))
@@ -194,6 +193,9 @@ class Scheduler():
 
     def trail(self):
         tasks = TaskQueue.get_trail_tasks()
+        if tasks:
+            print("...scheduler.trail(): found {0} tasks from get_trail_tasks".format(tasks.count()))
+
         for task in tasks:
             try:
                 if task.status == FAILED:

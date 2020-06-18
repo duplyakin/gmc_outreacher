@@ -15,7 +15,7 @@ import traceback
 from o24.backend.google.provider.oauth_provider import GoogleOauthProvider
 from o24.backend.dashboard.serializers import JSCredentialsData
 from o24.backend.utils.decors import auth_required
-
+from pprint import pprint
 
 COLUMNS = [
     {
@@ -102,7 +102,6 @@ def edit_credentials():
                 raise Exception("There is no _credentials form parameter")
 
             credentials_data = JSCredentialsData(raw_data=raw_data)
-
             credentials.safe_update_credentials(credentials_data=credentials_data, _reload=True)
 
             result['code'] = 1
@@ -177,9 +176,11 @@ def add_credentials():
             new_credentials = None
             if credentials_type == 'linkedin':
                 medium='linkedin'
+                modification = credentials_data.get_modification()
                 new_credentials = Credentials.create_credentials(owner=current_user.id, 
                                                                 new_data=credentials_data.get_data(), 
-                                                                medium=medium, 
+                                                                medium=medium,
+                                                                modification=modification,
                                                                 limit_per_day=credentials_data.get_limit_per_day())
             elif credentials_type == 'gmail/gsuite':
                 result['code'] = 1

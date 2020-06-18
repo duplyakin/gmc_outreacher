@@ -69,6 +69,7 @@ def dashboard_oauth_callback():
         GMAIL_TYPE = 'smtp'
 
     medium = 'email'
+    modification = GMAIL_TYPE
     data = {
         'email' : email,
         'account' : email,
@@ -78,6 +79,7 @@ def dashboard_oauth_callback():
     }
     Credentials.create_credentials(owner=current_user.id,
                                     medium=medium,
+                                    modification=modification,
                                     new_data=data)
 
     return '<script type="text/javascript">window.close();</script>'

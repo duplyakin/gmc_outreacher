@@ -54,7 +54,7 @@ def delay_handler(task_id):
             'if_true' : True
         }
         task.set_result(result_data=result_data)
-        task.update_status(status=CARRYOUT)
+        task.update_status(status=READY)
         return
      
     task.next_round = next_round

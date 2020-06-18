@@ -34,7 +34,8 @@ JOBS_MAP_PROD = {
 }
 
 env = os.environ.get('APP_ENV', None)
-if env == "Test":
-    JOBS_MAP = JOBS_MAP_TEST
-else:
-    JOBS_MAP = JOBS_MAP_PROD
+#TODO: make test handlers
+#if env == "Test":
+#    JOBS_MAP = JOBS_MAP_TEST
+#else:
+JOBS_MAP = JOBS_MAP_PROD

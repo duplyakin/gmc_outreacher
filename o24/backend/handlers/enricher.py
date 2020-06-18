@@ -10,6 +10,7 @@ import o24.config as config
 import traceback
 import time
 import o24.backend.dashboard.models as models
+import o24.backend.models.shared as shared
 from o24.enricher.models import EnrichTaskQueue
 
 def restart_prospect_enrichment(prospect, providers=None):
