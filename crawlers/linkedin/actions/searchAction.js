@@ -59,7 +59,7 @@ class SearchAction extends action.Action {
           let results = [];
           let items = document.querySelectorAll(mySelectors.selector1);
 
-          items.forEach((item) => {
+          for(let item of items) {
             // don't add: noName LinkedIn members and 1st degree connections
             if (item.querySelector(mySelectors.selector2) !== null && !item.querySelector(mySelectors.selector3).innerText.includes('LinkedIn') && !item.querySelector(mySelectors.selector4).innerText.includes('1st')) {
               let str = item.querySelector(mySelectors.selector3).innerText;
@@ -69,7 +69,7 @@ class SearchAction extends action.Action {
                 last_name: str.substr(str.indexOf(' ') + 1),
               });
             }
-          });
+          }
           return results;
         }, mySelectors);
         result_data.data.arr = result_data.data.arr.concat(newData);

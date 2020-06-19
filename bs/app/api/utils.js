@@ -257,14 +257,14 @@ const context_connect = async (browser, context_id) => {
     }
 
     let found_context = null;
-    for (var cx in contexts){
+    for (var cx in contexts) { // for of
         if (contexts[cx]._id == context_id){
             found_context = contexts[cx];
             break;
         }
     }
 
-    if (found_context == null){
+    if (found_context == null) {
         throw new Error("Can't find context by id: " + context_id);
     }
 
@@ -273,7 +273,7 @@ const context_connect = async (browser, context_id) => {
 
 
 const page_connect = async (context, page_url) => {
-    if (context == null){
+    if (context == null) {
         throw new Error("Can't find context: " + context);
     }
 
@@ -282,13 +282,13 @@ const page_connect = async (context, page_url) => {
     }
 
     let pages = await context.pages();
-    if (pages == null){
+    if (pages == null) {
         throw new Error("Context doesn't have pages.");
     }
 
     let found_page = null;
-    for (var p in pages){ 
-        if (pages[p].url() == page_url){ // here can be several pages with the same url
+    for (var p in pages) {  // for of
+        if (pages[p].url() == page_url) { // here can be several pages with the same url
             found_page = pages[p];
             break;
         }
@@ -352,11 +352,11 @@ const input_data = async (account, input) => {
             // get new cookies
             let new_cookies = await _get_current_cookie(page);
             let new_expires = 0;
-            new_cookies.forEach((item) => {
+            for(let item of new_cookies) {
                 if (item.name === 'li_at') {
                     new_expires = item.expires;
                 }
-            });
+            }
 
             let account_update = {
                 status: status_codes.AVAILABLE,

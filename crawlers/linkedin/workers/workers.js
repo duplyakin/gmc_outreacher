@@ -250,7 +250,7 @@ async function messageWorker(task_id) {
     let resCheckMsg = await messageCheckAction.messageCheck();
     browser = await messageCheckAction.closeBrowser();
 
-    if (resCheckMsg.message === '') {
+    if (!resCheckMsg.if_true) {
       // if no reply - send msg
       let messageAction = new modules.messageAction.MessageAction(cookies, credentials_id, task_data.prospect_data.linkedin, task_data.prospect_data, task_data.template_data.message);
       browser = await messageAction.startBrowser();
@@ -263,11 +263,7 @@ async function messageWorker(task_id) {
       };
     } else {
       // else - task finished
-      result_data = {
-        code: 2000,
-        if_true: true,
-        data: JSON.stringify(resCheckMsg)
-      };
+      result_data = resCheckMsg
     }
     status = status_codes.CARRYOUT;
 
@@ -421,14 +417,9 @@ async function messageCheckWorker(task_id) {
     // start work
     let messageCheckAction = new modules.messageCheckAction.MessageCheckAction(cookies, credentials_id, task_data.prospect_data.linkedin);
     browser = await messageCheckAction.startBrowser();
-    let res = await messageCheckAction.messageCheck();
+    result_data = await messageCheckAction.messageCheck();
     browser = await messageCheckAction.closeBrowser();
 
-    result_data = {
-      code: (res.message == '' ? 0 : 2000),
-      if_true: (res.message == '' ? false : true),
-      data: JSON.stringify(res)
-    };
     status = status_codes.CARRYOUT;
 
   } catch (err) {

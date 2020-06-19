@@ -64,16 +64,16 @@ class LoginAction {
     }
 
     async _update_cookie() {
-        let new_cookie = await this._get_current_cookie();
+        let new_cookies = await this._get_current_cookie();
 
         let new_expires = 0;
-        new_cookie.forEach((item) => {
+        for(let item of new_cookies) {
             if (item.name === 'li_at') {
                 new_expires = item.expires;
             }
-        });
+        }
 
-        let account = await models.Accounts.findOneAndUpdate({ _id: this.credentials_id }, { expires: new_expires, cookies: new_cookie }, { upsert: false }, function (err, res) {
+        let account = await models.Accounts.findOneAndUpdate({ _id: this.credentials_id }, { expires: new_expires, cookies: new_cookies }, { upsert: false }, function (err, res) {
             if (err) throw MyExceptions.MongoDBError('MongoDB find Account err: ' + err); 
         });
 
