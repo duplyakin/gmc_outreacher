@@ -5,8 +5,9 @@ import time
 import random
 from o24.exceptions.exception_with_code import ErrorCodeException
 from o24.backend.gmail.controller import GmailController
-from o24.backend.models.inbox.mailbox import MailBox
+from o24.backend.models.inbox.mailbox import MailBox, BouncedMessages
 from datetime import datetime
+import o24.backend.dashboard.models as models
 
 def check_reply(task, **kwargs):
     access_credentials = kwargs['credentials_data'].get('credentials', '')
@@ -65,15 +66,15 @@ def send_email(task, **kwargs):
 
     owner_id = mailbox.get_owner_id()
 
-    email_from, 
-    email_to,
-    subject,
-    body_html,
-    body_plain,
-    message,
+    email_from, \
+    email_to, \
+    subject, \
+    body_html, \
+    body_plain, \
+    message, \
     trail = construct_message(task=task,
                                 owner_id=owner_id, 
-                                gmail_controller=gmail_controller, 
+                                mail_controller=gmail_controller, 
                                 mailbox=parent_mailbox,
                                 draft_id=mailbox.id)
 
@@ -125,16 +126,11 @@ def check_bounced(task, **kwargs):
     if not access_credentials:
         raise Exception("Can't find access_credentials for credentials task_id:{0}".format(task.id))
 
-
-    access_credentials = Credentials.objects(data__email=email_from).first()
-    if not access_credentials:
-        raise Exception("Can't find credentials for modification=smtp email_from={0}".format(email_from))
-
     start_time_not_posix = MailBox.sequence_start_date(prospect_id=kwargs['prospect_id'], 
                                             campaign_id=kwargs['prospect_id'],
                                             posix_time=False)
     
-    prospect_email = kwargs['prospect_data'].get('email')
+    prospect_email = kwargs['prospect_data'].get('email', '')
     if not prospect_email:
         raise Exception("check_bounced error: empty prospect_email={0} for task.id={1}".format(prospect_email, task.id))
 

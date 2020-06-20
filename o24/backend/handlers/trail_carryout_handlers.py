@@ -24,9 +24,11 @@ def default_handler(task):
         raise Exception("default_handler ERROR: wrong result_data:{0}".format(result_data))
 
     code = result_data.get('code', 0)
-    if code == SUCCESS_CODE:
-        task.update_status(status=FINISHED)
-        #TODO - save reply message
+    if code < 0:
+        task.update_status(status=FAILED)
+
+        #log task
+        scheduler_models.ActionLog.log(task, step='carryout_handler', description="default_handler error")
         return
 
     task.update_status(status=READY)
@@ -123,11 +125,20 @@ def linkedin_search_action(task):
 
     is_finished = campaign.parsing_switch(next_url=search_url)
     code = int(result_data.get('code', 0))
+    if code < 0:
+        task.update_status(status=FAILED)
+
+        #log task
+        scheduler_models.ActionLog.log(task, step='carryout_handler', description="linkedin_search_action code error")
+        return
 
     if is_finished or code == CARRYOUT_SEARCH_ACTION_PAGES_FINISHED:
         task.update_status(status=FINISHED)
         campaign._safe_pause()
         start_linkedin_enrichment_campaign(task)
+
+        #log task
+        scheduler_models.ActionLog.log(task, step='carryout_handler', description="linkedin_search_action is_finished")
         return
 
     task.refresh_input_data()
@@ -155,6 +166,9 @@ def linkedin_parse_profile_action(task):
     code = int(result_data.get('code', 0))
     if code < 0:
         task.update_status(status=FAILED)
+
+        #log task
+        scheduler_models.ActionLog.log(task, step='carryout_handler', description="linkedin_parse_profile_action code error")
         return
     
     raw_data = result_data.get('data', '')

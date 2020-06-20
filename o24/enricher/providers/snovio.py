@@ -313,6 +313,27 @@ class SnovioProvider():
         res['code'] = self.PROVIDER_IN_PROGRESS
         return res
 
+    def _extract_emails_from_data(self, prospect):
+        
+        prospect_details = {}
+        first_name = prospect.get('firstName', '')
+        if first_name:
+            prospect_details['first_name'] = first_name
+        
+        last_name = prospect.get('lastName', '')
+        if last_name:
+            prospect_details['last_name'] = last_name
+
+        emails = prospect.get('emails', [])
+        if emails:
+            for email in emails:
+                status = email.get('status', None)
+                if status == 'valid':
+                    prospect_details['email'] = email.get('email', '')
+                    break
+        
+        return prospect_details
+
     def _convert_from_url_data(self, data):
         if not data:
             return {}
@@ -321,25 +342,28 @@ class SnovioProvider():
             data = json.loads(data)
         
         prospect_details = {}
-        for prospect in data:                
-            first_name = prospect.get('firstName', '')
-            if first_name:
-                prospect_details['first_name'] = first_name
-            
-            last_name = prospect.get('lastName', '')
-            if last_name:
-                prospect_details['last_name'] = last_name
+        if type(data) == list:
+            for prospect in data:
+                first_name = prospect.get('firstName', '')
+                if first_name:
+                    prospect_details['first_name'] = first_name
+                
+                last_name = prospect.get('lastName', '')
+                if last_name:
+                    prospect_details['last_name'] = last_name
 
-            emails = prospect.get('emails', [])
-            if emails:
-                for email in emails:
-                    status = email.get('status', None)
-                    if status == 'valid':
-                        prospect_details['email'] = email.get('email', '')
-                        break
+                emails = prospect.get('emails', [])
+                if emails:
+                    for email in emails:
+                        status = email.get('status', None)
+                        if status == 'valid':
+                            prospect_details['email'] = email.get('email', '')
+                            break
 
-            if first_name and last_name and email:
-                break
+                if first_name and last_name and email:
+                    break
+        else:
+            prospect_details = self._extract_emails_from_data(data)
         
         data['prospect_details'] = prospect_details
         return data

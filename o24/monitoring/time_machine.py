@@ -79,6 +79,6 @@ if __name__ == '__main__':
     print("\n\n.......time_machine started")
     while True:
         inc_limits()
-        time.sleep(3)
+        time.sleep(5)
 
 # python -m o24.monitoring.time_machine

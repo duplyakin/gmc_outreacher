@@ -81,7 +81,7 @@ async function taskStatusListener() {
                     });
 
                     log.debug('taskStatusListener: task executed, status: ' + task.status + ' action_key: ' + task.action_key); // test
-                    await consumer(data);
+                    consumer(data);
                 }
 
                 log.debug('taskStatusListener: TASKs executed');

@@ -45,6 +45,7 @@ def fix_failed():
 
     counter = 0    
     for task in tasks:
+        task.result_data = {}
         task.update_status(status=NEW)
         counter = counter + 1
     

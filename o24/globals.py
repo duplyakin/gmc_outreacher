@@ -131,6 +131,8 @@ DEFAULT_PROFILE_ENRICH_DELAY = 705
 NON_3RD_PARTY_ACTION_KEYS = [EMAIL_SEND_MESSAGE_ACTION,
                                 EMAIL_CHECK_REPLY_ACTION,
                                 DELAY_ACTION,
+                                ENRICH_DELAY_ACTION,
+                                EMAIL_CHECK_BOUNCED_ACTION,
                                 EMAIL_ENRICH,
                                 EMAIL_CHECK_ENRICHED,
                                 FINISHED_ACTION,
