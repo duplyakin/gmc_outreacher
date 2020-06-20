@@ -132,14 +132,26 @@ async check_success_selector(selector, page = this.page) {
   // cut user unique pathname in url
   get_pathname_url(url) {
     if(!url || !url.includes('linkedin') || !url.includes('/in/')) {
-      log.error("action.get_pathname_url incorrect url:", url)
-      return ''
+      log.error("action.get_pathname_url incorrect url format:", url)
+      return url
     }
 
     var pathname = new URL(url).pathname
     pathname = pathname.split( '/' )[2]
 
     log.debug("action.get_pathname_url:", pathname)
+    return pathname
+  }
+
+  get_pathname(url) {
+    if(!url || !url.includes('linkedin')) {
+      log.error("action.get_pathname incorrect url format:", url)
+      return url
+    }
+
+    var pathname = new URL(url).pathname
+
+    log.debug("action.get_pathname:", pathname)
     return pathname
   }
 
@@ -158,9 +170,11 @@ async check_success_selector(selector, page = this.page) {
 
       await page.waitFor(7000) // puppeteer wait loading..
 
-      let current_url = page.url();
+      let current_url = page.url()
 
-      if (current_url !== url) {
+      let short_url = this.get_pathname(url)
+
+      if (!current_url.includes(short_url)) {
         if (current_url.includes('login') || current_url.includes('signup')) {
 
           let loginAction = new LoginAction.LoginAction(this.credentials_id);
