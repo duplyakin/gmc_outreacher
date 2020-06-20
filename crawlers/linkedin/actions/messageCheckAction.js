@@ -20,7 +20,7 @@ class MessageCheckAction extends action.Action {
 
     if (await this.page.$(selectors.WRITE_MSG_BTN_SELECTOR) === null) {
       log.debug('MessageCheckAction: You can\'t write messages to ' + this.url);
-      return { message: '' }; // TODO: send (code = ...) here in result_data
+      return { code: 0, if_true: false }; // TODO: send (code = ...) here in result_data
     }
 
     await this.page.waitForSelector(selectors.WRITE_MSG_BTN_SELECTOR, { timeout: 5000 });

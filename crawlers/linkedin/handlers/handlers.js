@@ -92,12 +92,11 @@ async function taskStatusListener() {
         log.debug('taskStatusListener: TASKs ADDED in queue');
       }
 
-
       log.debug('taskStatusListener: ....this message logs every minute - CRON is active....');
 
     } catch (err) {
-      log.error('taskStatusListener: ....CRON error:....', err);
-      log.error('taskStatusListener: ....CRON error handler_lock:....', handler_lock);
+      log.debug('taskStatusListener: ....CRON error:....', err);
+      log.debug('taskStatusListener: ....CRON error handler_lock:....', handler_lock);
 
     } finally {
       log.debug('taskStatusListener: ....CRON finally handler_lock:....', handler_lock);
