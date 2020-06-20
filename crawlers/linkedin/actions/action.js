@@ -13,6 +13,7 @@ class Action {
     this.credentials_id = credentials_id;
   }
 
+
   async startBrowser() {
     //this.browser = await puppeteer.launch({ headless: false }); // test mode
     this.browser = await puppeteer.launch();
@@ -24,6 +25,7 @@ class Action {
 
     return this.browser;
   }
+
 
   async closeBrowser() {
     await this.browser.close();
@@ -68,6 +70,7 @@ async check_success_selector(selector, page = this.page) {
   }
 }
 
+
   async check_success_page(required_url, page = this.page) {
     if(!required_url) {
       throw new Error ('Empty required_url.');
@@ -88,6 +91,7 @@ async check_success_selector(selector, page = this.page) {
     //return false;
   }
 
+
   async close_msg_box(page = this.page) {
     if(page == null) {
       throw new Error ('Page not found.');
@@ -103,26 +107,42 @@ async check_success_selector(selector, page = this.page) {
     }
   }
 
+
   // format message
   formatMessage(message, data) {
     if(!message || message == '') {
-      log.debug("action.formatMessage: Empty message.");
-      //throw new Error('Empty message.');
-      return '';
+      log.debug("action.formatMessage: Empty message.")
+      return ''
     }
 
     if(data == null) {
-      return message;
+      return message
     }
 
-    let str = message;
+    let str = message
     for (var obj in data) {
-      str = str.replace(new RegExp('{' + obj + '}', 'g'), data[obj]);
+      str = str.replace(new RegExp('{' + obj + '}', 'g'), data[obj])
     }
 
-    str = str.replace(new RegExp('\{(.*?)\}', 'g'), '');
-    return str;
+    str = str.replace(new RegExp('\{(.*?)\}', 'g'), '')
+    return str
   }
+
+
+  // cut user unique pathname in url
+  get_pathname_url(url) {
+    if(!url || !url.includes('linkedin') || !url.includes('/in/')) {
+      log.error("action.get_pathname_url incorrect url:", url)
+      return ''
+    }
+
+    var pathname = new URL(url).pathname
+    pathname = pathname.split( '/' )[2]
+
+    log.debug("action.get_pathname_url:", pathname)
+    return pathname
+  }
+
 
   // do 1 trie to connect URL or goto login
   async gotoChecker(url, page = this.page) {

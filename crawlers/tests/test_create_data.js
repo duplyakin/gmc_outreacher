@@ -1,9 +1,11 @@
-const action = require('../linkedin/actions/loginAction.js');
 const models_shared = require("../models/shared.js");
 const models = require("../models/models.js");
 
 const SEARCH_URL = "https://www.linkedin.com/search/results/all/?keywords=acronis&origin=GLOBAL_SEARCH_HEADER&page=97";
-const CONNECT_URL = "https://www.linkedin.com/in/kirill-shilov-25aa8630/";
+const CONNECT_URL_1 = "https://www.linkedin.com/in/kirill-shilov-25aa8630/";
+const CONNECT_URL_2 = "https://www.linkedin.com/in/vlad-duplyakin-923475116/";
+const CONNECT_URL_3 = "https://www.linkedin.com/in/alexyerokhin/";
+const CONNECT_URL_4 = "https://www.linkedin.com/in/bersheva/";
 
 // test task
 
@@ -22,14 +24,13 @@ const CONNECT_URL = "https://www.linkedin.com/in/kirill-shilov-25aa8630/";
               page_count: 2,
             },
             template_data: {
-              subject: '',
-              body: 'Hi {first_name}, nice to meet you.',
+              message: 'Hi {first_name}, nice to meet you.',
             },
             prospect_data: {
               first_name: 'Olga',
               last_name: '',
               company_title: 'howtotoken.com',
-              linkedin: CONNECT_URL,
+              linkedin: CONNECT_URL_1,
             }
           },
           credentials_id: account_id,
