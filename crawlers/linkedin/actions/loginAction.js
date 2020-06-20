@@ -43,7 +43,7 @@ class LoginAction {
         await this.page.goto(links.SIGNIN_LINK);
         await this.page.waitFor(1000);
 
-        let current_url = await this.page.url();
+        let current_url = this.page.url();
 
         // Exctract domain here in format: “www.linkedin.com”
 
@@ -155,16 +155,20 @@ class LoginAction {
             timeout: 60000 // it may load too long! critical here
         });
 
+        await page.waitFor(7000) // puppeteer wait loading..
+
         let current_url = this.page.url();
-        if (current_url === links.START_PAGE_LINK) { // add domain here
+        if (current_url.includes(links.START_PAGE_SHORTLINK)) {
             // login success
+            log.debug("LoginAction: Login success.")
             return true;
         } else if (this.check_block(current_url)) {
             // BAN here
+            log.debug("LoginAction: Not logged - BAN here. current url: ", current_url);
             throw MyExceptions.ContextError("Can't goto url: " + current_url);
         }
 
-        log.debug("LoginAction: Can't login, current url: ", current_url);
+        log.debug("LoginAction: Not logged. current url: ", current_url);
         // login failed
         return false;
     }
@@ -195,16 +199,16 @@ class LoginAction {
 
         // if not - try to login with login/password
         await this.login_with_email()
-        logged = await this.is_logged();
+        logged = await this.is_logged()
 
         if (!logged) {
-            throw MyExceptions.LoginActionError("Can't login");
+            throw MyExceptions.LoginActionError("Can't login")
         }
 
-        await this._update_cookie();
-        await this.page.close();
+        await this._update_cookie()
+        await this.page.close()
 
-        return logged;
+        return logged
     }
 
 
