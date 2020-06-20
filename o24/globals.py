@@ -109,6 +109,7 @@ EMAIL_CHECK_ENRICHED = 'email-check-enriched'
 
 
 DELAY_ACTION = 'delay'
+ENRICH_DELAY_ACTION = 'delay-enrich' #helpfull for logs and test
 FINISHED_ACTION = 'finished'
 SUCCESS_ACTION = 'success'
 
@@ -116,13 +117,12 @@ SUCCESS_ACTION = 'success'
 SPECIAL_ACTIONS = [EMAIL_CHECK_REPLY_ACTION,
                         EMAIL_CHECK_BOUNCED_ACTION,
                         EMAIL_ENRICH,
+                        ENRICH_DELAY_ACTION,
                         EMAIL_CHECK_ENRICHED,
                         DELAY_ACTION,
                         FINISHED_ACTION,
                         SUCCESS_ACTION]
 
-
-DONT_LOG = [DELAY_ACTION, EMAIL_ENRICH, EMAIL_CHECK_ENRICHED, LINKEDIN_SEARCH_ACTION, LINKEDIN_PARSE_PROFILE_ACTION]
 
 DEFAULT_SEARCH_DELAY = 605
 DEFAULT_PROFILE_ENRICH_DELAY = 705

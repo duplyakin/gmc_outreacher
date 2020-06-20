@@ -35,10 +35,10 @@
         </div>
         <div class="row">
             <div class="col-12">
-                    <fg-input name="Company"
-                    label="Company"
+                    <fg-input name="Company domain"
+                    label="Company domain"
                     class="mb-3"
-                    v-model="prospect_data.data.company"/>
+                    v-model="prospect_data.data.company_url"/>
             </div>
         </div>
         </card>
@@ -80,7 +80,7 @@ export default {
                     first_name : '',
                     last_name : '',
                     lists : '',
-                    company : ''
+                    company_url : ''
                 },
             },
             filters : {

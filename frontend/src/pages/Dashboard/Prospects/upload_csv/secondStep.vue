@@ -102,7 +102,7 @@ export default {
 
         current_file : '',
         map_selected : '',
-        data_fields: ['email', 'linkedin', 'first_name', 'last_name', 'url']
+        data_fields: ['email', 'linkedin', 'first_name', 'last_name', 'company_url']
     }
     },
     watch: {

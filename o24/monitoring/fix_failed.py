@@ -38,7 +38,7 @@ T_STATUSES = {
 def fix_failed():
     CAMPAIGN_ID = sys.argv[1]
 
-    tasks = shared.TaskQueue.objects(campaign_id=CAMPAIGN_ID, status=FAILED)
+    tasks = shared.TaskQueue.objects(campaign_id=CAMPAIGN_ID, status__in=[-1, -2])
     if not tasks:
         print("Can't find FAILED tasks for campaign_id={0}".format(CAMPAIGN_ID))
         exit(0)

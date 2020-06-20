@@ -219,6 +219,8 @@ class TaskQueue(db.Document):
 
     status = db.IntField(default=NEW)
     ack = db.IntField(default=0)
+    celery_ack = db.IntField(default=0)
+
     is_queued = db.IntField(default=0)
 
     next_round = db.DateTimeField(default=parse("1980-05-25T16:31:37.436Z"))
@@ -235,7 +237,7 @@ class TaskQueue(db.Document):
 
     @classmethod
     def lock(cls, task_id):
-        locked = cls.objects(id=task_id, ack=0).update_one(upsert=False, ack=1)
+        locked = cls.objects(id=task_id, celery_ack=0).update_one(upsert=False, celery_ack=1)
         if not locked:
             return None
         
@@ -243,7 +245,7 @@ class TaskQueue(db.Document):
         
     @classmethod
     def unlock(cls, task_id, result_data, status):
-        return cls.objects(id=task_id).update_one(upsert=False, result_data=result_data, status=status, ack=0)
+        return cls.objects(id=task_id).update_one(upsert=False, result_data=result_data, status=status, celery_ack=0)
 
 
     def decrypt_password(self, credentials_dict):
@@ -346,7 +348,7 @@ class TaskQueue(db.Document):
 
         #CREATE DELAY DATA
         action_key = funnel_node.get_action_key()
-        if action_key == DELAY_ACTION:
+        if action_key in [DELAY_ACTION, ENRICH_DELAY_ACTION]:
             delay = campaign.get_delay(template_key=template_key)
             if delay is None:
                 delay = funnel_node.get_delay()
@@ -387,7 +389,6 @@ class TaskQueue(db.Document):
         self.status = NEW
 
         self.next_round = parse("1980-05-25T16:31:37.436Z")
-        self.ack = 0
 
         self.result_data = {}
 
@@ -495,9 +496,10 @@ class TaskQueue(db.Document):
         # if tasks.followup_level == 1 then check tasks.followup_level == Priority.followup_level
         credentials_ids_in_progress = TaskQueue.objects(status=IN_PROGRESS, action_key__nin=SPECIAL_ACTIONS).distinct('credentials_id')
         
-        query = {"$match": {"record_type" : {"$eq" : INTRO} }}
-        if (do_next == 1):
-            query = {"$match" : {"record_type" : {"$eq" : FOLLOWUP}, "followup_level" : {"$eq" : followup_level}}}
+        #TODO: fix priority
+        #query = {"$match": {"record_type" : {"$eq" : INTRO} }}
+        #if (do_next == 1):
+        #    query = {"$match" : {"record_type" : {"$eq" : FOLLOWUP}, "followup_level" : {"$eq" : followup_level}}}
         
         pipeline = [
             {"$lookup" : {
@@ -524,7 +526,7 @@ class TaskQueue(db.Document):
                 "cr_docs.status" : {"$eq" : IN_PROGRESS},
                 } 
              },
-             query,
+#             query,
 #            {"$group" : {
 #                "_id": "$credentials_id", 
 #                "task_id" : { "$first" : "$_id" }

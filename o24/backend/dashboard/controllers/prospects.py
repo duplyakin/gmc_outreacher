@@ -63,6 +63,11 @@ COLUMNS = [
         'data' : True
     },
     {
+        'label' : 'Domain',
+        'prop' : 'company_url',
+        'data' : True
+    },
+    {
         'label' : 'Tags',
         'prop' : 'tags'
     },

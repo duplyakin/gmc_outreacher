@@ -17,9 +17,26 @@ from pprint import pprint
 import time 
 import sys
 from dateutil.parser import parse
+from o24.enricher.models import EnrichTaskQueue
 
 MOSCOW = 'Europe/Moscow'
 
+def check_enrich_finished(task):
+    prospect_id = task.prospect_id
+
+    enrich_task = EnrichTaskQueue.objects(prospect_id=prospect_id).first()
+    if not enrich_task:
+        return False
+
+    if enrich_task.status == ENRICH_OUT_OF_CREDITS:
+        print("Enrich out of credits for task.id={0}".format(task.id))
+        return False
+
+    if enrich_task.status in [ENRICH_SUCCESS, ENRICH_FAILED_TO_FOUND]:
+        print("check_enrich_finished True for task.id={0} with status={1}".format(task.id, enrich_task.status))
+        return True
+
+    return False
 
 def inc_limits():
     CAMPAIGN_ID = sys.argv[1]
@@ -30,10 +47,20 @@ def inc_limits():
         exit(0)
     
     for task in tasks:
+        if task.action_key == ENRICH_DELAY_ACTION:
+            enrich_finished = check_enrich_finished(task)
+            if enrich_finished:
+                task.status = READY
+                task.next_round = parse("1980-05-25T16:31:37.436Z")
+                task._commit()
+            continue
+
         if task.action_key == 'delay':
             task.status = READY
+            task.next_round = parse("1980-05-25T16:31:37.436Z")
             task._commit()
             continue
+
 
         task.next_round = parse("1980-05-25T16:31:37.436Z")
         task._commit()

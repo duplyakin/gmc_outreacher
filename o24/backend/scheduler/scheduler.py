@@ -118,7 +118,8 @@ class Scheduler():
         current_priority = Priority.get_priority()
         do_next = current_priority.do_next
         followup_level = current_priority.followup_level
-
+        
+        print("....scheduler.execute(): current priority do_next={0} followup_level={1}".format(do_next, followup_level))
         tasks = TaskQueue.get_execute_tasks(do_next=do_next, followup_level=followup_level)
         if tasks:
             print("...scheduler.execute(): found {0} tasks from get_execute_tasks".format(tasks.count()))

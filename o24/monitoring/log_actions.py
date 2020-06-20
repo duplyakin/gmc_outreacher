@@ -18,6 +18,7 @@ import time
 from dateutil.parser import parse
 import sys
 import argparse
+from bson.objectid import ObjectId
 
 MOSCOW = 'Europe/Moscow'
 
@@ -41,38 +42,43 @@ T_STATUSES = {
 
 def args_to_query(args):
     query = {}
+    raw = {}
 
     campaign_id = args.campaign_id
     if campaign_id:
-        query['campaign_id'] = campaign_id
-    
+        query['task__campaign_id'] = ObjectId(campaign_id)
+
+    credentials_id = args.credentials_id
+    if credentials_id:
+        query['task__credentials_id'] = ObjectId(credentials_id)
+
     status = args.status
     if status:
-        query['status'] = int(status)
+        query['task__status'] = int(status)
 
     prospect_id = args.prospect_id
     if prospect_id:
-        query['prospect_id'] = prospect_id
+        query['task__prospect_id'] = ObjectId(prospect_id)
 
     task_id = args.task_id
     if task_id:
-        query['task_id'] = task_id
+        raw['task._id'] = ObjectId(task_id)
 
-    return query
+    return query, raw
 
 def log_actions(last_date, args):
-    query = args_to_query(args)
+    query, raw = args_to_query(args)
 
     show_id = args.show_id
 
     logs = []
-    if query:
-        logs = scheduler_models.ActionLog.objects(**query, created__gt=last_date).order_by('created')
+    if query or raw:
+        logs = scheduler_models.ActionLog.objects(__raw__=raw, **query, created__gt=last_date).order_by('created')
     else:
         logs = scheduler_models.ActionLog.objects(created__gt=last_date).order_by('created')
 
     for log in logs:
-        prospect_data = log.input_data.get('prospect_data', {})
+        prospect_data = log.task.get('input_data').get('prospect_data', {})
         linkedin = prospect_data.get('linkedin', 'None')
         email = prospect_data.get('email', 'None')
         if log.created > last_date:
@@ -81,24 +87,25 @@ def log_actions(last_date, args):
         if show_id:
             print("{log_id}  {id}--{status}--{action_key}--{step}--{description}--{linkedin}--{email}--{result_data}".format(
                                                                                                 log_id=log.id,
-                                                                                                id=log.task_id,
-                                                                                                status=T_STATUSES[log.status],
-                                                                                                action_key=log.action_key,
+                                                                                                id=log.task.get('_id'),
+                                                                                                status=T_STATUSES[log.task.get('status')],
+                                                                                                action_key=log.task.get('action_key'),
                                                                                                 step=log.step,
                                                                                                 description=log.description,
                                                                                                 linkedin=linkedin,
                                                                                                 email=email,
-                                                                                                result_data=log.result_data))
+                                                                                                result_data=log.task.get('result_data')))
 
         else:
-            print("{id}--{status}--{action_key}--{step}--{description}--{linkedin}--{email}--{result_data}".format(id=log.task_id,
-                                                                                                status=T_STATUSES[log.status],
-                                                                                                action_key=log.action_key,
+            print("{id}--{status}--{action_key}--{step}--{description}--{linkedin}--{email}--{result_data}".format(
+                                                                                                id=log.task.get('_id'),
+                                                                                                status=T_STATUSES[log.task.get('status')],
+                                                                                                action_key=log.task.get('action_key'),
                                                                                                 step=log.step,
                                                                                                 description=log.description,
                                                                                                 linkedin=linkedin,
                                                                                                 email=email,
-                                                                                                result_data=log.result_data))
+                                                                                                result_data=log.task.get('result_data')))
 
     return last_date
 
@@ -112,13 +119,14 @@ if __name__ == '__main__':
     parser.add_argument('--status', dest='status', action='store', default=None, help='show exact status')
     parser.add_argument('--prospect_id', dest='prospect_id', action='store', default=None, help='show only for prospect_id')
     parser.add_argument('--task_id', dest='task_id', action='store', default=None, help='show only task_id')
+    parser.add_argument('--credentials_id', dest='credentials_id', action='store', default=None, help='show only credentials_id')
 
     args = parser.parse_args()
     
     campaign_id = args.campaign_id
 
     print("\n\n.......log_actions started for campaign_id={0}".format(campaign_id))
-    print("id, status, action_key, step, description, linkedin, email, result_data")
+    print("log_id, id, status, action_key, step, description, linkedin, email, result_data")
     once = args.once
     if once is None:
         while True:

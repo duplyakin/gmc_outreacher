@@ -56,6 +56,7 @@ class ActionLog(db.Document):
     @classmethod
     def log(cls, task, step, description):
         try:
+            task.reload()
             now = pytz.utc.localize(datetime.utcnow())
             new_log = cls(
                 step=step,

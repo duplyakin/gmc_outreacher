@@ -83,6 +83,12 @@ ACTIONS = [
     {
         'action_type' : 2,
         'data' : {},
+        'medium' : 'email',
+        'key' : EMAIL_CHECK_BOUNCED_ACTION
+    },
+    {
+        'action_type' : 2,
+        'data' : {},
         'medium' : 'special-medium',
         'key' : EMAIL_ENRICH
     },
@@ -97,6 +103,12 @@ ACTIONS = [
         'data' : {},
         'medium' : 'special-medium',
         'key' : DELAY_ACTION
+    },
+    {
+        'action_type' : 1,
+        'data' : {},
+        'medium' : 'special-medium',
+        'key' : ENRICH_DELAY_ACTION
     },
     {
         'action_type' : 4,
@@ -336,8 +348,8 @@ FUNNELS = [
             },
         },
                 'visit-delay-1' : {
-                    'key' : DELAY_ACTION,
-                    'data' : { 'delay' : 20000 },
+                    'key' : ENRICH_DELAY_ACTION,
+                    'data' : { 'delay' : 20000, 'test-pause' : True},
                     'if_true' : 'has-email',
                     'if_false' : 'has-email'
                 },
@@ -499,8 +511,8 @@ FUNNELS = [
             'if_false' : 'delay-before'
         },
         'delay-before' : {
-                    'key' : DELAY_ACTION,
-                    'data' : { 'delay' : 20000 },
+                    'key' : ENRICH_DELAY_ACTION,
+                    'data' : { 'delay' : 20000, 'test-pause' : True},
                     'if_true' : 'has-email',
                     'if_false' : 'has-email'
         },
@@ -669,8 +681,8 @@ FUNNELS = [
             'if_false' : 'delay-before'
         },
         'delay-before' : {
-                    'key' : DELAY_ACTION,
-                    'data' : { 'delay' : 20000 },
+                    'key' : ENRICH_DELAY_ACTION,
+                    'data' : { 'delay' : 20000, 'test-pause' : True},
                     'if_true' : 'has-email',
                     'if_false' : 'has-email'
         },

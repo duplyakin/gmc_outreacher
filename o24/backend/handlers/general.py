@@ -150,6 +150,8 @@ def delay_handler(task_id):
             return result_data
         
         task.next_round = next_round
+        task._commit()
+
         result_data = {
             'code' : 0
         }
