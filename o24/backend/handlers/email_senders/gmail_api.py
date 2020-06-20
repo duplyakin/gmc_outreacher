@@ -118,3 +118,73 @@ def send_email(task, **kwargs):
     }
 
     return result_data
+
+
+def check_bounced(task, **kwargs):
+    access_credentials = kwargs['credentials_data'].get('credentials', '')
+    if not access_credentials:
+        raise Exception("Can't find access_credentials for credentials task_id:{0}".format(task.id))
+
+
+    access_credentials = Credentials.objects(data__email=email_from).first()
+    if not access_credentials:
+        raise Exception("Can't find credentials for modification=smtp email_from={0}".format(email_from))
+
+    start_time_not_posix = MailBox.sequence_start_date(prospect_id=kwargs['prospect_id'], 
+                                            campaign_id=kwargs['prospect_id'],
+                                            posix_time=False)
+    
+    prospect_email = kwargs['prospect_data'].get('email')
+    if not prospect_email:
+        raise Exception("check_bounced error: empty prospect_email={0} for task.id={1}".format(prospect_email, task.id))
+
+
+    bounced_exist = BouncedMessages.check_bounced(owner_id=task.owner_id, 
+                                                email=prospect_email,
+                                                after=start_time_not_posix)
+    if bounced_exist:
+        result_data = {
+            'if_true' : True,
+            'code' : 0,
+            'bounced_messages_id' : bounced_exist.id
+        }
+        return result_data
+
+    #IF we didn't find bounced email, let's check inbox
+    gmail_controller = GmailController(email=kwargs['email_from'],
+                                        credentials=access_credentials,
+                                        credentials_id=kwargs['credentials_id'],
+                                        smtp=False)
+
+    start_time_posix = MailBox.sequence_start_date(prospect_id=kwargs['prospect_id'], 
+                                            campaign_id=kwargs['prospect_id'])
+
+    bounce_daemon_email = BOUNCED_DAEMONS['api']
+    if not bounce_daemon_email:
+        raise Exception("check_bounced ERROR: bounce_daemon_email can't be empty - {0}".format(bounce_daemon_email))
+
+
+    messages = gmail_controller.check_reply(email_from=bounce_daemon_email, 
+                                            after=start_time_posix)
+
+    ids = [m.get('id') for m in messages]
+
+    full_messages = []
+    if ids:
+        has_ids = BouncedMessages.has_messages(owner_id=task.owner_id, 
+                                                msg_ids=ids)
+        if has_ids:
+            ids = [not_exist for not_exist in ids if not_exist not in has_ids]
+
+        if ids:
+            full_messages = gmail_controller.get_full_messages(msg_ids=ids)
+
+    res = BouncedMessages.parse_messages(owner_id=task.owner_id,
+                                        messages=full_messages, 
+                                        search_email=prospect_email)
+    result_data = {
+        'if_true' : res,
+        'code' : 0
+    }
+
+    return result_data

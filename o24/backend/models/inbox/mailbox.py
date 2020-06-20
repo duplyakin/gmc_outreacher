@@ -7,6 +7,7 @@ import pytz
 import o24.config as config
 import string
 import random
+import re
 
 week_day_map = {
     0 : 'Mon',
@@ -33,6 +34,86 @@ month_map = {
     12 : 'Dec'
 }
 
+class BouncedMessages(db.Document):
+    owner = db.ReferenceField('User')
+    email = db.StringField()
+    error = db.StringField()
+    
+    google_msg_id = db.StringField()
+    google_thread_id = db.StringField()
+
+    raw = db.StringField()
+    created = db.DateTimeField(default=pytz.utc.localize(datetime.utcnow()))
+
+    @classmethod
+    def _extract_id(cls, message):
+        msg_id = '' 
+        thread_id = ''
+        if not message:
+            return msg_id, thread_id
+        
+        msg_id = message.get('id', '')
+        thread_id = message.get('threadId', '')
+
+        return msg_id, thread_id
+
+    @classmethod
+    def _extract_error(cls, message):
+        email = ''
+        error = ''
+        if not message:
+            return email, error
+
+        snippet = message.get('snippet', '')
+        if snippet:
+            error = str(snippet)
+            emails = re.findall(r"[a-z0-9\.\-+_]+@[a-z0-9\.\-+_]+\.[a-z]+", snippet)
+            if len(emails) > 0:
+                email = emails[0]
+
+        return email, error
+
+    @classmethod
+    def has_messages(cls, owner_id, msg_ids):
+        return cls.objects(owner=owner_id,
+                            google_msg_id__in=msg_ids).distinct('google_msg_id')
+
+    @classmethod
+    def parse_messages(cls, owner_id, messages, search_email=None):
+        if not messages:
+            return False
+        
+        if not owner_id:
+            raise Exception("parse_messages ERROR: owner_id can't be null = {0}".format(owner_id))
+        
+        found = False
+        now = pytz.utc.localize(datetime.utcnow())
+
+        for m in messages:
+            email, error = cls._extract_error(message=m)
+            if search_email and email == search_email:
+                found = True
+
+            msg_id, thread_id = cls._extract_id(message=m)
+            new_bounced = cls(owner=owner_id,
+                                raw=str(m),
+                                created=now,
+                                email=email,
+                                error=error,
+                                google_msg_id=msg_id,
+                                google_thread_id=thread_id)
+            new_bounced._commit()
+
+        return found
+
+    @classmethod
+    def check_bounced(cls, owner_id, email, after):
+        return cls.objects(owner=owner_id, 
+                            email=email,
+                            created__gte=after).first()
+
+    def _commit(self):
+        self.save()
 
 class MailBox(db.Document):
     owner = db.ReferenceField('User')
@@ -59,14 +140,24 @@ class MailBox(db.Document):
     created = db.DateTimeField(default=pytz.utc.localize(datetime.utcnow()))
 
     @classmethod
-    def sequence_start_date(cls, prospect_id, campaign_id):
-        first_message = cls.objects(Q(prospect_id=prospect_id) & Q(campaign_id=campaign_id)).order_by('created').first()
+    def sequence_start_date(cls, prospect_id, campaign_id, posix_time=True, last_one=False):
+        _filter = 'created'
+        if last_one:
+            _filter = '-created'
+
+        first_message = cls.objects(prospect_id=prospect_id, campaign_id=campaign_id).order_by(_filter).first()
         if not first_message:
             now = pytz.utc.localize(datetime.utcnow())
-            return int(now.timestamp()) - 30
+            if posix_time:
+                return int(now.timestamp()) - 30
+            else:
+                return now
         
         created = first_message.created
-        return int(created.timestamp()) - 30
+        if posix_time:
+            return int(created.timestamp()) - 30
+        else:
+            return created
 
     @classmethod
     def create_draft(cls, prospect_id, campaign_id):

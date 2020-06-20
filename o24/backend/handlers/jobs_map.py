@@ -28,6 +28,7 @@ JOBS_MAP_PROD = {
     EMAIL_CHECK_ENRICHED: enricher.check_enriched_action,
     EMAIL_SEND_MESSAGE_ACTION: email.email_send_message,
     EMAIL_CHECK_REPLY_ACTION: email.email_check_reply,
+    EMAIL_CHECK_BOUNCED_ACTION : email.email_check_bounced,
     DELAY_ACTION: general.delay_handler,
     FINISHED_ACTION: general.finished_handler,
     SUCCESS_ACTION: general.success_handler

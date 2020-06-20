@@ -210,6 +210,9 @@ class GmailController():
 
         return -1
 
+    def get_full_messages(self, msg_ids):
+        return self.provider.get_messages_data_full(msg_ids=msg_ids)
+
     def get_msgId(self, msg_id):
         msgId = ''
         msg = self.provider.get_message_data(msg_id=msg_id, metadataHeaders=['Message-Id'])
@@ -225,7 +228,7 @@ class GmailController():
 
     def check_reply(self, email_from, after=None):
         return self.provider.check_reply(email_from=email_from, after=after)
-    
+
     def insert_tracking(self, owner_id, mailbox_id, email, body_html, events):
         try:
             if not events:

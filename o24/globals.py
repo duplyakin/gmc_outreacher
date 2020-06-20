@@ -101,7 +101,8 @@ LINKEDIN_CHECK_ACCEPT_ACTION = 'linkedin-check-accept'
 LINKEDIN_CHECK_REPLY_ACTION = 'linkedin-check-reply'
 
 EMAIL_SEND_MESSAGE_ACTION = 'email-send-message'
-EMAIL_CHECK_REPLY_ACTION = 'email-check-reply'
+EMAIL_CHECK_REPLY_ACTION = 'email-check-reply' #potential BUG: what if we will add this action to SPECIAL_ACTIONS ?
+EMAIL_CHECK_BOUNCED_ACTION = 'email-check-bounced'
 
 EMAIL_ENRICH = 'email-enrich'
 EMAIL_CHECK_ENRICHED = 'email-check-enriched'
@@ -111,7 +112,14 @@ DELAY_ACTION = 'delay'
 FINISHED_ACTION = 'finished'
 SUCCESS_ACTION = 'success'
 
-SPECIAL_ACTIONS = [EMAIL_ENRICH, EMAIL_CHECK_ENRICHED, DELAY_ACTION, FINISHED_ACTION, SUCCESS_ACTION]
+#actions that we can execute parallel on 1 account
+SPECIAL_ACTIONS = [EMAIL_CHECK_REPLY_ACTION,
+                        EMAIL_CHECK_BOUNCED_ACTION,
+                        EMAIL_ENRICH,
+                        EMAIL_CHECK_ENRICHED,
+                        DELAY_ACTION,
+                        FINISHED_ACTION,
+                        SUCCESS_ACTION]
 
 
 DONT_LOG = [DELAY_ACTION, EMAIL_ENRICH, EMAIL_CHECK_ENRICHED, LINKEDIN_SEARCH_ACTION, LINKEDIN_PARSE_PROFILE_ACTION]
@@ -254,6 +262,11 @@ LINKEDIN_LIMITS_DAILY = {
                         'days_inactivity' : 5
                 }
         }
+}
+
+BOUNCED_DAEMONS = {
+        'api' : 'mailer-daemon@googlemail.com',
+        'smtp' : 'mailer-daemon@googlemail.com'
 }
 
 LIMITS_BASED_ON_MEDIUM = {

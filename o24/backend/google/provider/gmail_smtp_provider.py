@@ -87,7 +87,6 @@ class GmailSmtpProvider():
             try:
                 res = self.smtp_client.send(to=email_to,
                                             contents=message)
-
                 self.smtp_client.close()
                 return res
             except Exception as e:

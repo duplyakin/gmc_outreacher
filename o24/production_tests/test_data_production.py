@@ -357,8 +357,13 @@ FUNNELS = [
                     'key' : DELAY_ACTION,
                     'template_key' : 'email_followup_1',
                     'data' : { 'delay' : 80000 },
-                    'if_true' : 'email-check-before-followup-1',
-                    'if_false' : 'email-check-before-followup-1'
+                    'if_true' : 'email-check-bounced',
+                    'if_false' : 'email-check-bounced'
+        },
+        'email-check-bounced' : {
+            'key' : EMAIL_CHECK_BOUNCED_ACTION,
+            'if_true' : FINISHED_ACTION,
+            'if_false' : 'email-check-before-followup-1' 
         },
         'email-check-before-followup-1' : {
             'key' : EMAIL_CHECK_REPLY_ACTION,
@@ -525,9 +530,14 @@ FUNNELS = [
                     'key' : DELAY_ACTION,
                     'template_key' : 'email_followup_1',
                     'data' : { 'delay' : 8000 },
-                    'if_true' : 'email-check-before-followup-1',
-                    'if_false' : 'email-check-before-followup-1'   
+                    'if_true' : 'email-check-bounced',
+                    'if_false' : 'email-check-bounced'   
                 },
+        'email-check-bounced' : {
+            'key' : EMAIL_CHECK_BOUNCED_ACTION,
+            'if_true' : FINISHED_ACTION,
+            'if_false' : 'email-check-before-followup-1'
+        },
         'email-check-before-followup-1' : {
             'key' : EMAIL_CHECK_REPLY_ACTION,
             'if_true' : SUCCESS_ACTION,
@@ -690,9 +700,14 @@ FUNNELS = [
                     'key' : DELAY_ACTION,
                     'template_key' : 'email_followup_1',
                     'data' : { 'delay' : 8000 },
-                    'if_true' : 'email-check-before-followup-1',
-                    'if_false' : 'email-check-before-followup-1'   
+                    'if_true' : 'email-check-bounced',
+                    'if_false' : 'email-check-bounced'   
                 },
+        'email-check-bounced' : {
+            'key' : EMAIL_CHECK_BOUNCED_ACTION,
+            'if_true' : FINISHED_ACTION,
+            'if_false' : 'email-check-before-followup-1'
+        },
         'email-check-before-followup-1' : {
             'key' : EMAIL_CHECK_REPLY_ACTION,
             'if_true' : SUCCESS_ACTION,

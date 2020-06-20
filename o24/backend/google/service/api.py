@@ -17,7 +17,8 @@ class GoogleApiService():
 
         api_service = build(gmail_api_settings['api_name'], 
                             gmail_api_settings['api_version'], 
-                            credentials=credentials_obj)
+                            credentials=credentials_obj,
+                            cache_discovery=False)
         
         return api_service
         

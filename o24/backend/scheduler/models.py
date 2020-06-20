@@ -46,40 +46,29 @@ class Priority(db.Document):
             self.reload()
 
 class ActionLog(db.Document):
-    owner_id = db.ObjectIdField()
-    task_id = db.ObjectIdField()
-    
-    status = db.IntField()
+    task = db.DictField()
+
     description = db.StringField()
     step = db.StringField()
-
-    prospect_id = db.ObjectIdField()
-    campaign_id = db.ObjectIdField()
-
-    action_key = db.StringField()
-    input_data = db.DictField()
-    result_data = db.DictField()
 
     created = db.DateTimeField( default=pytz.utc.localize(datetime.utcnow()) )
 
     @classmethod
     def log(cls, task, step, description):
-        now = pytz.utc.localize(datetime.utcnow())
-        new_log = cls(
-            owner_id = task.owner_id,
-            task_id = task.id,
-            status = task.status,
-            step=step,
-            description = description,
-            prospect_id = task.prospect_id,
-            campaign_id = task.campaign_id,
-            action_key = task.action_key,
-            input_data = task.input_data,
-            result_data = task.result_data,
-            created = now
-        )
+        try:
+            now = pytz.utc.localize(datetime.utcnow())
+            new_log = cls(
+                step=step,
+                description = description,
+                created = now,
+                task=task.to_mongo()
+            )
 
-        new_log._commit()
-    
+            new_log._commit()
+        except Exception as e:
+            print("LOG ERROR: .....")
+            print(str(e))
+            traceback.print_exc()
+
     def _commit(self):
         self.save()

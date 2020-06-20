@@ -170,18 +170,24 @@ def linkedin_parse_profile_action(task):
     scheduler_models.ActionLog.log(task, step='carryout_handler', description="linkedin_parse_profile_action")
     return
 
-    
-def email_check_reply(task):
+def email_check_bounced_action(task):
     if task.status != CARRYOUT:
-        raise Exception("WRONG STATUS: email_check_reply should be called for CARRYOUT status. task.id={0} task.status={1}".format(task.id, task.status))
+        raise Exception("WRONG STATUS: email_check_bounced_action should be called for CARRYOUT status. task.id={0} task.status={1}".format(task.id, task.status))
+    
+    prospect = task.get_prospect()
+    if not prospect:
+        raise Exception("email_check_bounced_action: no such prospect for task.id={0}".format(task.id))
 
     result_data = task.get_result_data()
     if not result_data:
-        raise Exception("default_handler ERROR: wrong result_data:{0}".format(result_data))
+        raise Exception("email_check_bounced_action ERROR: wrong or empty result_data={0}".format(result_data))
+    
+    if_true = result_data.get('if_true', False)
+    if if_true:
+        prospect.add_tag(title='email_bounced')
 
     task.update_status(status=READY)
 
     #log task
-    scheduler_models.ActionLog.log(task, step='carryout_handler', description="email_check_reply")
-    return 
-
+    scheduler_models.ActionLog.log(task, step='carryout_handler', description="email_check_bounced_action")
+    return

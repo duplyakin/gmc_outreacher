@@ -96,7 +96,7 @@ class GmailApiProvider():
 
         return messages
     
-    def get_messages_data_full(self, user_id, msg_ids):
+    def get_messages_data_full(self, msg_ids, user_id='me'):
         
         messages = []
         for msg_id in msg_ids:
@@ -255,8 +255,6 @@ class GmailApiProvider():
             after_query = " after:{0}".format(after)
             query = query + after_query
 
-        print("*******")
-        print(query)
         request = self.service.users().messages().list(userId=user_id,
                                                 q=query)
         response = self._safe_execute(request=request)
