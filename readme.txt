@@ -21,6 +21,7 @@ SET APP_ENV=Test
 2. Создаем базу с тестоваыми данными:
 python -m unittest discover test_data -s .\o24\production_tests\ -p "*1_models.py"
 py -m unittest discover test_data -s .\o24\production_tests\ -p "*1_models.py"
+py -m unittest discover test_data_production -s .\o24\production_tests\ -p "*1_models.py"
 
 3. Запускаем тестовый сервер
 python -m o24.tests.run_flask_server

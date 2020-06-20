@@ -1,4 +1,6 @@
-const handlers = require('./linkedin/handlers/handlers.js');
+const handlers = require('./linkedin/handlers/handlers');
+const handlers_sync = require('./linkedin/handlers/handlers_sync');
+
 var log = require('loglevel').getLogger("o24_logger");
 
 (async () => {
@@ -14,8 +16,9 @@ var log = require('loglevel').getLogger("o24_logger");
         
         log.debug("..... init started in mode: .....", APP_ENV == null ? 'Test' : APP_ENV)
 
-        await handlers.bullConsumer()
-        await handlers.taskStatusListener()
+        //await handlers.bullConsumer()
+        //await handlers.taskStatusListener()
+        await handlers_sync.taskStatusListener()
 
     } catch (err) {
         log.error("..... init error: .....", err)
