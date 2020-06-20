@@ -98,6 +98,7 @@ async function searchWorker(task_id) {
 
     if (err.code != null && err.code != -1) {
       result_data = {
+        if_true: false,
         code: err.code,
         raw: err.error
       };
@@ -105,6 +106,7 @@ async function searchWorker(task_id) {
       status = status_codes.BLOCK_HAPPENED;
       // Context error
       result_data = {
+        if_true: false,
         code: err.code,
         raw: err.error
       };
@@ -112,6 +114,7 @@ async function searchWorker(task_id) {
       
     } else {
       result_data = {
+        if_true: false,
         code: MyExceptions.SearchWorkerError().code,
         raw: MyExceptions.SearchWorkerError("searchWorker error: " + err).error
       };
@@ -182,6 +185,7 @@ async function connectWorker(task_id) {
 
     if (err.code != null && err.code != -1) {
       result_data = {
+        if_true: false,
         code: err.code,
         raw: err.error
       };
@@ -189,6 +193,7 @@ async function connectWorker(task_id) {
       status = status_codes.BLOCK_HAPPENED;
       // Context error
       result_data = {
+        if_true: false,
         code: err.code,
         raw: err.error
       };
@@ -196,6 +201,7 @@ async function connectWorker(task_id) {
       
     } else {
       result_data = {
+        if_true: false,
         code: MyExceptions.ConnectWorkerError().code,
         raw: MyExceptions.ConnectWorkerError("connectWorker error: " + err).error
       };
@@ -273,6 +279,7 @@ async function messageWorker(task_id) {
 
     if (err.code != null && err.code != -1) {
       result_data = {
+        if_true: false,
         code: err.code,
         raw: err.error
       };
@@ -280,6 +287,7 @@ async function messageWorker(task_id) {
       status = status_codes.BLOCK_HAPPENED;
       // Context error
       result_data = {
+        if_true: false,
         code: err.code,
         raw: err.error
       };
@@ -287,6 +295,7 @@ async function messageWorker(task_id) {
       
     } else {
       result_data = {
+        if_true: false,
         code: MyExceptions.MessageWorkerError().code,
         raw: MyExceptions.MessageWorkerError("messageWorker error: " + err).error
       };
@@ -353,6 +362,7 @@ async function scribeWorker(task_id) {
 
     if (err.code != null && err.code != -1) {
       result_data = {
+        if_true: false,
         code: err.code,
         raw: err.error
       };
@@ -360,6 +370,7 @@ async function scribeWorker(task_id) {
       status = status_codes.BLOCK_HAPPENED;
       // Context error
       result_data = {
+        if_true: false,
         code: err.code,
         raw: err.error
       };
@@ -367,6 +378,7 @@ async function scribeWorker(task_id) {
       
     } else {
       result_data = {
+        if_true: false,
         code: MyExceptions.ScribeWorkerError().code,
         raw: MyExceptions.ScribeWorkerError("scribeWorker error: " + err).error
       };
@@ -428,6 +440,7 @@ async function messageCheckWorker(task_id) {
 
     if (err.code != null && err.code != -1) {
       result_data = {
+        if_true: false,
         code: err.code,
         raw: err.error
       };
@@ -435,6 +448,7 @@ async function messageCheckWorker(task_id) {
       status = status_codes.BLOCK_HAPPENED;
       // Context error
       result_data = {
+        if_true: false,
         code: err.code,
         raw: err.error
       };
@@ -442,6 +456,7 @@ async function messageCheckWorker(task_id) {
       
     } else {
       result_data = {
+        if_true: false,
         code: MyExceptions.MessageCheckWorkerError().code,
         raw: MyExceptions.MessageCheckWorkerError("messageCheckWorker error: " + err).error
       };
@@ -507,6 +522,7 @@ async function connectCheckWorker(task_id) {
 
     if (err.code != null && err.code != -1) {
       result_data = {
+        if_true: false,
         code: err.code,
         raw: err.error
       };
@@ -514,6 +530,7 @@ async function connectCheckWorker(task_id) {
       status = status_codes.BLOCK_HAPPENED;
       // Context error
       result_data = {
+        if_true: false,
         code: err.code,
         raw: err.error
       };
@@ -521,6 +538,7 @@ async function connectCheckWorker(task_id) {
       
     } else {
       result_data = {
+        if_true: false,
         code: MyExceptions.ConnectCheckWorkerError().code,
         raw: MyExceptions.ConnectCheckWorkerError("connectCheckWorker error: " + err).error
       };
@@ -586,6 +604,7 @@ async function visitProfileWorker(task_id) {
 
     if (err.code != null && err.code != -1) {
       result_data = {
+        if_true: false,
         code: err.code,
         raw: err.error
       };
@@ -593,6 +612,7 @@ async function visitProfileWorker(task_id) {
       status = status_codes.BLOCK_HAPPENED;
       // Context error
       result_data = {
+        if_true: false,
         code: err.code,
         raw: err.error
       };
@@ -600,6 +620,7 @@ async function visitProfileWorker(task_id) {
       
     } else {
       result_data = {
+        if_true: false,
         code: MyExceptions.VisitProfileWorkerError().code,
         raw: MyExceptions.VisitProfileWorkerError("visitProfileWorker error: " + err).error
       };

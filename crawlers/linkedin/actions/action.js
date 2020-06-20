@@ -156,6 +156,8 @@ async check_success_selector(selector, page = this.page) {
         timeout: 60000 // it may load too long! critical here
       });
 
+      await page.waitFor(7000) // puppeteer wait loading..
+
       let current_url = page.url();
 
       if (current_url !== url) {
@@ -190,6 +192,8 @@ async check_success_selector(selector, page = this.page) {
         waitUntil: 'load',
         timeout: 60000 // it may load too long! critical here
       });
+
+      await page.waitFor(7000) // puppeteer wait loading..
 
       let current_url = page.url();
 
