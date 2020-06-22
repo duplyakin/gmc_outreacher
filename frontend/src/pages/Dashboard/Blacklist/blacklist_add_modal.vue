@@ -109,7 +109,7 @@ export default {
                     linkedin: this.split_data(this.linkedins),
                 }
 
-                console.log(entities)
+                //console.log(entities)
             
                 const path = this.api_url
 
