@@ -50,6 +50,7 @@
             width="55">
           </el-table-column>
           <el-table-column
+            width="270"
             v-for="(column,index) in list_data.columns"
             :key="index"
             :prop="column.prop"
@@ -94,7 +95,7 @@ export default {
       test: false,
       multipleSelection: [],
       list_data: {
-        columns: [{label: "Email | Domain | Linkedin", prop: "source"}, {label: "Added date", prop: "date"}],
+        columns: [{label: "Email | Domain | Linkedin", prop: "source"}, {label: "Type", prop: "type"}, {label: "Added date", prop: "date"}],
         list: []
       }
     };
@@ -189,21 +190,21 @@ export default {
       if (from_data.emails != null) {
         var emails_obj = JSON.parse(from_data.emails)
         emails = Object.keys(emails_obj).map(function(key) {
-          return { source: key, date: emails_obj[key] }
+          return { source: key, date: emails_obj[key], type: "Email" }
         })
       }
 
       if (from_data.domains != null) {
         var domains_obj = JSON.parse(from_data.domains)
         domains = Object.keys(domains_obj).map(function(key) {
-          return { source: key, date: domains_obj[key] }
+          return { source: key, date: domains_obj[key], type: "Domain" }
         })
       }
 
       if (from_data.linkedin != null) {
         var linkedin_obj = JSON.parse(from_data.linkedin)
         linkedin = Object.keys(linkedin_obj).map(function(key) {
-          return { source: key, date: linkedin_obj[key] }
+          return { source: key, date: linkedin_obj[key], type: "Lincedin" }
         })
       }
 
