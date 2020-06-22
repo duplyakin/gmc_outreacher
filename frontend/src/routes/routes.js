@@ -8,6 +8,7 @@ const Register = () => import('src/pages/Dashboard/Auth/register.vue')
 
 //CUSTOM components created by me
 const Profile = () => import('src/pages/Dashboard/Profile/profile.vue')
+const Blacklist = () => import('src/pages/Dashboard/Blacklist/blacklist.vue')
 const Dashboard = () => import('src/pages/Dashboard/Overview/Dashboard.vue')
 const Help = () => import('src/pages/Dashboard/Overview/help.vue')
 
@@ -102,6 +103,11 @@ const routes = [
         path: 'profile',
         name: 'Profile',
         component: Profile
+      },
+      {
+        path: 'blacklist',
+        name: 'Blacklist',
+        component: Blacklist
       },
       {
         path: 'dashboard',

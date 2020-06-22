@@ -35,7 +35,7 @@
 </template>
 <script>
 import axios from "@/api/axios-auth";
-import { Notification, Table, TableColumn, Select, Option } from "element-ui";
+import { Notification, Select, Option } from "element-ui";
 
 const Change_password_modal = () => import('./change_password_modal.vue')
 

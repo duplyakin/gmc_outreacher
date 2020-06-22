@@ -155,13 +155,7 @@ methods: {
             action: 'create',
             api_url : LISTS_API_ADD,
             valueUpdated:(newValue) => {
-                this.$notify(
-                {
-                    component: NotificationMessage,
-                    message: 'List created Success',
-                    icon: 'nc-icon nc-bulb-63',
-                    type: 'success'
-                })
+                Notification.success({title: "Success", message: 'List created'});
                 this.load_lists();   
             }
             },
@@ -178,13 +172,7 @@ methods: {
             action: 'edit',
             api_url : LISTS_API_EDIT,
             valueUpdated:(newValue) => {
-                this.$notify(
-                {
-                    component: NotificationMessage,
-                    message: 'List edit Success',
-                    icon: 'nc-icon nc-bulb-63',
-                    type: 'success'
-                })
+                Notification.success({title: "Success", message: 'List edit'});
                 this.load_lists();   
             }
             },

@@ -12,7 +12,7 @@
               <el-input label="Subject"
                   placeholder="Enter Subject"
                   name="Subject"
-                  maxlength="100"
+                  maxlength="1000"
                   show-word-limit
                   v-model="subject">
               </el-input>
