@@ -214,9 +214,9 @@ class User(db.Document):
 class BlackList(db.Document):
     owner = db.ReferenceField(User, reverse_delete_rule=1)
 
-    emails = db.DictField()
-    domains = db.DictField()
-    linkedin = db.DictField()
+    emails = db.StringField()
+    domains = db.StringField()
+    linkedin = db.StringField()
 
     created = db.DateTimeField( default=pytz.utc.localize(datetime.utcnow()) )
 
@@ -232,36 +232,64 @@ class BlackList(db.Document):
     def get_black_list(cls, owner_id):
         exist = cls.objects(owner=owner_id).first()
         if not exist:
-            exist = cls()
+            exist = cls(owner=owner_id)
             exist._commit(_reload=True)
         
         return exist
     
+    def _serialize_entities(self, _emails, _domains, _linkedin):
+        self.emails = json.dumps(_emails, indent=4, sort_keys=True, default=str)
+        self.domains = json.dumps(_domains, indent=4, sort_keys=True, default=str)
+        self.linkedin = json.dumps(_linkedin, indent=4, sort_keys=True, default=str)
+
+    def _deserialize_entities(self):
+        _emails = {}
+        _domains = {}
+        _linkedin = {}
+
+        if self.emails:
+            _emails = json.loads(self.emails)
+        
+        if self.domains:
+            _domains = json.loads(self.domains)
+
+        if self.linkedin:
+            _linkedin = json.loads(self.linkedin)
+
+        return _emails, _domains, _linkedin
+
     def remove_entities(self, entities):
+        _emails, _domains, _linkedin = self._deserialize_entities()
         for key in entities:
-            self.emails.pop(key, None)
-            self.domains.pop(key, None)
-            self.linkedin.pop(key, None)
+            _emails.pop(key, None)
+            _domains.pop(key, None)
+            _linkedin.pop(key, None)
+
+        self._serialize_entities(_emails=_emails,
+                                _domains=_domains,
+                                _linkedin=_linkedin)
 
         self._commit()
         return
 
     def add_list(self, entities):
+        _emails, _domains, _linkedin = self._deserialize_entities()
+
         emails = entities.get('emails', None)
         if emails:
             for email in emails:
                 if '@' not in email:
                     continue
                 email = email.replace(" ","")
-                if email not in self.emails.keys():
-                    self.emails[email] = pytz.utc.localize(datetime.utcnow())
-
+                if email not in _emails.keys():
+                    _emails[email] = pytz.utc.localize(datetime.utcnow())
+            
         domains = entities.get('domains', None)
         if domains:
             for domain in domains:
                 domain = domain.replace(" ","")
-                if domain not in self.domains.keys():
-                    self.domains[domain] = pytz.utc.localize(datetime.utcnow())
+                if domain not in _domains.keys():
+                    _domains[domain] = pytz.utc.localize(datetime.utcnow())
         
         linkedin_accounts = entities.get('linkedin', None)
         if linkedin_accounts:
@@ -270,8 +298,12 @@ class BlackList(db.Document):
                 li_acc = urlparse(li_acc).path
                 if li_acc:
                     li_acc = li_acc.strip('/')
-                    if li_acc not in self.linkedin.keys():
-                        self.linkedin[li_acc] = pytz.utc.localize(datetime.utcnow())
+                    if li_acc not in _linkedin.keys():
+                        _linkedin[li_acc] = pytz.utc.localize(datetime.utcnow())
+        
+        self._serialize_entities(_emails=_emails,
+                                _domains=_domains,
+                                _linkedin=_linkedin)
 
         self._commit()
 
@@ -280,15 +312,17 @@ class BlackList(db.Document):
         black_list = cls.objects(owner=owner_id).first()
         if not black_list:
             return False
-        
+
+        _emails, _domains, _linkedin = self._deserialize_entities()
+
         stripped = email.replace(" ", "")
-        if stripped in self.emails.keys():
+        if stripped in _emails.keys():
             return True
 
         email_domain = stripped.split('@')
         if len(email_domain) > 1:
             email_domain = email_domain[1]
-            if email_domain in self.domains.keys():
+            if email_domain in _domains.keys():
                 return True
 
         return False
@@ -298,12 +332,14 @@ class BlackList(db.Document):
         black_list = cls.objects(owner=owner_id).first()
         if not black_list:
             return False
-        
+
+        _emails, _domains, _linkedin = self._deserialize_entities()
+
         stripped = account.replace(" ", "")
         path = urlparse(stripped).path
         if path:
             path = path.strip('/')
-            if path in self.linkedin.keys():
+            if path in _linkedin.keys():
                 return True
 
         return False
