@@ -6,6 +6,7 @@ const CONNECT_URL_1 = "https://www.linkedin.com/in/kirill-shilov-25aa8630/";
 const CONNECT_URL_2 = "https://www.linkedin.com/in/vlad-duplyakin-923475116/";
 const CONNECT_URL_3 = "https://www.linkedin.com/in/alexander-savinkin-3ba99614/";
 const CONNECT_URL_4 = "https://www.linkedin.com/in/bersheva/";
+const CONNECT_URL_5 = "https://www.linkedin.com/in/alexyerokhin/";
 
 // test task
 
@@ -32,7 +33,7 @@ const CONNECT_URL_4 = "https://www.linkedin.com/in/bersheva/";
           first_name: 'Olga',
           last_name: '',
           company_title: 'howtotoken.com',
-          linkedin: CONNECT_URL_3,
+          linkedin: CONNECT_URL_1,
         }
       },
       credentials_id: account_id,

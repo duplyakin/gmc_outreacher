@@ -12,17 +12,19 @@ class ScribeAction extends action.Action {
   }
 
   async scribe() {
-    await super.gotoLogin();
-    await super.gotoChecker(this.url);
+    await super.gotoLogin()
+    await super.gotoChecker(this.url)
 
-    await super.autoScroll(this.page);
+    let result = {}
+    let country = null
+    let company_website = null
+    let education = null
 
-    let result = {};
-    let country = null;
-    let company_website = null;
-    let education = null;
+    let selector = selectors.COUNTRY_SELECTOR
 
-    let selector = selectors.COUNTRY_SELECTOR;
+    result = await this.scribe_contact_info()
+
+    await super.autoScroll(this.page)
 
     try {
       await this.page.waitForSelector(selectors.COUNTRY_SELECTOR, { timeout: 5000 });
@@ -52,17 +54,16 @@ class ScribeAction extends action.Action {
       
     } catch (err) {
       // if we cant find company informatiom
-      return result;
+      return result
     }
 
     let scribe_result = await this.page.evaluate((mySelectors) => {
-      let res = {};
+      let res = {}
 
-      res.link = document.querySelector(mySelectors.selector1).href;
-      res.job_title = document.querySelector(mySelectors.selector1).querySelector(mySelectors.selector2).innerText;
+      res.link = document.querySelector(mySelectors.selector1).href
+      res.job_title = document.querySelector(mySelectors.selector1).querySelector(mySelectors.selector2).innerText
 
-      //log.debug("ScribeAction: job:", res);
-      return res;
+      return res
     }, mySelectors);
 
     if(scribe_result.job_title) {
@@ -120,6 +121,132 @@ class ScribeAction extends action.Action {
     result.company_url = company_website;
     //log.debug("ScribeAction: result: ", result);
     return result;
+  }
+
+
+  async scribe_contact_info() {
+    let result = {}
+    let mySelector = ''
+    log.debug("ScribeAction: scribe_contact_info started")
+
+    let selector_res = ''
+    /*
+    let selector_res = await super.check_success_selector(selectors.CONTACT_INFO_SELECTOR)
+    if(!selector_res) {
+      // can't find contact info selector
+      return result
+    }
+    */
+
+    await super.gotoChecker(this.page.url() + 'detail/contact-info/')
+    await this.page.waitFor(5000)
+
+    if(!this.page.url().includes('contact-info')) {
+      super.gotoChecker(this.url)
+      await this.page.waitFor(5000)
+      
+      return result
+    }
+
+    await this.page.click(selectors.CONTACT_INFO_SELECTOR)
+    await this.page.waitFor(5000) // XZ etot linked
+
+    // phone
+    selector_res = await super.check_success_selector(selectors.CONTACT_INFO_PHONE_SELECTOR)
+    if(selector_res) {
+      mySelector = selectors.CONTACT_INFO_PHONE_SELECTOR
+
+      result.phone = await this.page.evaluate((mySelector) => {
+        return document.querySelector(mySelector).innerText
+      }, mySelector)
+
+      log.debug("ScribeAction: phone added")
+    }
+
+    // address
+    selector_res = await super.check_success_selector(selectors.CONTACT_INFO_ADDRESS_SELECTOR)
+    if(selector_res) {
+      mySelector = selectors.CONTACT_INFO_ADDRESS_SELECTOR
+
+      result.address = await this.page.evaluate((mySelector) => {
+        return document.querySelector(mySelector).innerText
+      }, mySelector)
+
+      log.debug("ScribeAction: address added")
+    }
+
+    // email
+    selector_res = await super.check_success_selector(selectors.CONTACT_INFO_EMAIL_SELECTOR)
+    if(selector_res) {
+      mySelector = selectors.CONTACT_INFO_EMAIL_SELECTOR
+
+      result.email = await this.page.evaluate((mySelector) => {
+        return document.querySelector(mySelector).innerText
+      }, mySelector)
+
+      log.debug("ScribeAction: email added")
+    }
+
+    // twitter
+    selector_res = await super.check_success_selector(selectors.CONTACT_INFO_TWITTER_SELECTOR)
+    if(selector_res) {
+      mySelector = selectors.CONTACT_INFO_TWITTER_SELECTOR
+
+      result.twitter = await this.page.evaluate((mySelector) => {
+        return document.querySelector(mySelector).innerText
+      }, mySelector)
+
+      log.debug("ScribeAction: twitter added")
+    }
+
+    // IM
+    selector_res = await super.check_success_selector(selectors.CONTACT_INFO_IM_SELECTOR)
+    if(selector_res) {
+      mySelector = selectors.CONTACT_INFO_IM_SELECTOR
+
+      result.im = await this.page.evaluate((mySelector) => {
+        return document.querySelector(mySelector).innerText
+      }, mySelector)
+
+      log.debug("ScribeAction: im added")
+    }
+
+    // birthday
+    selector_res = await super.check_success_selector(selectors.CONTACT_INFO_BIRTHDAY_SELECTOR)
+    if(selector_res) {
+      mySelector = selectors.CONTACT_INFO_BIRTHDAY_SELECTOR
+
+      result.birthday = await this.page.evaluate((mySelector) => {
+        return document.querySelector(mySelector).innerText
+      }, mySelector)
+
+      log.debug("ScribeAction: birthday added")
+    }
+
+    // connected date
+    selector_res = await super.check_success_selector(selectors.CONTACT_INFO_CONNECTED_DATE_SELECTOR)
+    if(selector_res) {
+      mySelector = selectors.CONTACT_INFO_CONNECTED_DATE_SELECTOR
+
+      result.connected_date = await this.page.evaluate((mySelector) => {
+        return document.querySelector(mySelector).innerText
+      }, mySelector)
+
+      log.debug("ScribeAction: connected date added")
+    }
+
+    // close contact info popup
+    selector_res = await super.check_success_selector(selectors.CONTACT_INFO_CLOSE_SELECTOR)
+    if(selector_res) {
+      this.page.click(selectors.CONTACT_INFO_CLOSE_SELECTOR)
+    } else {
+      super.gotoChecker(this.url)
+    }
+
+    this.page.waitFor(2000)
+
+    log.debug("ScribeAction: contact info scribed:", result)
+    return result
   }
 }
 

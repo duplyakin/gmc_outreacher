@@ -46,6 +46,17 @@ module.exports.JOB_LINK_SELECTOR = 'a.full-width.ember-view';
 module.exports.JOB_SITE_SELECTOR = 'span.link-without-visited-state';
 module.exports.COUNTRY_SELECTOR = '.t-16.t-black.t-normal.inline-block';
 module.exports.JOB_SELECTOR = '.t-16.t-black.t-bold';
+// scribe contact info
+module.exports.CONTACT_INFO_SELECTOR = '.inline-block .ember-view';
+module.exports.CONTACT_INFO_CLOSE_SELECTOR = 'li-icon > svg';
+module.exports.CONTACT_INFO_PHONE_SELECTOR = 'section.pv-contact-info__contact-type.ci-phone > ul > li > span.t-14.t-black.t-normal';
+module.exports.CONTACT_INFO_ADDRESS_SELECTOR = 'section.pv-contact-info__contact-type.ci-address > div > a';
+module.exports.CONTACT_INFO_EMAIL_SELECTOR = 'section.pv-contact-info__contact-type.ci-email > div > a';
+module.exports.CONTACT_INFO_TWITTER_SELECTOR = 'section.pv-contact-info__contact-type.ci-twitter > ul > li > a';
+module.exports.CONTACT_INFO_IM_SELECTOR = 'section.pv-contact-info__contact-type.ci-ims > ul > li > span.pv-contact-info__contact-item.t-14.t-black.t-normal'; // like Skype etc
+module.exports.CONTACT_INFO_BIRTHDAY_SELECTOR = 'section.pv-contact-info__contact-type.ci-birthday > div > span';
+module.exports.CONTACT_INFO_CONNECTED_DATE_SELECTOR = 'section.pv-contact-info__contact-type.ci-connected > div > span';
+
 
 // connect check
 module.exports.SEARCH_CONNECTS_SELECTOR = '#mn-connections-search-input';
