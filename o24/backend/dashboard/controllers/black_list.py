@@ -28,9 +28,9 @@ def blacklist_list():
 
     try:
         if request.method == 'POST':
-            blacklist_list = BlackList.async_list(owner_id=current_user.id)
-            if blacklist_list:
-                result['data'] = blacklist_list
+            b_list = BlackList.async_list(owner_id=current_user.id)
+            if b_list:
+                result['data'] = b_list
 
             result['code'] = 1
             result['msg'] = 'Success'
