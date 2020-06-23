@@ -56,8 +56,7 @@ class DataStorage(db.Document):
         self.save()
 
 class EnrichTaskQueueLock(db.Document):
-    key = db.StringField(unique=True)
-
+    lock_key = db.StringField(unique=True, sparse=False)
     ack = db.IntField(default=0)
 
 class EnrichTaskQueue(db.Document):
@@ -138,6 +137,10 @@ class EnrichTaskQueue(db.Document):
             self._commit()
 
         return self.next_round
+
+    def update_status(self, status):
+        self.status = status
+        self._commit()
 
     def _commit(self, _reload=False):
         self.save()

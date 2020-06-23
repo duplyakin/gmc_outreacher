@@ -39,6 +39,46 @@ T_STATUSES = {
     NEED_USER_ACTION_RESOLVED: 'need_user_action_resolved'
 }
 
+#enricher statuses
+E_STATUSES = {
+    ENRICH_NEW: 'new', 
+    ENRICH_IN_PROGRESS: 'in_progress',
+    ENRICH_SUCCESS: 'enrich_success',
+    ENRICH_FAILED_TO_FOUND: 'enrich_failed_to_found',
+    ENRICH_TRIED_ALL: 'tried_all',
+    ENRICH_OUT_OF_CREDITS: 'out_of_credits',
+    ENRICH_MOVED: 'enrich_moved'
+}
+
+def show_enrich_log(log, last_date, show_id):
+    input_data = log.task.get('input_data', {})
+    linkedin = input_data.get('linkedin', 'None')
+    email = input_data.get('email', 'None')
+    actions_tried = str(log.task.get('actions_tried', 'no_actions_tried'))
+    if log.created > last_date:
+        last_date = log.created
+
+    if show_id:
+        print("{log_id}  {id}--{status}---{step}--{description}--{linkedin}--{email}--{actions_tried}".format(
+                                                                                            log_id=log.id,
+                                                                                            id=log.task.get('_id'),
+                                                                                            status=E_STATUSES[log.task.get('status')],
+                                                                                            step=log.step,
+                                                                                            description=log.description,
+                                                                                            linkedin=linkedin,
+                                                                                            email=email,
+                                                                                            actions_tried=actions_tried))
+
+    else:
+        print("{id}--{status}--{step}--{description}--{linkedin}--{email}--{actions_tried}".format(
+                                                                                            id=log.task.get('_id'),
+                                                                                            status=E_STATUSES[log.task.get('status')],
+                                                                                            step=log.step,
+                                                                                            description=log.description,
+                                                                                            linkedin=linkedin,
+                                                                                            email=email,
+                                                                                            actions_tried=actions_tried))
+    return last_date
 
 def args_to_query(args):
     query = {}
@@ -78,6 +118,15 @@ def log_actions(last_date, args):
         logs = scheduler_models.ActionLog.objects(created__gt=last_date).order_by('created')
 
     for log in logs:
+        log_type = log.log_type
+        if not log_type:
+            print('Unknown log_type for log.id={0}'.format(log.id))
+            continue
+
+        if log_type == 'enricher-log':
+            last_date = show_enrich_log(log, last_date, show_id)
+            continue
+
         prospect_data = log.task.get('input_data').get('prospect_data', {})
         linkedin = prospect_data.get('linkedin', 'None')
         email = prospect_data.get('email', 'None')

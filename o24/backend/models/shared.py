@@ -204,7 +204,7 @@ class Funnel(db.Document):
             self.reload()
 
 class TaskQueueLock(db.Document):
-    key = db.StringField(unique=True)
+    lock_key = db.StringField(unique=True, sparse=False)
     ack = db.IntField(default=0)
 
 # How TaskQueue works

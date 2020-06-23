@@ -36,16 +36,38 @@ def check_enrich_finished(task):
         print("check_enrich_finished True for task.id={0} with status={1}".format(task.id, enrich_task.status))
         return True
 
+    prospect = models.Prospects.objects(id=prospect_id).first()
+    if prospect:
+        email = prospect.data.get('email', '')
+        if email:
+            return True
+
     return False
 
 def inc_limits():
-    CAMPAIGN_ID = sys.argv[1]
+    CAMPAIGN_ID = None
+    if len(sys.argv) < 2:
+        print("Time machine started for ALL tasks in TaskQueue - for all campaigns")
+    else:
+        CAMPAIGN_ID = sys.argv[1]
+        print("time machine started for CAMPAIGN_ID={0}".format(CAMPAIGN_ID))
 
-    tasks = shared.TaskQueue.objects(campaign_id=CAMPAIGN_ID)
-    if not tasks:
-        print("Can't find tasks for campaign_id={0}".format(CAMPAIGN_ID))
-        exit(0)
+    tasks = []
+
+    while True:
+        if CAMPAIGN_ID:
+            tasks = shared.TaskQueue.objects(campaign_id=CAMPAIGN_ID)
+        else:
+            tasks = shared.TaskQueue.objects()
+
+        if not tasks:
+            print("...Waiting for tasks appeared")
+            print("Can't find tasks for campaign_id={0}".format(CAMPAIGN_ID))
+            time.sleep(2)
+        else:
+            break
     
+    print("...Found tasks - starting the next round")
     for task in tasks:
         if task.action_key == ENRICH_DELAY_ACTION:
             enrich_finished = check_enrich_finished(task)
@@ -79,6 +101,6 @@ if __name__ == '__main__':
     print("\n\n.......time_machine started")
     while True:
         inc_limits()
-        time.sleep(5)
+        time.sleep(3)
 
 # python -m o24.monitoring.time_machine

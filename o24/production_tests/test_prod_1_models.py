@@ -4,7 +4,9 @@ import o24.config as config
 from o24.backend.dashboard.models import User, Team, Credentials, Campaign, Prospects, ProspectsList
 from o24.backend import app
 from o24.backend import db
-from o24.backend.models.shared import Action, Funnel
+from o24.backend.models.shared import Action, Funnel, TaskQueueLock
+from o24.enricher.models import EnrichTaskQueueLock
+
 from o24.backend.utils.funnel import construct_funnel
 
 from o24.backend.google.models import GoogleAppSetting
@@ -227,6 +229,24 @@ class TestUsersCampaignsProspects(unittest.TestCase):
 
             s._commit()
 
+        #WE need this to create indexes
+        try:
+            task_lock = TaskQueueLock(
+                lock_key=TASK_QUEUE_LOCK,
+                ack = 0
+            )
+            task_lock.save()
+        except:
+            pass
+
+        try:
+            enrich_lock = EnrichTaskQueueLock(
+                lock_key=ENRICH_TASK_QUEUE_LOCK,
+                ack = 0
+            )
+            enrich_lock.save()
+        except:
+            pass
 
 
 def setUpModule():

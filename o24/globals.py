@@ -279,3 +279,7 @@ LIMITS_BASED_ON_MEDIUM = {
 NO_LIMITS_MEDIUMS = ['special-medium']
 LIMITS_24_PERIOD_SECS = 86500  #24 hours period in seconds
 RANDOM_INTERVAL_MAX = 5 # will calculate interval = randrange(interval_sec, interval_sec * RANDOM_INTERVAL_MAX)
+
+
+TASK_QUEUE_LOCK = 'taskqueue_lock'
+ENRICH_TASK_QUEUE_LOCK = 'enrich_taskqueue_lock'

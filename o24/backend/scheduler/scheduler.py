@@ -25,9 +25,13 @@ class Scheduler():
     @classmethod
     def lock(cls):
         try:
-            locked = TaskQueueLock.objects(key='scheduler_lock', ack=0).update_one(upsert=True, ack=1)
+            locked = TaskQueueLock.objects(lock_key=TASK_QUEUE_LOCK, ack=0).update_one(upsert=True, ack=1)
             if not locked:
                 return None
+
+            total = TaskQueueLock.objects(lock_key=TASK_QUEUE_LOCK).count()
+            if total > 1:
+                raise Exception("...NEVER HAPPENED Scheduler.lock create more than 1 instance")
 
             scheduler = cls()
             return scheduler
@@ -41,7 +45,7 @@ class Scheduler():
         return None
 
     def unlock(self):
-        return TaskQueueLock.objects(key='scheduler_lock').update_one(upsert=False, ack=0)
+        return TaskQueueLock.objects(lock_key=TASK_QUEUE_LOCK).update_one(upsert=False, ack=0)
 
 
     ###################################### SCHEDULER CYCLE tasks  ##################################
