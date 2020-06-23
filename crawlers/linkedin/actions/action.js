@@ -165,11 +165,12 @@ async check_success_selector(selector, page = this.page) {
     }
     try {
       await page.goto(url, {
-        waitUntil: 'load',
+        //waitUntil: 'load',
+        waitUntil: 'domcontentloaded',
         timeout: 60000 // it may load too long! critical here
       });
 
-      await page.waitFor(7000) // puppeteer wait loading..
+      await page.waitFor(15000) // puppeteer wait loading..
 
       let current_url = page.url()
 
@@ -204,11 +205,12 @@ async check_success_selector(selector, page = this.page) {
   async gotoLogin(page = this.page) {
     try {
       await page.goto(links.SIGNIN_LINK, {
-        waitUntil: 'load',
+        //waitUntil: 'load',
+        waitUntil: 'domcontentloaded',
         timeout: 60000 // it may load too long! critical here
       });
 
-      await page.waitFor(7000) // puppeteer wait loading..
+      await page.waitFor(15000) // puppeteer wait loading..
 
       let current_url = page.url();
 
