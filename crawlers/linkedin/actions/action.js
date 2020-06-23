@@ -15,8 +15,8 @@ class Action {
 
 
   async startBrowser() {
-    //this.browser = await puppeteer.launch({ headless: false }); // test mode
-    this.browser = await puppeteer.launch();
+    this.browser = await puppeteer.launch({ headless: false }); // test mode
+    //this.browser = await puppeteer.launch();
     this.context = await this.browser.createIncognitoBrowserContext();
     this.page = await this.context.newPage();
 
@@ -204,9 +204,11 @@ async check_success_selector(selector, page = this.page) {
 
   async gotoLogin(page = this.page) {
     try {
+      console.log('gotoLogin  - signin_link: ', links.SIGNIN_LINK);
+      // links.SIGNIN_LINK
       await page.goto(links.SIGNIN_LINK, {
-        //waitUntil: 'load',
-        waitUntil: 'domcontentloaded',
+        waitUntil: 'load',
+        ///waitUntil: 'domcontentloaded',
         timeout: 60000 // it may load too long! critical here
       });
 

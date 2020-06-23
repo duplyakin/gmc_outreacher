@@ -91,16 +91,18 @@ class LoginAction {
     }
 
     async login_with_email() {
+
+        /*
         await this.page.goto(links.SIGNIN_LINK, {
             waitUntil: 'load',
             timeout: 60000 // it may load too long! critical here
-        });
-
+        });*/
+        /*
         try {
             await this.page.waitForSelector(selectors.USERNAME_SELECTOR, { timeout: 5000 });
         } catch (err) {
             throw MyExceptions.LoginPageError('Login page is not available.');
-        }
+        }*/
 
         let account = await this.get_account();
         if(account == null) {
@@ -150,12 +152,13 @@ class LoginAction {
 
     async is_logged() {
         //await this.page.waitFor(1000);
+        /*
         await this.page.goto(links.SIGNIN_LINK, {
             waitUntil: 'load',
             timeout: 60000 // it may load too long! critical here
-        });
+        });*/
 
-        await page.waitFor(7000) // puppeteer wait loading..
+        //await page.waitFor(7000) // puppeteer wait loading..
 
         let current_url = this.page.url();
         if (current_url.includes(links.START_PAGE_SHORTLINK)) {
