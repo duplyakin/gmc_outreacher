@@ -207,9 +207,6 @@ async check_success_selector(selector, page = this.page) {
   }
 
 
-
-
-
   async autoScroll(page) {
     await page.evaluate(async () => {
       await new Promise((resolve, reject) => {
