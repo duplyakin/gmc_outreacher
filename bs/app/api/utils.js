@@ -360,12 +360,12 @@ const input_data = async (account, input) => {
                 expires: new_expires,
             }
 
+            await models.Accounts.findOneAndUpdate({ _id: account._id }, account_update, { upsert: false });
             await models_shared.Credentials.findOneAndUpdate({ _id: account._id }, { status: status_codes.ACTIVE }, { upsert: false });
             if(account.task_id != null) {
                 await models_shared.TaskQueue.findOneAndUpdate({ _id: account.task_id }, { status: status_codes.NEED_USER_ACTION_RESOLVED }, { upsert: false });
             }
-            await models.Accounts.findOneAndUpdate({ _id: account._id }, account_update, { upsert: false });
-
+            
             await browser.close();
             browser.disconnect();
             log.debug("..... BLOCK RESOLVED. ..... ");
@@ -441,11 +441,11 @@ const input_login = async (account) => {
 
             //log.debug('input_login account_new = ', account_new)
             
+            await models.Accounts.findOneAndUpdate({ _id: account._id }, account_new, { upsert: false }); // upsert = false; because we have already created account object in DB
             await models_shared.Credentials.findOneAndUpdate({ _id: account._id }, { status: status_codes.ACTIVE }, { upsert: false });
             if(account.task_id != null) {
                 await models_shared.TaskQueue.findOneAndUpdate({ _id: account.task_id }, { status: status_codes.NEED_USER_ACTION_RESOLVED }, { upsert: false });
             }
-            await models.Accounts.findOneAndUpdate({ _id: account._id }, account_new, { upsert: false }); // upsert = false; because we have already created account object in DB
 
             await browser.close();
             browser.disconnect();
