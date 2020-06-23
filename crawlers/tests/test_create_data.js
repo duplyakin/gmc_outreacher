@@ -33,7 +33,7 @@ const CONNECT_URL_5 = "https://www.linkedin.com/in/alexyerokhin/";
           first_name: 'Olga',
           last_name: '',
           company_title: 'howtotoken.com',
-          linkedin: CONNECT_URL_1,
+          linkedin: CONNECT_URL_5,
         }
       },
       credentials_id: account_id,

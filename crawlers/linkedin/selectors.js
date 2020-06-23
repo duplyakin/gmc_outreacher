@@ -45,6 +45,7 @@ module.exports.LAST_MSG_SELECTOR = '.msg-s-event-listitem__body';
 module.exports.JOB_LINK_SELECTOR = 'a.full-width.ember-view';
 module.exports.JOB_SITE_SELECTOR = 'span.link-without-visited-state';
 module.exports.COUNTRY_SELECTOR = '.t-16.t-black.t-normal.inline-block';
+module.exports.EDUCATION_SELECTOR = '.pv-entity__school-name';
 module.exports.JOB_SELECTOR = '.t-16.t-black.t-bold';
 // scribe contact info
 module.exports.CONTACT_INFO_SELECTOR = '.inline-block .ember-view';

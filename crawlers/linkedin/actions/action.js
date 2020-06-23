@@ -52,65 +52,64 @@ class Action {
 
 async check_success_selector(selector, page = this.page) {
   if(!selector) {
-    throw new Error ('Empty selector.');
+    throw new Error ('Empty selector.')
   }
 
   try {
-    await page.waitForSelector(selector, { timeout: 5000 });
-    return true;
+    await page.waitForSelector(selector, { timeout: 5000 })
+    return true
 
   } catch(err) {
     
     if (this.check_block(page.url())) {
-      throw MyExceptions.ContextError("Block happend: " + page.url());
+      throw MyExceptions.ContextError("Block happend: " + page.url())
     }
 
-    // uncknown page here
-    return false;
+    return false
   }
 }
 
 
   async check_success_page(required_url, page = this.page) {
     if(!required_url) {
-      throw new Error ('Empty required_url.');
+      throw new Error ('Empty required_url.')
     }
 
-    let current_url = page.url();
+    let current_url = page.url()
 
-    if(current_url.includes(required_url)) {
-      return true;
+    if(current_url.includes(this.get_pathname(required_url))) {
+      return true
     }
 
     if(this.check_block(page.url())) {
-      throw MyExceptions.ContextError("Block happend.");
+      throw MyExceptions.ContextError("Block happend.")
     }
 
     // uncknown page here
-    throw new Error('Uncknowm page here: ', current_url);
-    //return false;
+    throw new Error('Uncknowm page here: ', current_url)
+    //return false
   }
 
 
   async close_msg_box(page = this.page) {
     if(page == null) {
-      throw new Error ('Page not found.');
+      throw new Error ('Page not found.')
     }
     try {
       // close messages box !!! (XZ ETOT LINKED)
-      await page.waitFor(10000);  // wait linkedIn loading process
-      await page.waitForSelector(selectors.CLOSE_MSG_BOX_SELECTOR, { timeout: 5000 });
-      await page.click(selectors.CLOSE_MSG_BOX_SELECTOR);
-      await page.waitFor(2000);  // wait linkedIn loading process
+      await page.waitFor(10000) // wait linkedIn loading process
+      await page.waitForSelector(selectors.CLOSE_MSG_BOX_SELECTOR, { timeout: 5000 })
+      await page.click(selectors.CLOSE_MSG_BOX_SELECTOR)
+      await page.waitFor(2000) // wait linkedIn loading process
     } catch (err) {
-      log.debug("action.close_msg_box: CLOSE_MSG_BOX_SELECTOR not found.");
+      log.debug("action.close_msg_box: CLOSE_MSG_BOX_SELECTOR not found.")
     }
   }
 
 
-  // format message
+  // format message with data templates
   formatMessage(message, data) {
-    if(!message || message == '') {
+    if(message == null || message == '') {
       log.debug("action.formatMessage: Empty message.")
       return ''
     }
@@ -143,6 +142,8 @@ async check_success_selector(selector, page = this.page) {
     return pathname
   }
 
+
+  // cut pathname in url
   get_pathname(url) {
     if(!url || !url.includes('linkedin')) {
       log.error("action.get_pathname incorrect url format:", url)
