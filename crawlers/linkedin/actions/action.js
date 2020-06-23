@@ -179,9 +179,7 @@ async check_success_selector(selector, page = this.page) {
       let short_url = this.get_pathname(url)
 
       if (!current_url.includes(short_url)) {
-        if (current_url.includes("authwall")) {
-          this.gotoLogin() // don't work
-        } else if (current_url.includes('login') || current_url.includes('signup')) {
+        if (current_url.includes('login') || current_url.includes('signup') || current_url.includes("authwall")) {
 
           let loginAction = new LoginAction.LoginAction(this.credentials_id)
           await loginAction.setContext(this.context)
@@ -209,44 +207,7 @@ async check_success_selector(selector, page = this.page) {
   }
 
 
-  async gotoLogin(page = this.page) {
-    try {
-      await page.goto(links.SIGNIN_LINK, {
-        waitUntil: 'load',
-        //waitUntil: 'domcontentloaded',
-        timeout: 30000 // it may load too long! critical here
-      })
 
-      await page.waitFor(7000) // puppeteer wait loading..
-
-      let current_url = page.url()
-      log.debug('gotoLogin - current_url: ', current_url)
-
-      if (current_url.includes('login') || current_url.includes('signup')) {
-
-        let loginAction = new LoginAction.LoginAction(this.credentials_id)
-        await loginAction.setContext(this.context)
-
-        await loginAction.login() // if unsuccess - throw eeror
-        
-      } else if (current_url.includes(links.START_PAGE_SHORTLINK)) {
-        return // success
-      } else {
-        log.error('gotoLogin - current url: ', current_url)
-        throw new Error("gotoLogin - We cann't go to page, we got: " + current_url)
-      }
-
-    } catch (err) { 
-      log.error('gotoLogin - current page: ', page.url())
-      log.error('gotoLogin - error: ', err.stack)
-
-      if(this.check_block(page.url())) {
-        throw MyExceptions.ContextError("gotoLogin - Block happend.")
-      }
-
-      throw new Error('gotoLogin error: ', err)
-    }
-  }
 
 
   async autoScroll(page) {

@@ -17,7 +17,6 @@ class SearchAction extends action.Action {
       throw new Error('Empty search url.');
     }
     
-    await super.gotoLogin();
     await super.gotoChecker(this.searchUrl);
 
     let currentPage = 1;

@@ -14,7 +14,6 @@ class MessageAction extends action.Action {
   }
 
   async message() {
-    await super.gotoLogin();
     await super.gotoChecker(this.url);
 
     const page = await this.context.newPage(); // feature (critical)

@@ -14,7 +14,6 @@ class ConnectAction extends action.Action {
   }
 
   async connect() {
-    await super.gotoLogin();
     await super.gotoChecker(this.url);
 
     let check = await this.connectCheck();

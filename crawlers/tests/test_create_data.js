@@ -62,7 +62,7 @@ const CONNECT_URL_5 = "https://www.linkedin.com/in/alexyerokhin/";
     let account_data2 = {
       login: "mrgeen12358@gmail.com",
       password: "A123456a",
-      cookies: null,
+      cookies: [],
       expires: Date.now() / 1000 + 10000000, // + ~ 4 months // https://www.epochconverter.com/
       status: 0,
     }
