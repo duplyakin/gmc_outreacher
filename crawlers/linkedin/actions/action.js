@@ -15,23 +15,25 @@ class Action {
 
 
   async startBrowser() {
-    //this.browser = await puppeteer.launch({ headless: false }); // test mode
-    this.browser = await puppeteer.launch();
-    this.context = await this.browser.createIncognitoBrowserContext();
-    this.page = await this.context.newPage();
+    //this.browser = await puppeteer.launch({ headless: false }) // test mode
+    this.browser = await puppeteer.launch()
+    this.context = await this.browser.createIncognitoBrowserContext()
+    this.page = await this.context.newPage()
 
     //log.debug('cooooookiieeeess: ', this.cookies)
-    await this.page.setCookie(...this.cookies);
+    if(this.cookies != null && Array.isArray(this.cookies) && this.cookies.length > 0) {
+      await this.page.setCookie(...this.cookies)
+    }
 
-    return this.browser;
+    return this.browser
   }
 
 
   async closeBrowser() {
-    await this.browser.close();
-    this.browser.disconnect();
+    await this.browser.close()
+    this.browser.disconnect()
 
-    return null;
+    return null
   }
 
 
@@ -42,10 +44,10 @@ class Action {
 
     if(url.includes(links.BAN_LINK) || url.includes(links.CHALLENGE_LINK)) {
       // not target page here
-      return true;
+      return true
     } else {
       // all ok
-      return false;
+      return false
     }
   }
 
@@ -157,47 +159,52 @@ async check_success_selector(selector, page = this.page) {
   }
 
 
-  // do 1 trie to connect URL or goto login
+  // do 1 trie to goto URL or goto login
   async gotoChecker(url, page = this.page) {
-    //log.debug('gotoChecker - url: ', url);
+    //log.debug('gotoChecker - url: ', url)
     if(!url) {
-      throw new Error('Empty url.');
+      throw new Error('Empty url.')
     }
     try {
       await page.goto(url, {
-        //waitUntil: 'load',
-        waitUntil: 'domcontentloaded',
-        timeout: 60000 // it may load too long! critical here
-      });
+        waitUntil: 'load',
+        //waitUntil: 'domcontentloaded',
+        timeout: 30000 // it may load too long! critical here
+      })
 
-      await page.waitFor(15000) // puppeteer wait loading..
+      await page.waitFor(7000) // puppeteer wait loading..
 
       let current_url = page.url()
 
       let short_url = this.get_pathname(url)
 
       if (!current_url.includes(short_url)) {
-        if (current_url.includes('login') || current_url.includes('signup')) {
+        if (current_url.includes("authwall")) {
+          this.gotoLogin() // don't work
+        } else if (current_url.includes('login') || current_url.includes('signup')) {
 
-          let loginAction = new LoginAction.LoginAction(this.credentials_id);
-          await loginAction.setContext(this.context);
+          let loginAction = new LoginAction.LoginAction(this.credentials_id)
+          await loginAction.setContext(this.context)
 
-          let result = await loginAction.login();
+          let result = await loginAction.login()
           if (result) {
-            await page.goto(url);
+            await page.goto(url)
           }
         } else {
-          log.error('gotoChecker - current url: ', current_url);
-          log.error('gotoChecker - required url: ', url);
-          throw new Error("gotoChecker - We cann't go to page, we got: " + current_url);
+          log.error('gotoChecker - current url: ', current_url)
+          log.error('gotoChecker - required url: ', url)
+          throw new Error("gotoChecker - We cann't go to page, we got: " + current_url)
         }
       }
     } catch (err) {
+      log.error('gotoChecker - current page: ', page.url())
+      log.error('gotoChecker - error: ', err.stack)
+
       if(this.check_block(page.url())) {
         throw MyExceptions.ContextError("Block happend.");
       }
 
-      throw new Error('Uncknowm page here: ', page.url());
+      throw new Error('gotoChecker error: ', err);
     }
   }
 
@@ -205,35 +212,39 @@ async check_success_selector(selector, page = this.page) {
   async gotoLogin(page = this.page) {
     try {
       await page.goto(links.SIGNIN_LINK, {
-        //waitUntil: 'load',
-        waitUntil: 'domcontentloaded',
-        timeout: 60000 // it may load too long! critical here
-      });
+        waitUntil: 'load',
+        //waitUntil: 'domcontentloaded',
+        timeout: 30000 // it may load too long! critical here
+      })
 
-      await page.waitFor(15000) // puppeteer wait loading..
+      await page.waitFor(7000) // puppeteer wait loading..
 
-      let current_url = page.url();
+      let current_url = page.url()
+      log.debug('gotoLogin - current_url: ', current_url)
 
       if (current_url.includes('login') || current_url.includes('signup')) {
 
-        let loginAction = new LoginAction.LoginAction(this.credentials_id);
-        await loginAction.setContext(this.context);
+        let loginAction = new LoginAction.LoginAction(this.credentials_id)
+        await loginAction.setContext(this.context)
 
-        await loginAction.login(); // if unsuccess - throw eeror
+        await loginAction.login() // if unsuccess - throw eeror
         
       } else if (current_url.includes(links.START_PAGE_SHORTLINK)) {
-        return; // success
+        return // success
       } else {
-        log.debug('gotoLogin - current url: ', current_url);
-        throw new Error("gotoLogin - We cann't go to page, we got: " + current_url);
+        log.error('gotoLogin - current url: ', current_url)
+        throw new Error("gotoLogin - We cann't go to page, we got: " + current_url)
       }
 
     } catch (err) { 
+      log.error('gotoLogin - current page: ', page.url())
+      log.error('gotoLogin - error: ', err.stack)
+
       if(this.check_block(page.url())) {
-        throw MyExceptions.ContextError("gotoLogin - Block happend.");
+        throw MyExceptions.ContextError("gotoLogin - Block happend.")
       }
 
-      throw new Error('gotoLogin - Uncknowm page here: ', page.url());
+      throw new Error('gotoLogin error: ', err)
     }
   }
 

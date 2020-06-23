@@ -11,48 +11,52 @@ const status_codes = require('../status_codes');
 async function get_cookies(credentials_id) {
 
   let account = await models.Accounts.findOne({ _id: credentials_id }, function (err, res) {
-    if (err) throw MyExceptions.MongoDBError('MongoDB find account err: ' + err);
-  });
+    if (err) throw MyExceptions.MongoDBError('MongoDB find account err: ' + err)
+  })
 
-  let is_expired = check_expired(account); // true if we have to update cookies
-
-  if (account == null || is_expired) {
-    let loginAction = new modules.loginAction.LoginAction(credentials_id);
-    await loginAction.startBrowser();
-    await loginAction.login();
-    await loginAction.closeBrowser();
-
-    account = await models.Accounts.findOne({ _id: credentials_id }, function (err, res) {
-      if (err) throw MyExceptions.MongoDBError('MongoDB find account err: ' + err);
-    });
-
-    return account.cookies;
+  if(account == null) {
+    throw new Error("get_cookies: Account not found with credentials_id:", credentials_id)
   }
 
-  return account.cookies;
+  let is_expired = check_expired(account) // true if we have to update cookies
+
+  if (account.cookies == null || !Array.isArray(account.cookies) || account.cookies.length <= 0 || is_expired) {
+    let loginAction = new modules.loginAction.LoginAction(credentials_id)
+    await loginAction.startBrowser()
+    await loginAction.login()
+    await loginAction.closeBrowser()
+
+    account = await models.Accounts.findOne({ _id: credentials_id }, function (err, res) {
+      if (err) throw MyExceptions.MongoDBError('MongoDB find account err: ' + err)
+    })
+
+    return account.cookies
+  }
+
+  return account.cookies
 }
 
 
 function check_expired(account) {
-  if (account == null) {
-    return true;
+  if (account.expires == null) {
+    return true
   }
-  return (Date.now() / 1000 > account.expires);
+  return (Date.now() / 1000 > account.expires)
 }
 
 
 function serialize_data(input_data) {
-  if (!input_data) {
-    throw new Error('SERIALIZATION error: input_data can’t be empty');
+  if (input_data == null) {
+    throw new Error('SERIALIZATION error: input_data can’t be empty')
   }
 
-  let task_data = {};
+  let task_data = {}
 
-  task_data['campaign_data'] = input_data.campaign_data;
-  task_data['template_data'] = input_data.template_data;
-  task_data['prospect_data'] = input_data.prospect_data;
+  task_data['campaign_data'] = input_data.campaign_data
+  task_data['template_data'] = input_data.template_data
+  task_data['prospect_data'] = input_data.prospect_data
 
-  return task_data;
+  return task_data
 }
 
 
