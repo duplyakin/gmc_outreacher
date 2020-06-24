@@ -8,7 +8,10 @@
             <div slot="header">
               <h3 class="card-title text-center">Register</h3>
             </div>
-            <div>
+
+            <pulse-loader :loading="loading" :color="color"></pulse-loader>
+
+            <div v-if="!loading">
               <fg-input
                 label="Email address"
                 placeholder="Enter email"
@@ -45,6 +48,7 @@
               >Create Free Account</button>
               <br />
             </div>
+
           </card>
         </form>
       </div>
@@ -56,6 +60,7 @@ import {
   Checkbox as LCheckbox,
   FadeRenderTransition
 } from "src/components/index";
+import { PulseLoader } from "vue-spinner/dist/vue-spinner.min.js";
 
 const AuthLayout = () => import('./AuthLayout.vue')
 
@@ -63,6 +68,7 @@ import { mapGetters } from "vuex";
 
 export default {
   components: {
+    PulseLoader,
     LCheckbox,
     FadeRenderTransition,
     AuthLayout
@@ -77,6 +83,9 @@ export default {
 
   data() {
     return {
+      loading: false,
+      color: "#a7a7ff",
+
       model: {
         email: "",
         password: "",
@@ -94,18 +103,23 @@ export default {
       document.body.classList.remove("off-canvas-sidebar");
     },
     async onSubmit() {
-      var _this = this;
+      var _this = this
+      this.loading = true
+
       await this.$store.dispatch("auth/register", this.model).then(
           resolve => {
-            _this.$router.push("profile");
+            _this.$router.push("profile")
+            _this.loading = false
           },
           reject => {
-            console.log("error here: ", reject);
+            console.log("error here: ", reject)
+            _this.loading = false
           }
         )
         .catch(err => {
-          console.error("register error: ", err);
-        });
+          console.error("register error: ", err)
+          _this.loading = false
+        })
     },
   },
   beforeDestroy() {

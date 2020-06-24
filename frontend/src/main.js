@@ -23,8 +23,8 @@ Vue.use(VModal, { dynamic: true })
 import VueYouTubeEmbed from 'vue-youtube-embed'
 Vue.use(VueYouTubeEmbed)
 
-//import directive from 'element-ui/packages/popover/src/directive';
-//Vue.directive('Loading', directive);
+import PulseLoader from 'vue-spinner/src/PulseLoader.vue' // http://greyby.github.io/vue-spinner/?ref=madewithvuejs.com
+Vue.use(PulseLoader)
 
 // configure router
 const router = new VueRouter({

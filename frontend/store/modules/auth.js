@@ -107,10 +107,12 @@ const actions = {
 				}
 				else {
 					commit('put_register_error', r.msg)
+					//console.log("put_register_error r:", r)
 					reject(r.msg)
 				}
 			}).catch(error => {
 				commit('put_register_error', error)
+				//console.log("put_register_error catch error:", error)
 				reject(error)
 			})
 		})

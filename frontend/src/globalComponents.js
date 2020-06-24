@@ -1,8 +1,9 @@
 import fgInput from './components/Inputs/formGroupInput.vue'
 import DropDown from './components/Dropdown.vue'
 import Card from './components/Cards/Card.vue'
-import Button from './components/Button.vue';
+import Button from './components/Button.vue'
 import {Input, InputNumber} from 'element-ui'
+
 /**
  * You can register global components here and use them as a plugin in your main Vue instance
  */

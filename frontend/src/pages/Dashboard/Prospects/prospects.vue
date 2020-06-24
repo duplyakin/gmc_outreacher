@@ -106,8 +106,10 @@
         </card>
 
         </div>
+        <pulse-loader :loading="loading" :color="color"></pulse-loader>
         <div v-if="prospects_data.prospects.length > 0" class="col-12">
         <el-table stripe
+                    v-if="!loading"
                     ref="prospects_data_table"
                     style="width: 100%;"
                     @selection-change="handleSelectionChange"
@@ -168,6 +170,7 @@
 </template>
 <script>
 import { Notification, Table, TableColumn, Select, Option } from 'element-ui'
+import { PulseLoader } from 'vue-spinner/dist/vue-spinner.min.js'
 
 const ProspectPagination = () => import('./prospectPagination.vue')
 const NotificationMessage = () => import('./notification.vue')
@@ -202,6 +205,7 @@ var FileSaver = require('file-saver');
 
 export default {
 components: {
+    PulseLoader,
     ProspectPagination,
     ProspectEdit,
     ProspectListAdd,
@@ -230,6 +234,9 @@ computed: {
 data () {     
     return {
         test : false,
+
+        loading: true,
+        color: "#a7a7ff",
         
         list_data : {
             columns : [],
@@ -326,6 +333,8 @@ methods: {
             var prospects = JSON.parse(from_data.prospects)
             this.$set(this.prospects_data, 'prospects', prospects);
         }
+
+        this.loading = false
     },
     serialize_fitler(filter){
         var res = {

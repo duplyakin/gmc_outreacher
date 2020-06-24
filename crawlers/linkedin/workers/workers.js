@@ -39,8 +39,16 @@ async function get_cookies(credentials_id) {
 
 function check_expired(account) {
   if (account.expires == null) {
+    log.debug("check_expired: expires is null, credentials_id:", account._id)
     return true
   }
+
+  if(Date.now() / 1000 > account.expires) {
+    log.debug("check_expired: expires is OLD, credentials_id:", account._id)
+    log.debug("check_expired: account.expires:", account.expires)
+    log.debug("check_expired: expires now:", Date.now() / 1000)
+  }
+
   return (Date.now() / 1000 > account.expires)
 }
 
