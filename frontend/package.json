@@ -46,6 +46,7 @@
     "vue-router": "^3.0.2",
     "vue-scrollama": "^1.1.9",
     "vue-scrollbar-simple": "0.0.4",
+    "vue-spinner": "^1.0.3",
     "vue-tinymce-editor": "^1.6.2",
     "vue-youtube-embed": "^2.2.2",
     "vue2-google-maps": "^0.8.4",

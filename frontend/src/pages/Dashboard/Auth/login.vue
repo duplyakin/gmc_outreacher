@@ -5,14 +5,15 @@
         <form method="#" action="#">
           <!--You can specify transitions on initial render. The `card-hidden` class will be present initially and then it will be removed-->
           <card>
-
             <div slot="header">
               <h3 class="card-title text-center">Login</h3>
             </div>
 
-            <div class="mb-3">
+            <pulse-loader :loading="loading" :color="color"></pulse-loader>
+
+            <div v-if="!loading">
               <div class="row">
-                <div class="col-12">
+                <div class="col-12 mb-3">
                   <label class="text">email</label>
                   <el-input
                     label="Email address"
@@ -24,7 +25,7 @@
               </div>
 
               <div class="row">
-                <div class="col-12">
+                <div class="col-12 mb-3">
                   <label class="text">password</label>
                   <el-input
                     label="passsword"
@@ -39,15 +40,15 @@
               <div v-if="error" class="form-group">
                 <small class="text-danger">{{ error }}</small>
               </div>
-            </div>
 
-            <div class="text-center">
-              <button
-                type="submit"
-                @click.prevent="onSubmit"
-                class="btn btn-fill btn-info btn-round btn-wd"
-              >Login</button>
-              <br />
+              <div class="text-center">
+                <button
+                  type="submit"
+                  @click.prevent="onSubmit"
+                  class="btn btn-fill btn-info btn-round btn-wd"
+                >Login</button>
+                <br />
+              </div>
             </div>
 
           </card>
@@ -62,12 +63,13 @@ import {
   FadeRenderTransition
 } from "src/components/index";
 
-const AuthLayout = () => import('./AuthLayout.vue')
-
+const AuthLayout = () => import("./AuthLayout.vue");
+import { PulseLoader } from "vue-spinner/dist/vue-spinner.min.js";
 import { mapGetters } from "vuex";
 
 export default {
   components: {
+    PulseLoader,
     LCheckbox,
     FadeRenderTransition,
     AuthLayout
@@ -81,6 +83,9 @@ export default {
   },
   data() {
     return {
+      loading: false,
+      color: "#a7a7ff",
+
       model: {
         email: "",
         password: ""
@@ -96,22 +101,29 @@ export default {
       document.body.classList.remove("off-canvas-sidebar");
     },
     onSubmit() {
-      var _this = this;
-      this.$store.dispatch("auth/login", this.model).then(
+      var _this = this
+      this.loading = true
+      
+      this.$store
+        .dispatch("auth/login", this.model)
+        .then(
           resolve => {
-            _this.$router.push("profile");
+            _this.$router.push("profile")
+            _this.loading = false
           },
           reject => {
-            console.log("error here: ", reject);
+            console.log("error here: ", reject)
+            _this.loading = false
           }
         )
         .catch(err => {
-          console.error("login error: ", err);
+          console.error("login error: ", err)
+          _this.loading = false
         });
     }
   },
   beforeDestroy() {
-    this.closeMenu();
+    this.closeMenu()
   }
 };
 </script>

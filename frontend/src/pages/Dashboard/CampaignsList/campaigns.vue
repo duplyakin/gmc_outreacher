@@ -27,8 +27,9 @@
 
 <card>
         <div class="col-12">
+            <pulse-loader :loading="loading" :color="color"></pulse-loader>
             <el-table
-            :v-loading="loading"
+            v-if="!loading"
             stripe
             ref="campaigns_data_table"
             style="width: 100%;"
@@ -89,8 +90,9 @@
 </div>
 </template>
 <script>
-import { Notification, Loading, Table, TableColumn, Select, Option } from "element-ui";
+import { Notification, Table, TableColumn, Select, Option } from "element-ui";
 import { Pagination as LPagination } from "src/components/index";
+import { PulseLoader } from 'vue-spinner/dist/vue-spinner.min.js';
 
 import axios from '@/api/axios-auth';
 
@@ -103,8 +105,7 @@ const CAMPAIGNS_API_PAUSE = '/campaigns/pause';
 
 export default {
 components: {
-    [Loading.name]: Loading,
-    Loading,
+    PulseLoader,
     LPagination,
     [Select.name]: Select,
     [Option.name]: Option,
@@ -117,6 +118,7 @@ data() {
     return {
         test : false,
         loading: true,
+        color: "#a7a7ff",
         
         status : {
             0 : 'New',
@@ -294,6 +296,8 @@ methods: {
             var campaigns = JSON.parse(from_data.campaigns)
             this.$set(this.campaigns_data, 'campaigns', campaigns);
         }
+
+        this.loading = false
     },
 
 },

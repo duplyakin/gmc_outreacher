@@ -8,7 +8,7 @@ const Register = () => import('src/pages/Dashboard/Auth/register.vue')
 
 //CUSTOM components created by me
 const Profile = () => import('src/pages/Dashboard/Profile/profile.vue')
-//const Profile = () => import('src/pages/Dashboard/Profile/1.vue')
+//const Profile = () => import('src/pages/Dashboard/Profile/1.vue') // test file
 const Blacklist = () => import('src/pages/Dashboard/Blacklist/blacklist.vue')
 const Dashboard = () => import('src/pages/Dashboard/Overview/Dashboard.vue')
 const Help = () => import('src/pages/Dashboard/Overview/help.vue')
