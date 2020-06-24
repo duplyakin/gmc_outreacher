@@ -22,13 +22,15 @@ gunicorn -b localhost:8880 -w 4 o24.wsgi:app #test gunicorn
 gunicorn -c gunicorn_config_dev.py -e APP_ENV=Test o24.wsgi:app
 
 #CREATE PRODUCTION TEST DATA
-python -m unittest discover -s .\o24\production_tests\ -p "*test_production_database.py"
+APP_ENV=Production python -m unittest discover -s ./o24/production_tests/ -p "*test_production_database.py"
 
+#load Production google apps cookie
+python -m o24.migrations.update_google_settings prod
 
 Добавляем сертификат:
 sudo add-apt-repository ppa:certbot/certbot
 sudo apt install python-certbot-nginx
-sudo certbot --nginx -d outreacher24.com -d dv.outreacher24.com
+sudo certbot --nginx -d outreacher24.com -d dv.outreacher24.com -d app.outreacher24.com -d via.outreacher24.com
 
  - Congratulations! Your certificate and chain have been saved at:
    /etc/letsencrypt/live/outreacher24.com/fullchain.pem
