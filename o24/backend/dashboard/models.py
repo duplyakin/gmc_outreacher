@@ -842,10 +842,13 @@ class Credentials(db.Document):
         
         increase = self.warmup_limits.get('increase')
         for action, counter in self.warmup_limits.items():
+            if action in WORKAROUND_PASS:
+                continue
+                
             max_counter = self.limits.get(action)
-            next_counter = ceil(int(counter) * increase)
+            next_counter = ceil(counter * increase)
 
-            if int(next_counter) > int(max_counter):
+            if next_counter > max_counter:
                 self.warmup_limits[action] = max_counter
             else:
                 self.warmup_limits[action] = next_counter

@@ -463,7 +463,7 @@ methods: {
                 }else{
                     var csv =r.csv;
                     if (csv){
-                        var file = new File(csv, "export.csv", {type: "text/csv;charset=utf-8"});
+                        var file = new File([csv], "export.csv", {type: "text/csv;charset=utf-8"});
                         FileSaver.saveAs(file);
                     }else{
                         var msg = "Something went wrong, try again or contact support: " + r.msg;

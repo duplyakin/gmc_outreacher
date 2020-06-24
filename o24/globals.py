@@ -266,6 +266,8 @@ LINKEDIN_LIMITS_DAILY = {
         }
 }
 
+WORKAROUND_PASS = ['account_maximum', 'interval_sec', 'increase', 'days_inactivity']
+
 BOUNCED_DAEMONS = {
         'api' : 'mailer-daemon@googlemail.com',
         'smtp' : 'mailer-daemon@googlemail.com'
