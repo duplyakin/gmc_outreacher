@@ -53,7 +53,7 @@ class User(db.Document):
     invite_code = db.StringField(default='')
     invited_by = db.StringField(default='')
 
-    def __created(self):
+    def when_created(self):
         #Create special-medium
         exist = Credentials.objects(owner=self.id, medium='special-medium').first()
         if not exist:
@@ -844,7 +844,7 @@ class Credentials(db.Document):
         for action, counter in self.warmup_limits.items():
             if action in WORKAROUND_PASS:
                 continue
-                
+
             max_counter = self.limits.get(action)
             next_counter = ceil(counter * increase)
 

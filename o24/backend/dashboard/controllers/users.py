@@ -76,7 +76,7 @@ def sign_up():
             current_user._commit(_reload=True)
             
             #TODO: make it more clear
-            current_user._created()
+            current_user.when_created()
 
             session['user_id'] = str(current_user.id)
 
