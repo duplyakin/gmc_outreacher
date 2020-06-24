@@ -21,6 +21,9 @@ pip install gunicorn
 gunicorn -b localhost:8880 -w 4 o24.wsgi:app #test gunicorn
 gunicorn -c gunicorn_config_dev.py -e APP_ENV=Test o24.wsgi:app
 
+#CREATE PRODUCTION TEST DATA
+python -m unittest discover -s .\o24\production_tests\ -p "*test_production_database.py"
+
 
 Добавляем сертификат:
 sudo add-apt-repository ppa:certbot/certbot
