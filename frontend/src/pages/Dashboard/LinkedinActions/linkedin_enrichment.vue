@@ -46,7 +46,7 @@
                     <a @click.prevent="editCampaign(scope.row, scope.$index)" href="#" v-if="column.prop === 'title'">{{ scope.row[column.prop] }}</a>
                     <template v-else-if="column.prop === 'status'">{{  status[scope.row[column.prop]] }}</template>
                     <template v-else-if="column.prop === 'funnel' && scope.row[column.prop] !== undefined"> {{ scope.row[column.prop].title }} </template>
-                    <template v-else>{{  scope.row[column.prop] }}</template>
+                    <template v-else>{{ show_data(scope.row, column) }}</template>
                 </template>
             </el-table-column>
             
@@ -169,19 +169,25 @@ methods: {
         }
     },
     show_data(scope_row, column){
-        var data = column.data || '';
+        var data = column.data || false;
+        var value = '-';
+
         if (data){
-            return scope_row.data[column.prop] || '';
+            value = scope_row.data[column.prop] || '-';
         }else{
-            var field = column.field || '';
-            if (field){
-                return scope_row[column.prop][field] || '';
+            var field = column.field || ''; 
+            if (field !== ''){
+                if (scope_row[column.prop]){
+                    value = scope_row[column.prop][column.field] || '-';
+                }else{
+                    value = '-';
+                }
             }else{
-                return scope_row[column.prop] || '';
+                value = scope_row[column.prop] || '-';
             }
         }
 
-        return '';
+        return value;
     },
     delete_campaign(campaign_id, row_index){
         if (confirm("Are you sure?")) {

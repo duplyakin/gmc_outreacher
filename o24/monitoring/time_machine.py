@@ -21,6 +21,18 @@ from o24.enricher.models import EnrichTaskQueue
 
 MOSCOW = 'Europe/Moscow'
 
+def inc_warmup_limits(credentials):
+    limits = credentials.limits
+    warmup_limits = credentials.warmup_limits
+
+    for action, count in warmup_limits.items():
+        max_count = limits.get(action, '')
+        if max_count:
+            if count < max_count:
+                warmup_limits[action] = max_count
+    
+    credentials._commit()
+
 def check_enrich_finished(task):
     prospect_id = task.prospect_id
 
@@ -94,6 +106,8 @@ def inc_limits():
         
         credentials.next_action = parse("1980-05-25T16:31:37.436Z")
         credentials._commit()
+
+        inc_warmup_limits(credentials)
 
     
 

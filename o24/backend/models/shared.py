@@ -372,6 +372,7 @@ class TaskQueue(db.Document):
                                 credentials_id=self.credentials_id, 
                                 template_key=template_key)
 
+        self.result_data = {}
         self._commit()
 
 

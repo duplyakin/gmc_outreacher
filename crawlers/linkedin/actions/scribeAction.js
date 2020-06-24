@@ -12,7 +12,6 @@ class ScribeAction extends action.Action {
   }
 
   async scribe() {
-    await super.gotoLogin()
     await super.gotoChecker(this.url)
 
     let result = {}

@@ -49,7 +49,7 @@ const CONNECT_URL_5 = "https://www.linkedin.com/in/alexyerokhin/";
         domain: '.linkedin.com',
         path: "/",
         expires: Date.now() / 1000 + 10000000, // + ~ 4 months // https://www.epochconverter.com/
-        size: 127,
+        size: 157,
         httpOnly: true,
         secure: true,
         session: false,
@@ -59,7 +59,15 @@ const CONNECT_URL_5 = "https://www.linkedin.com/in/alexyerokhin/";
       status: 0,
     }
 
-    let account = await models.Accounts.findOneAndUpdate({ _id: account_id }, account_data, { new: true, upsert: true });
+    let account_data2 = {
+      login: "mrgeen12358@gmail.com",
+      password: "A123456a",
+      cookies: [],
+      expires: Date.now() / 1000 + 10000000, // + ~ 4 months // https://www.epochconverter.com/
+      status: 0,
+    }
+
+    let account = await models.Accounts.findOneAndUpdate({ _id: account_id }, account_data2, { new: true, upsert: true });
     let task = await models_shared.TaskQueue.findOneAndUpdate({ _id: task_id }, task_data, { new: true, upsert: true });
 
     console.log('..........account.............', account)

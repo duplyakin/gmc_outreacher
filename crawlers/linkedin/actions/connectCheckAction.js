@@ -13,7 +13,6 @@ class ConnectCheckAction extends action.Action {
   }
 
   async connectCheck() {
-    await super.gotoLogin()
     await super.gotoChecker(this.url)
 
     // wait selector here

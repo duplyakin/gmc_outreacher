@@ -8,53 +8,47 @@ var log = require('loglevel').getLogger("o24_logger");
 
 class LoginAction {
     constructor(credentials_id) {
-        this.credentials_id = credentials_id;
+        this.credentials_id = credentials_id
     }
 
     async startBrowser() {
-        //this.browser = await puppeteer.launch({ headless: false }); // test mode
-        this.browser = await puppeteer.launch();
-        this.context = await this.browser.createIncognitoBrowserContext();
-        this.page = await this.context.newPage();
+        //this.browser = await puppeteer.launch({ headless: false }) // test mode
+        this.browser = await puppeteer.launch()
+        this.context = await this.browser.createIncognitoBrowserContext()
+        this.page = await this.context.newPage()
 
-        //this.set_cookie(this.cookies);
+        //this.set_cookie(...this.cookies)
     }
 
     async closeBrowser() {
-        await this.browser.close();
-        this.browser.disconnect();
+        await this.browser.close()
+        this.browser.disconnect()
       }
 
     async setContext(context) {
-        this.context = context;
-        this.page = await this.context.newPage();
+        this.context = context
+        this.page = await this.context.newPage()
     }
 
     async set_cookie(cookies) {
-        if (cookies != undefined && cookies != null) {
+        if (cookies != null) {
             //log.debug('cooooookiieeeess: ', cookies)
-            await this.page.setCookie(...cookies);
-            return true;
+            await this.page.setCookie(...cookies)
+            return true
         }
-        return false;
+        return false
     }
 
     async _get_domain() {
-        await this.page.goto(links.SIGNIN_LINK);
-        await this.page.waitFor(1000);
-
-        let current_url = this.page.url();
+        let current_url = this.page.url()
 
         // Exctract domain here in format: “www.linkedin.com”
 
-        return (new URL(current_url)).hostname;
+        return (new URL(current_url)).hostname
     }
 
     async _get_current_cookie() {
         // Get Session Cookies
-        await this.page.goto(links.SIGNIN_LINK);
-        await this.page.waitFor(1000);
-
         let newCookies = await this.page.cookies();
         if (!newCookies) {
             throw new Error("Can't get cookie.");
@@ -96,8 +90,8 @@ class LoginAction {
         await this.page.goto(links.SIGNIN_LINK, {
             waitUntil: 'load',
             timeout: 60000 // it may load too long! critical here
-        });*/
-        /*
+        })
+        
         try {
             await this.page.waitForSelector(selectors.USERNAME_SELECTOR, { timeout: 5000 });
         } catch (err) {
@@ -151,27 +145,28 @@ class LoginAction {
 */
 
     async is_logged() {
-        //await this.page.waitFor(1000);
         /*
+        await this.page.waitFor(2000)
         await this.page.goto(links.SIGNIN_LINK, {
             waitUntil: 'load',
             timeout: 60000 // it may load too long! critical here
-        });*/
+        })
 
-        //await page.waitFor(7000) // puppeteer wait loading..
+        await this.page.waitFor(7000) // puppeteer wait loading..
+        */
 
-        let current_url = this.page.url();
+        let current_url = this.page.url()
         if (current_url.includes(links.START_PAGE_SHORTLINK)) {
             // login success
             log.debug("LoginAction: Login success.")
-            return true;
+            return true
         } else if (this.check_block(current_url)) {
             // BAN here
-            log.debug("LoginAction: Not logged - BAN here. current url: ", current_url);
-            throw MyExceptions.ContextError("Can't goto url: " + current_url);
+            log.debug("LoginAction: Not logged - BAN here. current url: ", current_url)
+            throw MyExceptions.ContextError("Can't goto url: " + current_url)
         }
 
-        log.debug("LoginAction: Not logged. current url: ", current_url);
+        log.debug("LoginAction: Not logged. current url: ", current_url)
         // login failed
         return false;
     }
@@ -179,11 +174,11 @@ class LoginAction {
     async login() {
 
         // check - if we logged
-        let logged = await this.is_logged();
+        let logged = await this.is_logged()
         if (logged) {
-            await this._update_cookie();
-            await this.page.close();
-            return logged;
+            await this._update_cookie()
+            await this.page.close()
+            return logged
         }
 
         /*
@@ -230,7 +225,7 @@ class LoginAction {
 
     check_block(url) {
         if(!url) {
-          throw new Error('Empty url in check_block in LoginAction.')
+          throw new Error('LoginAction: Empty url in check_block.')
         }
     
         if(url.includes(links.BAN_LINK) || url.includes(links.CHALLENGE_LINK)) {

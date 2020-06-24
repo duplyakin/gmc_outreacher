@@ -283,3 +283,27 @@ RANDOM_INTERVAL_MAX = 5 # will calculate interval = randrange(interval_sec, inte
 
 TASK_QUEUE_LOCK = 'taskqueue_lock'
 ENRICH_TASK_QUEUE_LOCK = 'enrich_taskqueue_lock'
+
+CSV_EXPORT_HEADERS = {
+        'campaign' : 'assign_to#title',
+        'leads list' : 'assign_to_list#title',
+        'first_name' : 'data#first_name',
+        'last_name' : 'data#last_name',
+        'email' : 'data#email',
+        'linkedin' : 'data#linkedin',
+        'company url' : 'data#company_url',
+        'company linkedin page' : 'data#company_linkedin_page',
+        'country' : 'data#country',
+        'education' : 'data#education',
+        'job title' : 'data#job_title',
+        'twitter' : 'data#twitter'
+}
+
+CAMPAIGN_STATUSES_CSV = {
+        0 : 'New',
+        1 : 'In progress',
+        2 : 'Paused',
+        3 : 'Finished',
+        -1 : 'Failed',
+        -2 : 'Failed need action'
+}

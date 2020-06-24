@@ -17,7 +17,6 @@ class SearchAction extends action.Action {
       throw new Error('Empty search url.');
     }
     
-    await super.gotoLogin();
     await super.gotoChecker(this.searchUrl);
 
     let currentPage = 1;
@@ -89,22 +88,23 @@ class SearchAction extends action.Action {
 
         if (await this.page.$(selectors.NEXT_PAGE_MUTED_SELECTOR) != null) {
           // all awailable pages has been scribed
-          result_data.code = 1000;
-          log.debug('SearchAction: All awailable pages has been scribed!');
-          break;
+          result_data.code = 1000
+          log.debug('SearchAction: All awailable pages has been scribed!')
+          break
         }
 
         await this.page.click(selectors.NEXT_PAGE_SELECTOR);
-        await this.page.waitFor(2000); // critical here!?
+        await this.page.waitFor(2000) // critical here!?
         // here we have to check BAN page
-        result_data.data.link = this.page.url(); // we have to send NEXT page link in task
+        result_data.data.link = this.page.url() // we have to send NEXT page link in task
 
-        currentPage++;
+        currentPage++
       }
     } catch (err) {
-      log.error("SearchAction: we catch something strange:", err);
-      result_data.data = JSON.stringify(result_data.data);
-      return result_data;
+      log.error("SearchAction: we catch something strange:", err)
+      result_data.code = -1000
+      result_data.data = JSON.stringify(result_data.data)
+      return result_data
     }
 
     //log.debug("SearchAction: Reult Data: ", result_data)

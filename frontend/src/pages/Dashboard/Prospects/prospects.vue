@@ -19,6 +19,7 @@
         <div v-if="multipleSelection.length == 0">
         <button @click.prevent="addProspect" type="button" class="btn btn-default btn-success mx-1">Add manually</button>
         <button @click.prevent="uploadProspect" type="button" class="btn btn-default btn-success mx-1">Upload CSV</button>
+        <button @click.prevent="exportAllProspects" type="button" class="btn btn-default btn-success mx-1">Export All</button>
         <button @click.prevent="reload_prospects" type="button" class="btn btn-default btn-success mx-1">Refresh</button>
         </div>
     
@@ -192,9 +193,12 @@ const PROSPECTS_API_UNASSIGN = '/prospects/campaign/unassign';
 const PROSPECTS_API_ASSIGN = '/prospects/campaign/assign';
 const PROSPECTS_API_UPLOAD = '/prospects/upload';
 
-const PROSPECTS_API_LIST_REMOVE = '/prospects/list/remove'
-const PROSPECTS_API_LIST_ADD = '/prospects/list/add'
+const PROSPECTS_API_LIST_REMOVE = '/prospects/list/remove';
+const PROSPECTS_API_LIST_ADD = '/prospects/list/add';
 
+const PROSPECTS_EXPORT = '/prospects/export';
+
+var FileSaver = require('file-saver');
 
 export default {
 components: {
@@ -443,6 +447,35 @@ methods: {
             height: 'auto',
             scrollable: true
             })
+    },
+    exportAllProspects(){
+        if (confirm("Are you sure? (It will take some time)")){
+            const path = PROSPECTS_EXPORT;
+
+            var data = new FormData();
+
+            axios.post(path, data)
+            .then((res) => {
+                var r = res.data;
+                if (r.code <= 0){
+                    var msg = "Error code: " + r.msg;
+                    Notification.error({title: "Error", message: msg});
+                }else{
+                    var csv =r.csv;
+                    if (csv){
+                        var file = new File(csv, "export.csv", {type: "text/csv;charset=utf-8"});
+                        FileSaver.saveAs(file);
+                    }else{
+                        var msg = "Something went wrong, try again or contact support: " + r.msg;
+                        Notification.error({title: "Error", message: msg});
+                    }
+                }
+            })
+            .catch((error) => {
+                var msg = "Error: " + error;
+                Notification.error({title: "Error", message: msg});
+            });
+        }
     },
     addProspect(){
         const _table = this.$refs.prospects_data_table;

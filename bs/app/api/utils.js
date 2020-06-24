@@ -342,13 +342,7 @@ const input_data = async (account, input) => {
         let res = await found_form_and_input(page, input);
         log.debug('input_data res = ', res);
 
-        if(res == 0) {
-            // block resolved
-            await models_shared.Credentials.findOneAndUpdate({ _id: account._id }, { status: status_codes.ACTIVE }, { upsert: false });
-            if(account.task_id != null) {
-                await models_shared.TaskQueue.findOneAndUpdate({ _id: account.task_id }, { status: status_codes.NEED_USER_ACTION_RESOLVED }, { upsert: false });
-            }
-
+        if(res == 0) { // block resolved
             // get new cookies
             let new_cookies = await _get_current_cookie(page);
             let new_expires = 0;
@@ -367,7 +361,11 @@ const input_data = async (account, input) => {
             }
 
             await models.Accounts.findOneAndUpdate({ _id: account._id }, account_update, { upsert: false });
-
+            await models_shared.Credentials.findOneAndUpdate({ _id: account._id }, { status: status_codes.ACTIVE }, { upsert: false });
+            if(account.task_id != null) {
+                await models_shared.TaskQueue.findOneAndUpdate({ _id: account.task_id }, { status: status_codes.NEED_USER_ACTION_RESOLVED }, { upsert: false });
+            }
+            
             await browser.close();
             browser.disconnect();
             log.debug("..... BLOCK RESOLVED. ..... ");
@@ -422,13 +420,7 @@ const input_login = async (account) => {
         let res = await login(page, account);
         log.debug('input_login res = ', res);
 
-        if(res === 0) {
-            // login success
-            await models_shared.Credentials.findOneAndUpdate({ _id: account._id }, { status: status_codes.ACTIVE }, { upsert: false });
-            if(account.task_id != null) {
-                await models_shared.TaskQueue.findOneAndUpdate({ _id: account.task_id }, { status: status_codes.NEED_USER_ACTION_RESOLVED }, { upsert: false });
-            }
-
+        if(res === 0) { // login success
             // get new cookies
             let new_cookies = await _get_current_cookie(page);
             let new_expires = 0;
@@ -446,7 +438,14 @@ const input_login = async (account) => {
                 expires: new_expires,
                 task_id: null, // !
             }
+
+            //log.debug('input_login account_new = ', account_new)
+            
             await models.Accounts.findOneAndUpdate({ _id: account._id }, account_new, { upsert: false }); // upsert = false; because we have already created account object in DB
+            await models_shared.Credentials.findOneAndUpdate({ _id: account._id }, { status: status_codes.ACTIVE }, { upsert: false });
+            if(account.task_id != null) {
+                await models_shared.TaskQueue.findOneAndUpdate({ _id: account.task_id }, { status: status_codes.NEED_USER_ACTION_RESOLVED }, { upsert: false });
+            }
 
             await browser.close();
             browser.disconnect();
@@ -496,15 +495,12 @@ const input_login = async (account) => {
 
 const _get_current_cookie = async (page) => {
     // Get Session Cookies
-    await page.goto(links.SIGNIN_LINK);
-    await page.waitFor(1000);
-
-    let newCookies = await page.cookies();
+    let newCookies = await page.cookies()
     if (!newCookies) {
-        throw new Error("Can't get cookie."); //todo: don't throw error here (?)
+        throw new Error("Can't get cookie.") //todo: don't throw error here (?)
     }
 
-    return newCookies;
+    return newCookies
 }
 
 

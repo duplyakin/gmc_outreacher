@@ -61,10 +61,11 @@ def start_linkedin_enrichment_campaign(task):
     if not prospects or len(prospects) <= 0:
         raise Exception("start_linkedin_enrichment_campaign: no prospects for list_id={0}".format(list_id))
 
-
-    new_campaign = campaign.fork_linkedin_enrichment_campaign()
+    new_campaign = models.Campaign.objects(fork_from=campaign.id).first()
     if not new_campaign:
-        raise Exception("start_linkedin_enrichment_campaign: something went wrong after campaign.fork_linkedin_enrichment_campaign")
+        new_campaign = campaign.fork_linkedin_enrichment_campaign()
+        if not new_campaign:
+            raise Exception("start_linkedin_enrichment_campaign: something went wrong after campaign.fork_linkedin_enrichment_campaign")
     
     ids = [p.id for p in prospects]
     scheduler.Scheduler.safe_assign_prospects(owner_id=owner_id, 
@@ -78,33 +79,18 @@ def start_linkedin_enrichment_campaign(task):
     scheduler_models.ActionLog.log(task, step='start_linkedin_enrichment_campaign', description="start_linkedin_enrichment_campaign")
     return
 
-def linkedin_search_action(task):
-    #Special type of action
-    # 1. Need to get prospects and create data from that
-    # 2. Update campaign data with next_page 
-    # 3. Update input_data
-    # 4. If it's the last one then task.status=FINISHED  other way task.status=NEW
-    if task.status != CARRYOUT:
-        raise Exception("WRONG STATUS: linkedin_search_action should be called for CARRYOUT status. task.id={0} task.status={1}".format(task.id, task.status))
+def _save_search_data(task, campaign):
 
-    result_data = task.get_result_data()
-    if not result_data:
-        raise Exception("linkedin_search_action ERROR: wrong or empty result_data={0}".format(result_data))
-    
-
-    campaign = task.get_campaign()
-    if not campaign:
-        task.update_status(status=FAILED)
-        raise Exception("linkedin_search_action ERROR: There is no campaign for task.id={0}".format(task.id))
-    
     owner_id = campaign.get_owner_id()
     list_id = campaign.get_list_id()
     update_existing = campaign.get_update_existing()
 
+    result_data = task.get_result_data()
     raw_data = result_data.get('data', '')
     if not raw_data:
         print("linkedin_search_action WARNING: result_data.data is empty result_data={0}".format(result_data))
-        task.update_status(status=FAILED)
+        if task.status != FAILED:
+            task.update_status(status=FAILED)
         campaign._safe_pause()
         return
     
@@ -119,11 +105,35 @@ def linkedin_search_action(task):
     search_url = data.get('link', '')
     if not search_url:
         print("linkedin_search_action WARNING: result_data.data.link is empty result_data={0}".format(result_data))
-        task.update_status(status=FAILED)
+        if task.status != FAILED:
+            task.update_status(status=FAILED)
         campaign._safe_pause()
         return
 
     is_finished = campaign.parsing_switch(next_url=search_url)
+
+    return is_finished
+
+def linkedin_search_action(task):
+    #Special type of action
+    # 1. Need to get prospects and create data from that
+    # 2. Update campaign data with next_page 
+    # 3. Update input_data
+    # 4. If it's the last one then task.status=FINISHED  other way task.status=NEW
+    if task.status != CARRYOUT:
+        raise Exception("WRONG STATUS: linkedin_search_action should be called for CARRYOUT status. task.id={0} task.status={1}".format(task.id, task.status))
+
+    result_data = task.get_result_data()
+    if not result_data:
+        raise Exception("linkedin_search_action ERROR: wrong or empty result_data={0}".format(result_data))
+    
+    campaign = task.get_campaign()
+    if not campaign:
+        task.update_status(status=FAILED)
+        raise Exception("linkedin_search_action ERROR: There is no campaign for task.id={0}".format(task.id))
+
+    is_finished = _save_search_data(task, campaign)
+
     code = int(result_data.get('code', 0))
     if code < 0:
         task.update_status(status=FAILED)

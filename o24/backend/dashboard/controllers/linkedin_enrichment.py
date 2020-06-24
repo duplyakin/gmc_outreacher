@@ -33,7 +33,22 @@ COLUMNS = [
         'label' : 'Sequence',
         'prop' : 'funnel',
         'field' : 'title',   
-    }
+    },
+    {
+        'label' : 'Pages parsed',
+        'prop' : 'pages_done',
+        'data' : True
+    },
+    {
+        'label' : 'Current page',
+        'prop' : 'search_url',
+        'data' : True
+    },
+    {
+        'label' : 'Message',
+        'prop' : 'message',
+    },
+
 ]
 
 modified_fields_on_create = {
