@@ -46,10 +46,16 @@ class Priority(db.Document):
             self.reload()
 
 class ActionLog(db.Document):
+    owner_id = db.ObjectIdField()
+    prospect_id = db.ObjectIdField()
+    campaign_id = db.ObjectIdField()
+
     task = db.DictField()
 
     description = db.StringField()
     step = db.StringField()
+
+    log_type = db.StringField()
 
     created = db.DateTimeField( default=pytz.utc.localize(datetime.utcnow()) )
 
@@ -62,7 +68,8 @@ class ActionLog(db.Document):
                 step=step,
                 description = description,
                 created = now,
-                task=task.to_mongo()
+                task=task.to_mongo(),
+                log_type='general'
             )
 
             new_log._commit()
@@ -70,6 +77,46 @@ class ActionLog(db.Document):
             print("LOG ERROR: .....")
             print(str(e))
             traceback.print_exc()
+
+    @classmethod
+    def log_open(cls, owner_id, prospect_id, campaign_id):
+        try:
+            now = pytz.utc.localize(datetime.utcnow())
+            new_log = cls(
+                owner_id = owner_id,
+                prospect_id=prospect_id,
+                campaign_id=campaign_id,
+                step='email-open-log',
+                created = now,
+                log_type='email-open'
+            )
+
+            new_log._commit()
+        except Exception as e:
+            print("OPEN LOG ERROR: .....")
+            print(str(e))
+            traceback.print_exc()
+
+    @classmethod
+    def log_enricher(cls, task, step, description):
+        try:
+            now = pytz.utc.localize(datetime.utcnow())
+            
+            task.reload()
+            new_log = cls(
+                step=step,
+                description=description,
+                created = now,
+                task=task.to_mongo(),
+                log_type='enricher-log'
+            )
+
+            new_log._commit()
+        except Exception as e:
+            print("OPEN LOG ERROR: .....")
+            print(str(e))
+            traceback.print_exc()
+
 
     def _commit(self):
         self.save()

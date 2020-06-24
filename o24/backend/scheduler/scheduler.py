@@ -25,9 +25,13 @@ class Scheduler():
     @classmethod
     def lock(cls):
         try:
-            locked = TaskQueueLock.objects(key='scheduler_lock', ack=0).update_one(upsert=True, ack=1)
+            locked = TaskQueueLock.objects(lock_key=TASK_QUEUE_LOCK, ack=0).update_one(upsert=True, ack=1)
             if not locked:
                 return None
+
+            total = TaskQueueLock.objects(lock_key=TASK_QUEUE_LOCK).count()
+            if total > 1:
+                raise Exception("...NEVER HAPPENED Scheduler.lock create more than 1 instance")
 
             scheduler = cls()
             return scheduler
@@ -41,7 +45,7 @@ class Scheduler():
         return None
 
     def unlock(self):
-        return TaskQueueLock.objects(key='scheduler_lock').update_one(upsert=False, ack=0)
+        return TaskQueueLock.objects(lock_key=TASK_QUEUE_LOCK).update_one(upsert=False, ack=0)
 
 
     ###################################### SCHEDULER CYCLE tasks  ##################################
@@ -273,16 +277,37 @@ class Scheduler():
         campaign._safe_pause()
         #campaign.update_status(status=PAUSED)
 
-    def resume_campaign(self, owner, campaign):
+    def _update_search_task(self, campaign, status):
+        task = TaskQueue.objects(campaign_id=campaign.id).first()
+        if not task:
+            raise Exception("Can't find task for campaign title={0}".format(campaign.title))
+        
+        task.update_status(status=status)
+    
+
+    def _resume_linkedin_parse_campaign(self, owner, campaign):
         if campaign.inprogress():
             raise Exception("Campaign already resumed, title={0}".format(campaign.title))
 
-        # TaskQueue.resume_tasks(campaign_id=campaign.id)
         self._input_data_refresh(campaign=campaign)
 
-        self._check_new_prospects(owner=owner, campaign=campaign)
+        self._update_search_task(campaign=campaign, status=NEW)
 
         campaign._safe_start()
+
+
+    def resume_campaign(self, owner, campaign):
+        if campaign.inprogress():
+            raise Exception("Campaign already resumed, title={0}".format(campaign.title))
+        
+        if campaign.campaign_type == LINKEDIN_PARSING_CAMPAIGN_TYPE:
+            self._resume_linkedin_parse_campaign(owner=owner, campaign=campaign)
+        else:
+            self._input_data_refresh(campaign=campaign)
+
+            self._check_new_prospects(owner=owner, campaign=campaign)
+
+            campaign._safe_start()
 
         #campaign.update_status(status=IN_PROGRESS)
 

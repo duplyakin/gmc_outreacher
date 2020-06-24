@@ -85,6 +85,8 @@ class LoginAction {
     }
 
     async login_with_email() {
+
+        /*
         await this.page.goto(links.SIGNIN_LINK, {
             waitUntil: 'load',
             timeout: 60000 // it may load too long! critical here
@@ -94,7 +96,7 @@ class LoginAction {
             await this.page.waitForSelector(selectors.USERNAME_SELECTOR, { timeout: 5000 });
         } catch (err) {
             throw MyExceptions.LoginPageError('Login page is not available.');
-        }
+        }*/
 
         let account = await this.get_account();
         if(account == null) {

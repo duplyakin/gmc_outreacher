@@ -30,6 +30,8 @@ import string
 import random
 from random import randrange
 from urllib.parse import unquote, urlparse
+import io
+import csv
 
 def generate_invite_code(stringLength=10):
     letters = string.ascii_lowercase
@@ -840,6 +842,9 @@ class Credentials(db.Document):
         
         increase = self.warmup_limits.get('increase')
         for action, counter in self.warmup_limits.items():
+            if action in WORKAROUND_PASS:
+                continue
+                
             max_counter = self.limits.get(action)
             next_counter = ceil(counter * increase)
 
@@ -907,7 +912,8 @@ class Campaign(db.Document):
     # 11 - archived (deleted)
     status = db.IntField(default=0)
     campaign_type = db.IntField(default=0)
-    
+    message = db.StringField(default='')
+
     custom_delays = db.DictField()
     tracking_events = db.DictField(default=DEAFULT_TRACKING_EVENTS)
 
@@ -968,6 +974,7 @@ class Campaign(db.Document):
                 'title' : 1,
                 'credentials' : 1,
                 'funnel' : 1,
+                'message' : 1,
                 'campaign_type' : 1
             }}
         ]
@@ -1080,6 +1087,10 @@ class Campaign(db.Document):
 
     def parsing_switch(self, next_url):
         is_finished = False
+
+        current_search_url = self.data.get('search_url', None)
+        if current_search_url and current_search_url == next_url:
+            return is_finished
 
         if self.campaign_type != LINKEDIN_PARSING_CAMPAIGN_TYPE:
             raise Exception("parsing_switch wrong campaign_type={0}".format(self.campaign_type))
@@ -1247,7 +1258,9 @@ class Campaign(db.Document):
 
         return False
 
-    def _safe_pause(self):
+    def _safe_pause(self, message=''):
+        self.message = message
+
         self.update_status(status=PAUSED)
 
     def _safe_start(self):
@@ -1263,7 +1276,7 @@ class Campaign(db.Document):
                 raise Exception("Starting error: There is no assigned prospects for this campaign")
 
         self.update_status(status=IN_PROGRESS)
-
+        self.message = ''
 
     def _validate_campaign_data(self, owner, campaign_data, changed_fields):
 
@@ -1433,7 +1446,7 @@ class Campaign(db.Document):
         new_campaign = Campaign()
         new_campaign.fork_from = self.id
 
-        new_campaign.title = "Linkedin enrichment for {0}".format(self.title)
+        new_campaign.title = "In-depth linkedin profile parsing for {0}".format(self.title)
         new_campaign.owner = self.owner
 
         new_campaign.credentials = self.credentials
@@ -1752,6 +1765,62 @@ class Prospects(db.Document):
                     tags.append('no_linkedin')
 
         return tags
+
+    @classmethod
+    def export_all(cls, owner_id):
+        db_query = cls.objects(owner=owner_id)
+        if not db_query:
+            return None
+
+        #we use it for join and showing objects as it is
+        pipeline = [
+            {"$lookup" : {
+                "from" : "campaign",
+                "localField" : "assign_to",
+                "foreignField" : "_id",
+                "as" : "assign_to"
+            }},
+            { "$unwind" : { "path" : "$assign_to", "preserveNullAndEmptyArrays": True }},
+            {"$lookup" : {
+                "from" : "prospects_list",
+                "localField" : "assign_to_list",
+                "foreignField" : "_id",
+                "as" : "assign_to_list"
+            }},
+            { "$unwind" : { "path" : "$assign_to_list", "preserveNullAndEmptyArrays": True }},
+            { "$project" : { 
+                "data" : 1,
+                "assign_to" : 1,
+                "status" : 1,
+                "tags" : 1,
+                "assign_to_list" : 1
+            }}
+        ]
+
+        prospects = list(db_query.order_by('-created').aggregate(*pipeline))
+        
+        csv.register_dialect("custom", delimiter=";")
+
+        si = io.StringIO()
+        cw = csv.writer(si, dialect="custom")
+
+        csv_headers = list(CSV_EXPORT_HEADERS.keys())
+        cw.writerow(csv_headers)
+
+        for p in prospects:
+            next_row = []
+            for header, value in CSV_EXPORT_HEADERS.items():
+                val = p.get(value, '-')
+                if '#' in value:
+                    prop, field = value.split('#')
+                    if prop and field:
+                        data = p.get(prop, '')
+                        if data:
+                            val = data.get(field, '')
+                next_row.append(val)
+            cw.writerow(next_row)
+
+        return si.getvalue()
 
     @classmethod
     def enrich_prospect(cls, owner_id, prospect_id, prospect_data):

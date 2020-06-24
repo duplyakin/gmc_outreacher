@@ -52,7 +52,6 @@ def fix_failed():
     print("Has fixed {0} tasks".format(counter))
     
 
-
 if __name__ == '__main__':
     print("\n\n.......fix_failed started")
     fix_failed()

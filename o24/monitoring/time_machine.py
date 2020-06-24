@@ -21,6 +21,18 @@ from o24.enricher.models import EnrichTaskQueue
 
 MOSCOW = 'Europe/Moscow'
 
+def inc_warmup_limits(credentials):
+    limits = credentials.limits
+    warmup_limits = credentials.warmup_limits
+
+    for action, count in warmup_limits.items():
+        max_count = limits.get(action, '')
+        if max_count:
+            if count < max_count:
+                warmup_limits[action] = max_count
+    
+    credentials._commit()
+
 def check_enrich_finished(task):
     prospect_id = task.prospect_id
 
@@ -36,16 +48,38 @@ def check_enrich_finished(task):
         print("check_enrich_finished True for task.id={0} with status={1}".format(task.id, enrich_task.status))
         return True
 
+    prospect = models.Prospects.objects(id=prospect_id).first()
+    if prospect:
+        email = prospect.data.get('email', '')
+        if email:
+            return True
+
     return False
 
 def inc_limits():
-    CAMPAIGN_ID = sys.argv[1]
+    CAMPAIGN_ID = None
+    if len(sys.argv) < 2:
+        print("Time machine started for ALL tasks in TaskQueue - for all campaigns")
+    else:
+        CAMPAIGN_ID = sys.argv[1]
+        print("time machine started for CAMPAIGN_ID={0}".format(CAMPAIGN_ID))
 
-    tasks = shared.TaskQueue.objects(campaign_id=CAMPAIGN_ID)
-    if not tasks:
-        print("Can't find tasks for campaign_id={0}".format(CAMPAIGN_ID))
-        exit(0)
+    tasks = []
+
+    while True:
+        if CAMPAIGN_ID:
+            tasks = shared.TaskQueue.objects(campaign_id=CAMPAIGN_ID)
+        else:
+            tasks = shared.TaskQueue.objects()
+
+        if not tasks:
+            print("...Waiting for tasks appeared")
+            print("Can't find tasks for campaign_id={0}".format(CAMPAIGN_ID))
+            time.sleep(2)
+        else:
+            break
     
+    print("...Found tasks - starting the next round")
     for task in tasks:
         if task.action_key == ENRICH_DELAY_ACTION:
             enrich_finished = check_enrich_finished(task)
@@ -73,12 +107,14 @@ def inc_limits():
         credentials.next_action = parse("1980-05-25T16:31:37.436Z")
         credentials._commit()
 
+        inc_warmup_limits(credentials)
+
     
 
 if __name__ == '__main__':
     print("\n\n.......time_machine started")
     while True:
         inc_limits()
-        time.sleep(5)
+        time.sleep(3)
 
 # python -m o24.monitoring.time_machine

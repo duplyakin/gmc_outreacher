@@ -28,7 +28,7 @@ class TestLock(unittest.TestCase):
 
     def test_lock(self):
         try:
-            locked = TaskQueueLock.objects(key='scheduler_lock', ack=0).update_one(upsert=False, ack=1)
+            locked = TaskQueueLock.objects(key='scheduler_lock', ack=0).update_one(upsert=True, ack=1)
             print(locked)
             if not locked:
                 return None

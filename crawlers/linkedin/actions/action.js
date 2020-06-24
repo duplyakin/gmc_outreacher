@@ -19,7 +19,7 @@ class Action {
     this.browser = await puppeteer.launch()
     this.context = await this.browser.createIncognitoBrowserContext()
     this.page = await this.context.newPage()
-
+    
     //log.debug('cooooookiieeeess: ', this.cookies)
     if(this.cookies != null && Array.isArray(this.cookies) && this.cookies.length > 0) {
       await this.page.setCookie(...this.cookies)

@@ -85,8 +85,9 @@ def launch_prospects_enrich(owner_id, leads_list_id, providers=None):
     except Exception as e:
         app.logger.error(".....launch_prospects_enrich Exception:{0}".format(str(e)))
         traceback.print_exc()
-        return False
-    
+        
+        return False    
+
     return True
 
 @celery.task
@@ -134,9 +135,6 @@ def check_enriched_action(task_id):
         status = FAILED
         code = -1
         raw = ''
-        if (type(e) == ErrorCodeException):
-            code = e.error_code
-            raw = e.message
 
         result_data = {
             'error' : str(e),
@@ -205,9 +203,6 @@ def enrich_action(task_id):
         status = FAILED
         code = -1
         raw = ''
-        if (type(e) == ErrorCodeException):
-            code = e.error_code
-            raw = e.message
 
         result_data = {
             'error' : str(e),

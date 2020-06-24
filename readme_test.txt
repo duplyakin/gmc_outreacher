@@ -4,6 +4,7 @@ SET APP_ENV=Test
 #CREATE TEST DATABASE
 python -m unittest discover test_data -s .\o24\production_tests\ -p "*1_models.py"
 
+
 #RUN ALL PRODUCTION TESTS
 python -m unittest discover -s .\o24\production_tests\ -p "*2_scenaries.py"
 

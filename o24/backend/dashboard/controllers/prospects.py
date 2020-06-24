@@ -1,6 +1,6 @@
 # Import flask dependencies
 from flask import Blueprint, request, render_template, \
-                  flash, g, session, redirect, url_for, render_template_string
+                  flash, g, session, redirect, url_for, render_template_string, make_response
 from flask import Flask, jsonify
 from o24.backend import db
 from o24.backend import app
@@ -16,6 +16,9 @@ import o24.backend.scheduler.scheduler as scheduler
 from o24.backend.dashboard.serializers import JSProspectData
 from bson.objectid import ObjectId
 from o24.backend.utils.decors import auth_required
+
+import io
+import csv
 
 PROSPECTS = [
     {
@@ -555,5 +558,35 @@ def stop_sequence_for_prospect():
 
             result['code'] = -1
             result['msg'] = 'SERVER ERROR: ' + str(e)
+
+    return jsonify(result)
+
+
+@bp_dashboard.route('/prospects/export', methods=['POST'])
+@auth_required
+def export_prospects():
+    current_user = g.user
+
+    result = {
+        'code' : -1,
+        'msg' : ''
+    }
+
+    try:
+        if request.method == 'POST':
+            all_prospects = Prospects.export_all(owner_id=current_user.id)
+            if not all_prospects:
+                raise Exception("There is not prospects - nothing to export")
+            
+            result['csv'] = all_prospects
+            result['code'] = 1
+            result['msg'] = 'Success'
+    except Exception as e:
+        #TODO: change to loggin
+        print(e)
+        traceback.print_exc()
+
+        result['code'] = -1
+        result['msg'] = str(e)
 
     return jsonify(result)
