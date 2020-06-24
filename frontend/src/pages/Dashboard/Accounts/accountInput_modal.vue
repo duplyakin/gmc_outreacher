@@ -3,9 +3,12 @@
 <card>
         <h3>Input code</h3>
 
+        <pulse-loader :loading="loading" :color="color"></pulse-loader>
+
+        <div v-if="!loading">
         <div class="row">
             <div class="col-6 mb-5">
-                <el-input placeholder="Enter code" v-model="input" :disabled="ack"></el-input>
+                <el-input placeholder="Enter code" v-model="input" :disabled="loading"></el-input>
             </div>
         </div>
 
@@ -15,13 +18,12 @@
         
         <p> </p>
 
-        <div v-if="ack" class="o24_notification mb-3">Loading. Please wait, it can take a minute...</div>
-
         <div class="row">
             <div class="col-12 d-flex flex-row-reverse">
-                <button :disabled="ack" v-on:click="inputAccount" type="button" class="btn btn-outline btn-wd btn-success mx-1">Input</button>
-                <button :disabled="ack" v-on:click="discard" type="button" class="btn btn-outline btn-wd btn-danger">Close</button>
+                <button :disabled="loading" v-on:click="inputAccount" type="button" class="btn btn-outline btn-wd btn-success mx-1">Input</button>
+                <button :disabled="loading" v-on:click="discard" type="button" class="btn btn-outline btn-wd btn-danger">Close</button>
             </div>
+        </div>
         </div>
 
 </card>
@@ -30,11 +32,12 @@
 
 <script>
 import { Notification, Select, Option } from 'element-ui'
-import axios from '@/api/axios-auth';
-
+import axios from '@/api/axios-auth'
+import { PulseLoader } from 'vue-spinner/dist/vue-spinner.min.js'
 
 export default {
     components: {
+        PulseLoader,
         [Select.name]: Select,
         [Option.name]: Option,
     },
@@ -46,23 +49,25 @@ export default {
     data() {
         return {
             input: '',
-            ack: false,
+
+            loading: false,
+            color: "#a7a7ff",
         }
     },
     methods: {
         async inputAccount(){
 
             if(!this.input) {
-                Notification.error({title: "Error", message: "Empty input"});
-                return;
+                Notification.error({title: "Error", message: "Empty input"})
+                return
             }
 
-            this.ack = true;
+            this.loading = true
 
-            this.accountInputBS(this.credentials_id, this.input);
+            this.accountInputBS(this.credentials_id, this.input)
         },
         discard(){
-            this.$emit('close');
+            this.$emit('close')
         }
     },
     mounted() {
@@ -70,10 +75,5 @@ export default {
 }
 </script>
 <style>
-.o24_notification {
-    color: rgb(56, 56, 179);
-    text-transform: uppercase;
-    font-size: 10px;
-}
 </style>
     
