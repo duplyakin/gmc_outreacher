@@ -25,7 +25,7 @@ gunicorn -c gunicorn_config_dev.py -e APP_ENV=Test o24.wsgi:app
 APP_ENV=Production python -m unittest discover -s ./o24/production_tests/ -p "*test_production_database.py"
 
 #load Production google apps cookie
-python -m o24.migrations.update_google_settings prod
+APP_ENV=Production python -m o24.migrations.update_google_settings prod
 
 Добавляем сертификат:
 sudo add-apt-repository ppa:certbot/certbot
