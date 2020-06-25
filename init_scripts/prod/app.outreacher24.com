@@ -11,6 +11,11 @@ server {
         proxy_pass http://unix:/home/o24user/o24-prod.sock;
     }
 
+    location /bs/api {
+        include proxy_params;
+        proxy_pass http://127.0.0.1:3000;
+    }
+
 
     location /api {
         include proxy_params;

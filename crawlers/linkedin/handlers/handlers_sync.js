@@ -80,7 +80,7 @@ async function taskStatusListener() {
                         if (err) throw MyExceptions.MongoDBError('MongoDB updateOne TASK err: ' + err);
                     });
 
-                    log.debug('taskStatusListener: task executed, status: ' + task.status + ' action_key: ' + task.action_key); // test
+                    log.error('taskStatusListener: task executed, status: ' + task.status + ' action_key: ' + task.action_key); // test
                     consumer(data);
                 }
 

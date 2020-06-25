@@ -33,4 +33,4 @@ if (APP_ENV == 'Production') {
     log.setLevel("TRACE") // TRACE: 0, DEBUG: 1, INFO: 2, WARN: 3, ERROR: 4, SILENT: 5
 }
 
-log.debug("... Server started in mode: ...", APP_ENV == null ? 'Test' : APP_ENV)
+log.error("... Server started in mode: ...", APP_ENV == null ? 'Test' : APP_ENV)

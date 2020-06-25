@@ -29,6 +29,7 @@ sudo apt-get install -y nodejs
 sudo apt-get install redis-server
 redis-cli ping
 sudo systemctl enable redis-server.service
+pip install -U "celery[redis]"
 
 Добавляем сертификат:
 sudo add-apt-repository ppa:certbot/certbot
@@ -64,8 +65,43 @@ pip install flower
 sudo sh -c "echo -n 'flower:' >> /etc/nginx/.htpasswd"
 sudo sh -c "openssl passwd -apr1 >> /etc/nginx/.htpasswd"
 
+#Install nodejs services - pm2 is a manager
+sudo npm install -g pm2
+
+#Install global bs dependencies
+cd /home/o24user/o24_prod/bs
+sudo npm install -g
+pm2 start app/server.js
+
+#Install global crawler dependencies
+cd /home/o24user/o24_prod/crawlers
+sudo npm install -g
+pm2 start init.js
+
+# сохраняем список сервисов
+pm2 save
+pm2 unstartup
+
+#GENERATE PM2 systemd script (details: https://www.digitalocean.com/community/tutorials/how-to-set-up-a-node-js-application-for-production-on-ubuntu-16-04)
+pm2 startup systemd
+sudo ТО ЧТО сгенерировали
+добавить APP_ENV=Production в /etc/systemd/system/pm2-o24user.service
+
+#Логи от PM2 лежат здесь:
+~/.pm2/logs/
+
 #deploy scripts to production
 sudo ./prod_deploy.sh
 
 #VIEW SYSTEMCTL ERRORS:
 journalctl -xe
+
+
+#МОНИТОРИНГ ВСЕГО
+systemctl status pm2-o24user
+systemctl status mongod
+systemctl status o24-prod
+systemctl status celery-beat
+systemctl status celery-o24-worker
+systemctl status nginx
+systemctl status flower-monitor
