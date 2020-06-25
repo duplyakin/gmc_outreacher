@@ -19,10 +19,14 @@ pip install -r o24/requirements.txt
 Ставим сервер:
 pip install gunicorn
 gunicorn -b localhost:8880 -w 4 o24.wsgi:app #test gunicorn
-gunicorn -c gunicorn_config_dev.py -e APP_ENV=Test o24.wsgi:app
+gunicorn -c gunicorn_config_prod.py -e APP_ENV=Production o24.wsgi:app
 
 #CREATE PRODUCTION TEST DATA
 APP_ENV=Production python -m unittest discover -s ./o24/production_tests/ -p "*test_production_database.py"
+
+#create production database
+python -m unittest discover test_data_production -s .\o24\deployment_scripts\ -p "*deploy_data_to_database.py"
+
 
 #load Production google apps cookie
 APP_ENV=Production python -m o24.migrations.update_google_settings prod
@@ -48,6 +52,8 @@ sudo certbot --nginx -d outreacher24.com -d dv.outreacher24.com -d app.outreache
 curl -sL https://deb.nodesource.com/setup_12.x | sudo -E bash -
 sudo apt-get install -y nodejs
 
-#create production database
-$env:APP_ENV="Production"
-python -m unittest discover test_data_production -s .\o24\deployment_scripts\ -p "*deploy_data_to_database.py"
+
+#Install reddis
+sudo apt-get install redis-server
+redis-cli ping
+sudo systemctl enable redis-server.service
