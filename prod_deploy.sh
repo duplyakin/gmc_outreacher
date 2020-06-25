@@ -29,4 +29,6 @@ systemctl enable celery-o24-worker
 systemctl daemon-reload
 systemctl start mongod
 systemctl start o24-prod
+systemctl start celery-beat
+systemctl start celery-o24-worker
 systemctl restart nginx
