@@ -101,7 +101,7 @@ class DevConfig(BaseConfig):
 
 class ProductionConfig(BaseConfig):
     FLASK_ENV = 'production'
-    CELERY_BROKER = 'amqp://guest:guest@localhost:5672//'
+    CELERY_BROKER = 'redis://127.0.0.1:6379/0'
     CELERY_BACKEND_RESULT_EXPIRES = 300
     CELERY_TASK_ALWAYS_EAGER = False
     
