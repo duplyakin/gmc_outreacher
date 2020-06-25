@@ -60,6 +60,9 @@ APP_ENV=Production python -m o24.migrations.update_google_settings prod
 #deploy FLOWER to monitor celery
 pip install flower
 
+#setup Password for flower in nginx
+sudo sh -c "echo -n 'flower:' >> /etc/nginx/.htpasswd"
+sudo sh -c "openssl passwd -apr1 >> /etc/nginx/.htpasswd"
 
 #deploy scripts to production
 sudo ./prod_deploy.sh

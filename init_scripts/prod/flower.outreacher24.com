@@ -4,9 +4,9 @@ server {
     charset utf-8;
 
     location / {
-        auth_basic "Restricted";
-        auth_basic_user_file htpasswd;
-
+        auth_basic "Restricted Content";
+        auth_basic_user_file /etc/nginx/.htpasswd;
+        
         proxy_pass http://localhost:6666;
         proxy_set_header Host $host;
         proxy_redirect off;
