@@ -6,6 +6,7 @@ After=network.target
 Type=simple
 User=o24user
 Group=o24user
+EnvironmentFile=/etc/celeryd.conf
 Environment="PATH=/home/o24user/o24_prod/.venv/bin"
 Environment="APP_ENV=Production"
 WorkingDirectory=/home/o24user/o24_prod

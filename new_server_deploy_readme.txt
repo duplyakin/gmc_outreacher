@@ -18,18 +18,17 @@ pip install -r o24/requirements.txt
 
 Ставим сервер:
 pip install gunicorn
-gunicorn -b localhost:8880 -w 4 o24.wsgi:app #test gunicorn
-gunicorn -c gunicorn_config_prod.py -e APP_ENV=Production o24.wsgi:app
 
-#CREATE PRODUCTION TEST DATA
-APP_ENV=Production python -m unittest discover -s ./o24/production_tests/ -p "*test_production_database.py"
-
-#create production database
-python -m unittest discover test_data_production -s .\o24\deployment_scripts\ -p "*deploy_data_to_database.py"
+#deploy vue.js
+Стаим node последней версии
+curl -sL https://deb.nodesource.com/setup_12.x | sudo -E bash -
+sudo apt-get install -y nodejs
 
 
-#load Production google apps cookie
-APP_ENV=Production python -m o24.migrations.update_google_settings prod
+#Install reddis
+sudo apt-get install redis-server
+redis-cli ping
+sudo systemctl enable redis-server.service
 
 Добавляем сертификат:
 sudo add-apt-repository ppa:certbot/certbot
@@ -45,15 +44,23 @@ sudo certbot --nginx -d outreacher24.com -d dv.outreacher24.com -d app.outreache
    with the "certonly" option. To non-interactively renew *all* of
    your certificates, run "certbot renew"
  - If you like Certbot, please consider supporting our work by:
+ 
+
+#CREATE PRODUCTION TEST DATA
+APP_ENV=Production python -m unittest discover -s ./o24/production_tests/ -p "*test_production_database.py"
+
+#create production database
+python -m unittest discover test_data_production -s .\o24\deployment_scripts\ -p "*deploy_data_to_database.py"
 
 
-#deploy vue.js
-Стаим node последней версии
-curl -sL https://deb.nodesource.com/setup_12.x | sudo -E bash -
-sudo apt-get install -y nodejs
+#load Production google apps cookie
+APP_ENV=Production python -m o24.migrations.update_google_settings prod
 
 
-#Install reddis
-sudo apt-get install redis-server
-redis-cli ping
-sudo systemctl enable redis-server.service
+
+
+#deploy scripts to production
+sudo ./prod_deploy.sh
+
+#VIEW SYSTEMCTL ERRORS:
+journalctl -xe
