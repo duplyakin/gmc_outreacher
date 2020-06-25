@@ -2,6 +2,9 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+#pid files
+*.pid
+
 # Distribution / packaging
 .Python
 puppeteer/

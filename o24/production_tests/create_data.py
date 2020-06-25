@@ -24,7 +24,7 @@ def drop_database():
 
 def drop_database_production():
     print("GOING TO DROP PRODUCTION DATABASE ARE YOU SURE - the uncomment")
-    exit(0)
+    #exit(0)
 
     env = os.environ.get('APP_ENV', None)
     assert env == "Production", "ERROR: Must be Test environment. APP_ENV={0}".format(env)
