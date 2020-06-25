@@ -44,7 +44,7 @@ sudo certbot --nginx -d outreacher24.com -d dv.outreacher24.com -d app.outreache
    with the "certonly" option. To non-interactively renew *all* of
    your certificates, run "certbot renew"
  - If you like Certbot, please consider supporting our work by:
- 
+
 
 #CREATE PRODUCTION TEST DATA
 APP_ENV=Production python -m unittest discover -s ./o24/production_tests/ -p "*test_production_database.py"
@@ -57,6 +57,8 @@ python -m unittest discover test_data_production -s .\o24\deployment_scripts\ -p
 APP_ENV=Production python -m o24.migrations.update_google_settings prod
 
 
+#deploy FLOWER to monitor celery
+pip install flower
 
 
 #deploy scripts to production
