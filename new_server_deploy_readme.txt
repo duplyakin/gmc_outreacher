@@ -93,9 +93,20 @@ sudo ТО ЧТО сгенерировали
 #deploy scripts to production
 sudo ./prod_deploy.sh
 
+#INSTALL chrome
+cd /home/o24user/headless_chromium
+npm install puppeteer
+#create symlinks
+sudo ln -s /home/o24user/headless_chromium/node_modules/puppeteer/.local-chromium /home/o24user/o24_prod/bs/node_modules/puppeteer/.local-chromium
+sudo ln -s /home/o24user/headless_chromium/node_modules/puppeteer/.local-chromium /home/o24user/o24_prod/crawlers/node_modules/puppeteer/.local-chromium
+sudo apt-get install -y libgbm-dev
+
+
 #VIEW SYSTEMCTL ERRORS:
 journalctl -xe
 
+#CHECK IF nodejs packgae installed
+npm list puppeter
 
 #МОНИТОРИНГ ВСЕГО
 systemctl status pm2-o24user
