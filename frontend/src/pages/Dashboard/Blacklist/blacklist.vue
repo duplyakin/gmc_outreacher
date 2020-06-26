@@ -204,7 +204,7 @@ export default {
       if (from_data.linkedin != null) {
         var linkedin_obj = JSON.parse(from_data.linkedin)
         linkedin = Object.keys(linkedin_obj).map(function(key) {
-          return { source: key, date: linkedin_obj[key], type: "Lincedin" }
+          return { source: key, date: linkedin_obj[key], type: "Linkedin" }
         })
       }
 

@@ -1,7 +1,9 @@
 const models_shared = require("../models/shared.js");
 const models = require("../models/models.js");
 
-const SEARCH_URL = "https://www.linkedin.com/search/results/all/?keywords=acronis&origin=GLOBAL_SEARCH_HEADER&page=97";
+const SEARCH_URL_1 = "https://www.linkedin.com/search/results/all/?keywords=acronis&origin=GLOBAL_SEARCH_HEADER&page=97";
+const SEARCH_URL_2 = "https://www.linkedin.com/search/results/all/?keywords=kirill&origin=GLOBAL_SEARCH_HEADER";
+
 const CONNECT_URL_1 = "https://www.linkedin.com/in/kirill-shilov-25aa8630/";
 const CONNECT_URL_2 = "https://www.linkedin.com/in/vlad-duplyakin-923475116/";
 const CONNECT_URL_3 = "https://www.linkedin.com/in/alexander-savinkin-3ba99614/";
@@ -23,8 +25,8 @@ const CONNECT_URL_5 = "https://www.linkedin.com/in/alexyerokhin/";
       action_key: 'linkedin-check-reply',
       input_data: {
         campaign_data: {
-          search_url: SEARCH_URL,
-          page_count: 2,
+          search_url: SEARCH_URL_2,
+          interval_pages: 2,
         },
         template_data: {
           message: 'Hi {first_name}, nice to meet you.',
@@ -67,7 +69,7 @@ const CONNECT_URL_5 = "https://www.linkedin.com/in/alexyerokhin/";
       status: 0,
     }
 
-    let account = await models.Accounts.findOneAndUpdate({ _id: account_id }, account_data2, { new: true, upsert: true });
+    let account = await models.Accounts.findOneAndUpdate({ _id: account_id }, account_data, { new: true, upsert: true });
     let task = await models_shared.TaskQueue.findOneAndUpdate({ _id: task_id }, task_data, { new: true, upsert: true });
 
     console.log('..........account.............', account)

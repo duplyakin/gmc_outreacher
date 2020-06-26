@@ -51,28 +51,6 @@
       </card>
 
       <card v-if="hasMedium('any')">
-        <div v-if="hasMedium('email')" class="col-6">
-          <p>Email account</p>
-          <el-select
-            class="select-default mb-3"
-            style="width: 100%;"
-            placeholder="Select email account to use"
-            v-on:change="onChangeEmailCredentials"
-            v-model="email_account_selected"
-            value-key="data.account"
-            :disabled="!modified_fields['credentials']"
-          >
-            <el-option
-              class="select-default"
-              v-for="(account,index) in list_data.credentials"
-              v-if="account.medium == 'email'"
-              :key="account._id.$oid"
-              :label="account.data.account"
-              :value="account"
-            ></el-option>
-          </el-select>
-        </div>
-
         <div v-if="hasMedium('linkedin')" class="col-6">
           <p>Linkedin account</p>
           <el-select
@@ -82,8 +60,7 @@
             v-on:change="onChangeLinkedinCredentials"
             v-model="linkedin_account_selected"
             value-key="data.account"
-            :disabled="!modified_fields['credentials']"
-          >
+            :disabled="!modified_fields['credentials']">
             <el-option
               class="select-default"
               v-for="(account,index) in list_data.credentials"
@@ -94,35 +71,27 @@
             ></el-option>
           </el-select>
         </div>
-      </card>
 
-      <card v-if="modified_fields['templates'] && campaign_data.templates.email.length != 0">
-        <p>Fill Email templates</p>
-        <el-table
-          stripe
-          ref="email_templates_data_table"
-          style="width: 100%;"
-          :data="campaign_data.templates.email"
-          max-height="500"
-          border
-        >
-          <el-table-column
-            v-for="(column, index) in email_table_columns"
-            :key="index"
-            :label="column.label"
-            :prop="column.prop"
-            show-overflow-tooltip
-          >
-            <template slot-scope="scope">
-              <a
-                @click.prevent="editEmailTemplate(scope.row, scope.$index)"
-                href="#"
-                v-if="column.prop === 'title'"
-              >{{ scope.row[column.prop] }}</a>
-              <template v-else>{{ scope.row[column.prop] }}</template>
-            </template>
-          </el-table-column>
-        </el-table>
+        <div v-if="hasMedium('email')" class="col-6">
+          <p>Email account</p>
+          <el-select
+            class="select-default mb-3"
+            style="width: 100%;"
+            placeholder="Select email account to use"
+            v-on:change="onChangeEmailCredentials"
+            v-model="email_account_selected"
+            value-key="data.account"
+            :disabled="!modified_fields['credentials']">
+            <el-option
+              class="select-default"
+              v-for="(account,index) in list_data.credentials"
+              v-if="account.medium == 'email'"
+              :key="account._id.$oid"
+              :label="account.data.account"
+              :value="account"
+            ></el-option>
+          </el-select>
+        </div>
       </card>
 
       <card v-if="modified_fields['templates'] && campaign_data.templates.linkedin.length != 0">
@@ -145,6 +114,35 @@
             <template slot-scope="scope">
               <a
                 @click.prevent="editLinkedinTemplate(scope.row, scope.$index)"
+                href="#"
+                v-if="column.prop === 'title'"
+              >{{ scope.row[column.prop] }}</a>
+              <template v-else>{{ scope.row[column.prop] }}</template>
+            </template>
+          </el-table-column>
+        </el-table>
+      </card>
+
+      <card v-if="modified_fields['templates'] && campaign_data.templates.email.length != 0">
+        <p>Fill Email templates</p>
+        <el-table
+          stripe
+          ref="email_templates_data_table"
+          style="width: 100%;"
+          :data="campaign_data.templates.email"
+          max-height="500"
+          border
+        >
+          <el-table-column
+            v-for="(column, index) in email_table_columns"
+            :key="index"
+            :label="column.label"
+            :prop="column.prop"
+            show-overflow-tooltip
+          >
+            <template slot-scope="scope">
+              <a
+                @click.prevent="editEmailTemplate(scope.row, scope.$index)"
                 href="#"
                 v-if="column.prop === 'title'"
               >{{ scope.row[column.prop] }}</a>

@@ -13,7 +13,7 @@
         </div>
 
         <card>
-            <img v-bind:src="'data:image/jpeg;base64,' + screenshot" />
+            <img v-bind:src="'data:image/jpeg;base64,' + screenshot" class="o24_image" />
         </card>
         
         <p> </p>
@@ -75,5 +75,8 @@ export default {
 }
 </script>
 <style>
+.o24_image {
+    filter: brightness(50%)
+}
 </style>
     

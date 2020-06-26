@@ -26,7 +26,7 @@
                 <fg-input>
                     <textarea
                         class="form-control"
-                        placeholder="Enter Domains"
+                        placeholder="somedomain.com anotherdomain.ua"
                         rows="3"
                         name="domains"
                         v-model="domains"
@@ -37,7 +37,7 @@
 
         <div class="row">
             <div class="col-12">
-                <label>Linkedin accaunts</label>
+                <label>Linkedin accounts</label>
                 <fg-input>
                     <textarea
                         class="form-control"
