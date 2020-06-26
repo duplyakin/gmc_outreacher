@@ -116,3 +116,14 @@ systemctl status celery-beat
 systemctl status celery-o24-worker
 systemctl status nginx
 systemctl status flower-monitor
+
+#Рестарт основного
+sudo systemctl stop o24-prod
+sudo systemctl stop celery-beat
+sudo systemctl stop celery-o24-worker
+sudo systemctl stop flower-monitor
+
+sudo systemctl start o24-prod
+sudo systemctl start celery-beat
+sudo systemctl start celery-o24-worker
+sudo systemctl start flower-monitor

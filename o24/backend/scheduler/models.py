@@ -9,6 +9,8 @@ import json
 import traceback
 import o24.backend.dashboard.models as models
 from bson.json_util import dumps as bson_dumps
+from bson import ObjectId
+
 from pprint import pprint
 from pymongo.errors import DuplicateKeyError
 from o24.backend.models.shared import TaskQueue
@@ -65,8 +67,11 @@ class ActionLog(db.Document):
             task.reload()
             now = pytz.utc.localize(datetime.utcnow())
             new_log = cls(
+                owner_id=task.owner_id,
+                prospect_id=task.prospect_id,
+                campaign_id=task.campaign_id,
                 step=step,
-                description = description,
+                description=description,
                 created = now,
                 task=task.to_mongo(),
                 log_type='general'
@@ -101,9 +106,9 @@ class ActionLog(db.Document):
     def log_enricher(cls, task, step, description):
         try:
             now = pytz.utc.localize(datetime.utcnow())
-            
             task.reload()
             new_log = cls(
+                owner_id=task.owner,
                 step=step,
                 description=description,
                 created = now,
@@ -117,6 +122,234 @@ class ActionLog(db.Document):
             print(str(e))
             traceback.print_exc()
 
+    @classmethod
+    def get_stats_total(cls, owner_id, from_date, to_date):
+        db_query = cls.objects(owner_id=owner_id, 
+                                created__gte=from_date,
+                                created__lte=to_date)
+
+        stats = []
+
+        #we use it for join and showing objects as it is
+        pipeline = [
+            { "$match":
+                { "$expr":
+                    { "$and":
+                        [
+                            { "$eq" :["$step", 'carryout_handler'] },
+                            { "$eq": ["$task.status",  READY ] },
+                            { "$eq": ["$task.result_data.if_true",  True ] },
+                        ]
+                    }
+                }
+            },
+            {"$group" : {
+                '_id':"$task.action_key",
+                'total' : {'$sum' : 1},
+                }
+            }  
+        ]
+
+        events = list(db_query.aggregate(*pipeline))
+        if events:
+            stats.extend(events)
+
+        pipeline = [
+            { "$match":
+                { "$expr":
+                    { "$and":
+                        [
+                            { "$eq" :["$step", 'carryout_handler'] },
+                            { "$eq": ["$task.status",  READY ] },
+                            { "$eq": ["$task.result_data.if_true",  True ] },
+                        ]
+                    }
+                }
+            },
+            {"$group" : {
+                '_id': "$task.prospect_id",
+            }},
+            {"$group" : {
+                '_id' : 'prospects_total',
+                'total' : {"$sum" : 1}
+            }}
+        ]
+
+        prospects = list(db_query.aggregate(*pipeline))
+        if prospects:
+            stats.extend(prospects)
+
+
+        pipeline = [
+            { "$match":
+                { "$expr":
+                    { "$and":
+                        [
+                            { "$eq": ["$step", 'email-open-log' ] },
+                        ]
+                    }
+                }
+            },
+            {"$group" : {
+                '_id' : 'email_opens',
+                'total' : {"$sum" : 1}
+            }}
+        ]
+
+        email_opens = list(db_query.aggregate(*pipeline))
+        if email_opens:
+            stats.extend(email_opens)
+
+        pipeline = [
+            { "$match":
+                { "$expr":
+                    { "$and":
+                        [
+                            { "$eq": ["$task.status", FAILED ] },
+                        ]
+                    }
+                }
+            },
+            {"$group" : {
+                '_id' : '$task.action_key',
+            }},
+            {"$group" : {
+                '_id' : 'errors',
+                'total' : {"$sum" : 1}
+            }}
+
+        ]
+
+        errors = list(db_query.aggregate(*pipeline))
+        if errors:
+            stats.extend(errors)
+
+
+        results = bson_dumps(stats)
+        return results
+
+    @classmethod
+    def get_campaign_stats(cls, owner_id, campaign_id, from_date, to_date):
+        db_query = cls.objects(owner_id=owner_id,
+                                campaign_id=campaign_id,
+                                created__gte=from_date,
+                                created__lte=to_date)
+
+        stats = []
+
+        #we use it for join and showing objects as it is
+        pipeline = [
+            { "$match":
+                { "$expr":
+                    { "$and":
+                        [
+                            { "$eq" :["$step", 'carryout_handler'] },
+                            { "$eq": ["$task.status",  READY ] },
+                            { "$eq": ["$task.result_data.if_true",  True ] },
+                        ]
+                    }
+                }
+            },
+            {"$group" : {
+                '_id': {
+                    'action_key' : "$task.action_key",
+                    'month_day' : { '$dateToString' : { 'format' : "%m-%d", 'date' : "$created" }  }
+                },
+                'total' : {'$sum' : 1},
+                }
+            }  
+        ]
+
+        events = list(db_query.aggregate(*pipeline))
+        if events:
+            stats.extend(events)
+
+        pipeline = [
+            { "$match":
+                { "$expr":
+                    { "$and":
+                        [
+                            { "$eq" :["$step", 'carryout_handler'] },
+                            { "$eq": ["$task.status",  READY ] },
+                            { "$eq": ["$task.result_data.if_true",  True ] },
+                        ]
+                    }
+                }
+            },
+            {"$group" : {
+                '_id': {
+                    "prospect_id" : "$task.prospect_id",
+                    'month_day' : { '$dateToString' : { 'format' : "%m-%d", 'date' : "$created" }  }
+                },
+            }},
+            {"$group" : {
+                '_id' : {
+                    'month_day' : "$_id.month_day",
+                    "action_key" : "prospects_total"
+                },
+                'total' : {"$sum" : 1}
+            }}
+        ]
+
+        prospects = list(db_query.aggregate(*pipeline))
+        if prospects:
+            stats.extend(prospects)
+
+        pipeline = [
+            { "$match":
+                { "$expr":
+                    { "$and":
+                        [
+                            { "$eq": ["$step", 'email-open-log' ] },
+                        ]
+                    }
+                }
+            },
+            {"$group" : {
+                '_id' : {
+                    'action_key' : 'email_opens',
+                    'month_day' : { '$dateToString' : { 'format' : "%m-%d", 'date' : "$created" }  } 
+                },
+                'total' : {"$sum" : 1}
+            }}
+        ]
+
+        email_opens = list(db_query.aggregate(*pipeline))
+        if email_opens:
+            stats.extend(email_opens)
+
+        pipeline = [
+            { "$match":
+                { "$expr":
+                    { "$and":
+                        [
+                            { "$eq": ["$task.status", FAILED ] },
+                        ]
+                    }
+                }
+            },
+            {"$group" : {
+                '_id': {
+                    "a_key" : "$task.action_key",
+                    'month_day' : { '$dateToString' : { 'format' : "%m-%d", 'date' : "$created" }  }
+                },
+            }},
+            {"$group" : {
+                '_id' : {
+                    'month_day' : "$_id.month_day",
+                    "action_key" : "errors"
+                },
+                'total' : {"$sum" : 1}
+            }}
+        ]
+
+        errors = list(db_query.aggregate(*pipeline))
+        if errors:
+            stats.extend(errors)
+
+
+        results = bson_dumps(stats)
+        return results
 
     def _commit(self):
         self.save()
