@@ -5,10 +5,10 @@ After=network.target
 [Service]
 User=o24user
 Group=o24user
-WorkingDirectory=/home/o24user/o24_dev
-Environment="PATH=/home/o24user/o24_dev/.venv/bin"
-Environment="APP_ENV=Test"
-ExecStart=/home/o24user/o24_dev/dev_start.sh
+WorkingDirectory=/home/o24user/o24_prod
+Environment="PATH=/home/o24user/o24_prod/.venv/bin"
+Environment="APP_ENV=Production"
+ExecStart=/home/o24user/o24_prod/prod_start.sh
 Restart=on-failure
 
 [Install]

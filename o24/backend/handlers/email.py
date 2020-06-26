@@ -131,7 +131,7 @@ def email_send_message(task_id):
     try:
         task = shared.TaskQueue.lock(task_id)
         if not task:
-            print("CONCURRENCY in email_check_reply attempt")
+            print("CONCURRENCY in email_send_message attempt")
             return 
         
         params = {}

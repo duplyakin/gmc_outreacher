@@ -79,7 +79,7 @@ modified_fields_on_edit = {
     'to_minutes' : True,
     'sending_days' : True,
     'data' : True,
-    'search_url': False,
+    'search_url': True,
     'total_pages': True,
     'interval_pages': True,
     'time_zone': True

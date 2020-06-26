@@ -253,3 +253,7 @@ Linkedin handlers (nodejs) - выполняет linkedin action’ы из оче
     node init.js
 BS service (nodejs) - должен решать блокировки с Linkedin. Запускается из BS/app/server.js
     node server.js
+
+
+#google developer console - to CHANGE CREDENTIALS
+https://console.developers.google.com/

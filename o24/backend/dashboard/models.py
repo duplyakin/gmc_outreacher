@@ -315,7 +315,7 @@ class BlackList(db.Document):
         if not black_list:
             return False
 
-        _emails, _domains, _linkedin = self._deserialize_entities()
+        _emails, _domains, _linkedin = black_list._deserialize_entities()
 
         stripped = email.replace(" ", "")
         if stripped in _emails.keys():
@@ -335,7 +335,7 @@ class BlackList(db.Document):
         if not black_list:
             return False
 
-        _emails, _domains, _linkedin = self._deserialize_entities()
+        _emails, _domains, _linkedin = black_list._deserialize_entities()
 
         stripped = account.replace(" ", "")
         path = urlparse(stripped).path

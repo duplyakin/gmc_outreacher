@@ -1,0 +1,18 @@
+[Unit]
+Description=Flower Celery Service
+
+[Service]
+Type=simple
+User=o24user
+Group=o24user
+WorkingDirectory=/home/o24user/o24_prod
+EnvironmentFile=/etc/celeryd.conf
+Environment="PATH=/home/o24user/o24_prod/.venv/bin"
+Environment="APP_ENV=Production"
+ExecStart=/bin/sh -c '${FLOWER_BIN} --address=${FLOWER_IP} --port=${FLOWER_PORT} \
+    --loglevel=${CELERYD_LOG_LEVEL} -A ${CELERY_APP}'
+Restart=on-failure
+
+
+[Install]
+WantedBy=multi-user.target
