@@ -1,119 +1,118 @@
-ВКЛАДКА СТАТИСТИКА
-0. /statistics/data
-- POST
+Реализовать статистику в следующем виде:
 
-Ответ:
+1. В разделе dashboard выводим основные метрики (ДЛЯ всех кампаний) - 
+нужно выбрать какой-то ХОРОШИЙ дизайн из стандартных компонентов темы.
+
+В ответе тебе приходит credits-left - это то сколько кредитов осталось у пользователя.
+
+СОответственно где-то нужно вывести заметно:
+"Enrich credits left" : <NUM> (buy more email credits)
+
+Запрос:
+/statistics/total (POST) - возвращает общую статистику для всех кампаний за последние 7 ДНЕЙ
+
+request:
+Ничего
+
+В ответах проверять что поля columns и statistics НЕ ПУСТЫЕ перед сериализацией.
+response:
 {
-    'columns' : []
+    'code': 1, 
+    'columns': '[
+                {"label": "Prospects contacted", "field": "prospects_total"}, 
+                {"label": "Emails sent", "field": "email-send-message"}, 
+                {"label": "Emails replied", "field": "email-check-reply"}, 
+                {"label": "Emails opened", "field": "email_opens"}, 
+                {"label": "Emails enriched", "field": "emails-enriched-success"}, 
+                {"label": "Linkedin invites sent", "field": "linkedin-connect"}, 
+                {"label": "Linkedin profiles viewed", "field": "linkedin-visit-profile"}, 
+                {"label": "Linkedin messages sent", "field": "linkedin-send-message"}, 
+                {"label": "Linkedin replied", "field": "linkedin-check-reply"}, 
+                {"label": "Enrich credits left", "field": "credits-left"}
+                ]', 
+    'msg': 'Success', 
+    'statistics': '[{"_id": "email_opens", "total": 24}, {"_id": "credits-left", "total": 999}]'
 }
 
-1. /statistics/list
+В columns приходит соответствие название полей - тому как их надо выводить в интерфейсе (label)
+
+В statistics приходит массиы диктов, гд в _id лежит название метрики, в total лежит кол-во. 
+Если метрика нулевая или ее нет то она НЕ ПРИДЕТ в ответе.
+
+СЕРИАЛИЗАЦИЯ statistics, ты преобразуешь массив диктов в один большой ДИКТ, где ключами будут значения _id а значением то что в total.
+На входе: [{"_id": "email_opens", "total": 24}, {"_id": "credits-left", "total": 999}]
+На выходе: {
+    'email_opens' : 24,
+    'credits-left' : 999,
+    ....
+}
+
+
+ВЫВОДИТЬ статистику в интерфейсе нужно так:
+- Ты идешь в цикле по columns 
+- Далее берешь значение из дикта statistics по ключу из "field", если значения нет ТО ВЫВОДИШЬ 0
+
+2. В разделе CAMPAIGNS, добавляем колонку с надписью: "View stats", при нажатии на которую выводим статистику для кампании.
+
+Основные элементы этой страницы:
+- Ввод даты: от, до (Здесь нужны только дни месяца). по дефолту выставляешь их на 20 дней назад от текущего момента.
+- Отображение "Enrich credits left" : <NUM> (buy more email credits)
+- Далее идет строчка с метриками (по дефолту проценты от prospects_total, при наведении абсолютные цифры)
+- Далее идет график на 20 дней со статистикой по дням
+
+Запрос:
+/statistics/campaign (POST) - возвращает статистику для данной кампании за ПЕРИОД.
+
+request:
 - POST
 - {
-    '_page' : 1
+    '_campaign_id' : 
+    '_from_date' : Передаем только дни и месяцы
+    '_to_date' : Передаем толкьо дни и месяцы
 }
 
-Вывод в таблице колонки:
-- Campaign title (при нажатии переходишь на статистику для это кампании то есть /statistics/campaign/campaign_id=1324321)
-- funnel title 
-- Prospects list title 
-- prospects_contacted_total (Кол-во уникальных проспектов с которыми я сделал действие (email, linkedin request, linkedin message))
-- prospects_email_opens_total (Кол-во уникальных проспектов которые открыли емайл)
-- email_bounced_total (Сколько испорченных email'ов)
-- linkedin_accounts_404 (Не существующие linkedin аккаунты)
-- linkedin_messages_failed (Сколько linkedin сообщений не удалось отправить)
-- prospects_accepted_linkedin_total (Уникальное число проспектов, которые приняли мой linkedin request)
-- replied_total (Уникальное число ответов. Ответ на email и linkedin от одного и того же проспекта считается как 1)
-
-
-Ответ получаешь:
-- {
-    pagination : {},
-    statistics : [
-        {
-            campaign : {
-                title : "Campaign -1 "
-                id : 2341234231,
-                credentials : [{acount:"ks.shilov@gmail.com"}],
-                funnel : 'funnel title'
-                prospects_list : {
-                    title : 'It outsource CEO and CMO"
-                    id : ID
-                }
-            },
-            aggregated : {
-                prospects_contacted_total : 100,
-                prospects_email_opens_total : 90
-                linkedin_accounts_404 : 20
-                email_bounced_total : 10
-                linkedin_messages_failed_total : 20
-                prospects_accepted_linkedin_total : 20
-                replied_total : 34
-            }
-        },
-        ....
-        {
-            campaign : {
-                title : "Campaign - Ni"
-                id : ...NX
-            },
-            aggregated : {
-
-            }
-        },
-
-    ]
-}
-
-Страница статистики по кампании 
-2. /statistics/campaign/
-- POST
-- {
-    '_campaign_id' : ...
-}
-
-Фильтр по medium: email | linkedin
-- Общая полоска метрик (наводишь меняется на %)
-- Далее таблицу по дням за 2 недели (14 дней) как у smartreach
-    * Колонка день
-    * Далее колонки метрики  
-- ЕСЛИ успеешь то Гистограма (высота колокни = prospects_contacted, и далее при наведении на колонку показывает другие метрики для этого дня) 
-
-Ответ вот такой:
+response:
 {
-    campaign : {
-        title : "Campaign -1 "
-        id : 2341234231,
-        credentials : [{acount:"ks.shilov@gmail.com"}],
-        funnel : 'funnel title'
-    },
-    statistics : {
-        email : [
-            {
-                date : 1212
-                prospects_email_contacted_total : 100
-                emails_sent : 300
-                emails_bounced : 20
-                emails_opened : 40
-                emails_replies_total : 10
-            },
-            {
-                date : 1213
-                ....
-            }
-            ],
-        linkedin :[
-            {
-                date :1111
-                prospects_linkedin_contacted_total : 200
-                connect_request_total : 50
-                connect_request_approved_total : 20 
-                linkedin_messages_sent_total : 12
-                linkedin_replies_received : 4
-            },
-            {
-                date : 1213
-            }
-        ]
+    'code': 1, 
+    'columns': '[
+                {"label": "Prospects contacted", "field": "prospects_total"}, 
+                {"label": "Emails sent", "field": "email-send-message"}, 
+                {"label": "Emails replied", "field": "email-check-reply"}, 
+                {"label": "Emails opened", "field": "email_opens"}, 
+                {"label": "Emails enriched", "field": "emails-enriched-success"}, 
+                {"label": "Linkedin invites sent", "field": "linkedin-connect"}, 
+                {"label": "Linkedin profiles viewed", "field": "linkedin-visit-profile"}, 
+                {"label": "Linkedin messages sent", "field": "linkedin-send-message"}, 
+                {"label": "Linkedin replied", "field": "linkedin-check-reply"}, 
+                {"label": "Enrich credits left", "field": "credits-left"}
+                ]', 
+    'msg': 'Success', 
+    'statistics': '[
+            {"_id": {"action_key": "linkedin-parse-profile", "month_day": "06-24"}, "total": 35}, 
+            {"_id": {"action_key": "linkedin-parse-profile", "month_day": "06-23"}, "total": 40}, 
+            {"_id": {"action_key": "email-send-message", "month_day": "06-23"}, "total": 4}, 
+            {"_id": {"month_day": "06-24", "action_key": "prospects_total"}, "total": 35}, 
+            {"_id": "credits-left", "total": 999}
+            ]
+}
+
+ЗДЕСЬ ВНИМАТЕЛЬНО приходит массив диктов по дням, тебе нужно его преобразовать в один общий дикт, и посчитать тотал. 
+{"_id": "credits-left", "total": 999} - вот эта строчка приходит ОДИН РАЗ НЕ ПО дням
+
+соответственно на десириализации то что вверху нужно преобразовать в дикт:
+{
+    'linkedin-parse-profile' : 75,
+    'email-send-message' : 4,
+    'prospects_total' : 35,
+    'credits-left' : 999,
+    'days' : {
+        '06-24' : {
+            'linkedin-parse-profile' : 35,
+            'prospects_total' : 35
+        },
+        '06-23' : {
+            'linkedin-parse-profile' : 40,
+            'email-send-message' : 4,
+        }
     }
 }
