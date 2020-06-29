@@ -8,6 +8,11 @@ module.exports.BLOCK_TOAST_SELECTOR = '#app__container > artdeco-toasts > artdec
 module.exports.VERIFICATION_PIN_SELECTOR = '#input__email_verification_pin';
 module.exports.VERIFICATION_PIN_BTN_SELECTOR = '#email-pin-submit-button';
 
+// captcha
+module.exports.CAPTCHA_SELECTOR = '.g-recaptcha';
+module.exports.CAPTCHA_RESPONSE_SELECTOR = '#g-recaptcha-response';
+module.exports.SUBMIT_CAPTCHA_BTN_SELECTOR = '';
+
 // search
 module.exports.SEARCH_ELEMENT_SELECTOR = '.search-result__wrapper .search-result__info a';
 module.exports.LINK_SELECTOR = 'span > .actor-name';

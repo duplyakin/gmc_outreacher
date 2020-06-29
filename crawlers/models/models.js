@@ -22,6 +22,11 @@ let accountsSchema = new Schema({
 
     cookies: Array,
 
+    blocking_type: {
+        type: String,
+        default: null,
+    },
+
     blocking_data: {
         type: Object,
         default: null,
