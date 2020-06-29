@@ -93,6 +93,7 @@ async function accountStatus(req, res) {
 
             res.json({
                 code: 2, // wait user action
+                blocking_type: 'captcha',
                 sitekey: account.blocking_data.sitekey,
             })
         } else if (account.blocking_type == "code") {
@@ -103,6 +104,7 @@ async function accountStatus(req, res) {
 
             res.json({
                 code: 2, // wait user action
+                blocking_type: 'code',
                 screenshot: account.blocking_data.screenshot,
             })
         } else {

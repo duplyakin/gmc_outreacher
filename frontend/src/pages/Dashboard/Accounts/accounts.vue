@@ -8,6 +8,9 @@
         <div class="col-6 d-flex flex-row-reverse align-self-center">
             <button @click.prevent="addAccount" type="button" class="btn btn-default btn-success mx-1">Add account</button>
         </div>
+        <div class="col-2 d-flex flex-row-reverse align-self-center">
+            <button @click.prevent="captchaLinkedinModal" type="button" class="btn btn-default btn-success mx-1">Add account</button>
+        </div>
 
     </div>
     </card>
@@ -71,10 +74,13 @@
 
 
     const O24Pagination = () => import('src/components/O24Pagination.vue')
+
     const AccountEdit = () => import('./accountEdit.vue')
     const AccountAdd = () => import('./accountAdd.vue')
+
     const AccountLogin = () => import('./accountLogin_modal.vue')
     const AccountInput = () => import('./accountInput_modal.vue')
+    const AccountCaptcha = () => import('./accountCaptcha_modal.vue')
 
     const CREDENTIALS_API_LIST = '/credentials/list';
     const CREDENTIALS_API_EDIT = '/credentials/edit';
@@ -171,6 +177,19 @@
                 clickToClose: false
             })
         },
+        async captchaLinkedinModal(credentials_id, sitekey='6Le-wvkSAAAAAPBMRTvw0Q4Muexq9bi0DJwx_mJ-') {
+            this.$modal.show(AccountCaptcha, {
+                sitekey: sitekey,
+                credentials_id: credentials_id,
+                accountInputBS: this.accountInputBS,
+            },
+            {
+                width: '620',
+                height: 'auto',
+                scrollable: true,
+                clickToClose: false
+            })
+        },
         async accountInputBS(credentials_id, input) {
             console.log("accountInputBS started with credentials_id: ", credentials_id);
             const path = BS_API_INPUT;
@@ -229,7 +248,7 @@
                         console.log("accountStatusBS status: ", this.$refs["modal_login"].modals);
 
                         Notification.success({title: "Success", message: "Success."});
-                        this.$refs["modal_login"].modals = []; // CLOSE MODAL // CLOSE MODAL
+                        this.$refs["modal_login"].modals = []; // CLOSE MODAL
                         this.loadCredentials(); // update table
                     }
 
@@ -239,27 +258,40 @@
                     }
 
                     if(status == 2) {
-                        // NEED ACTION - INPUT CAPTCHA
+                        // NEED ACTION - INPUT CODE or CAPTCHA
                         Notification.info({title: "Info", message: "Need action."});
-                        this.$refs["modal_login"].modals = []; // CLOSE MODAL // CLOSE MODAL
-                        if(r.screenshot) {
-                            this.inputLinkedinModal(credentials_id, r.screenshot);
+                        this.$refs["modal_login"].modals = []; // CLOSE MODAL
+
+                        if(r.blocking_type == 'code') { // code
+                            if(r.screenshot) {
+                                this.inputLinkedinModal(credentials_id, r.screenshot);
+                            } else {
+                                Notification.error({title: "Error", message: "Something went wrong... Please, contact support."});
+                            }
+
+                        } else if (r.blocking_type == 'captcha') { // captcha
+                            if(r.sitekey) {
+                                this.captchaLinkedinModal(credentials_id, r.sitekey);
+                            } else {
+                                Notification.error({title: "Error", message: "Something went wrong... Please, contact support."});
+                            }
+
                         } else {
                             Notification.error({title: "Error", message: "Something went wrong... Please, contact support."});
                         }
                     }
 
                     if(status == 4) {
-                        // NEED ACTION - REPEAT LOGIN\PASSWORD
+                        // NEED ACTION - REPEAT LOGIN / PASSWORD
                         Notification.error({title: "Error", message: "Wrong login or password. Try again."});
-                        this.$refs["modal_login"].modals = []; // CLOSE MODAL // CLOSE MODAL
+                        this.$refs["modal_login"].modals = []; // CLOSE MODAL
                         this.loginLinkedinModal(credentials_id);
                     }
 
                 })
                 .catch(error => {
                     console.log("Error accountStatusBS: ", error);
-                    this.$refs["modal_login"].modals = []; // CLOSE MODAL // CLOSE MODAL
+                    this.$refs["modal_login"].modals = []; // CLOSE MODAL
                     Notification.error({title: "Error", message: "Something went wrong... Please, contact support."});
                 });
         },
