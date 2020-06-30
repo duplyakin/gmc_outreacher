@@ -8,9 +8,6 @@
         <div class="col-6 d-flex flex-row-reverse align-self-center">
             <button @click.prevent="addAccount" type="button" class="btn btn-default btn-success mx-1">Add account</button>
         </div>
-        <div class="col-2 d-flex flex-row-reverse align-self-center">
-            <button @click.prevent="captchaLinkedinModal" type="button" class="btn btn-default btn-success mx-1">Add account</button>
-        </div>
 
     </div>
     </card>
@@ -171,27 +168,29 @@
                 accountInputBS: this.accountInputBS,
             },
             {
-                width: '620',
+                width: '920',
                 height: 'auto',
                 scrollable: true,
                 clickToClose: false
             })
         },
-        async captchaLinkedinModal(credentials_id, sitekey='6Le-wvkSAAAAAPBMRTvw0Q4Muexq9bi0DJwx_mJ-') {
+        async captchaLinkedinModal(credentials_id, sitekey) {
+            //credentials_id="gfjytrdfg34t5y6rfgd"
+            //sitekey='6Le-wvkSAAAAAPBMRTvw0Q4Muexq9bi0DJwx_mJ-' // test
             this.$modal.show(AccountCaptcha, {
                 sitekey: sitekey,
                 credentials_id: credentials_id,
                 accountInputBS: this.accountInputBS,
             },
             {
-                width: '620',
+                width: '420',
                 height: 'auto',
                 scrollable: true,
                 clickToClose: false
             })
         },
         async accountInputBS(credentials_id, input) {
-            console.log("accountInputBS started with credentials_id: ", credentials_id);
+            //console.log("accountInputBS started with credentials_id: ", credentials_id);
             const path = BS_API_INPUT;
             let _this = this;
 

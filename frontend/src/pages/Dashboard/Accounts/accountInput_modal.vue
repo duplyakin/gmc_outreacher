@@ -5,7 +5,7 @@
 
         <pulse-loader :loading="loading" :color="color"></pulse-loader>
 
-        <div v-if="!loading">
+        <div v-if="!loading" class="mb-3">
         <div class="row">
             <div class="col-6 mb-5">
                 <el-input placeholder="Enter code" v-model="input" :disabled="loading"></el-input>
@@ -13,10 +13,10 @@
         </div>
 
         <card>
+            <p>Image of code:</p>
             <img v-bind:src="'data:image/jpeg;base64,' + screenshot" class="o24_image" />
         </card>
-        
-        <p> </p>
+
 
         <div class="row">
             <div class="col-12 d-flex flex-row-reverse">

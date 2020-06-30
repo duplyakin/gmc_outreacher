@@ -5,11 +5,12 @@
 
         <pulse-loader :loading="loading" :color="color"></pulse-loader>
 
-        <vue-recaptcha sitekey="6Le-wvkSAAAAAPBMRTvw0Q4Muexq9bi0DJwx_mJ-" :loadRecaptchaScript="true"></vue-recaptcha>
+        <div v-if="!loading" class="mb-3">
+            <vue-recaptcha @verify="get_response" :sitekey="sitekey" :loadRecaptchaScript="true"></vue-recaptcha>
+        </div>
 
         <div class="row">
             <div class="col-12 d-flex flex-row-reverse">
-                <button :disabled="loading" v-on:click="inputAccount" type="button" class="btn btn-outline btn-wd btn-success mx-1">Input</button>
                 <button :disabled="loading" v-on:click="discard" type="button" class="btn btn-outline btn-wd btn-danger">Close</button>
             </div>
         </div>
@@ -33,28 +34,27 @@ export default {
     },
     props : {
         sitekey: String,
-        //credentials_id: String,
+        credentials_id: String,
         accountInputBS: Function,
     },
     data() {
         return {
-            input: '',
+            sitekey_captcha: '',
 
             loading: false,
             color: "#a7a7ff",
         }
     },
     methods: {
-        async inputAccount(){
-
-            if(!this.input) {
-                Notification.error({title: "Error", message: "Empty input"})
+        get_response(response) {
+            //console.log("response:", response)
+            if(response == null || response == '') {
                 return
             }
 
             this.loading = true
 
-            this.accountInputBS(this.credentials_id, this.input)
+            this.accountInputBS(this.credentials_id, response)
         },
         discard(){
             this.$emit('close')
@@ -63,12 +63,9 @@ export default {
     mounted() {
     },
     created() {
-        this.sitekey = '6Le-wvkSAAAAAPBMRTvw0Q4Muexq9bi0DJwx_mJ-'
+        //this.sitekey_captcha = '6Le-wvkSAAAAAPBMRTvw0Q4Muexq9bi0DJwx_mJ-'
     }
 }
 </script>
 <style>
-.o24_image {
-    filter: brightness(50%)
-}
 </style>
