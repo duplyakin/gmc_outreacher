@@ -137,6 +137,9 @@ class JSGoogleAppSettingsData(JSObject):
     def __init__(self, raw_data):
         super().__init__(raw_data)
 
+class JSLimitsData(JSObject):
+    def __init__(self, raw_data):
+        super().__init__(raw_data)
 
 class JSCampaignData(JSObject):
     def __init__(self, raw_data):

@@ -518,6 +518,34 @@ class Credentials(db.Document):
 
         return True
 
+    def get_limits(self):
+        res = {
+            'maximum' : self.limits.to_json(),
+            'current' : self.warmup_limits.to_json()
+        }
+
+        return json.dumps(res)
+
+    def update_limits(self, limits_data):
+        
+        for action, count in self.warmup_limits.items():
+            if action in ['interval_sec', 'increase', 'days_inactivity']:
+                continue 
+
+            new_value = limits_data.get_field(field=action, default=None)
+            max_possible = self.limits.get(action, 0)
+
+            if new_value is not None:
+                if new_value <= max_possible:
+                    self.warmup_limits[action] = new_value
+
+                    #account_maximum not used by email right now, maybe in the future
+                    if action == EMAIL_SEND_MESSAGE_ACTION:
+                        self.warmup_limits['account_maximum'] = new_value
+
+        self._commit()
+
+        return self.warmup_limits
 
     @classmethod
     def ready_ids(cls, utc_now):

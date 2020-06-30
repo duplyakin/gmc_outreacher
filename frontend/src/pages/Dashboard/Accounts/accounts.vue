@@ -32,6 +32,7 @@
                         <template slot-scope="scope">
                             <a @click.prevent="editAccount(scope.row, scope.$index)" href="#"  v-if="column.prop === 'account'">{{ scope.row.data[column.prop] }}</a>
                             <template v-else-if="column.prop === 'status'">{{  status[scope.row[column.prop]] }}</template>
+                            <a @click.prevent="editLimits(scope.row, scope.$index)" href="#"  v-if="column.prop === 'limit_per_day'">Edit limits</a>
                             <template v-else-if="column.prop === 'error_message'"><div class="red">{{ show_data(scope.row, column) }}</div> </template>
                             <template v-else> {{ show_data(scope.row, column) }} </template>
                         </template>
@@ -72,6 +73,8 @@
 
     const O24Pagination = () => import('src/components/O24Pagination.vue')
     const AccountEdit = () => import('./accountEdit.vue')
+    const AccountLimitsEdit = () => import('./accountLimitsEdit.vue')
+
     const AccountAdd = () => import('./accountAdd.vue')
     const AccountLogin = () => import('./accountLogin_modal.vue')
     const AccountInput = () => import('./accountInput_modal.vue')
@@ -80,6 +83,8 @@
     const CREDENTIALS_API_EDIT = '/credentials/edit';
     const CREDENTIALS_API_DELETE = '/credentials/delete';
     const CREDENTIALS_API_ADD = '/credentials/add';
+
+    const CREDENTIALS_API_LIMITS_EDIT = '/limits/edit';
     //const CREDENTIALS_API_REFRESH = '/credentials/refresh';
 
     const BS_API_BASE_URL = process.env.VUE_APP_BS_URL;
@@ -92,6 +97,7 @@
     components: {
         O24Pagination,
         AccountEdit,
+        AccountLimitsEdit,
         AccountAdd,
         [Select.name]: Select,
         [Option.name]: Option,
@@ -298,6 +304,21 @@
                     Notification.error({title: "Error", message: "Error login " + error});
                     this.$refs["modal_login"].modals = []; // CLOSE MODAL
                 });
+        },
+        editLimits(account_dict, row_index) {
+            this.$modal.show(AccountLimitsEdit, {
+                accountObj: account_dict,
+                api_url : CREDENTIALS_API_LIMITS_EDIT,
+                modalTitle: "Account limits edit",
+                valueUpdated:(newValue) => {
+                    Notification.success({title: "Success", message: "Account limits changed"});
+                }
+            },
+            {
+                width: '720',
+                height: 'auto',
+                scrollable: true
+            })
         },
         editAccount(account_dict, row_index) {
 

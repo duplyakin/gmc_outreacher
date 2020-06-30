@@ -192,7 +192,7 @@ EMAIL_LIMITS_DAILY = {
         'smtp' : {
                 'limits' : {
                         'account_maximum' : 250,
-                        EMAIL_SEND_MESSAGE_ACTION: 250
+                        EMAIL_SEND_MESSAGE_ACTION: 250,
                 },
                 'warmup' : {
                         'account_maximum' : 25,
