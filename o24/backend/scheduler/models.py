@@ -205,25 +205,36 @@ class ActionLog(db.Document):
                 { "$expr":
                     { "$and":
                         [
-                            { "$eq": ["$task.status", FAILED ] },
+                            { "$eq": ["$step", 'enrich-controller-enrich' ] },
+                            { "$eq": ["$task.status", ENRICH_SUCCESS ] },
                         ]
                     }
                 }
             },
             {"$group" : {
-                '_id' : '$task.action_key',
+                '_id' : '$task.prospect_id',
             }},
             {"$group" : {
-                '_id' : 'errors',
+                '_id' : 'emails-enriched-success',
                 'total' : {"$sum" : 1}
             }}
 
         ]
 
-        errors = list(db_query.aggregate(*pipeline))
-        if errors:
-            stats.extend(errors)
+        emails_enriched = list(db_query.aggregate(*pipeline))
+        if emails_enriched:
+            stats.extend(emails_enriched)
 
+
+        #need to add Amount of credits for this user
+        user = models.User.objects(id=owner_id).first()
+        if user:
+            credits_left = user.get_credits()
+            credits_stats = [{
+                '_id' : 'credits-left',
+                'total' : credits_left
+            }]
+            stats.extend(credits_stats)
 
         results = bson_dumps(stats)
         return results
@@ -346,6 +357,49 @@ class ActionLog(db.Document):
         errors = list(db_query.aggregate(*pipeline))
         if errors:
             stats.extend(errors)
+
+        pipeline = [
+            { "$match":
+                { "$expr":
+                    { "$and":
+                        [
+                            { "$eq": ["$step", 'enrich-controller-enrich' ] },
+                            { "$eq": ["$task.status", ENRICH_SUCCESS ] },
+                        ]
+                    }
+                }
+            },
+
+            {"$group" : {
+                '_id': {
+                    "prospect_id" : "$task.prospect_id",
+                    'month_day' : { '$dateToString' : { 'format' : "%m-%d", 'date' : "$created" }  }
+                },
+            }},
+
+            {"$group" : {
+                '_id' : {
+                    'month_day' : "$_id.month_day",
+                    "action_key" : "emails-enriched-success"
+                },
+                'total' : {"$sum" : 1}
+            }}
+        ]
+
+        emails_enriched = list(db_query.aggregate(*pipeline))
+        if emails_enriched:
+            stats.extend(emails_enriched)
+
+
+        #need to add Amount of credits for this user
+        user = models.User.objects(id=owner_id).first()
+        if user:
+            credits_left = user.get_credits()
+            credits_stats = [{
+                '_id' : 'credits-left',
+                'total' : credits_left
+            }]
+            stats.extend(credits_stats)
 
 
         results = bson_dumps(stats)

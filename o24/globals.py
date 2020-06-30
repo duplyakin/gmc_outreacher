@@ -309,3 +309,6 @@ CAMPAIGN_STATUSES_CSV = {
         -1 : 'Failed',
         -2 : 'Failed need action'
 }
+
+#STATISTICS
+TOTAL_STATS_DAYS_DEFAULT = 7
