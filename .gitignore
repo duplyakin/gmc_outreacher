@@ -4,6 +4,7 @@ __pycache__/
 
 #pid files
 *.pid
+celerybeat-schedule
 
 # Distribution / packaging
 .Python
