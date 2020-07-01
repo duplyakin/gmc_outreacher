@@ -10,6 +10,8 @@ const Register = () => import('src/pages/Dashboard/Auth/register.vue')
 const Profile = () => import('src/pages/Dashboard/Profile/profile.vue')
 //const Profile = () => import('src/pages/Dashboard/Profile/1.vue') // test file
 const Blacklist = () => import('src/pages/Dashboard/Blacklist/blacklist.vue')
+const Subscription = () => import('src/pages/Dashboard/Subscription/subscription.vue')
+
 const Dashboard = () => import('src/pages/Dashboard/Overview/Dashboard.vue')
 const Help = () => import('src/pages/Dashboard/Overview/help.vue')
 
@@ -109,6 +111,11 @@ const routes = [
         path: 'blacklist',
         name: 'Blacklist',
         component: Blacklist
+      },
+      {
+        path: 'subscription',
+        name: 'Subscription',
+        component: Subscription
       },
       {
         path: 'dashboard',
