@@ -251,7 +251,66 @@ const login = async(page, account) => {
         log.debug("login success.") // add check here (?)
         return 0; // logged in
     } catch(err) {
-        log.error("Error in login(): ", err.stack);
+        log.error("Error in login: ", err.stack);
+        return -2;
+    }
+}
+
+
+// -2 = system err, -1 = block, 0 = resolved, 4 = wrong credentials, 2 = captcha
+const login_cookie = async(page, account) => {
+    try {
+        if(!Array.isArray(account.cookies) || account.cookies.length == 0) {
+            log.error("Empty (or not array) cookies in login_cookie.")
+            return -2; 
+        }
+
+        if(page == null) {
+            log.error("Empty page in login_cookie.")
+            return -2;
+        }
+
+        await page.setCookie(...account.cookies)
+
+        await page.goto(links.SIGNIN_LINK, {
+            waitUntil: 'load',
+            timeout: 60000 // it may load too long! critical here
+        });
+
+        try {
+            // todo: check toast by url (?)
+            //await page.waitForSelector(selectors.BLOCK_TOAST_SELECTOR, { timeout: 1000 }); // todo: add status - wait a day and try again
+        } catch (err) {
+            log.error("Login FAILED - toast error.")
+            return -2;
+        }
+    
+        let current_url = page.url();
+
+        if (check_phone_page(current_url)) {
+            await skip_phone(page);
+            current_url = page.url();
+        }
+
+        if (await page.$(selectors.CAPTCHA_SELECTOR) != null) {
+            log.debug("Captcha happend in login_cookie.")
+            return 2; // captcha happend
+        }
+
+        if (check_block_url(current_url)) {
+            log.debug("Block happend in login_cookie.")
+            return -1; // block happend
+        }
+
+        if (current_url.includes(links.SIGNIN_SHORTLINK)) {
+            log.debug("Wrong credentials in login_cookie.")
+            return 4; // wrong credentials
+        }
+
+        log.debug("login_cookie success.") // add check here (?)
+        return 0; // logged in
+    } catch(err) {
+        log.error("Error in login_cookie: ", err.stack);
         return -2;
     }
 }
@@ -525,7 +584,18 @@ const input_login = async (account) => {
         context = await browser.createIncognitoBrowserContext();
         page = await context.newPage();
 
-        let res = await login(page, account);
+        let res = -2
+
+        if(account.login && account.password) {
+            res = await login(page, account)
+
+        } else if (account.cookies != null && Array.isArray(account.cookies) && account.cookies.length > 0) {
+            res = await login_cookie(page, account)
+
+        } else {
+            log.error("input_login: can't login becouse login or password or li_at is not valid, account:", account)
+        }
+
         log.debug('input_login res = ', res);
 
         if(res === 0) { // login success

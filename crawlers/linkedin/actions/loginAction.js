@@ -39,7 +39,7 @@ class LoginAction {
         return false
     }
 
-    async _get_domain() {
+    _get_domain() {
         let current_url = this.page.url()
 
         // Exctract domain here in format: “www.linkedin.com”
@@ -122,7 +122,7 @@ class LoginAction {
 
 /*
     async login_with_li_at() {
-        let domain_var = await this._get_domain();
+        let domain_var = this._get_domain();
         if(domain_var == null || domain_var == '') {
             log.debug('Never happend: domain_var is broken.')
             return;

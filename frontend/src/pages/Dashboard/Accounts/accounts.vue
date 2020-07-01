@@ -88,6 +88,7 @@
     const BS_API_BASE_URL = process.env.VUE_APP_BS_URL;
     const BS_API_STATUS = BS_API_BASE_URL + '/api/status/';
     const BS_API_LOGIN = BS_API_BASE_URL + '/api/login/';
+    const BS_API_LOGIN_COOKIE = BS_API_BASE_URL + '/api/login/cookie/';
     const BS_API_INPUT = BS_API_BASE_URL + '/api/input/';
 
 
@@ -294,15 +295,26 @@
                     Notification.error({title: "Error", message: "Something went wrong... Please, contact support."});
                 });
         },
-        async accountLoginBS(credentials_id, login, password) {
-            const path = BS_API_LOGIN;
-            console.log("accountLoginBS started with credentials_id: ", credentials_id);
+        async accountLoginBS(credentials_id, login_type, login_or_cookie, password) {
+            //console.log("accountLoginBS started with credentials_id: ", credentials_id);
+            let path = null
             let _this = this;
 
             var result = {
                 credentials_id: credentials_id,
-                login: login,
-                password: password,
+                login_type: login_type,
+            }
+
+            if(login_type == 'cookie') {
+                result.li_at = login_or_cookie
+
+                path = BS_API_LOGIN_COOKIE
+
+            } else if (login_type == 'regular') {
+                result.login = login_or_cookie
+                result.password = password
+
+                path = BS_API_LOGIN
             }
 
             await bs_axios
@@ -310,7 +322,7 @@
                 .then(res => {
                     var r = res.data;
                     if (r.code == -2) {
-                        Notification.error({title: "Error", message: "Empty login or password."});
+                        Notification.error({title: "Error", message: "Empty login / password or li_at cookie."});
                         this.$refs["modal_login"].modals = []; // CLOSE MODAL
 
                     } else if (r.code == 1) {
