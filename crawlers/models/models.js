@@ -14,13 +14,27 @@ let accountsSchema = new Schema({
         default: 0,
     },
 
-    login: String,
+    login: {
+        type: String,
+        default: null,
+    },
 
-    password: String,
+    password: {
+        type: String,
+        default: null,
+    },
 
     expires: Number,
 
-    cookies: Array,
+    cookies: {
+        type: Array,
+        default: null,
+    },
+
+    blocking_type: {
+        type: String,
+        default: null,
+    },
 
     blocking_data: {
         type: Object,

@@ -72,12 +72,15 @@
 
 
     const O24Pagination = () => import('src/components/O24Pagination.vue')
+
     const AccountEdit = () => import('./accountEdit.vue')
     const AccountLimitsEdit = () => import('./accountLimitsEdit.vue')
 
     const AccountAdd = () => import('./accountAdd.vue')
+
     const AccountLogin = () => import('./accountLogin_modal.vue')
     const AccountInput = () => import('./accountInput_modal.vue')
+    const AccountCaptcha = () => import('./accountCaptcha_modal.vue')
 
     const CREDENTIALS_API_LIST = '/credentials/list';
     const CREDENTIALS_API_EDIT = '/credentials/edit';
@@ -90,6 +93,7 @@
     const BS_API_BASE_URL = process.env.VUE_APP_BS_URL;
     const BS_API_STATUS = BS_API_BASE_URL + '/api/status/';
     const BS_API_LOGIN = BS_API_BASE_URL + '/api/login/';
+    const BS_API_LOGIN_COOKIE = BS_API_BASE_URL + '/api/login/cookie/';
     const BS_API_INPUT = BS_API_BASE_URL + '/api/input/';
 
 
@@ -171,14 +175,29 @@
                 accountInputBS: this.accountInputBS,
             },
             {
-                width: '620',
+                width: '920',
+                height: 'auto',
+                scrollable: true,
+                clickToClose: false
+            })
+        },
+        async captchaLinkedinModal(credentials_id, sitekey) {
+            //credentials_id="gfjytrdfg34t5y6rfgd"
+            //sitekey='6Le-wvkSAAAAAPBMRTvw0Q4Muexq9bi0DJwx_mJ-' // test
+            this.$modal.show(AccountCaptcha, {
+                sitekey: sitekey,
+                credentials_id: credentials_id,
+                accountInputBS: this.accountInputBS,
+            },
+            {
+                width: '420',
                 height: 'auto',
                 scrollable: true,
                 clickToClose: false
             })
         },
         async accountInputBS(credentials_id, input) {
-            console.log("accountInputBS started with credentials_id: ", credentials_id);
+            //console.log("accountInputBS started with credentials_id: ", credentials_id);
             const path = BS_API_INPUT;
             let _this = this;
 
@@ -235,7 +254,7 @@
                         console.log("accountStatusBS status: ", this.$refs["modal_login"].modals);
 
                         Notification.success({title: "Success", message: "Success."});
-                        this.$refs["modal_login"].modals = []; // CLOSE MODAL // CLOSE MODAL
+                        this.$refs["modal_login"].modals = []; // CLOSE MODAL
                         this.loadCredentials(); // update table
                     }
 
@@ -245,39 +264,63 @@
                     }
 
                     if(status == 2) {
-                        // NEED ACTION - INPUT CAPTCHA
+                        // NEED ACTION - INPUT CODE or CAPTCHA
                         Notification.info({title: "Info", message: "Need action."});
-                        this.$refs["modal_login"].modals = []; // CLOSE MODAL // CLOSE MODAL
-                        if(r.screenshot) {
-                            this.inputLinkedinModal(credentials_id, r.screenshot);
+                        this.$refs["modal_login"].modals = []; // CLOSE MODAL
+
+                        if(r.blocking_type == 'code') { // code
+                            if(r.screenshot) {
+                                this.inputLinkedinModal(credentials_id, r.screenshot);
+                            } else {
+                                Notification.error({title: "Error", message: "Something went wrong... Please, contact support."});
+                            }
+
+                        } else if (r.blocking_type == 'captcha') { // captcha
+                            if(r.sitekey) {
+                                this.captchaLinkedinModal(credentials_id, r.sitekey);
+                            } else {
+                                Notification.error({title: "Error", message: "Something went wrong... Please, contact support."});
+                            }
+
                         } else {
                             Notification.error({title: "Error", message: "Something went wrong... Please, contact support."});
                         }
                     }
 
                     if(status == 4) {
-                        // NEED ACTION - REPEAT LOGIN\PASSWORD
+                        // NEED ACTION - REPEAT LOGIN / PASSWORD
                         Notification.error({title: "Error", message: "Wrong login or password. Try again."});
-                        this.$refs["modal_login"].modals = []; // CLOSE MODAL // CLOSE MODAL
+                        this.$refs["modal_login"].modals = []; // CLOSE MODAL
                         this.loginLinkedinModal(credentials_id);
                     }
 
                 })
                 .catch(error => {
                     console.log("Error accountStatusBS: ", error);
-                    this.$refs["modal_login"].modals = []; // CLOSE MODAL // CLOSE MODAL
+                    this.$refs["modal_login"].modals = []; // CLOSE MODAL
                     Notification.error({title: "Error", message: "Something went wrong... Please, contact support."});
                 });
         },
-        async accountLoginBS(credentials_id, login, password) {
-            const path = BS_API_LOGIN;
-            console.log("accountLoginBS started with credentials_id: ", credentials_id);
+        async accountLoginBS(credentials_id, login_type, login_or_cookie, password) {
+            //console.log("accountLoginBS started with credentials_id: ", credentials_id);
+            let path = null
             let _this = this;
 
             var result = {
                 credentials_id: credentials_id,
-                login: login,
-                password: password,
+                login_type: login_type,
+            }
+
+            if(login_type == 'cookie') {
+                result.li_at = login_or_cookie
+
+                path = BS_API_LOGIN_COOKIE
+
+            } else if (login_type == 'regular') {
+                result.login = login_or_cookie
+                result.password = password
+
+                path = BS_API_LOGIN
             }
 
             await bs_axios
@@ -285,7 +328,7 @@
                 .then(res => {
                     var r = res.data;
                     if (r.code == -2) {
-                        Notification.error({title: "Error", message: "Empty login or password."});
+                        Notification.error({title: "Error", message: "Empty login / password or li_at cookie."});
                         this.$refs["modal_login"].modals = []; // CLOSE MODAL
 
                     } else if (r.code == 1) {

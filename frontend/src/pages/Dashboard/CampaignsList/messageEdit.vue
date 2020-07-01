@@ -110,7 +110,7 @@ export default {
       subject: '', // element-ui feature
       interval: 1, // element-ui feature
 
-      linkedin_max_msg_length: 1999,
+      linkedin_max_msg_length: 299,
 
       template: null,
       editorSettings: {
@@ -171,17 +171,15 @@ export default {
       } 
 
       if (this.template_type == "linkedin" && this.convertToPlainText(this.template.message).length > this.linkedin_max_msg_length) {
-        Notification.error({title: "Error", message: "Message lengh should be shorter than " + this.linkedin_max_msg_length + " symbols."});
+        Notification.error({title: "Error", message: "Message length should be shorter than " + this.linkedin_max_msg_length + " symbols."});
         return false;
       } 
 
-      if (confirm("Are you sure?")) {
-        this.$emit("close");
-        this.template.interval = this.interval; // element-ui feature
-        this.template.subject = this.subject; // element-ui feature
-        this.valueUpdated(this.template);
-        console.log("template: ", this.template);
-      }
+      this.$emit("close");
+      this.template.interval = this.interval; // element-ui feature
+      this.template.subject = this.subject; // element-ui feature
+      this.valueUpdated(this.template);
+      //console.log("template: ", this.template);
     },
     discardEdit() {
       this.$emit("close");

@@ -44,6 +44,7 @@
     "vue-form-wizard": "^0.8.1",
     "vue-js-modal": "^1.3.35",
     "vue-nav-tabs": "^0.5.6",
+    "vue-recaptcha": "^1.3.0",
     "vue-router": "^3.0.2",
     "vue-scrollama": "^1.1.9",
     "vue-scrollbar-simple": "0.0.4",
