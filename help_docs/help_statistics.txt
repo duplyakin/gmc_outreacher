@@ -28,6 +28,7 @@ response:
                 {"label": "Linkedin profiles viewed", "field": "linkedin-visit-profile"}, 
                 {"label": "Linkedin messages sent", "field": "linkedin-send-message"}, 
                 {"label": "Linkedin replied", "field": "linkedin-check-reply"}, 
+
                 {"label": "Enrich credits left", "field": "credits-left"}
                 ]', 
     'msg': 'Success', 
@@ -84,6 +85,7 @@ response:
                 {"label": "Linkedin profiles viewed", "field": "linkedin-visit-profile"}, 
                 {"label": "Linkedin messages sent", "field": "linkedin-send-message"}, 
                 {"label": "Linkedin replied", "field": "linkedin-check-reply"}, 
+
                 {"label": "Enrich credits left", "field": "credits-left"}
                 ]', 
     'msg': 'Success', 
@@ -105,6 +107,7 @@ response:
     'email-send-message' : 4,
     'prospects_total' : 35,
     'credits-left' : 999,
+    
     'days' : {
         '06-24' : {
             'linkedin-parse-profile' : 35,
