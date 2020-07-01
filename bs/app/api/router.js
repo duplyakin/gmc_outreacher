@@ -185,45 +185,32 @@ async function accountLoginCookie(req, res) {
     let li_at = req.body.li_at
 
     if(!credentials_id) {
-        log.error("..... accountLogin: Empty credentials_id .....")
+        log.error("..... accountLoginCookie: Empty credentials_id .....")
         return res.json({ code: -1 }); // empty credentials_id
     }
 
     if(!li_at) {
-        log.error("..... accountLogin: Empty li_at .....")
+        log.error("..... accountLoginCookie: Empty li_at .....")
         return res.json({ code: -2 }); // empty credentials
     }
-
-    li_at = [{
-        name : "li_at",
-        value : li_at,
-        domain : '.' + 'www.linkedin.com',
-        path : "/",
-        expires : Date.now() / 1000 + 10000000, // + ~ 4 months // https://www.epochconverter.com/
-        size : (new TextEncoder().encode(li_at)).length,
-        httpOnly : true,
-        secure : true,
-        session : false,
-        sameSite : "None"
-        }]
     
 	let account = null;
 	try {
         // check if it BROKEN_CREDENTIALS account
-        account = await models.Accounts.findOneAndUpdate({ _id: credentials_id, status: { $in: [status_codes.BROKEN_CREDENTIALS, status_codes.AVAILABLE] }}, { _id: credentials_id, cookies: li_at, status: status_codes.IN_PROGRESS }, { new: true, upsert: true }); 
+        account = await models.Accounts.findOneAndUpdate({ _id: credentials_id, status: { $in: [status_codes.BROKEN_CREDENTIALS, status_codes.AVAILABLE] }}, { _id: credentials_id, status: status_codes.IN_PROGRESS }, { new: true, upsert: true }); 
 
-        log.debug("..... account status in accountLogin: ..... ", account.status);
+        log.debug("..... account status in accountLoginCookie: ..... ", account.status);
 
 		// login linkedin async
-		utils.input_login(account);
+		utils.input_cookie(account, li_at);
 
         return res.json({ code: 1 }); // IN_PROGRESS
         
 	} catch (err) { 
-        log.error("..... Error in accountLogin: ..... ", err.stack);
+        log.error("..... Error in accountLoginCookie: ..... ", err.stack);
 
 	    if (account != null) {
-            log.error(".... Error in accountLogin - credentials_id: ....", credentials_id);
+            log.error(".... Error in accountLoginCookie - credentials_id: ....", credentials_id);
 
             await models.Accounts.findOneAndUpdate({ _id: credentials_id, status: status_codes.IN_PROGRESS }, { status: status_codes.AVAILABLE }, { upsert: false });
             return res.json({ code: -1 }) // system error

@@ -36,11 +36,10 @@
                   title="How to get them?"
                   width="auto"
                   trigger="hover"
-                  content="1. Install chrome extension https://chrome.google.com/webstore/detail/editthiscookie/fngmhnnpilhplaeedifhccceomclgfbg/related
-                  2. Go to the Linkedin page and log in
-                  3. Open this extension and find li_at - copy and paste it here">
+                  content="Download chrome extension, go to the Linkedin page with your login / password and extract li_at cookie and past it to the field below">
                   <el-button slot="reference" size="mini" icon="el-icon-question" circle></el-button>
                 </el-popover>
+                <a href="https://chrome.google.com/webstore/detail/editthiscookie/fngmhnnpilhplaeedifhccceomclgfbg/related"> Cookie extension download</a>
               </label>
               <el-input placeholder="Enter li_at cookie" v-model="li_at" :disabled="loading"></el-input>
             </div>
