@@ -32,7 +32,7 @@
                         <template slot-scope="scope">
                             <a @click.prevent="editAccount(scope.row, scope.$index)" href="#"  v-if="column.prop === 'account'">{{ scope.row.data[column.prop] }}</a>
                             <template v-else-if="column.prop === 'status'">{{  status[scope.row[column.prop]] }}</template>
-                            <a @click.prevent="editLimits(scope.row, scope.$index)" href="#"  v-if="column.prop === 'limit_per_day'">Edit limits</a>
+                            <a v-else-if="column.prop === 'limit_per_day'" @click.prevent="editLimits(scope.row, scope.$index)" href="#">Edit limits</a>
                             <template v-else-if="column.prop === 'error_message'"><div class="red">{{ show_data(scope.row, column) }}</div> </template>
                             <template v-else> {{ show_data(scope.row, column) }} </template>
                         </template>
@@ -315,7 +315,7 @@
                 }
             },
             {
-                width: '720',
+                width: '820',
                 height: 'auto',
                 scrollable: true
             })

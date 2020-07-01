@@ -3,13 +3,18 @@
 <card :title="modalTitle">
     <form @submit.prevent="submitAccountData">
         <card>
-
             <div class="row">
                 <div class="col-6">
-                    <fg-input name="limits_per_day"
-                        label="Limits per day"
-                        class="mb-3"
-                        v-model="account_data.limit_per_day"/>
+                    <el-checkbox v-model="account_data.warmup_active">Automatic warmup
+                        <el-popover
+                        placement="top-start"
+                        title="What is automatic warmup?"
+                        width="auto"
+                        trigger="hover"
+                        content="Our system will safety increase daily limits to achieve maximum">
+                        <el-button slot="reference" size="mini" icon="el-icon-question" circle></el-button>
+                    </el-popover>
+                    </el-checkbox>
                 </div>
             </div>
 
@@ -58,13 +63,15 @@
 </template>
 
 <script>
-import { Notification, Select, Option } from 'element-ui'
+import { Notification, Popover, Checkbox, Select, Option } from 'element-ui'
 import axios from '@/api/axios-auth'
 
 export default {
     components: {
         [Select.name]: Select,
-        [Option.name]: Option
+        [Option.name]: Option,
+        [Checkbox.name]: Checkbox,
+        [Popover.name]: Popover
     },
     name : 'account-edit',
     props : {
@@ -79,7 +86,7 @@ export default {
 
             account_data : {
                 medium : '',
-                limit_per_day : 0,
+                warmup_active : true,
                 modification: '',
                 data : {},
             }

@@ -578,7 +578,7 @@ def admin_edit_credentials():
                             'error_message' : 0, 
                             'medium' : 0, 
                             'next_action' : 2,
-                            'limit_per_day' : 1, 
+                            'warmup_active' : 1, 
                             'limit_per_hour' : 1, 
                             'limit_interval' : 1,
                             'current_daily_counter' : 1, 

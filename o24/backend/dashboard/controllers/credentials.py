@@ -180,8 +180,7 @@ def add_credentials():
                 new_credentials = Credentials.create_credentials(owner=current_user.id, 
                                                                 new_data=credentials_data.get_data(), 
                                                                 medium=medium,
-                                                                modification=modification,
-                                                                limit_per_day=credentials_data.get_limit_per_day())
+                                                                modification=modification)
             elif credentials_type == 'gmail/gsuite':
                 result['code'] = 1
                 result['redirect'] = url_for('dashboard.dashboard_oauth_button', user_id=current_user.id)

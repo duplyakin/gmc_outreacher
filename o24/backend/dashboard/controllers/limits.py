@@ -4,7 +4,7 @@ from flask import Blueprint, request, render_template, \
 from flask import Flask, jsonify
 from o24.backend import db
 from o24.backend import app
-from o24.backend.dashboard.models import Prospects, User, ProspectsList, Campaign
+from o24.backend.dashboard.models import Prospects, User, ProspectsList, Campaign, Credentials
 from o24.backend.dashboard import bp_dashboard
 from o24.globals import *
 from flask_cors import CORS
@@ -13,12 +13,12 @@ from o24.backend.utils.serialize import JSONEncoder
 import json
 import traceback
 import o24.backend.scheduler.scheduler as scheduler
-from o24.backend.dashboard.serializers import JSProspectData
+from o24.backend.dashboard.serializers import JSLimitsData
 from o24.backend.utils.decors import auth_required
 
 EMAIL_LIMITS = [
     {
-        'label' : 'Daily sending maximum',
+        'label' : 'Sending limits',
         'prop' : EMAIL_SEND_MESSAGE_ACTION,
         'explanation' : 'The maximum amount of emails you can send per 24 hours period'
     },
@@ -26,36 +26,36 @@ EMAIL_LIMITS = [
 
 LINKEDIN_LIMITS = [
     {
-        'label' : 'Account daily maximum',
+        'label' : 'Total actions',
         'prop' : 'account_maximum',
         'explanation' : 'Number of all actions you can do from your linkedin account per 24 hour period.'
     },
     {
-        'label' : 'Search pages parse maximum',
+        'label' : 'Search parse',
         'prop' : LINKEDIN_SEARCH_ACTION,
         'explanation' : 'Maximum number of search pages, that you can parse per 24 hour period.'
 
     },
     {
-        'label' : 'Profiles parse maximum',
+        'label' : 'Profiles parse',
         'prop' : LINKEDIN_PARSE_PROFILE_ACTION,
         'explanation' : 'Maximum number of profile parsed per 24 hour period.'
 
     },
     {
-        'label' : 'Profile visit action maximum',
+        'label' : 'Profile visit',
         'prop' : LINKEDIN_VISIT_PROFILE_ACTION,
         'explanation' : 'Maximum number of profiles you can automatically visit per 24 hour period.'
 
     },
     {
-        'label' : 'Linkedin connect request maximum',
+        'label' : 'Connect request',
         'prop' : LINKEDIN_CONNECT_ACTION,
         'explanation' : 'Maximum number connection requests you can send per 24 hour period.'
 
     },
     {
-        'label' : 'Linkedin messages maximum',
+        'label' : 'Sending messages',
         'prop' : LINKEDIN_SEND_MESSAGE_ACTION,
         'explanation' : 'Maximum number of messages you can send per 24 hour period.'
     },
@@ -135,9 +135,7 @@ def limits_edit():
             if not new_limits:
                 raise Exception("Try again")
                 
-            new_limits.reload()
-
-            result['limits'] = new_limits.to_json()
+            result['limits'] = json.dumps(new_limits)
             result['code'] = 1
             result['msg'] = 'Success'
     except Exception as e:

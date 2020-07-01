@@ -48,24 +48,7 @@
                             placeholder="example: linkedin.com/myaccount"/>
                     </div>
                 </div>
-  
-                <div class="row">
-                    <div class="col-6">
-                        <label>Limits per day
-                        <el-popover
-                            placement="top-start"
-                            title="What is limits?"
-                            width="auto"
-                            trigger="hover"
-                            content="Limits - maximum messages from current account per day.">
-                            <el-button slot="reference" size="mini" icon="el-icon-question" circle></el-button>
-                        </el-popover>
-                        </label>
-                        <fg-input name="limits_per_day"
-                        v-model="model.limit_per_day"/>
-                    </div>
-                </div>
-            </div>    
+              </div>    
         </card>
 
         <div class="row">
@@ -79,7 +62,7 @@
 </template>
 
 <script>
-import { Button, Popover, Notification, Select, Option } from 'element-ui'
+import { Button, Popover, Checkbox, Notification, Select, Option } from 'element-ui'
 import axios from '@/api/axios-auth';
 
 const OAUTH_SERVER = process.env.VUE_APP_API_URL;
@@ -90,6 +73,7 @@ export default {
         [Select.name]: Select,
         [Option.name]: Option,
         [Popover.name]: Popover,
+        [Checkbox.name]: Checkbox
     },
     name : 'account-add',
     props : {
@@ -103,7 +87,6 @@ export default {
             linkedin_account_types: ['basic', 'premium'],
 
             model: {
-                limit_per_day: 50,
                 credentials_type: '',
                 modification: '',
                 data: {

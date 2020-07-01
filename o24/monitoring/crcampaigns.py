@@ -44,7 +44,7 @@ def show_credentials():
         { "$project" : { 
             'status' : 1,
             'medium' : 1,
-            'limit_per_day' : 1,
+            'warmup_active' : 1,
             'limit_interval' : 1,
             'current_daily_counter' : 1,
             'next_action' : 1,
@@ -55,7 +55,7 @@ def show_credentials():
     credentials = list(models.Credentials.objects().aggregate(*pipeline))
     print("HELP: status1: 0-New, 1-Active, -1-Failed")
     print("HELP: status2: 0-Available, 1-In_progress, 2-Blocked, 3-Solving_Captcha, 4-BROKEN_CREDENTIALS, -1-Failed")
-    print("status1|medium         |limit_per_day|limit_interval|current_daily_counter|next_action  |status2|li_at |expired    |blocking_data|login |password|task_id|")
+    print("status1|medium         |warmup_active|limit_interval|current_daily_counter|next_action  |status2|li_at |expired    |blocking_data|login |password|task_id|")
     print("_______|_______________|_____________|______________|_____________________|_____________|_______|______|___________|_____________|______|________|_______|")
 
     for cr in  credentials:
@@ -65,7 +65,7 @@ def show_credentials():
             moscow_format = cr.get('next_action').astimezone(pytz.timezone(MOSCOW)).strftime("%d-%b %H:%M")
 
         medium = cr.get('medium', 'None')
-        limit_per_day = cr.get('limit_per_day', 'None')
+        warmup_active = cr.get('warmup_active', 'None')
         limit_interval = cr.get('limit_interval', 'None')
         current_daily_counter = cr.get('current_daily_counter', 'None')
 
@@ -93,11 +93,11 @@ def show_credentials():
             if expired != 'None':
                 expired = time.strftime('%Y-%m-%d', time.localtime(int(expired)))
         
-        print("{status1:7}|{medium:15}|{limit_per_day:13}|{limit_interval:14}|\
+        print("{status1:7}|{medium:15}|{warmup_active:13}|{limit_interval:14}|\
 {current_daily_counter:21}|{next_action:13}|{status2:7}|{li_at_cookie:6}|\
 {expired:11}|{blocking_data:13}|{login:6}|{password:8}|{task_id:8}".format(status1=status1,
                                                                                 medium=medium,
-                                                                                limit_per_day=limit_per_day,
+                                                                                warmup_active=warmup_active,
                                                                                 limit_interval=limit_interval,
                                                                                 current_daily_counter=current_daily_counter,
                                                                                 next_action=moscow_format,
