@@ -45,9 +45,10 @@
                 type="submit"
                 @click.prevent="onSubmit"
                 class="btn btn-fill btn-info btn-round btn-wd"
-              >Create Free Account</button>
-              <br />
+              >Create Account</button>
             </div>
+
+            <p class="o24_policy_text">By clicking the "Create Account" button, I expressly agree to the outreacher24 <a href="https://outreacher24.com/terms-and-conditions">Terms of Use</a> and understand that my account information will be used according to outreacher24 <a href="https://outreacher24.com/privacy-policy">Privacy Policy</a></p>
 
           </card>
         </form>
@@ -131,5 +132,9 @@ export default {
 .navbar-nav .nav-item p {
   line-height: inherit;
   margin-left: 5px;
+}
+.o24_policy_text {
+  font-size: 10px;
+  color: grey;
 }
 </style>
