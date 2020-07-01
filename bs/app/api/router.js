@@ -156,7 +156,7 @@ async function accountLogin(req, res) {
 	let account = null;
 	try {
         // check if it BROKEN_CREDENTIALS account
-        account = await models.Accounts.findOneAndUpdate({ _id: credentials_id, status: { $in: [status_codes.BROKEN_CREDENTIALS, status_codes.AVAILABLE] }}, { _id: credentials_id, login: login, password: password, status: status_codes.IN_PROGRESS }, { new: true, upsert: true }); 
+        account = await models.Accounts.findOneAndUpdate({ _id: credentials_id, status: { $in: [status_codes.BROKEN_CREDENTIALS, status_codes.AVAILABLE, status_codes.BLOCKED] }}, { _id: credentials_id, login: login, password: password, status: status_codes.IN_PROGRESS }, { new: true, upsert: true }); 
 
         log.debug("..... account status in accountLogin: ..... ", account.status);
 
@@ -197,7 +197,7 @@ async function accountLoginCookie(req, res) {
 	let account = null;
 	try {
         // check if it BROKEN_CREDENTIALS account
-        account = await models.Accounts.findOneAndUpdate({ _id: credentials_id, status: { $in: [status_codes.BROKEN_CREDENTIALS, status_codes.AVAILABLE] }}, { _id: credentials_id, status: status_codes.IN_PROGRESS }, { new: true, upsert: true }); 
+        account = await models.Accounts.findOneAndUpdate({ _id: credentials_id, status: { $in: [status_codes.BROKEN_CREDENTIALS, status_codes.AVAILABLE, status_codes.BLOCKED] }}, { _id: credentials_id, status: status_codes.IN_PROGRESS }, { new: true, upsert: true }); 
 
         log.debug("..... account status in accountLoginCookie: ..... ", account.status);
 
