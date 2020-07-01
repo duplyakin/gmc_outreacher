@@ -258,10 +258,10 @@ const login = async(page, account) => {
 
 
 // -2 = system err, -1 = block, 0 = resolved, 4 = wrong credentials, 2 = captcha
-const login_cookie = async(page, account) => {
+const login_cookie = async(page, li_at) => {
     try {
-        if(!Array.isArray(account.cookies) || account.cookies.length == 0) {
-            log.error("Empty (or not array) cookies in login_cookie.")
+        if(!li_at) {
+            log.error("Empty li_at in login_cookie.")
             return -2; 
         }
 
@@ -270,26 +270,37 @@ const login_cookie = async(page, account) => {
             return -2;
         }
 
-        await page.setCookie(...account.cookies)
+        await page.goto(links.SIGNIN_LINK, {
+            waitUntil: 'load',
+            timeout: 60000 // it may load too long! critical here
+        })
+
+        let cookies = [{
+            name : "li_at",
+            value : li_at,
+            domain : '.' + (new URL(page.url())).hostname,
+            path : "/",
+            expires : Date.now() / 1000 + 10000000, // + ~ 4 months // https://www.epochconverter.com/
+            size : (new TextEncoder().encode(li_at)).length,
+            httpOnly : true,
+            secure : true,
+            session : false,
+            sameSite : "None"
+            }]
+
+        await page.setCookie(...cookies)
 
         await page.goto(links.SIGNIN_LINK, {
             waitUntil: 'load',
             timeout: 60000 // it may load too long! critical here
-        });
-
-        try {
-            // todo: check toast by url (?)
-            //await page.waitForSelector(selectors.BLOCK_TOAST_SELECTOR, { timeout: 1000 }); // todo: add status - wait a day and try again
-        } catch (err) {
-            log.error("Login FAILED - toast error.")
-            return -2;
-        }
+        })
+        await page.waitFor(2000)
     
-        let current_url = page.url();
+        let current_url = page.url()
 
         if (check_phone_page(current_url)) {
-            await skip_phone(page);
-            current_url = page.url();
+            await skip_phone(page)
+            current_url = page.url()
         }
 
         if (await page.$(selectors.CAPTCHA_SELECTOR) != null) {
@@ -310,8 +321,12 @@ const login_cookie = async(page, account) => {
         log.debug("login_cookie success.") // add check here (?)
         return 0; // logged in
     } catch(err) {
-        log.error("Error in login_cookie: ", err.stack);
-        return -2;
+        if(err.toString().includes("ERR_NETWORK_ACCESS_DENIED")) { // check it
+            log.debug("wrong cookies format in login_cookie: ", err)
+            return 4 // wrong cookies
+        }
+        log.error("Error in login_cookie: ", err.stack)
+        return -2
     }
 }
 
@@ -584,17 +599,7 @@ const input_login = async (account) => {
         context = await browser.createIncognitoBrowserContext();
         page = await context.newPage();
 
-        let res = -2
-
-        if(account.login && account.password) {
-            res = await login(page, account)
-
-        } else if (account.cookies != null && Array.isArray(account.cookies) && account.cookies.length > 0) {
-            res = await login_cookie(page, account)
-
-        } else {
-            log.error("input_login: can't login becouse login or password or li_at is not valid, account:", account)
-        }
+        let res = await login(page, account)
 
         log.debug('input_login res = ', res);
 
@@ -688,6 +693,117 @@ const input_login = async (account) => {
 }
 
 
+const input_cookie = async (account, li_at) => {
+    if(account == null) {
+        throw new Error('Empty account in input_cookie.')
+    }
+
+    if(!li_at) {
+        throw new Error('Empty li_at in input_cookie.')
+    }
+
+    let browser = null
+
+    try {
+        //browser = await puppeteer.launch({ headless: false }); // test mode
+        browser = await puppeteer.launch()
+        context = await browser.createIncognitoBrowserContext()
+        page = await context.newPage()
+
+        let res = await login_cookie(page, li_at)
+
+        log.debug('input_cookie res = ', res)
+
+        if(res === 0) { // login success
+            // get new cookies
+            let new_cookies = await _get_current_cookie(page)
+            let new_expires = 0
+            new_cookies.forEach((item) => {
+                if (item.name === 'li_at') {
+                    new_expires = item.expires;
+                }
+            })
+
+            let account_new = { 
+                status: status_codes.AVAILABLE, 
+                login: account.login,
+                password: account.password,
+                cookies: new_cookies,
+                expires: new_expires,
+                task_id: null, // !
+            }
+
+            //log.debug('input_login account_new = ', account_new)
+            
+            await models.Accounts.findOneAndUpdate({ _id: account._id }, account_new, { upsert: false }); // upsert = false; because we have already created account object in DB
+            await models_shared.Credentials.findOneAndUpdate({ _id: account._id }, { status: status_codes.ACTIVE }, { upsert: false });
+            if(account.task_id != null) {
+                await models_shared.TaskQueue.findOneAndUpdate({ _id: account.task_id }, { status: status_codes.NEED_USER_ACTION_RESOLVED }, { upsert: false });
+            }
+
+            await browser.close();
+            browser.disconnect();
+
+        } else if (res === -1) {
+            // login failed - block happend
+            let context_obj = await get_context(browser, context, page);
+            if(context_obj == null) {
+                throw new Error("Error in input_cookie: context_obj is null.");
+            }
+
+            await models.Accounts.findOneAndUpdate({ _id: account._id }, { status: status_codes.BLOCKED, blocking_type: "code", blocking_data: context_obj }, { upsert: false });
+            await models_shared.Credentials.findOneAndUpdate({ _id: account._id }, { status: status_codes.FAILED }, { upsert: false });
+
+            browser.disconnect();
+
+        } else if (res === 2) {
+            // login failed - captcha happend
+            let context_obj = await get_context(browser, context, page);
+            if(context_obj == null) {
+                throw new Error("Error in input_cookie: context_obj is null.");
+            }
+            let sitekey = await get_sitekey(page);
+            if(sitekey == null) {
+                throw new Error("Error in input_cookie: sitekey is null.");
+            }
+
+            context_obj.sitekey = sitekey
+
+            await models.Accounts.findOneAndUpdate({ _id: account._id }, { status: status_codes.BLOCKED, blocking_type: "captcha", blocking_data: context_obj }, { upsert: false });
+            await models_shared.Credentials.findOneAndUpdate({ _id: account._id }, { status: status_codes.FAILED }, { upsert: false });
+
+            browser.disconnect();
+
+        } else if (res === 4) {
+            // wrong credentials - need one more try
+            await models.Accounts.findOneAndUpdate({ _id: account._id }, { status: status_codes.BROKEN_CREDENTIALS }, { upsert: false });
+            await models_shared.Credentials.findOneAndUpdate({ _id: account._id }, { status: status_codes.FAILED }, { upsert: false });
+
+            await browser.close();
+            browser.disconnect();
+
+        } else if (res === -2) {
+            // system error
+            await models.Accounts.findOneAndUpdate({ _id: account._id }, { status: status_codes.FAILED }, { upsert: false });
+            
+            await browser.close();
+            browser.disconnect();
+        }
+
+    } catch(err) {
+        log.error("..... Error in input_cookie account._id: ..... ", account._id);
+        log.error("..... Error in input_cookie: ..... ", err.stack);
+
+        await models.Accounts.findOneAndUpdate({ _id: account._id, status: status_codes.IN_PROGRESS }, { status: status_codes.AVAILABLE }, { upsert: false });
+
+        if(browser != null) {
+            await browser.close();
+            browser.disconnect();
+        }
+    }
+}
+
+
 const _get_current_cookie = async (page) => {
     // Get Session Cookies
     let newCookies = await page.cookies()
@@ -701,5 +817,6 @@ const _get_current_cookie = async (page) => {
 
 module.exports = {
     input_data: input_data,
-    input_login: input_login
+    input_login: input_login,
+    input_cookie: input_cookie,
   }

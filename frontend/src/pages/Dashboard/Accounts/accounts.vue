@@ -288,8 +288,8 @@
                     }
 
                     if(status == 4) {
-                        // NEED ACTION - REPEAT LOGIN / PASSWORD
-                        Notification.error({title: "Error", message: "Wrong login or password. Try again."});
+                        // NEED ACTION - REPEAT LOGIN / PASSWORD or LI_AT
+                        Notification.error({title: "Error", message: "Wrong login / password or li_at cookie. Try again."});
                         this.$refs["modal_login"].modals = []; // CLOSE MODAL
                         this.loginLinkedinModal(credentials_id);
                     }
