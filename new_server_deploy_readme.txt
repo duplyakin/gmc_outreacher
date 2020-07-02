@@ -127,3 +127,7 @@ sudo systemctl start o24-prod
 sudo systemctl start celery-beat
 sudo systemctl start celery-o24-worker
 sudo systemctl start flower-monitor
+
+pm2 restart init
+pm2 restart server
+sudo systemctl restart nginx

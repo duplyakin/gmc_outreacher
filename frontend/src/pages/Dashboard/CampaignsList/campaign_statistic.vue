@@ -39,8 +39,75 @@
       </card>
 
       <card>
-        <div>Enrich credits left: {{credits_left}} (buy more email credits)</div>
+        <div>Enrich credits left: <strong>{{credits_left}}</strong> <p class=".text-danger">(buy more email credits)</p></div>
       </card>
+
+      <div class="row text-center">
+        <div class="col">
+        <div class="counter">
+        <h2 class="timer count-title count-number text-info" data-to="100" data-speed="1500">100</h2>
+        <p class="count-text ">Prospects contacted</p>
+      </div>
+      </div>
+
+      <div class="col">
+             <div class="counter">
+
+    <h2 class="timer count-title count-number text-info" data-to="1700" data-speed="1500">10</h2>
+    <p class="count-text ">Emails sent</p>
+  </div>
+            </div>
+
+            <div class="col">
+                <div class="counter">
+
+    <h2 class="timer count-title count-number text-info" data-to="11900" data-speed="1500">1</h2>
+    <p class="count-text ">Linkedin messages sent</p>
+  </div>
+</div>
+
+
+        <div class="col">
+        <div class="counter">
+        <h2 class="timer count-title count-number text-info" data-to="100" data-speed="1500">1</h2>
+        <p class="count-text ">Emails replied</p>
+      </div>
+      </div>
+        
+            <div class="col">
+             <div class="counter">
+    <h2 class="timer count-title count-number text-info" data-to="1700" data-speed="1500">12</h2>
+    <p class="count-text ">Emails opened</p>
+  </div>
+            </div>
+            <div class="col">
+                <div class="counter">
+    <h2 class="timer count-title count-number text-info" data-to="11900" data-speed="1500">0</h2>
+    <p class="count-text ">Emails enriched</p>
+  </div></div>
+
+
+        <div class="col">
+        <div class="counter">
+        <h2 class="timer count-title count-number text-info" data-to="100" data-speed="1500">0</h2>
+        <p class="count-text ">Linkedin invites sent</p>
+      </div>
+      </div>
+        
+            <div class="col">
+             <div class="counter">
+    <h2 class="timer count-title count-number text-info" data-to="1700" data-speed="1500">0</h2>
+    <p class="count-text ">Linkedin profiles viewed</p>
+  </div>
+            </div>
+            <div class="col">
+                <div class="counter">
+    <h2 class="timer count-title count-number text-info" data-to="11900" data-speed="1500">0</h2>
+    <p class="count-text ">Linkedin replied</p>
+  </div></div>
+       </div>
+
+
 
 
       <div v-show="!mouse_active" @mouseleave="mouseLeave">
