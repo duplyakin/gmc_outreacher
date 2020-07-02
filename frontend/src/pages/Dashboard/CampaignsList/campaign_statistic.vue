@@ -1,6 +1,5 @@
 <template>
   <div>
-    <card>
       <card>
         <div class="row">
           <div class="col-12 d-flex align-self-center">
@@ -11,10 +10,11 @@
         </div>
       </card>
 
+      <card>
+      <card>
       <div class="container">
         <div class="row align-items-end mb-3">
           <div class="col-7">
-            <div class="block">
               <span class="demonstration">Statistic period</span>
               <el-date-picker
                 v-model="date"
@@ -26,7 +26,6 @@
                 end-placeholder="End date"
                 :picker-options="pickerOptions">
               </el-date-picker>
-            </div>
           </div>
           <div class="col-5">
             <button
@@ -37,13 +36,15 @@
           </div>
         </div>
       </div>
+      </card>
 
       <card>
         <div>Enrich credits left: {{credits_left}} (buy more email credits)</div>
       </card>
 
 
-        <div v-show="!mouse_active" @mouseleave="mouseLeave">
+      <div v-show="!mouse_active" @mouseleave="mouseLeave">
+        <card>
         <div class="container">
           <div class="row">
             
@@ -71,11 +72,13 @@
 
           </div>
         </div>
-        </div>
+        </card>
+      </div>
 
         <!--hover-->
 
-        <div @mouseover="mouseOver" v-show="mouse_active">
+      <div @mouseover="mouseOver" v-show="mouse_active">
+        <card>
         <div class="container">
           <div class="row">
             
@@ -104,19 +107,20 @@
 
           </div>
         </div>
-        </div>
+        </card>
+      </div>
 
 
-      <div>
+      <card>
         <h4 class="card-title">Daily Statistics (comming soon)</h4>
         <p class="card-category">Statistics for the last days</p>
         <line-chart :chart-data="datacollection" :options="chartOptions"></line-chart>
         <div class="stats">
           <i class="fa fa-check"></i> Outreacher24
         </div>
-      </div>
+      </card>
+      </card>
       
-    </card>
   </div>
 </template>
 <script>

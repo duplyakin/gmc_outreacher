@@ -1,11 +1,30 @@
 <template>
   <div>
     <card>
-      <div class="col-4 d-flex align-self-center">
-        <h3>
-          <i class="nc-icon nc-circle-09"></i> Profile
-        </h3>
+      <div class="container">
+          <div class="row">
+              <div class="col-4 d-flex align-self-center">
+                  <h3>
+                  <i class="nc-icon nc-circle-09"></i> Profile
+                  </h3>
+              </div>
+              <div class="col-8 d-flex flex-row-reverse align-self-center">
+                  <button
+                      @click.prevent="change_password"
+                      type="button"
+                      class="btn btn-default btn-success mx-1"
+                  >Change password</button>
+                  <button
+                      @click.prevent="onLogout"
+                      type="button"
+                      class="btn btn-default btn-success mx-1"
+                  >Logout</button>
+              </div>
+          </div>
       </div>
+    </card>
+
+    <card>
       <card>
         <p class="info">E-mail</p>
         <p>{{ user_data.email }}</p>
@@ -17,16 +36,6 @@
         <p>{{ user_data.invite_code }}</p>
       </card>
 
-      <button
-        type="button"
-        @click.prevent="change_password"
-        class="btn btn-fill btn-info btn-round btn-wd"
-      >Change password</button>
-      <button
-        type="button"
-        @click.prevent="onLogout"
-        class="btn btn-fill btn-info btn-round btn-wd"
-      >Logout</button>
     </card>
 
     <modals-container/>

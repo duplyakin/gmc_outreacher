@@ -2,13 +2,19 @@
   <div>
 
       <card>
-
         <div class="col-12 d-flex align-self-center">
           <h3>
             <i class="nc-icon nc-air-baloon"></i> Dashboard
           </h3>
         </div>
+      </card>
 
+      <card>
+        <card>
+          <div class="mb-3">Enrich credits left: {{statistics['credits-left']}} (buy more email credits)</div>
+        </card>
+
+        <card>
         <div class="container">
           <div class="row">
             
@@ -36,11 +42,7 @@
 
           </div>
         </div>
-
-      <card>
-        <div>Enrich credits left: {{statistics['credits-left']}} (buy more email credits)</div>
-      </card>
-
+        </card>
       </card>
 
   </div>
