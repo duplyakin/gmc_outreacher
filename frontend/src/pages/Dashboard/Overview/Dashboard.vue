@@ -142,11 +142,9 @@ export default {
         })
       }
 
-      //console.log('down_row:', down_row)
-      this.statistics = statistics
-
-      this.down_row = down_row
-      this.up_row = up_row
+      this.$set(this, 'statistics', statistics)
+      this.$set(this, 'down_row', down_row)
+      this.$set(this, 'up_row', up_row)
     },
   },
   mounted() {
