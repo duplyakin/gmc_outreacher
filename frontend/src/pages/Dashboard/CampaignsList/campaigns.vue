@@ -50,6 +50,17 @@
                     <template v-else> {{ show_data(scope.row, column) }} </template>
                 </template>
             </el-table-column>
+            <el-table-column :min-width="50" fixed="left" label="">
+                <template slot-scope="props">
+                <a
+                    v-tooltip.top-center="'View full statistics'"
+                    class="btn-simple btn-link"
+                    @click.prevent="detalization(props.row._id.$oid)"
+                    href="#"
+                >View stats
+                </a>
+                </template>
+            </el-table-column>
             <el-table-column :min-width="50" fixed="right" label="Action">
                 <template slot-scope="props">
                 <a
@@ -142,6 +153,12 @@ data() {
     };
 },
 methods: {
+    detalization(campaign_id) {
+      this.$router.push({
+        path: "campaign_statistic",
+        query: { campaign_id: campaign_id }
+      });
+    },
     make_action(campaign, index){
         var path = CAMPAIGNS_API_START;
         if (campaign.status == 1){

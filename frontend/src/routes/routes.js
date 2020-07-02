@@ -20,6 +20,7 @@ const Prospects = () => import('src/pages/Dashboard/Prospects/prospects.vue')
 const CampaignsList = () => import('src/pages/Dashboard/CampaignsList/campaigns.vue')
 const CampaignForm = () => import('src/pages/Dashboard/CampaignsList/campaign_form.vue')
 const CampaignEditForm = () => import('src/pages/Dashboard/CampaignsList/campaign_edit_form.vue')
+const CampaignStatistic = () => import('src/pages/Dashboard/CampaignsList/campaign_statistic.vue')
 
 const LinkedinEnrichment = () => import('src/pages/Dashboard/LinkedinActions/linkedin_enrichment.vue')
 const LinkedinParsing = () => import('src/pages/Dashboard/LinkedinActions/linkedin_parsing.vue')
@@ -27,15 +28,14 @@ const LinkedinEnrichmentData = () => import('src/pages/Dashboard/LinkedinActions
 
 const ProspectLists = () => import('src/pages/Dashboard/ProspectLists/lists.vue')
 
-
 const Statistics = () => import('src/pages/Dashboard/Statistics/statistics.vue')
 const Statistics_detailed = () => import('src/pages/Dashboard/Statistics/statistics_detailed.vue')
 
 const Accounts = () => import('src/pages/Dashboard/Accounts/accounts.vue')
 const Team = () => import('src/pages/Dashboard/Team/team.vue')
-const Actions = () => import('src/pages/Dashboard/Actions/actions.vue')
 
 // admin
+const Actions = () => import('src/pages/Dashboard/Actions/actions.vue')
 const UsersList = () => import('src/pages/Dashboard/Admin/users_list.vue')
 const GoogleAppSettings = () => import('src/pages/Dashboard/Admin/google_app_settings.vue')
 const GoogleAppSettingsAdd = () => import('src/pages/Dashboard/Admin/google_app_settings_add.vue')
@@ -153,6 +153,11 @@ const routes = [
         path: 'campaign_edit_form',
         name: 'Edit Campaign',
         component: CampaignEditForm
+      },
+      {
+        path: 'campaign_statistic',
+        name: 'Campaign Statistic',
+        component: CampaignStatistic
       },
 
       {

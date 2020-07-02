@@ -57,7 +57,7 @@
 import { Notification, Table, TableColumn, Select, Option } from "element-ui";
 import { Pagination as LPagination } from "src/components/index";
 
-import axios from '@/api/axios-auth';;
+import axios from '@/api/axios-auth';
 import dummy_statistics from "./dummy_statistics"; // test data
 
 const STATISTICS_API_LIST = "/statistics/list";

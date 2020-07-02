@@ -90,8 +90,8 @@ response:
                 ]', 
     'msg': 'Success', 
     'statistics': '[
-            {"_id": {"action_key": "linkedin-parse-profile", "month_day": "06-24"}, "total": 35}, 
-            {"_id": {"action_key": "linkedin-parse-profile", "month_day": "06-23"}, "total": 40}, 
+            {"_id": {"action_key": "linkedin-send-message", "month_day": "06-24"}, "total": 35}, 
+            {"_id": {"action_key": "linkedin-send-message", "month_day": "06-23"}, "total": 40}, 
             {"_id": {"action_key": "email-send-message", "month_day": "06-23"}, "total": 4}, 
             {"_id": {"month_day": "06-24", "action_key": "prospects_total"}, "total": 35}, 
             {"_id": "credits-left", "total": 999}
@@ -103,18 +103,18 @@ response:
 
 соответственно на десириализации то что вверху нужно преобразовать в дикт:
 {
-    'linkedin-parse-profile' : 75,
+    'linkedin-send-message' : 75,
     'email-send-message' : 4,
     'prospects_total' : 35,
     'credits-left' : 999,
     
     'days' : {
         '06-24' : {
-            'linkedin-parse-profile' : 35,
+            'linkedin-send-message' : 35,
             'prospects_total' : 35
         },
         '06-23' : {
-            'linkedin-parse-profile' : 40,
+            'linkedin-send-message' : 40,
             'email-send-message' : 4,
         }
     }
