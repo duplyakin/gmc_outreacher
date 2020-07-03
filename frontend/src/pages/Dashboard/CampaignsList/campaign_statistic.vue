@@ -230,10 +230,6 @@ export default {
         return
       }
 
-      if (this.statistics["prospects_total"] <= 0) {
-        return
-      }
-
       let statistics_abs = {}
 
       for (let key in this.statistics) {
