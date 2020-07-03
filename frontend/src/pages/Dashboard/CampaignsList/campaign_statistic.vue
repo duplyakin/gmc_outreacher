@@ -1,21 +1,21 @@
 <template>
   <div>
-      <card>
-        <div class="row">
-          <div class="col-12 d-flex align-self-center">
-            <h3>
-              <i class="nc-icon nc-chart-bar-32"></i> Campaign Detalization
-            </h3>
-          </div>
+    <card>
+      <div class="row">
+        <div class="col-12 d-flex align-self-center">
+          <h3>
+            <i class="nc-icon nc-chart-bar-32"></i> Campaign Detalization
+          </h3>
         </div>
-      </card>
+      </div>
+    </card>
 
+    <card>
       <card>
-      <card>
-      <div class="container">
-        <div class="row align-items-end mb-3">
-          <div class="col-7">
-              <span class="demonstration">Statistic period</span>
+        <div class="container">
+          <div class="row align-items-end mb-3">
+            <div class="col-7">
+              <span class="demonstration">Statistics period</span>
               <el-date-picker
                 v-model="date"
                 type="daterange"
@@ -24,159 +24,79 @@
                 range-separator="|"
                 start-placeholder="Start date"
                 end-placeholder="End date"
-                :picker-options="pickerOptions">
-              </el-date-picker>
-          </div>
-          <div class="col-5">
-            <button
+                :picker-options="pickerOptions"
+              ></el-date-picker>
+            </div>
+            <div class="col-5">
+              <button
                 @click.prevent="load_data"
                 type="button"
                 class="btn btn-default btn-success mx-1"
-            >Get statistic</button>
+              >Get statistics</button>
+            </div>
           </div>
         </div>
-      </div>
       </card>
 
       <card>
-        <div>Enrich credits left: <strong>{{credits_left}}</strong> <p class=".text-danger">(buy more email credits)</p></div>
+        <div>
+          Enrich credits left: <strong>{{credits_left}}</strong>
+          <p class="text-danger">(buy more email credits)</p>
+        </div>
       </card>
 
-      <div class="row text-center">
-        <div class="col">
-        <div class="counter">
-        <h2 class="timer count-title count-number text-info" data-to="100" data-speed="1500">100</h2>
-        <p class="count-text ">Prospects contacted</p>
-      </div>
-      </div>
-
-      <div class="col">
-             <div class="counter">
-
-    <h2 class="timer count-title count-number text-info" data-to="1700" data-speed="1500">10</h2>
-    <p class="count-text ">Emails sent</p>
-  </div>
-            </div>
-
-            <div class="col">
-                <div class="counter">
-
-    <h2 class="timer count-title count-number text-info" data-to="11900" data-speed="1500">1</h2>
-    <p class="count-text ">Linkedin messages sent</p>
-  </div>
-</div>
-
-
-        <div class="col">
-        <div class="counter">
-        <h2 class="timer count-title count-number text-info" data-to="100" data-speed="1500">1</h2>
-        <p class="count-text ">Emails replied</p>
-      </div>
-      </div>
-        
-            <div class="col">
-             <div class="counter">
-    <h2 class="timer count-title count-number text-info" data-to="1700" data-speed="1500">12</h2>
-    <p class="count-text ">Emails opened</p>
-  </div>
-            </div>
-            <div class="col">
-                <div class="counter">
-    <h2 class="timer count-title count-number text-info" data-to="11900" data-speed="1500">0</h2>
-    <p class="count-text ">Emails enriched</p>
-  </div></div>
-
-
-        <div class="col">
-        <div class="counter">
-        <h2 class="timer count-title count-number text-info" data-to="100" data-speed="1500">0</h2>
-        <p class="count-text ">Linkedin invites sent</p>
-      </div>
-      </div>
-        
-            <div class="col">
-             <div class="counter">
-    <h2 class="timer count-title count-number text-info" data-to="1700" data-speed="1500">0</h2>
-    <p class="count-text ">Linkedin profiles viewed</p>
-  </div>
-            </div>
-            <div class="col">
-                <div class="counter">
-    <h2 class="timer count-title count-number text-info" data-to="11900" data-speed="1500">0</h2>
-    <p class="count-text ">Linkedin replied</p>
-  </div></div>
-       </div>
-
-
-
-
       <div v-show="!mouse_active" @mouseleave="mouseLeave">
-        <card>
-        <div class="container">
-          <div class="row">
-            
-            <div v-for="col in up_row" class="col-4 justify-content-center">
-              <card class="bg-light">
-                <div v-if="statistics.hasOwnProperty(col.field)" class="text-info text-center h2"><strong>{{statistics[col.field]}}</strong></div>
-                <div v-else class="text-info text-center h2"><strong>0</strong></div>
-                <p class="text-center"><small>{{col.label}}</small></p>
-              </card>
+          <div class="container">
+            <div class="row">
+              <div v-for="col in columns" class="col justify-content-center">
+                <div v-if="col.field != 'credits-left'" class="counter">
+                  <div v-if="statistics.hasOwnProperty(col.field)" class="text-info text-center h3">
+                    <strong>{{statistics[col.field]}}</strong>
+                  </div>
+                  <div v-else class="text-info text-center h3">
+                    <strong>0</strong>
+                  </div>
+                  <p class="text-center">
+                    <small>{{col.label}}</small>
+                  </p>
+                </div>
+              </div>
             </div>
-
           </div>
-        </div>
 
-        <div class="container">
-          <div class="row">
-
-            <div v-for="col in down_row" class="col-2 d-flex justify-content-center">
-              <card class="bg-light">
-                <div v-if="statistics.hasOwnProperty(col.field)" class="text-info text-center h2"><strong>{{statistics[col.field]}}</strong></div>
-                <div v-else class="text-info text-center h2"><strong>0</strong></div>
-                <p class="text-center"><small>{{col.label}}</small></p>
-              </card>
-            </div>
-
-          </div>
-        </div>
-        </card>
       </div>
 
-        <!--hover-->
+      <!--hover-->
 
       <div @mouseover="mouseOver" v-show="mouse_active">
-        <card>
-        <div class="container">
-          <div class="row">
-            
-            <div v-for="col in up_row" class="col-4 justify-content-center">
-              <card class="bg-light">
-                <div v-if="col.field == 'prospects_total' && statistics.hasOwnProperty('prospects_total')" class="text-info text-center h2"><strong>{{statistics[col.field]}}</strong></div>
-                <div v-else-if="statistics.hasOwnProperty(col.field)" class="text-info text-center h2"><strong>{{statistics_abs[col.field]}}%</strong></div>
-                <div v-else class="text-info text-center h2"><strong>0%</strong></div>
-                <p class="text-center"><small>{{col.label}}</small></p>
-              </card>
+          <div class="container">
+            <div class="row">
+              <div v-for="col in columns" class="col justify-content-center">
+                <div v-if="col.field != 'credits-left'" class="counter">
+                  <div
+                    v-if="col.field == 'prospects_total' && statistics.hasOwnProperty('prospects_total')"
+                    class="text-info text-center h3"
+                  >
+                    <strong>{{statistics[col.field]}}</strong>
+                  </div>
+                  <div
+                    v-else-if="statistics.hasOwnProperty(col.field)"
+                    class="text-info text-center h3"
+                  >
+                    <strong>{{statistics_abs[col.field]}}%</strong>
+                  </div>
+                  <div v-else class="text-info text-center h3">
+                    <strong>0%</strong>
+                  </div>
+                  <p class="text-center">
+                    <small>{{col.label}}</small>
+                  </p>
+                </div>
+              </div>
             </div>
-
           </div>
-        </div>
 
-        <div class="container">
-          <div class="row">
-
-            <div v-for="col in down_row" class="col-2 d-flex justify-content-center">
-              <card class="bg-light">
-                <div v-if="statistics_abs.hasOwnProperty(col.field)" class="text-info text-center h2"><strong>{{statistics_abs[col.field]}}%</strong></div>
-                <div v-else class="text-info text-center h2"><strong>0%</strong></div>
-                <p class="text-center"><small>{{col.label}}</small></p>
-              </card>
-            </div>
-
-          </div>
-        </div>
-        </card>
       </div>
-
 
       <card>
         <h4 class="card-title">Daily Statistics (comming soon)</h4>
@@ -186,15 +106,14 @@
           <i class="fa fa-check"></i> Outreacher24
         </div>
       </card>
-      </card>
-      
+    </card>
   </div>
 </template>
 <script>
 import { DatePicker, Notification, Select, Option } from "element-ui";
 import LineChart from "./LineChart.js";
 
-import axios from '@/api/axios-auth';;
+import axios from "@/api/axios-auth";
 import dummy_detalization from "./dummy_detalization"; // test data
 
 const STATISTICS_API_DETALIZATION = "/statistics/campaign";
@@ -204,40 +123,44 @@ export default {
     LineChart,
     [DatePicker.name]: DatePicker,
     [Select.name]: Select,
-    [Option.name]: Option,
+    [Option.name]: Option
   },
   computed: {},
   data() {
     return {
       pickerOptions: {
         disabledDate(time) {
-            return time.getTime() > Date.now();
+          return time.getTime() > Date.now();
+        },
+        shortcuts: [
+          {
+            text: "Last week",
+            onClick(picker) {
+              const end = new Date();
+              const start = new Date();
+              start.setTime(start.getTime() - 3600 * 1000 * 24 * 7);
+              picker.$emit("pick", [start, end]);
+            }
           },
-        shortcuts: [{
-          text: 'Last week',
-          onClick(picker) {
-            const end = new Date();
-            const start = new Date();
-            start.setTime(start.getTime() - 3600 * 1000 * 24 * 7);
-            picker.$emit('pick', [start, end]);
+          {
+            text: "Last month",
+            onClick(picker) {
+              const end = new Date();
+              const start = new Date();
+              start.setTime(start.getTime() - 3600 * 1000 * 24 * 30);
+              picker.$emit("pick", [start, end]);
+            }
+          },
+          {
+            text: "Last 3 months",
+            onClick(picker) {
+              const end = new Date();
+              const start = new Date();
+              start.setTime(start.getTime() - 3600 * 1000 * 24 * 90);
+              picker.$emit("pick", [start, end]);
+            }
           }
-        }, {
-          text: 'Last month',
-          onClick(picker) {
-            const end = new Date();
-            const start = new Date();
-            start.setTime(start.getTime() - 3600 * 1000 * 24 * 30);
-            picker.$emit('pick', [start, end]);
-          }
-        }, {
-          text: 'Last 3 months',
-          onClick(picker) {
-            const end = new Date();
-            const start = new Date();
-            start.setTime(start.getTime() - 3600 * 1000 * 24 * 90);
-            picker.$emit('pick', [start, end]);
-          }
-        }]
+        ]
       },
       date: [],
 
@@ -247,15 +170,14 @@ export default {
       statistics: {},
       statistics_abs: {},
 
-      down_row: [],
-      up_row: [],
+      columns: [],
 
       credits_left: 0,
 
       // row data
       list_data: {
         columns: [],
-        statistics: [],
+        statistics: []
       },
 
       // chart
@@ -263,11 +185,11 @@ export default {
 
       chartOptions: {
         responsive: true,
-        maintainAspectRatio: false,
+        maintainAspectRatio: false
 
         //barThickness: 1,
         //maxBarThickness: 1,
-        
+
         /*
         scales: {
           xAxes: [
@@ -281,7 +203,7 @@ export default {
             }
           ]
         }*/
-      },
+      }
     };
   },
   methods: {
@@ -295,65 +217,69 @@ export default {
       this.mouse_active = true;
     },
     calculate() {
-      if(this.statistics == null || !this.statistics.hasOwnProperty('prospects_total')) {
-        return
+      if (
+        this.statistics == null ||
+        !this.statistics.hasOwnProperty("prospects_total")
+      ) {
+        return;
       }
 
-      if(this.statistics['prospects_total'] <= 0) {
-        return
+      if (this.statistics["prospects_total"] <= 0) {
+        return;
       }
 
-      let statistics_abs = {}
+      let statistics_abs = {};
 
-      for(let key in this.statistics) {
-        if(key != 'prospects_total') {
-          statistics_abs[key] = Math.round(this.statistics['prospects_total'] == 0 ? 0 : (this.statistics[key] / this.statistics['prospects_total']) * 100)
+      for (let key in this.statistics) {
+        if (key != "prospects_total") {
+          statistics_abs[key] = Math.round(
+            this.statistics["prospects_total"] == 0 ? 0 : (this.statistics[key] / this.statistics["prospects_total"]) * 100);
         }
       }
 
-      this.statistics_abs = statistics_abs
-      console.log(this.statistics_abs)
+      this.statistics_abs = statistics_abs;
+      console.log(this.statistics_abs);
     },
 
     load_data() {
-      if(this.date == null || this.date.length != 2) {
-        Notification.error({title: "Error", message: "Choose period"});
-        return
+      if (this.date == null || this.date.length != 2) {
+        Notification.error({ title: "Error", message: "Choose period" });
+        return;
       }
 
-      const path = STATISTICS_API_DETALIZATION
+      const path = STATISTICS_API_DETALIZATION;
 
-      var data = new FormData()
-      data.append("_campaign_id", this.campaign_id)
-      data.append("_from_date", this.date[0])
-      data.append("_to_date", this.date[1])
+      var data = new FormData();
+      data.append("_campaign_id", this.campaign_id);
+      data.append("_from_date", this.date[0]);
+      data.append("_to_date", this.date[1]);
 
       axios
         .post(path, data)
         .then(res => {
           var r = res.data;
-          r = dummy_detalization // test
+          r = dummy_detalization; // test
           if (r.code <= 0) {
             var msg = "Error loading campaign statistic " + r.msg;
-            Notification.error({title: "Error", message: msg});
+            Notification.error({ title: "Error", message: msg });
           } else {
             this.deserialize_data(r);
           }
         })
         .catch(error => {
           var msg = "Error loading campaign statistic " + error;
-          Notification.error({title: "Error", message: msg});
+          Notification.error({ title: "Error", message: msg });
         });
     },
 
     deserialize_data(new_data) {
-      if(new_data == null) {
-        return
+      if (new_data == null) {
+        return;
       }
 
       for (var key in new_data) {
         if (this.list_data.hasOwnProperty(key) && new_data[key]) {
-          //var parsed_data = JSON.parse(new_data[key]);
+          //var parsed_data = JSON.parse(new_data[key])
           var parsed_data = new_data[key]
           this.$set(this.list_data, key, parsed_data)
         }
@@ -361,55 +287,35 @@ export default {
 
       let statistics = {}
       let days = {}
-      let down_row = []
-      let up_row = []
+      let columns = []
 
       // statistics
       if (this.list_data.statistics.length > 0) {
-        for(let stat of this.list_data.statistics) {
+        for (let stat of this.list_data.statistics) {
           //days[stat._id.month_day] = { stat._id.action_key : ui }
-          if(stat._id.hasOwnProperty('action_key')) {
-            if(statistics[stat._id.action_key] == null) {
-              statistics[stat._id.action_key] = stat.total
+          if (stat._id.hasOwnProperty("action_key")) {
+            if (statistics[stat._id.action_key] == null) {
+              statistics[stat._id.action_key] = stat.total;
             } else {
-              statistics[stat._id.action_key] += stat.total
+              statistics[stat._id.action_key] += stat.total;
             }
           }
-          
         }
 
-        let credits_left = this.list_data.statistics.find(function (element) {
-            return (element._id == "credits-left" ? element : 0)
-        })
+        let credits_left = this.list_data.statistics.find(function(element) {
+          return element._id == "credits-left" ? element : 0;
+        });
 
-        if(credits_left != 0 && credits_left.total != null) {
-          this.credits_left = credits_left.total
+        if (credits_left != 0 && credits_left.total != null) {
+          this.credits_left = credits_left.total;
         }
       }
 
-      // columns
-      if (this.list_data.columns.length > 0) {
-        up_row = this.list_data.columns.filter(col => {
-          if(col.field == 'prospects_total' || col.field == 'email-send-message' || col.field == 'linkedin-send-message') {
-            return col
-          }
-        })
-
-        down_row = this.list_data.columns.filter(col => {
-          if(col.field != 'prospects_total' && col.field != 'email-send-message' && col.field != 'linkedin-send-message' && col.field != 'credits-left') {
-            return col
-          }
-        })
-      }
-
-      this.statistics = statistics
-      this.down_row = down_row
-      this.up_row = up_row
-
-      //console.log('statistics:', this.statistics)
+      this.$set(this, 'statistics', statistics)
+      this.$set(this, 'columns', this.list_data.columns)
 
       this.calculate()
-    },
+    }
   },
 
   mounted() {
@@ -419,8 +325,8 @@ export default {
     const start = new Date();
     start.setTime(start.getTime() - 3600 * 1000 * 24 * 20); // last 20 days
 
-    this.date = [start, end]
-    this.load_data()
+    this.date = [start, end];
+    this.load_data();
   }
 };
 </script>

@@ -10,80 +10,9 @@
       </card>
 
       <card>
+
         <card>
-          <div class="mb-3">Enrich credits left: <strong>{{statistics['credits-left']}}</strong> <p class=".text-danger">(buy more email credits)</p> </div>
-        </card>
-  
-<card>   
-        <div class="row text-center">
-          <div class="col">
-	        <div class="counter">
-          <h2 class="timer count-title count-number text-info" data-to="100" data-speed="1500">100</h2>
-          <p class="count-text ">Prospects contacted</p>
-        </div>
-        </div>
-
-        <div class="col">
-               <div class="counter">
-
-      <h2 class="timer count-title count-number text-info" data-to="1700" data-speed="1500">10</h2>
-      <p class="count-text ">Emails sent</p>
-    </div>
-              </div>
-
-              <div class="col">
-                  <div class="counter">
-
-      <h2 class="timer count-title count-number text-info" data-to="11900" data-speed="1500">1</h2>
-      <p class="count-text ">Linkedin messages sent</p>
-    </div>
-  </div>
-
-         </div>
-
-
-         <div class="row text-center">
-	        <div class="col">
-	        <div class="counter">
-          <h2 class="timer count-title count-number text-info" data-to="100" data-speed="1500">1</h2>
-          <p class="count-text ">Emails replied</p>
-        </div>
-        </div>
-          
-              <div class="col">
-               <div class="counter">
-      <h2 class="timer count-title count-number text-info" data-to="1700" data-speed="1500">12</h2>
-      <p class="count-text ">Emails opened</p>
-    </div>
-              </div>
-              <div class="col">
-                  <div class="counter">
-      <h2 class="timer count-title count-number text-info" data-to="11900" data-speed="1500">0</h2>
-      <p class="count-text ">Emails enriched</p>
-    </div></div>
-         </div>
-
-
-         <div class="row text-center">
-	        <div class="col">
-	        <div class="counter">
-          <h2 class="timer count-title count-number text-info" data-to="100" data-speed="1500">0</h2>
-          <p class="count-text ">Linkedin invites sent</p>
-        </div>
-        </div>
-          
-              <div class="col">
-               <div class="counter">
-      <h2 class="timer count-title count-number text-info" data-to="1700" data-speed="1500">0</h2>
-      <p class="count-text ">Linkedin profiles viewed</p>
-    </div>
-              </div>
-              <div class="col">
-                  <div class="counter">
-      <h2 class="timer count-title count-number text-info" data-to="11900" data-speed="1500">0</h2>
-      <p class="count-text ">Linkedin replied</p>
-    </div></div>
-         </div>
+          <div class="mb-3">Enrich credits left: <strong>{{statistics['credits-left']}}</strong> <p class="text-danger">(buy more email credits)</p> </div>
         </card>
 
 
@@ -91,31 +20,18 @@
         <div class="container">
           <div class="row">
             
-            <div v-for="col in up_row" class="col-4 justify-content-center">
-              <card v-if="col.field != 'credits-left'" class="bg-light">
+            <div v-for="col in columns" class="col-4 justify-content-center">
+              <div v-if="col.field != 'credits-left'" class="counter">
                 <div v-if="statistics.hasOwnProperty(col.field)" class="text-info text-center h2"><strong>{{statistics[col.field]}}</strong></div>
                 <div v-else class="text-info text-center h2"><strong>0</strong></div>
                 <p class="text-center"><small>{{col.label}}</small></p>
-              </card>
-            </div>
-
-          </div>
-        </div>
-
-        <div class="container">
-          <div class="row">
-
-            <div v-for="col in down_row" class="col-2 d-flex justify-content-center">
-              <card v-if="col.field != 'credits-left'" class="bg-light">
-                <div v-if="statistics.hasOwnProperty(col.field)" class="text-info text-center h2"><strong>{{statistics[col.field]}}</strong></div>
-                <div v-else class="text-info text-center h2"><strong>0</strong></div>
-                <p class="text-center"><small>{{col.label}}</small></p>
-              </card>
+              </div>
             </div>
 
           </div>
         </div>
         </card>
+
       </card>
 
   </div>
@@ -135,10 +51,6 @@ export default {
     return {
       columns: [],
       statistics: {},
-
-      down_row: [],
-      up_row: [],
-
 
       dummy_data: {
         code: 1, 
@@ -208,23 +120,10 @@ export default {
       if (from_data.columns != null) {
         //columns = JSON.parse(from_data.columns)
         columns = from_data.columns
-
-        up_row = columns.filter(col => {
-          if(col.field == 'prospects_total' || col.field == 'email-send-message' || col.field == 'linkedin-send-message') {
-            return col
-          }
-        })
-
-        down_row = columns.filter(col => {
-          if(col.field != 'prospects_total' && col.field != 'email-send-message' && col.field != 'linkedin-send-message' && col.field != 'credits-left') {
-            return col
-          }
-        })
       }
 
       this.$set(this, 'statistics', statistics)
-      this.$set(this, 'down_row', down_row)
-      this.$set(this, 'up_row', up_row)
+      this.$set(this, 'columns', columns)
     },
   },
   mounted() {
