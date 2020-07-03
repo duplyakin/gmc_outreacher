@@ -323,7 +323,9 @@ export default {
       // delete not relevant data
       let sorted_statistics = this.list_data.statistics.filter( a => {
         if(a._id.hasOwnProperty('month_day') && a._id.hasOwnProperty('action_key')) {
-          return a
+          if(a._id.action_key != 'prospects_total') {
+            return a
+          }
         }
       })
 
