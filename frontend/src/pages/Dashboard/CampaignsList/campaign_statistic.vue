@@ -219,9 +219,6 @@ export default {
     };
   },
   methods: {
-    calcPercent(value, abs_value) {
-      return Math.round(abs_value == 0 ? 0 : (value / abs_value) * 100);
-    },
     mouseOver: function() {
       this.mouse_active = false;
     },
@@ -245,7 +242,7 @@ export default {
         }
       }
 
-      this.statistics_abs = statistics_abs
+      this.$set(this, 'statistics_abs', statistics_abs)
     },
 
     load_data() {
