@@ -8,7 +8,36 @@
                         v-model="campaign_data.title">
                     </el-input>
                 </card>                        
-            
+   
+          <card v-if="campaign_data.templates.linkedin && campaign_data.templates.linkedin.length != 0">
+                    <p>Edit Linkedin templates</p>
+                    <el-table
+                    stripe
+                    ref="linkedin_templates_data_table"
+                    style="width: 100%;"
+                    :data="campaign_data.templates.linkedin"
+                    max-height="500"
+                    border
+                    >
+                    <el-table-column
+                        v-for="(column, index) in linkedin_table_columns"
+                        :key="index"
+                        :label="column.label"
+                        :prop="column.prop"
+                        show-overflow-tooltip
+                    >
+                        <template slot-scope="scope">
+                        <a
+                            @click.prevent="editLinkedinTemplate(scope.row, scope.$index)"
+                            href="#"
+                            v-if="column.prop === 'title'"
+                        >{{ scope.row[column.prop] }}</a>
+                        <template v-else>{{ scope.row[column.prop] }}</template>
+                        </template>
+                    </el-table-column>
+                    </el-table>
+                </card>
+         
                 <card v-if="campaign_data.templates.email && campaign_data.templates.email.length != 0">
                     <p>Edit Email templates</p>
                     <el-table
@@ -37,34 +66,6 @@
                     </el-table>
                 </card>
                 
-                <card v-if="campaign_data.templates.linkedin && campaign_data.templates.linkedin.length != 0">
-                    <p>Edit Linkedin templates</p>
-                    <el-table
-                    stripe
-                    ref="linkedin_templates_data_table"
-                    style="width: 100%;"
-                    :data="campaign_data.templates.linkedin"
-                    max-height="500"
-                    border
-                    >
-                    <el-table-column
-                        v-for="(column, index) in linkedin_table_columns"
-                        :key="index"
-                        :label="column.label"
-                        :prop="column.prop"
-                        show-overflow-tooltip
-                    >
-                        <template slot-scope="scope">
-                        <a
-                            @click.prevent="editLinkedinTemplate(scope.row, scope.$index)"
-                            href="#"
-                            v-if="column.prop === 'title'"
-                        >{{ scope.row[column.prop] }}</a>
-                        <template v-else>{{ scope.row[column.prop] }}</template>
-                        </template>
-                    </el-table-column>
-                    </el-table>
-                </card>
                 
                 <card>
                 <h5 class="text-center">Schedule</h5>

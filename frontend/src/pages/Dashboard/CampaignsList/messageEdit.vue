@@ -170,7 +170,7 @@ export default {
         return false;
       } 
 
-      if (this.template_type == "linkedin" && this.convertToPlainText(this.template.message).length > this.linkedin_max_msg_length) {
+      if (this.template && this.template.template_key == "intro_linkedin" && this.convertToPlainText(this.template.message).length > this.linkedin_max_msg_length) {
         Notification.error({title: "Error", message: "Message length should be shorter than " + this.linkedin_max_msg_length + " symbols."});
         return false;
       } 
