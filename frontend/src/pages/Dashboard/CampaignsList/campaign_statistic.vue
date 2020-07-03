@@ -281,7 +281,7 @@ export default {
 
     deserialize_data(new_data) {
       if (new_data == null) {
-        return;
+        return
       }
 
       for (var key in new_data) {
@@ -322,9 +322,8 @@ export default {
       this.$set(this, 'statistics', statistics)
       this.$set(this, 'columns', this.list_data.columns)
       
-      this.get_chart_data()
-
       this.calculate()
+      this.get_chart_data()
     },
 
     get_chart_data() {
@@ -406,27 +405,24 @@ export default {
 
       this.$set(this, 'datacollection', {labels: [...days_set], datasets: [...chart_data]})
 
-      //console.log("days:", days_set)
       //console.log('sorted_statistics:', sorted_statistics)
+      //console.log("days:", days_set)
       //console.log('chart_data:', chart_data)
-
     },
   },
 
   mounted() {
-    this.campaign_id = this.$route.query.campaign_id || "";
+    this.campaign_id = this.$route.query.campaign_id || ""
 
-    const end = new Date();
-    const start = new Date();
-    start.setTime(start.getTime() - 3600 * 1000 * 24 * 20); // last 20 days
+    const end = new Date()
+    const start = new Date()
+    start.setTime(start.getTime() - 3600 * 1000 * 24 * 20) // last 20 days
 
-    this.date = [start, end];
-    this.load_data();
+    this.$set(this, 'date', [start, end])
+
+    this.load_data()
   }
 };
 </script>
 <style lang="scss">
-.f{
-  color: rgb(68, 143, 255);
-}
 </style>
