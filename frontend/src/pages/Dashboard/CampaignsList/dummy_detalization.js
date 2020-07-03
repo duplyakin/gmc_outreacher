@@ -18,9 +18,12 @@ export default
             statistics: [
                     {"_id": {"action_key": "linkedin-send-message", "month_day": "06-24"}, "total": 35}, 
                     {"_id": {"action_key": "linkedin-send-message", "month_day": "06-23"}, "total": 40}, 
-                    {"_id": {"action_key": "linkedin-visit-profile", "month_day": "06-23"}, "total": 15}, 
-                    {"_id": {"action_key": "linkedin-connect", "month_day": "06-23"}, "total": 3}, 
+                    {"_id": {"action_key": "linkedin-visit-profile", "month_day": "06-22"}, "total": 15}, 
+                    {"_id": {"action_key": "linkedin-visit-profile", "month_day": "06-21"}, "total": 10}, 
+                    {"_id": {"action_key": "linkedin-connect", "month_day": "06-24"}, "total": 3}, 
                     {"_id": {"action_key": "email-send-message", "month_day": "06-23"}, "total": 4}, 
+                    {"_id": {"action_key": "linkedin-visit-profile", "month_day": "06-23"}, "total": 6}, 
+                    {"_id": {"action_key": "email-send-message", "month_day": "06-26"}, "total": 40}, 
                     {"_id": {"month_day": "06-24", "action_key": "prospects_total"}, "total": 79}, 
                     {"_id": "credits-left", "total": 999}
             ]

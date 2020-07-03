@@ -12,7 +12,7 @@
       <card>
 
         <card>
-          <div class="mb-3">Enrich credits left: <strong>{{statistics['credits-left']}}</strong> <p class="text-danger">(buy more email credits)</p> </div>
+          <div class="d-flex">Enrich credits left: <strong class="ml-2">{{statistics['credits-left']}}</strong> <p class="text-danger ml-2">(buy more email credits)</p> </div>
         </card>
 
 

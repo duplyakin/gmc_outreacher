@@ -39,9 +39,9 @@
       </card>
 
       <card>
-        <div>
-          Enrich credits left: <strong>{{credits_left}}</strong>
-          <p class="text-danger">(buy more email credits)</p>
+        <div class="d-flex">
+          Enrich credits left: <strong class="ml-2">{{credits_left}}</strong>
+          <p class="text-danger ml-2"> (buy more email credits)</p>
         </div>
       </card>
 
@@ -99,8 +99,8 @@
       </div>
 
       <card>
-        <h4 class="card-title">Daily Statistics (comming soon)</h4>
-        <p class="card-category">Statistics for the last days</p>
+        <h4 class="card-title">Daily Statistics</h4>
+        <p class="card-category">Statistics for selected days</p>
         <line-chart :chart-data="datacollection" :options="chartOptions"></line-chart>
         <div class="stats">
           <i class="fa fa-check"></i> Outreacher24
@@ -162,7 +162,7 @@ export default {
           }
         ]
       },
-      date: [],
+      date: [], // period of statistics
 
       mouse_active: true,
       campaign_id: "",
@@ -182,15 +182,27 @@ export default {
 
       // chart
       datacollection: {},
+      colors: [
+        "rgb(16, 53, 99)",
+        "rgb(85, 153, 199)",
+        "rgb(121, 88, 148)",
+        "rgb(97, 184, 97)",
+        "rgb(255, 158, 74)",
+        "rgba(215, 255, 68, 0.959)",
+        "rgb(255, 221, 68)",
+        "rgb(255, 174, 68)",
+        "rgb(109, 68, 255)",
+        "rgb(68, 143, 255)",
+
+      ],
 
       chartOptions: {
         responsive: true,
-        maintainAspectRatio: false
+        maintainAspectRatio: false,
 
-        //barThickness: 1,
-        //maxBarThickness: 1,
-
-        /*
+        barThickness: 1,
+        maxBarThickness: 1,
+        
         scales: {
           xAxes: [
             {
@@ -202,7 +214,7 @@ export default {
               stacked: true
             }
           ]
-        }*/
+        }
       }
     };
   },
@@ -217,28 +229,23 @@ export default {
       this.mouse_active = true;
     },
     calculate() {
-      if (
-        this.statistics == null ||
-        !this.statistics.hasOwnProperty("prospects_total")
-      ) {
-        return;
+      if (this.statistics == null || !this.statistics.hasOwnProperty("prospects_total")) {
+        return
       }
 
       if (this.statistics["prospects_total"] <= 0) {
-        return;
+        return
       }
 
-      let statistics_abs = {};
+      let statistics_abs = {}
 
       for (let key in this.statistics) {
         if (key != "prospects_total") {
-          statistics_abs[key] = Math.round(
-            this.statistics["prospects_total"] == 0 ? 0 : (this.statistics[key] / this.statistics["prospects_total"]) * 100);
+          statistics_abs[key] = Math.round(this.statistics["prospects_total"] == 0 ? 0 : (this.statistics[key] / this.statistics["prospects_total"]) * 100);
         }
       }
 
-      this.statistics_abs = statistics_abs;
-      console.log(this.statistics_abs);
+      this.statistics_abs = statistics_abs
     },
 
     load_data() {
@@ -260,14 +267,14 @@ export default {
           var r = res.data;
           r = dummy_detalization; // test
           if (r.code <= 0) {
-            var msg = "Error loading campaign statistic " + r.msg;
+            var msg = "Error loading campaign statistics " + r.msg;
             Notification.error({ title: "Error", message: msg });
           } else {
             this.deserialize_data(r);
           }
         })
         .catch(error => {
-          var msg = "Error loading campaign statistic " + error;
+          var msg = "Error loading campaign statistics. ERROR: " + error;
           Notification.error({ title: "Error", message: msg });
         });
     },
@@ -286,36 +293,124 @@ export default {
       }
 
       let statistics = {}
-      let days = {}
       let columns = []
 
       // statistics
       if (this.list_data.statistics.length > 0) {
         for (let stat of this.list_data.statistics) {
-          //days[stat._id.month_day] = { stat._id.action_key : ui }
+
           if (stat._id.hasOwnProperty("action_key")) {
+
             if (statistics[stat._id.action_key] == null) {
-              statistics[stat._id.action_key] = stat.total;
+              statistics[stat._id.action_key] = stat.total
+
             } else {
-              statistics[stat._id.action_key] += stat.total;
+              statistics[stat._id.action_key] += stat.total
             }
           }
         }
 
         let credits_left = this.list_data.statistics.find(function(element) {
-          return element._id == "credits-left" ? element : 0;
-        });
+          return element._id == "credits-left" ? element : 0
+        })
 
         if (credits_left != 0 && credits_left.total != null) {
-          this.credits_left = credits_left.total;
+          this.credits_left = credits_left.total
         }
       }
 
       this.$set(this, 'statistics', statistics)
       this.$set(this, 'columns', this.list_data.columns)
+      
+      this.get_chart_data()
 
       this.calculate()
-    }
+    },
+
+    get_chart_data() {
+      // delete not relevant data
+      let sorted_statistics = this.list_data.statistics.filter( a => {
+        if(a._id.hasOwnProperty('month_day') && a._id.hasOwnProperty('action_key')) {
+          return a
+        }
+      })
+
+      // sort days
+      sorted_statistics = sorted_statistics.sort( (a, b) => {
+        let a_set = a._id.month_day.split('-')
+        let a_val = Number.parseInt(a_set[0]) * 30 + Number.parseInt(a_set[1])
+
+        let b_set = b._id.month_day.split('-')
+        let b_val = Number.parseInt(b_set[0]) * 30 + Number.parseInt(b_set[1])
+
+        if(a_val < b_val) {
+          return -1
+        }
+        if(a_val > b_val) {
+          return 1
+        }
+        return 0
+      })
+
+      let days_set = new Set()
+      let data_set = new Set()
+
+      // get unique days and action_keys
+      sorted_statistics = sorted_statistics.map(stat => {
+        days_set.add(stat._id.month_day)
+
+        let label = this.columns.find( col => {
+          if(col.field == stat._id.action_key) {
+            return col
+          }
+        }).label
+        if(label != null) {
+          data_set.add( label )
+        }
+
+        return stat
+      })
+
+      // create template of chart_data with unique set
+      let chart_data = []
+      let i = 0
+      for(let data of data_set) {
+        //chart_data.push({label: data, data: []})
+        chart_data.push({label: data, backgroundColor: this.colors[i], data: []})
+        i++
+      }
+
+      // push sorted data in each array in chart_data by action_key and day
+      for(let day of days_set) {
+        for(let data of chart_data) {
+          let stat_value = sorted_statistics.find( stat => {
+
+            let action_key = this.columns.find( col => {
+              if(col.label == data.label) {
+                return col
+              }
+            }).field
+
+            if(stat._id.action_key == action_key && stat._id.month_day == day) {
+              return stat
+            }
+          })
+
+          if(stat_value != null) {
+            data.data.push(stat_value.total)
+          } else {
+            data.data.push(0)
+          }
+        }
+      }
+
+      this.$set(this, 'datacollection', {labels: [...days_set], datasets: [...chart_data]})
+
+      //console.log("days:", days_set)
+      //console.log('sorted_statistics:', sorted_statistics)
+      //console.log('chart_data:', chart_data)
+
+    },
   },
 
   mounted() {
@@ -331,4 +426,7 @@ export default {
 };
 </script>
 <style lang="scss">
+.f{
+  color: rgb(68, 143, 255);
+}
 </style>

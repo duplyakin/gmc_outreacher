@@ -293,12 +293,12 @@ export default {
       });
       // email chart
       this.datacollectionEmail = {
-        labels: days_arr,
+        labels: days_arr, // [06-21, 06-22, 06-23]
         datasets: [
           {
             label: this.email_data.prospects_contacted.label,
             backgroundColor: this.email_data.prospects_contacted.chart_color,
-            data: prospects_contacted_arr
+            data: prospects_contacted_arr // [213, 54, 543]
           },
           {
             label: this.email_data.emails_sent.label,
@@ -378,8 +378,7 @@ export default {
           },
           {
             label: this.linkedin_data.connect_request_approved.label,
-            backgroundColor: this.linkedin_data.connect_request_approved
-              .chart_color,
+            backgroundColor: this.linkedin_data.connect_request_approved.chart_color,
             data: connect_request_approved_arr
           },
           {
