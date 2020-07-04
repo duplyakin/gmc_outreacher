@@ -127,6 +127,7 @@ computed: {
 data() {
     return {
         test : false,
+
         loading: true,
         color: "#a7a7ff",
         
@@ -318,18 +319,7 @@ methods: {
 
 },
 async mounted() {
-    //await this.load_data();
-    /* // loading
-    let loadingInstance = Loading.service();
-    this.$nextTick(() => { // Loading should be closed asynchronously
-        loadingInstance.close();
-    });
-    let loading = this.$loading({ fullscreen: true })
-    setTimeout(() => { loading.close() }, 1000)
-    // https://juejin.im/post/5c8e151df265da67eb15fe09
-    */
-
-    await this.load_campaigns();
+    await this.load_campaigns()
 }
 };
 </script>
