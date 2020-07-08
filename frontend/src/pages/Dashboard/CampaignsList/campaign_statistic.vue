@@ -281,7 +281,7 @@ export default {
         .catch(error => {
           var msg = "Error loading campaign statistics. ERROR: " + error
           Notification.error({ title: "Error", message: msg })
-          this.loading = false
+          this.loading = false 
         })
     },
 
