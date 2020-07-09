@@ -17,7 +17,7 @@ class LoginAction {
         this.context = await this.browser.createIncognitoBrowserContext()
         this.page = await this.context.newPage()
 
-        //this.set_cookie(...this.cookies)
+        //this.set_cookie(...this.cookies) // we don't set cookie in loginAction!
     }
 
     async closeBrowser() {

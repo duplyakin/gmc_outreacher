@@ -14,12 +14,25 @@ module.exports.CAPTCHA_RESPONSE_SELECTOR = '#g-recaptcha-response';
 module.exports.SUBMIT_CAPTCHA_BTN_SELECTOR = '';
 
 // search
-module.exports.SEARCH_ELEMENT_SELECTOR = '.search-result__wrapper .search-result__info a';
+module.exports.SEARCH_ELEMENT_SELECTOR = '.search-result__wrapper .search-result__info';
 module.exports.LINK_SELECTOR = 'span > .actor-name';
 module.exports.FULL_NAME_SELECTOR = 'span > .actor-name';
-module.exports.FIRST_DEGREE_SELECTOR = 'span > .dist-value';
+module.exports.DEGREE_SELECTOR = 'span > .dist-value';
 module.exports.NEXT_PAGE_SELECTOR = '.artdeco-pagination__button--next';
 module.exports.NEXT_PAGE_MUTED_SELECTOR = '.artdeco-pagination__button--next.artdeco-button--disabled';
+module.exports.SEARCH_JOB_SELECTOR = '.search-result__snippets-black';
+
+// search SN
+module.exports.SN_CLOSE_HELP_SELECTOR = '#global-nav-help-menu-trigger-button';
+module.exports.SN_SEARCH_ELEMENT_SELECTOR = '.search-results__result-item';
+module.exports.SN_LINK_SELECTOR = '.result-lockup__name .ember-view';
+module.exports.SN_FULL_NAME_SELECTOR = '.result-lockup__name .ember-view';
+module.exports.SN_DEGREE_SELECTOR = '.label-16dp.block';
+module.exports.SN_NEXT_PAGE_SELECTOR = '.search-results__pagination-next-button';
+//module.exports.SN_NEXT_PAGE_MUTED_SELECTOR = '.artdeco-pagination__button--next.artdeco-button--disabled'; // not used
+module.exports.SN_JOB_SELECTOR = '.result-lockup__highlight-keyword .t-14.t-bold';
+module.exports.SN_JOB_LINK_SELECTOR = '.result-lockup__position-company > a';
+module.exports.SN_JOB_NAME_SELECTOR = '.result-lockup__position-company > a > span';
 
 // connect
 module.exports.CONNECT_SELECTOR = '.pv-s-profile-actions.pv-s-profile-actions--connect';
@@ -62,7 +75,6 @@ module.exports.CONTACT_INFO_TWITTER_SELECTOR = 'section.pv-contact-info__contact
 module.exports.CONTACT_INFO_IM_SELECTOR = 'section.pv-contact-info__contact-type.ci-ims > ul > li > span.pv-contact-info__contact-item.t-14.t-black.t-normal'; // like Skype etc
 module.exports.CONTACT_INFO_BIRTHDAY_SELECTOR = 'section.pv-contact-info__contact-type.ci-birthday > div > span';
 module.exports.CONTACT_INFO_CONNECTED_DATE_SELECTOR = 'section.pv-contact-info__contact-type.ci-connected > div > span';
-
 
 // connect check
 module.exports.SEARCH_CONNECTS_SELECTOR = '#mn-connections-search-input';

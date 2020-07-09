@@ -11,6 +11,7 @@ var log = require('loglevel').getLogger("o24_logger");
 
   //await workers.loginWorker(task);
   await workers.searchWorker(task);
+  //await workers.search_SN_worker(task);
   //await workers.connectWorker(task);
   //await workers.messageWorker(task);
   //await workers.scribeWorker(task);

@@ -147,6 +147,85 @@ async function searchWorker(task_id) {
 }
 
 
+async function search_SN_worker(task_id) {
+  let status = status_codes.FAILED;
+  let result_data = {};
+  let task = null;
+  let credentials_id = null;
+
+  let browser = null;
+  try {
+    task = await models_shared.TaskQueue.findOneAndUpdate({ _id: task_id, ack: 0 }, { ack: 1 }, { new: true, upsert: false });
+    if (task == null) {
+      log.debug("..... task not found or locked: .....");
+      return;
+    }
+
+    credentials_id = task.credentials_id;
+    if (!credentials_id) {
+      throw new Error('there is no task.credentials_id');
+    }
+    let input_data = task.input_data;
+    if (!input_data) {
+      throw new Error('there is no task.input_data');
+    }
+    let task_data = serialize_data(input_data);
+
+    let cookies = await get_cookies(credentials_id);
+
+    // start work
+    search_SN_action = new modules.search_SN_action.Search_SN_action(cookies, credentials_id, task_data.campaign_data.search_url, task_data.campaign_data.interval_pages);
+    browser = await search_SN_action.startBrowser();
+    result_data = await search_SN_action.search();
+    browser = await search_SN_action.closeBrowser();
+
+    status = result_data.code >= 0 ? 5 : -1;  // if we got some exception (BAN?), we have to save results before catch Error and send task status -1
+
+  } catch (err) {
+
+    log.error("search_SN_worker error:", err.stack)
+
+    status = status_codes.FAILED;
+
+    if (err.code != null && err.code != -1) {
+      result_data = {
+        if_true: false,
+        code: err.code,
+        raw: err.error
+      };
+    } else if (err.code == -1) {
+      status = status_codes.BLOCK_HAPPENED;
+      // Context error
+      result_data = {
+        if_true: false,
+        code: err.code,
+        raw: err.error
+      };
+      await models.Accounts.findOneAndUpdate({ _id: credentials_id }, { task_id: task_id }, { upsert: false });
+      
+    } else {
+      result_data = {
+        if_true: false,
+        code: MyExceptions.SearchWorkerError().code,
+        raw: MyExceptions.SearchWorkerError("search_SN_worker error: " + err).error
+      };
+    }
+
+  } finally {
+    log.debug("search_SN_worker RES: ", result_data);
+
+    if (task !== null) {
+      await models_shared.TaskQueue.findOneAndUpdate({ _id: task_id }, { ack: 0, status: status, result_data: result_data, is_queued: 0 }, { upsert: false });
+    }
+
+    if(browser != null) {
+      await browser.close();
+      browser.disconnect();
+    }
+  }
+}
+
+
 async function connectWorker(task_id) {
   let status = status_codes.FAILED;
   let result_data = {};
@@ -656,6 +735,7 @@ async function visitProfileWorker(task_id) {
 
 module.exports = {
   searchWorker: searchWorker,
+  search_SN_worker: search_SN_worker,
   connectWorker: connectWorker,
   messageWorker: messageWorker,
   scribeWorker: scribeWorker,

@@ -6,9 +6,9 @@ var log = require('loglevel').getLogger("o24_logger");
 
 class ScribeAction extends action.Action {
   constructor(cookies, credentials_id, url) {
-    super(cookies, credentials_id);
+    super(cookies, credentials_id)
 
-    this.url = url;
+    this.url = url
   }
 
   async scribe() {
@@ -202,10 +202,10 @@ class ScribeAction extends action.Action {
     if(selector_res) {
       await this.page.click(selectors.CONTACT_INFO_CLOSE_SELECTOR)
     } else {
-      super.gotoChecker(this.url)
+      await super.gotoChecker(this.url)
     }
 
-    this.page.waitFor(5000)
+    await this.page.waitFor(5000)
 
     log.debug("ScribeAction: contact info scribed:", result)
     return result
