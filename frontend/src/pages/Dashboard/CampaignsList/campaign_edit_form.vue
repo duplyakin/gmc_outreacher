@@ -7,9 +7,9 @@
                         placeholder="Сampaign name" 
                         v-model="campaign_data.title">
                     </el-input>
-                </card>              
-
-                <card v-if="campaign_data.templates.linkedin && campaign_data.templates.linkedin.length != 0">
+                </card>                        
+   
+          <card v-if="campaign_data.templates.linkedin && campaign_data.templates.linkedin.length != 0">
                     <p>Edit Linkedin templates</p>
                     <el-table
                     stripe
@@ -36,8 +36,8 @@
                         </template>
                     </el-table-column>
                     </el-table>
-                </card>          
-            
+                </card>
+         
                 <card v-if="campaign_data.templates.email && campaign_data.templates.email.length != 0">
                     <p>Edit Email templates</p>
                     <el-table
@@ -65,7 +65,8 @@
                     </el-table-column>
                     </el-table>
                 </card>
-                        
+                
+                
                 <card>
                 <h5 class="text-center">Schedule</h5>
                 <div class="extended-forms">
