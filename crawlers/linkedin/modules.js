@@ -8,4 +8,5 @@ module.exports = {
    messageCheckAction : require('./actions/messageCheckAction.js'),
    scribeAction : require('./actions/scribeAction.js'),
    visitProfileAction: require('./actions/visitProfileAction.js'),
+   post_engagement_action: require('./actions/post_engagement_action.js'),
 }

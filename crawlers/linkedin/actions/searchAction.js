@@ -13,8 +13,12 @@ class SearchAction extends action.Action {
   }
 
   async search() {
-    if(!this.searchUrl) {
-      throw new Error('Empty search url.');
+    if (!this.searchUrl) {
+      throw new Error('Empty search url.')
+    }
+
+    if (this.interval_pages == null || this.interval_pages < 1) {
+      throw new Error('Incorrect interval_pages:', this.interval_pages)
     }
     
     await super.gotoChecker(this.searchUrl);

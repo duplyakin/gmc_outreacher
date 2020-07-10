@@ -11,7 +11,7 @@ module.exports.VERIFICATION_PIN_BTN_SELECTOR = '#email-pin-submit-button';
 // captcha
 module.exports.CAPTCHA_SELECTOR = '.g-recaptcha';
 module.exports.CAPTCHA_RESPONSE_SELECTOR = '#g-recaptcha-response';
-module.exports.SUBMIT_CAPTCHA_BTN_SELECTOR = '';
+module.exports.SUBMIT_CAPTCHA_BTN_SELECTOR = ''; // delete
 
 // search
 module.exports.SEARCH_ELEMENT_SELECTOR = '.search-result__wrapper .search-result__info';
@@ -80,3 +80,14 @@ module.exports.CONTACT_INFO_CONNECTED_DATE_SELECTOR = 'section.pv-contact-info__
 module.exports.SEARCH_CONNECTS_SELECTOR = '#mn-connections-search-input';
 module.exports.CONNECTOR_SELECTOR = 'span.mn-connection-card__name';
 module.exports.CONNECT_DEGREE_SELECTOR = '.pv-top-card--list .dist-value';
+
+// post engagement
+// comments
+module.exports.POST_MORE_COMMENTERS_BTN_SELECTOR = '.comments-comments-list__load-more-comments-button';
+module.exports.POST_PREVIOUS_REPLIES_BTN_SELECTOR = '.button.show-prev-replies';
+module.exports.POST_ELEMENT_SELECTOR = 'article';
+module.exports.POST_AUTHOR_TAG_SELECTOR = '.comments-post-meta__author-badge';
+module.exports.POST_COMMENTER_LINK_SELECTOR = '.comments-post-meta__profile-link';
+module.exports.POST_COMMENTER_NAME_SELECTOR = '.hoverable-link-text';
+module.exports.POST_COMMENTER_JOB_SELECTOR = '.comments-post-meta__headline';
+// likes

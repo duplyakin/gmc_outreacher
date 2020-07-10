@@ -17,7 +17,10 @@ class Search_SN_action extends action.Action {
     if (!this.searchUrl) {
       throw new Error('Empty search url.')
     }
-    log.debug('Search_SN_action started')
+
+    if (this.interval_pages == null || this.interval_pages < 1) {
+      throw new Error('Incorrect interval_pages:', this.interval_pages)
+    }
 
     await super.gotoChecker(this.searchUrl)
 
@@ -132,8 +135,8 @@ class Search_SN_action extends action.Action {
         if(result_data.data.link != null && current_page_search_url.includes(previous_page_search_url)) {
           // all awailable pages has been scribed
           result_data.code = 1000
-          log.debug('Search_SN_action: this.page.url():', this.page.url())
-          log.debug('Search_SN_action: result_data.data.link:', result_data.data.link)
+          //log.debug('Search_SN_action: this.page.url():', this.page.url())
+          //log.debug('Search_SN_action: result_data.data.link:', result_data.data.link)
           log.debug('Search_SN_action: All awailable pages has been scribed!')
           break
         }

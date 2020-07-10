@@ -39,6 +39,9 @@ async function consumer(data) {
             case 'linkedin-visit-profile':
                 await workers.visitProfileWorker(data.task_id);
                 break;
+            case 'linkedin-post-parsing':
+                await workers.post_engagement_worker(job.data.task_id);
+                break;
 
             default:
                 //log.debug('unknown action_key: ', data.action_key);

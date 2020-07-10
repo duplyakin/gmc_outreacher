@@ -10,6 +10,8 @@ const CONNECT_URL_3 = "https://www.linkedin.com/in/alexander-savinkin-3ba99614/"
 const CONNECT_URL_4 = "https://www.linkedin.com/in/bersheva/";
 const CONNECT_URL_5 = "https://www.linkedin.com/in/alexyerokhin/";
 
+const POST_URL = "https://www.linkedin.com/posts/dr-marc-o-riain-74b7a911_covid-activity-6681268515862822913-CZrF/";
+
 // test task
 
 (async () => {
@@ -25,6 +27,7 @@ const CONNECT_URL_5 = "https://www.linkedin.com/in/alexyerokhin/";
       action_key: 'linkedin-check-reply',
       input_data: {
         campaign_data: {
+          post_url: POST_URL,
           search_url: SEARCH_URL_2,
           interval_pages: 4,
         },
