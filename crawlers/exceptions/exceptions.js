@@ -42,6 +42,12 @@ const ContextError = (message) => ({
   code: ERROR_CODES.CONTEXT_ERROR,
 });
 
+//-----No access to uccount------
+const SN_access_error = (message) => ({
+  error: new Error(message),
+  code: ERROR_CODES.SN_ACCESS_ERROR,
+});
+
 //------Workers-------
 const LoginWorkerError = (message) => ({
   error: new Error(message),
@@ -134,6 +140,8 @@ module.exports = {
   BanError: BanError,
   NetworkError: NetworkError,
 
+  SN_access_error: SN_access_error,
+  
   ContextError: ContextError,
 
   LoginWorkerError: LoginWorkerError,

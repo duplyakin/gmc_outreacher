@@ -39,13 +39,14 @@
       </card>
 
       <card>
-        <div class="d-flex">
+        <pulse-loader :loading="loading" :color="color"></pulse-loader>
+        <div class="d-flex" v-if="!loading">
           Enrich credits left: <strong class="ml-2">{{credits_left}}</strong>
           <p class="text-danger ml-2"> (buy more email credits)</p>
         </div>
       </card>
 
-      <div v-show="!mouse_active" @mouseleave="mouseLeave">
+      <div v-show="!mouse_active" @mouseleave="mouseLeave" v-if="!loading">
           <div class="container">
             <div class="row">
               <div v-for="col in columns" class="col justify-content-center">
@@ -68,7 +69,7 @@
 
       <!--hover-->
 
-      <div @mouseover="mouseOver" v-show="mouse_active">
+      <div @mouseover="mouseOver" v-show="mouse_active" v-if="!loading">
           <div class="container">
             <div class="row">
               <div v-for="col in columns" class="col justify-content-center">
@@ -98,7 +99,7 @@
 
       </div>
 
-      <card>
+      <card v-if="!loading">
         <h4 class="card-title">Daily Statistics</h4>
         <p class="card-category">Statistics for selected days</p>
         <line-chart :chart-data="datacollection" :options="chartOptions"></line-chart>
@@ -112,6 +113,7 @@
 <script>
 import { DatePicker, Notification, Select, Option } from "element-ui";
 import LineChart from "./LineChart.js";
+import { PulseLoader } from 'vue-spinner/dist/vue-spinner.min.js';
 
 import axios from "@/api/axios-auth";
 import dummy_detalization from "./dummy_detalization"; // test data
@@ -120,6 +122,7 @@ const STATISTICS_API_DETALIZATION = "/statistics/campaign";
 
 export default {
   components: {
+    PulseLoader,
     LineChart,
     [DatePicker.name]: DatePicker,
     [Select.name]: Select,
@@ -163,6 +166,9 @@ export default {
         ]
       },
       date: [], // period of statistics
+
+      loading: true,
+      color: "#a7a7ff",
 
       mouse_active: true,
       campaign_id: "",
@@ -243,16 +249,22 @@ export default {
 
     load_data() {
       if (this.date == null || this.date.length != 2) {
-        Notification.error({ title: "Error", message: "Choose period" });
-        return;
+        Notification.error({ title: "Error", message: "Choose period" })
+        return
       }
 
-      const path = STATISTICS_API_DETALIZATION;
+      this.loading = true
 
-      var data = new FormData();
-      data.append("_campaign_id", this.campaign_id);
-      data.append("_from_date", this.date[0]);
-      data.append("_to_date", this.date[1]);
+      const path = STATISTICS_API_DETALIZATION
+
+      // format date
+      let _from_date = this.date[0].getFullYear() + "-" + (this.date[0].getMonth() + 1) + "-" + this.date[0].getDate() + " " + this.date[0].getHours() + ":" + this.date[0].getMinutes() + ":" + this.date[0].getSeconds()
+      let _to_date   = this.date[1].getFullYear() + "-" + (this.date[1].getMonth() + 1) + "-" + this.date[1].getDate() + " " + this.date[1].getHours() + ":" + this.date[1].getMinutes() + ":" + this.date[1].getSeconds()
+
+      var data = new FormData()
+      data.append("_campaign_id", this.campaign_id)
+      data.append("_from_date", _from_date)
+      data.append("_to_date", _to_date)
 
       axios
         .post(path, data)
@@ -260,16 +272,17 @@ export default {
           var r = res.data;
           r = dummy_detalization; // test
           if (r.code <= 0) {
-            var msg = "Error loading campaign statistics " + r.msg;
-            Notification.error({ title: "Error", message: msg });
+            var msg = "Error loading campaign statistics " + r.msg
+            Notification.error({ title: "Error", message: msg })
           } else {
-            this.deserialize_data(r);
+            this.deserialize_data(r)
           }
         })
         .catch(error => {
-          var msg = "Error loading campaign statistics. ERROR: " + error;
-          Notification.error({ title: "Error", message: msg });
-        });
+          var msg = "Error loading campaign statistics. ERROR: " + error
+          Notification.error({ title: "Error", message: msg })
+          this.loading = false 
+        })
     },
 
     deserialize_data(new_data) {
@@ -317,9 +330,14 @@ export default {
       
       this.calculate()
       this.get_chart_data()
+
+      this.loading = false
     },
 
     get_chart_data() {
+      if(this.list_data.statistics == null || this.list_data.statistics.length == 0) {
+        return
+      }
       // delete not relevant data
       let sorted_statistics = this.list_data.statistics.filter( a => {
         if(a._id.hasOwnProperty('month_day') && a._id.hasOwnProperty('action_key')) {
@@ -369,7 +387,6 @@ export default {
       let chart_data = []
       let i = 0
       for(let data of data_set) {
-        //chart_data.push({label: data, data: []})
         chart_data.push({label: data, backgroundColor: this.colors[i], data: []})
         i++
       }

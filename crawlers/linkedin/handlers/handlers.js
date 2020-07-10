@@ -30,6 +30,9 @@ async function bullConsumer() {
         case 'linkedin-search':
           await workers.searchWorker(job.data.task_id);
           break;
+        case 'linkedin-search-sn':
+          await workers.search_SN_worker(data.task_id);
+          break;
         case 'linkedin-parse-profile':
           await workers.scribeWorker(job.data.task_id);
           break;

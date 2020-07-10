@@ -27,6 +27,9 @@ async function consumer(data) {
             case 'linkedin-search':
                 await workers.searchWorker(data.task_id);
                 break;
+            case 'linkedin-search-sn':
+                await workers.search_SN_worker(data.task_id);
+                break;
             case 'linkedin-parse-profile':
                 await workers.scribeWorker(data.task_id);
                 break;

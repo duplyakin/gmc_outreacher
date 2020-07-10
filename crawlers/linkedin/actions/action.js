@@ -6,6 +6,7 @@ const selectors = require("../selectors");
 var log = require('loglevel').getLogger("o24_logger");
 
 const MyExceptions = require('../../exceptions/exceptions.js');
+const error_codes = require('../../exceptions/error_codes.js');
 
 class Action {
   constructor(cookies, credentials_id) {
@@ -172,15 +173,20 @@ async check_success_selector(selector, page = this.page) {
         timeout: 30000 // it may load too long! critical here
       })
 
-      await page.waitFor(7000) // puppeteer wait loading..
+      await page.waitFor(15000) // puppeteer wait loading..
 
       let current_url = page.url()
 
       let short_url = this.get_pathname(url)
 
       if (!current_url.includes(short_url)) {
-        if (current_url.includes('login') || current_url.includes('signup') || current_url.includes("authwall")) {
+        // Sales Navigator
+        if (current_url.includes('guest_login_sales_nav')) {
+          log.debug('gotoChecker - Sales Navigator unreachable: ', current_url)
+          throw MyExceptions.SN_access_error("gotoChecker - Sales Navigator unreachable: " + current_url)
 
+        // Login
+        } else if (current_url.includes('login') || current_url.includes('signup') || current_url.includes("authwall")) {
           let loginAction = new LoginAction.LoginAction(this.credentials_id)
           await loginAction.setContext(this.context)
 
@@ -188,6 +194,8 @@ async check_success_selector(selector, page = this.page) {
           if (result) {
             await page.goto(url)
           }
+
+        // Unexpectable page
         } else {
           log.error('gotoChecker - current url: ', current_url)
           log.error('gotoChecker - required url: ', url)
@@ -200,6 +208,10 @@ async check_success_selector(selector, page = this.page) {
 
       if(this.check_block(page.url())) {
         throw MyExceptions.ContextError("Block happend.");
+      }
+
+      if(err.code != null && err.code == error_codes.SN_ACCESS_ERROR) {
+        throw MyExceptions.SN_access_error("gotoChecker - Sales Navigator unreachable")
       }
 
       throw new Error('gotoChecker error: ', err);

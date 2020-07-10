@@ -34,12 +34,10 @@
           </div>
 
           <div class="container">
-            <div class="row justify-content-start">
+            <div class="row justify-content-start align-items-center">
               <div class="col-8">If no reply is received for previous email, this email will be sent after (days)</div>
               <div class="col-2">
-                <fg-input>
-                  <el-input-number v-model="interval" placeholder="ex: 1.00" :min="1" :max="365"></el-input-number>
-                </fg-input>
+                <el-input-number v-model="interval" placeholder="ex: 1.00" :min="1" :max="365"></el-input-number>
               </div>
             </div>
           </div>
@@ -62,12 +60,10 @@
           </div>
 
           <div class="container">
-            <div class="row justify-content-start">
+            <div class="row justify-content-start align-items-center">
               <div class="col-8 o24_interval_text">If no reply is received for previous message, this message will be sent after (days)</div>
               <div class="col-2">
-                <fg-input>
-                  <el-input-number v-model="interval" placeholder="ex: 1.00" :min="1" :max="365"></el-input-number>
-                </fg-input>
+                <el-input-number v-model="interval" placeholder="ex: 1.00" :min="1" :max="365"></el-input-number>
               </div>
             </div>
           </div>

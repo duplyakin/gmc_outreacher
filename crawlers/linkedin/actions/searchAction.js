@@ -35,7 +35,8 @@ class SearchAction extends action.Action {
         selector1: selectors.SEARCH_ELEMENT_SELECTOR,
         selector2: selectors.LINK_SELECTOR,
         selector3: selectors.FULL_NAME_SELECTOR,
-        selector4: selectors.FIRST_DEGREE_SELECTOR,
+        selector4: selectors.DEGREE_SELECTOR,
+        selector5: selectors.SEARCH_JOB_SELECTOR,
       };
 
       while (currentPage <= this.interval_pages) {
@@ -60,13 +61,36 @@ class SearchAction extends action.Action {
 
           for(let item of items) {
             // don't add: noName LinkedIn members and 1st degree connections
-            if (item.querySelector(mySelectors.selector2) !== null && !item.querySelector(mySelectors.selector3).innerText.includes('LinkedIn') && !item.querySelector(mySelectors.selector4).innerText.includes('1st')) {
-              let str = item.querySelector(mySelectors.selector3).innerText;
-              results.push({
-                linkedin: item.href,
-                first_name: str.substr(0, str.indexOf(' ')),
-                last_name: str.substr(str.indexOf(' ') + 1),
-              });
+            if (item.querySelector(mySelectors.selector2) != null && !item.querySelector(mySelectors.selector3).innerText.includes('LinkedIn') && (item.querySelector(mySelectors.selector4) == null || !item.querySelector(mySelectors.selector4).innerText.includes('1st'))) {
+              let full_name = item.querySelector(mySelectors.selector3)
+              let full_job = document.querySelector(mySelectors.selector5)
+              
+              let result = {}
+
+              result.linkedin = item.href
+
+              if(full_name != null) {
+                full_name = full_name.innerText
+                if(full_name.includes(' ')) {
+                  result.first_name = full_name.substr(0, full_name.indexOf(' '))
+                  result.last_name = full_name.substr(full_name.indexOf(' ') + 1)
+                } else {
+                  result.first_name = full_name
+                }
+              }
+
+              if(full_job != null) {
+                full_job = full_job.innerText // -> "Текущая должность: Product Marketing Manager – Morningstar"
+                full_job = full_job.split(': ')[1]  // -> "Product Marketing Manager – Morningstar"
+                if(full_job.includes('–')) {
+                  result.job_title = full_job.substr(0, full_job.indexOf('–')) // -> "Product Marketing Manager "
+                  result.job_name = full_job.substr(full_job.indexOf('–') + 2) // -> "Morningstar"
+                } else {
+                  result.job_title = full_job // ? or new param
+                }
+              }
+
+              results.push(result)
             }
           }
           return results;
@@ -109,6 +133,7 @@ class SearchAction extends action.Action {
 
     //log.debug("SearchAction: Reult Data: ", result_data)
     //log.debug("SearchAction: Users Data: ", result_data.data.arr)
+    log.debug("SearchAction: contacts scribed:", result_data.data.arr.length)
     result_data.data = JSON.stringify(result_data.data);
     return result_data;
   }

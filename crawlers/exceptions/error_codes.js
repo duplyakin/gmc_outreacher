@@ -1,9 +1,10 @@
 module.exports = {
-    UNKNOWN_ERROR: -2000,
+    UNKNOWN_ERROR: -2000, // not used
 
     HANDLER_ERROR: -2010,
     WORKER_ERROR: -2020,
     ACTION_ERROR: -2030,
+
     MONGODB_ERROR: -3000,
     
     LOGIN_WORKER_ERROR: -4010,
@@ -14,10 +15,10 @@ module.exports = {
     SCRIBE_WORKER_ERROR: -4060,
     SEARCH_WORKER_ERROR: -4070,
     VISIT_PROFILE_WORKER_ERROR: -4080,
-    
-    BAN_ERROR: -3, //Seems we are banned
-    NETWORK_ERROR: -2, //something wromg with network
+
     CONTEXT_ERROR: -1, // Custom error that required user action to continue task
+    NETWORK_ERROR: -2, //something wromg with network
+    BAN_ERROR: -3, //Seems we are banned
     
     LOGIN_ACTION_ERROR: -1010, //On our sid
     LOGIN_ERROR: -1011, //Check credentials
@@ -28,9 +29,14 @@ module.exports = {
     MESSAGE_CHECK_ACTION_ERROR: -1050, //Not used
     SCRIBE_ACTION_ERROR: -1060, //Not used
     SEARCH_ACTION_ERROR: -1070, //Can't open the next page, need to wait maybe because of limit
+
+    // access errors
+    SN_ACCESS_ERROR: -5100,
+    PREMIUM_ACCESS_ERROR: -5200, // not used
+    RL_ACCESS_ERROR: -5300, // not used
+
     
-    
-    CARRYOUT_SEARCH_ACTION_PAGES_FINISHED: 1000, //we have reached the last page for this search
+    CARRYOUT_SEARCH_ACTION_PAGES_FINISHED: 1000, //we have reached the last page for this search // not used
 
 
     // codes for user action

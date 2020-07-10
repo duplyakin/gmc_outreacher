@@ -2,7 +2,7 @@ const models_shared = require("../models/shared.js");
 const models = require("../models/models.js");
 
 const SEARCH_URL_1 = "https://www.linkedin.com/search/results/all/?keywords=acronis&origin=GLOBAL_SEARCH_HEADER&page=97";
-const SEARCH_URL_2 = "https://www.linkedin.com/search/results/all/?keywords=kirill&origin=GLOBAL_SEARCH_HEADER";
+const SEARCH_URL_2 = "https://www.linkedin.com/sales/search/people?doFetchHeroCard=false&geoIncluded=103644278&industryIncluded=80&logHistory=false&page=98&preserveScrollPosition=false&rsLogId=343536385&searchSessionId=DY4JJTjhRH6qJ2ZZIKMtXw%3D%3D";
 
 const CONNECT_URL_1 = "https://www.linkedin.com/in/kirill-shilov-25aa8630/";
 const CONNECT_URL_2 = "https://www.linkedin.com/in/vlad-duplyakin-923475116/";
@@ -26,7 +26,7 @@ const CONNECT_URL_5 = "https://www.linkedin.com/in/alexyerokhin/";
       input_data: {
         campaign_data: {
           search_url: SEARCH_URL_2,
-          interval_pages: 2,
+          interval_pages: 4,
         },
         template_data: {
           message: 'Hi {first_name}, nice to meet you.',
@@ -64,7 +64,18 @@ const CONNECT_URL_5 = "https://www.linkedin.com/in/alexyerokhin/";
     let account_data2 = {
       login: "mrgeen12358@gmail.com",
       password: "A123456a",
-      cookies: [],
+      cookies: [{
+        name: "li_at",
+        value: "AQEDATErT40E2B8bAAABcyjdk58AAAFzTOoXn00Aqy0XYDO9vuw2Jt58tq9_GwPUYRJCYchRMNi113pjfVGkyc9EmhRCe24TQikhMAR6wN9J0cUHduPjF1ux2lqw-U-45MHxt4UHft7E8kJXW-jV0y7v",
+        domain: '.linkedin.com',
+        path: "/",
+        expires: Date.now() / 1000 + 10000000, // + ~ 4 months // https://www.epochconverter.com/
+        size: 157,
+        httpOnly: true,
+        secure: true,
+        session: false,
+        sameSite: "None"
+      }],
       expires: Date.now() / 1000 + 10000000, // + ~ 4 months // https://www.epochconverter.com/
       status: 0,
     }
