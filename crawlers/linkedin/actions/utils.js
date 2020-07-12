@@ -202,26 +202,52 @@ async function gotoChecker(context, page, credentials_id, url) {
 
 async function autoScroll(page) {
     await page.evaluate(async () => {
+      await new Promise((resolve, reject) => {
+        var totalHeight = 0;
+        var distance = 100;
+        var timer = setInterval(() => {
+          var scrollHeight = document.body.scrollHeight;
+          window.scrollBy(0, distance);
+          totalHeight += distance;
+
+          if (totalHeight >= scrollHeight) {
+            clearInterval(timer);
+            resolve();
+          }
+        }, 100);
+      });
+    });
+  }
+
+
+async function autoScroll_modal(page, element_class) {
+    if(element_class == null) {
+        return
+    }
+    await page.evaluate(async (element_class) => {
         await new Promise((resolve, reject) => {
-            var totalHeight = 0;
-            var distance = 100;
+            var totalHeight = 0
+            var distance = 100
+            let element = document.getElementsByClassName(element_class)[0]
+
             var timer = setInterval(() => {
-                var scrollHeight = document.body.scrollHeight;
-                window.scrollBy(0, distance);
-                totalHeight += distance;
+                var scrollHeight = element.scrollHeight
+                element.scrollBy(0, distance)
+                totalHeight += distance
 
                 if (totalHeight >= scrollHeight) {
-                    clearInterval(timer);
-                    resolve();
+                    clearInterval(timer)
+                    resolve()
                 }
-            }, 100);
-        });
-    });
+            }, 500)
+        })
+    }, element_class)
 }
 
 
 module.exports = {
     autoScroll: autoScroll,
+    autoScroll_modal: autoScroll_modal,
     gotoChecker: gotoChecker,
     get_pathname_url: get_pathname_url,
     get_search_url: get_search_url,

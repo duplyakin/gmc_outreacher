@@ -797,7 +797,7 @@ async function post_engagement_worker(task_id) {
     }
 
   } finally {
-    log.debug("post_engagement_worker RES: ", result_data);
+    //log.debug("post_engagement_worker RES: ", result_data);
 
     if (task !== null) {
       await models_shared.TaskQueue.findOneAndUpdate({ _id: task_id }, { ack: 0, status: status, result_data: result_data, is_queued: 0 }, { upsert: false });

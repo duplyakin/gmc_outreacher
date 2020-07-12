@@ -77,7 +77,7 @@ class Search_SN_action extends action.Action {
               let full_name = item.querySelector(mySelectors.selector3)
               let job_title = item.querySelector(mySelectors.selector5)
               let company_linkedin_page = item.querySelector(mySelectors.selector6)
-              let job_name = item.querySelector(mySelectors.selector7)
+              let company_name = item.querySelector(mySelectors.selector7)
 
               let result = {}
 
@@ -101,8 +101,8 @@ class Search_SN_action extends action.Action {
                 result.company_linkedin_page = company_linkedin_page.href
               }
 
-              if (job_name != null) {
-                result.job_name = job_name.innerText
+              if (company_name != null) {
+                result.company_name = company_name.innerText
               }
 
               results.push(result)

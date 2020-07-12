@@ -82,6 +82,9 @@ module.exports.CONNECTOR_SELECTOR = 'span.mn-connection-card__name';
 module.exports.CONNECT_DEGREE_SELECTOR = '.pv-top-card--list .dist-value';
 
 // post engagement
+// general info
+module.exports.POST_AUTHOR_NAME_SELECTOR = '.feed-shared-actor__name';
+module.exports.POST_AUTHOR_LINK_SELECTOR = '.feed-shared-actor__container-link';
 // comments
 module.exports.POST_MORE_COMMENTERS_BTN_SELECTOR = '.comments-comments-list__load-more-comments-button';
 module.exports.POST_PREVIOUS_REPLIES_BTN_SELECTOR = '.button.show-prev-replies';
@@ -89,5 +92,18 @@ module.exports.POST_ELEMENT_SELECTOR = 'article';
 module.exports.POST_AUTHOR_TAG_SELECTOR = '.comments-post-meta__author-badge';
 module.exports.POST_COMMENTER_LINK_SELECTOR = '.comments-post-meta__profile-link';
 module.exports.POST_COMMENTER_NAME_SELECTOR = '.hoverable-link-text';
+module.exports.POST_COMMENTER_DEGREE_SELECTOR = '.dist-value';
 module.exports.POST_COMMENTER_JOB_SELECTOR = '.comments-post-meta__headline';
+// likes modal
+module.exports.POST_LIKERS_MODAL_SELECTOR = 'artdeco-modal__content';
+module.exports.POST_LIKERS_MODAL_BTN_SELECTOR = '.social-details-reactors-facepile__reactions-modal-button';
+module.exports.POST_LIKERS_MODAL_CLOSE_SELECTOR = '.artdeco-modal__dismiss';
+module.exports.POST_LIKERS_MODAL_ELEMENT_SELECTOR = '.actor-item';
+module.exports.POST_LIKERS_MODAL_NAME_SELECTOR = '.name > span';
+module.exports.POST_LIKERS_MODAL_LINK_SELECTOR = '.social-details-reactors-tab-body__profile-link';
+module.exports.POST_LIKERS_MODAL_DEGREE_SELECTOR = '.dist-value';
+module.exports.POST_LIKERS_MODAL_JOB_SELECTOR = '.headline';
+module.exports.POST_LIKERS_SELECTOR = '.social-details-reactors-facepile__list-item';
 // likes
+module.exports.POST_LIKERS_ELEMENT_SELECTOR = '.social-details-reactors-facepile__list-item a';
+

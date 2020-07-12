@@ -10,7 +10,10 @@ const CONNECT_URL_3 = "https://www.linkedin.com/in/alexander-savinkin-3ba99614/"
 const CONNECT_URL_4 = "https://www.linkedin.com/in/bersheva/";
 const CONNECT_URL_5 = "https://www.linkedin.com/in/alexyerokhin/";
 
-const POST_URL = "https://www.linkedin.com/posts/dr-marc-o-riain-74b7a911_covid-activity-6681268515862822913-CZrF/";
+const POST_URL_1 = "https://www.linkedin.com/posts/dr-marc-o-riain-74b7a911_covid-activity-6681268515862822913-CZrF/";
+const POST_URL_2 = "https://www.linkedin.com/posts/modern-healthcare_appeals-court-rules-bankrupt-hospitals-not-activity-6681289160814325761-Kt_5/";
+const POST_URL_3 = "https://www.linkedin.com/posts/christiangaravito_marketing-ventas-b2b-activity-6687284660688441344-iEXR/";
+const POST_URL_4 = "https://www.linkedin.com/posts/swopelees_covid19-supportlocalbusiness-commercialrealestate-activity-6646040475419709440-00n4/";
 
 // test task
 
@@ -27,7 +30,7 @@ const POST_URL = "https://www.linkedin.com/posts/dr-marc-o-riain-74b7a911_covid-
       action_key: 'linkedin-check-reply',
       input_data: {
         campaign_data: {
-          post_url: POST_URL,
+          post_url: POST_URL_3,
           search_url: SEARCH_URL_2,
           interval_pages: 4,
         },

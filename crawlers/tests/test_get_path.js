@@ -15,7 +15,7 @@ var log = require('loglevel').getLogger("o24_logger");
         let res1 = res.substr(0, res.indexOf(' at '))
         let res2 = res.substr(res.indexOf(' at ') + 4)
 
-        log.error("..... res: .....", res2)
+        log.error("..... res: .....", res2.includes('reddy'))
     } catch (err) {
         log.error("..... error: .....", err)
     } finally {

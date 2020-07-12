@@ -88,7 +88,7 @@ class SearchAction extends action.Action {
                 full_job = full_job.split(': ')[1]  // -> "Product Marketing Manager – Morningstar"
                 if(full_job.includes('–')) {
                   result.job_title = full_job.substr(0, full_job.indexOf('–')) // -> "Product Marketing Manager "
-                  result.job_name = full_job.substr(full_job.indexOf('–') + 2) // -> "Morningstar"
+                  result.company_name = full_job.substr(full_job.indexOf('–') + 2) // -> "Morningstar"
                 } else {
                   result.job_title = full_job // ? or new param
                 }
