@@ -938,6 +938,58 @@ class Campaign(db.Document):
 
     created = db.DateTimeField( default=pytz.utc.localize(datetime.utcnow()) )
 
+    @classmethod
+    def admin_async_campaigns_list(cls, page=None, per_page=config.CAMPAIGNS_PER_PAGE):
+        if page and page <= 1:
+            page = 1
+
+        db_query = cls.objects()
+                
+        total = db_query.count()
+
+        #we use it for join and showing objects as it is
+        pipeline = [
+            {"$lookup" : {
+                "from" : "user",
+                "localField" : "owner",
+                "foreignField" : "_id",
+                "as" : "user"
+            }},
+            {"$lookup" : {
+                "from" : "credentials",
+                "localField" : "credentials",
+                "foreignField" : "_id",
+                "as" : "credentials"
+            }},
+            {"$lookup" : {
+                "from" : "funnel",
+                "localField" : "funnel",
+                "foreignField" : "_id",
+                "as" : "funnel"
+            }},
+            { "$unwind" : { "path" : "$funnel", "preserveNullAndEmptyArrays": True }},
+            { "$project" : { 
+                'status' : 1,
+                'data' : 1,
+                'title' : 1,
+                'credentials' : 1,
+                'user' : 1,
+                'funnel' : 1,
+                'message' : 1,
+                'campaign_type' : 1
+            }}
+        ]
+
+        campaigns = []
+        if page is not None:
+            campaigns = list(db_query.skip(per_page * (page-1)).limit(per_page).order_by('-created').aggregate(*pipeline))
+        else:
+            campaigns = list(db_query.order_by('-created').aggregate(*pipeline))
+
+        results = bson_dumps(campaigns)
+
+        return (total, results)
+
 
     @classmethod
     def async_campaigns_list(cls, owner, page=None, campaign_types=[0], per_page=config.CAMPAIGNS_PER_PAGE):

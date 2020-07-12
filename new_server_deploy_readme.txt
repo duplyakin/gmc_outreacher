@@ -101,6 +101,8 @@ sudo ln -s /home/o24user/headless_chromium/node_modules/puppeteer/.local-chromiu
 sudo ln -s /home/o24user/headless_chromium/node_modules/puppeteer/.local-chromium /home/o24user/o24_prod/crawlers/node_modules/puppeteer/.local-chromium
 sudo apt-get install -y libgbm-dev
 
+#INSTALL ELK for logs:
+https://www.digitalocean.com/community/tutorials/how-to-install-elasticsearch-logstash-and-kibana-elastic-stack-on-ubuntu-18-04
 
 #VIEW SYSTEMCTL ERRORS:
 journalctl -xe
@@ -131,3 +133,10 @@ sudo systemctl start flower-monitor
 pm2 restart init
 pm2 restart server
 sudo systemctl restart nginx
+
+
+#stop/start logs monitor
+sudo systemctl stop elasticsearch
+sudo systemctl stop kibana
+sudo systemctl stop logstash
+sudo systemctl stop filebeat

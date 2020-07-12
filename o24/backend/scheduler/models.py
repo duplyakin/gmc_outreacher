@@ -405,5 +405,35 @@ class ActionLog(db.Document):
         results = bson_dumps(stats)
         return results
 
+    @classmethod
+    def admin_get_actions(cls, campaign_id, filter_by):
+        db_query = cls.objects(campaign_id=campaign_id,
+                                created__gte=filter_by['from_date'],
+                                created__lte=filter_by['to_date'])
+
+        res = []
+
+        #we use it for join and showing objects as it is
+        pipeline = [
+            { "$match":
+                { "$expr":
+                    { "$and":
+                        [
+                            { "$step" : {"$in" : filter_by['step']} },
+                            { "$task.status" : {"$in" : filter_by['status']} },
+                        ]
+                    }
+                }
+            }
+        ]
+
+        actions = list(db_query.aggregate(*pipeline))
+        if actions:
+            res.extend(actions)
+
+        results = bson_dumps(res)
+        return results
+
+
     def _commit(self):
         self.save()
