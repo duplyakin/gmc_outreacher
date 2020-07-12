@@ -1,4 +1,4 @@
-const workers = require('./../linkedin/workers/workers.js');
+const workers = require('../linkedin/workers/workers.js');
 var log = require('loglevel').getLogger("o24_logger");
 
 // test
@@ -7,16 +7,17 @@ var log = require('loglevel').getLogger("o24_logger");
   log.setLevel("DEBUG");
   log.debug("..... test started: .....", __filename);
 
-  let task = "000003a80a2de70af2b00000";
+  let task_id = "000003a80a2de70af2b00000"; // test task_id
 
-  //await workers.loginWorker(task);
-  await workers.searchWorker(task);
-  //await workers.search_SN_worker(task);
-  //await workers.connectWorker(task);
-  //await workers.messageWorker(task);
-  //await workers.scribeWorker(task);
-  //await workers.messageCheckWorker(task);
-  //await workers.connectCheckWorker(task);
-  //await workers.visitProfileWorker(task);
+  //await workers.loginWorker(task_id);
+  //await workers.searchWorker(task_id);
+  //await workers.search_SN_worker(task_id);
+  //await workers.connectWorker(task_id);
+  //await workers.messageWorker(task_id);
+  //await workers.scribeWorker(task_id);
+  //await workers.messageCheckWorker(task_id);
+  //await workers.connectCheckWorker(task_id);
+  //await workers.visitProfileWorker(task_id);
+  await workers.post_engagement_worker(task_id)
 
 })();

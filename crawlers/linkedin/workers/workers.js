@@ -14,7 +14,7 @@ async function get_cookies(credentials_id) {
     if (err) throw MyExceptions.MongoDBError('MongoDB find account err: ' + err)
   })
 
-  if(account == null) {
+  if (account == null) {
     throw new Error("get_cookies: Account not found with credentials_id:", credentials_id)
   }
 
@@ -43,7 +43,7 @@ function check_expired(account) {
     return true
   }
 
-  if(Date.now() / 1000 > account.expires) {
+  if (Date.now() / 1000 > account.expires) {
     log.debug("check_expired: expires is OLD, credentials_id:", account._id)
     log.debug("check_expired: account.expires:", account.expires)
     log.debug("check_expired: expires now:", Date.now() / 1000)
@@ -123,7 +123,7 @@ async function searchWorker(task_id) {
         raw: err.error
       };
       await models.Accounts.findOneAndUpdate({ _id: credentials_id }, { task_id: task_id }, { upsert: false });
-      
+
     } else {
       result_data = {
         if_true: false,
@@ -139,7 +139,7 @@ async function searchWorker(task_id) {
       await models_shared.TaskQueue.findOneAndUpdate({ _id: task_id }, { ack: 0, status: status, result_data: result_data, is_queued: 0 }, { upsert: false });
     }
 
-    if(browser != null) {
+    if (browser != null) {
       await browser.close();
       browser.disconnect();
     }
@@ -202,7 +202,7 @@ async function search_SN_worker(task_id) {
         raw: err.error
       };
       await models.Accounts.findOneAndUpdate({ _id: credentials_id }, { task_id: task_id }, { upsert: false });
-      
+
     } else {
       result_data = {
         if_true: false,
@@ -218,7 +218,7 @@ async function search_SN_worker(task_id) {
       await models_shared.TaskQueue.findOneAndUpdate({ _id: task_id }, { ack: 0, status: status, result_data: result_data, is_queued: 0 }, { upsert: false });
     }
 
-    if(browser != null) {
+    if (browser != null) {
       await browser.close();
       browser.disconnect();
     }
@@ -289,7 +289,7 @@ async function connectWorker(task_id) {
         raw: err.error
       };
       await models.Accounts.findOneAndUpdate({ _id: credentials_id }, { task_id: task_id }, { upsert: false });
-      
+
     } else {
       result_data = {
         if_true: false,
@@ -306,7 +306,7 @@ async function connectWorker(task_id) {
       await models_shared.TaskQueue.findOneAndUpdate({ _id: task_id }, { ack: 0, status: status, result_data: result_data, is_queued: 0 }, { upsert: false });
     }
 
-    if(browser != null) {
+    if (browser != null) {
       await browser.close();
       browser.disconnect();
     }
@@ -383,7 +383,7 @@ async function messageWorker(task_id) {
         raw: err.error
       };
       await models.Accounts.findOneAndUpdate({ _id: credentials_id }, { task_id: task_id }, { upsert: false });
-      
+
     } else {
       result_data = {
         if_true: false,
@@ -400,7 +400,7 @@ async function messageWorker(task_id) {
       await models_shared.TaskQueue.findOneAndUpdate({ _id: task_id }, { ack: 0, status: status, result_data: result_data, is_queued: 0 }, { upsert: false });
     }
 
-    if(browser != null) {
+    if (browser != null) {
       await browser.close();
       browser.disconnect();
     }
@@ -466,7 +466,7 @@ async function scribeWorker(task_id) {
         raw: err.error
       };
       await models.Accounts.findOneAndUpdate({ _id: credentials_id }, { task_id: task_id }, { upsert: false });
-      
+
     } else {
       result_data = {
         if_true: false,
@@ -477,13 +477,13 @@ async function scribeWorker(task_id) {
     status = status_codes.FAILED;
 
   } finally {
-   log.debug("ScribeWorker RES: ", result_data);
-    
+    log.debug("ScribeWorker RES: ", result_data);
+
     if (task !== null) {
       await models_shared.TaskQueue.findOneAndUpdate({ _id: task_id }, { ack: 0, status: status, result_data: result_data, is_queued: 0 }, { upsert: false });
     }
 
-    if(browser != null) {
+    if (browser != null) {
       await browser.close();
       browser.disconnect();
     }
@@ -544,7 +544,7 @@ async function messageCheckWorker(task_id) {
         raw: err.error
       };
       await models.Accounts.findOneAndUpdate({ _id: credentials_id }, { task_id: task_id }, { upsert: false });
-      
+
     } else {
       result_data = {
         if_true: false,
@@ -555,13 +555,13 @@ async function messageCheckWorker(task_id) {
     status = status_codes.FAILED;
 
   } finally {
-   log.debug("MessageCheckWorker RES: ", result_data);
+    log.debug("MessageCheckWorker RES: ", result_data);
 
     if (task !== null) {
       await models_shared.TaskQueue.findOneAndUpdate({ _id: task_id }, { ack: 0, status: status, result_data: result_data, is_queued: 0 }, { upsert: false });
     }
 
-    if(browser != null) {
+    if (browser != null) {
       await browser.close();
       browser.disconnect();
     }
@@ -626,7 +626,7 @@ async function connectCheckWorker(task_id) {
         raw: err.error
       };
       await models.Accounts.findOneAndUpdate({ _id: credentials_id }, { task_id: task_id }, { upsert: false });
-      
+
     } else {
       result_data = {
         if_true: false,
@@ -637,13 +637,13 @@ async function connectCheckWorker(task_id) {
     status = status_codes.FAILED;
 
   } finally {
-   log.debug("ConnectCheckWorker RES: ", result_data);
+    log.debug("ConnectCheckWorker RES: ", result_data);
 
     if (task !== null) {
       await models_shared.TaskQueue.findOneAndUpdate({ _id: task_id }, { ack: 0, status: status, result_data: result_data, is_queued: 0 }, { upsert: false });
     }
 
-    if(browser != null) {
+    if (browser != null) {
       await browser.close();
       browser.disconnect();
     }
@@ -708,7 +708,7 @@ async function visitProfileWorker(task_id) {
         raw: err.error
       };
       await models.Accounts.findOneAndUpdate({ _id: credentials_id }, { task_id: task_id }, { upsert: false });
-      
+
     } else {
       result_data = {
         if_true: false,
@@ -719,13 +719,91 @@ async function visitProfileWorker(task_id) {
     status = status_codes.FAILED;
 
   } finally {
-   log.debug("visitProfileWorker RES: ", result_data);
+    log.debug("visitProfileWorker RES: ", result_data);
 
     if (task !== null) {
       await models_shared.TaskQueue.findOneAndUpdate({ _id: task_id }, { ack: 0, status: status, result_data: result_data, is_queued: 0 }, { upsert: false });
     }
 
-    if(browser != null) {
+    if (browser != null) {
+      await browser.close();
+      browser.disconnect();
+    }
+  }
+}
+
+
+async function post_engagement_worker(task_id) {
+  let status = status_codes.FAILED;
+  let result_data = {};
+  let task = null;
+  let credentials_id = null;
+
+  let browser = null;
+  try {
+    task = await models_shared.TaskQueue.findOneAndUpdate({ _id: task_id, ack: 0 }, { ack: 1 }, { new: true, upsert: false });
+    if (task == null) {
+      log.debug("..... task not found or locked: .....");
+      return;
+    }
+
+    credentials_id = task.credentials_id;
+    if (!credentials_id) {
+      throw new Error('there is no task.credentials_id');
+    }
+    let input_data = task.input_data;
+    if (!input_data) {
+      throw new Error('there is no task.input_data');
+    }
+    let task_data = serialize_data(input_data);
+
+    let cookies = await get_cookies(credentials_id);
+
+    // start work
+    post_engagement_action = new modules.post_engagement_action.Post_engagement_action(cookies, credentials_id, task_data.campaign_data.post_url);
+    browser = await post_engagement_action.startBrowser();
+    result_data = await post_engagement_action.engagement();
+    browser = await post_engagement_action.closeBrowser();
+
+    status = status_codes.CARRYOUT
+  } catch (err) {
+
+    log.error("post_engagement_worker error:", err.stack)
+
+    status = status_codes.FAILED;
+
+    if (err.code != null && err.code != -1) {
+      result_data = {
+        if_true: false,
+        code: err.code,
+        raw: err.error
+      };
+    } else if (err.code == -1) {
+      status = status_codes.BLOCK_HAPPENED;
+      // Context error
+      result_data = {
+        if_true: false,
+        code: err.code,
+        raw: err.error
+      };
+      await models.Accounts.findOneAndUpdate({ _id: credentials_id }, { task_id: task_id }, { upsert: false });
+
+    } else {
+      result_data = {
+        if_true: false,
+        code: MyExceptions.SearchWorkerError().code,
+        raw: MyExceptions.SearchWorkerError("post_engagement_worker error: " + err).error
+      };
+    }
+
+  } finally {
+    //log.debug("post_engagement_worker RES: ", result_data);
+
+    if (task !== null) {
+      await models_shared.TaskQueue.findOneAndUpdate({ _id: task_id }, { ack: 0, status: status, result_data: result_data, is_queued: 0 }, { upsert: false });
+    }
+
+    if (browser != null) {
       await browser.close();
       browser.disconnect();
     }
@@ -742,4 +820,5 @@ module.exports = {
   messageCheckWorker: messageCheckWorker,
   connectCheckWorker: connectCheckWorker,
   visitProfileWorker: visitProfileWorker,
+  post_engagement_worker: post_engagement_worker,
 }

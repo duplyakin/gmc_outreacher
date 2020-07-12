@@ -10,12 +10,12 @@ var log = require('loglevel').getLogger("o24_logger");
         var res = new URL(SEARCH_URL_2).search
 
         str = "Текущая должность: Product Marketing Manager – Morningstar"
-        res = str.split(': ')[1]
-        //res = res.split(' – ')
-        let res1 = res.substr(0, res.indexOf('–'))
-        let res2 = res.substr(res.indexOf('–') + 2)
+        res = "Architectural Technologist at Reddy Architecture + Urbanism"
 
-        log.error("..... res: .....", res1)
+        let res1 = res.substr(0, res.indexOf(' at '))
+        let res2 = res.substr(res.indexOf(' at ') + 4)
+
+        log.error("..... res: .....", res2.includes('reddy'))
     } catch (err) {
         log.error("..... error: .....", err)
     } finally {

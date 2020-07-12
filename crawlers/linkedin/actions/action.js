@@ -24,6 +24,8 @@ class Action {
     //log.debug('cooooookiieeeess: ', this.cookies)
     if(this.cookies != null && Array.isArray(this.cookies) && this.cookies.length > 0) {
       await this.page.setCookie(...this.cookies)
+    } else {
+      log.debug("action: Empty or invalid cookies.")
     }
 
     return this.browser

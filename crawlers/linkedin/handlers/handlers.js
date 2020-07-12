@@ -42,6 +42,9 @@ async function bullConsumer() {
         case 'linkedin-visit-profile':
           await workers.visitProfileWorker(job.data.task_id);
           break;
+        case 'linkedin-post-parsing':
+          await workers.post_engagement_worker(job.data.task_id);
+          break;
 
         default:
           //log.debug('unknown action_key: ', job.data.action_key);
