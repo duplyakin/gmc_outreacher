@@ -5,7 +5,7 @@ const utils = require('./utils.js');
 const MyExceptions = require('../../exceptions/exceptions.js');
 var log = require('loglevel').getLogger("o24_logger");
 
-class Search_SN_action extends action.Action {
+class SN_SearchAction extends action.Action {
   constructor(cookies, credentials_id, searchUrl, interval_pages) {
     super(cookies, credentials_id);
 
@@ -14,6 +14,10 @@ class Search_SN_action extends action.Action {
   }
 
   async search() {
+    if (!this.searchUrl) {
+      throw new Error('Empty search url.')
+    }
+
     if (!this.searchUrl) {
       throw new Error('Empty search url.')
     }
@@ -162,5 +166,5 @@ class Search_SN_action extends action.Action {
 }
 
 module.exports = {
-  Search_SN_action: Search_SN_action
+  SN_SearchAction: SN_SearchAction
 }

@@ -16,8 +16,8 @@ class Action {
 
 
   async startBrowser() {
-    //this.browser = await puppeteer.launch({ headless: false }) // test mode
-    this.browser = await puppeteer.launch()
+    this.browser = await puppeteer.launch({ headless: false }) // test mode
+    //this.browser = await puppeteer.launch()
     this.context = await this.browser.createIncognitoBrowserContext()
     this.page = await this.context.newPage()
     
@@ -25,7 +25,7 @@ class Action {
     if(this.cookies != null && Array.isArray(this.cookies) && this.cookies.length > 0) {
       await this.page.setCookie(...this.cookies)
     } else {
-      log.debug("action: Empty or invalid cookies.")
+      log.error("action: Empty or invalid cookies for credentials_id:", this.credentials_id)
     }
 
     return this.browser
@@ -57,7 +57,7 @@ class Action {
 
 async check_success_selector(selector, page = this.page) {
   if(!selector) {
-    throw new Error ('Empty selector.')
+    throw new Error ('check_success_selector: Empty selector.')
   }
 
   try {
@@ -77,7 +77,7 @@ async check_success_selector(selector, page = this.page) {
 
   async check_success_page(required_url, page = this.page) {
     if(!required_url) {
-      throw new Error ('Empty required_url.')
+      throw new Error ('check_success_page: Empty required_url.')
     }
 
     let current_url = page.url()
@@ -182,7 +182,7 @@ async check_success_selector(selector, page = this.page) {
       let short_url = this.get_pathname(url)
 
       if (!current_url.includes(short_url)) {
-        // Sales Navigator
+        // Sales Navigator access
         if (current_url.includes('guest_login_sales_nav')) {
           log.debug('gotoChecker - Sales Navigator unreachable: ', current_url)
           throw MyExceptions.SN_access_error("gotoChecker - Sales Navigator unreachable: " + current_url)

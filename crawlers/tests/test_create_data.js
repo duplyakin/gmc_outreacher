@@ -15,6 +15,9 @@ const POST_URL_2 = "https://www.linkedin.com/posts/modern-healthcare_appeals-cou
 const POST_URL_3 = "https://www.linkedin.com/posts/christiangaravito_marketing-ventas-b2b-activity-6687284660688441344-iEXR/";
 const POST_URL_4 = "https://www.linkedin.com/posts/swopelees_covid19-supportlocalbusiness-commercialrealestate-activity-6646040475419709440-00n4/";
 
+const CONNECT_URL_SN_1 = "https://www.linkedin.com/sales/people/ACoAAAaQ6eYBBjpCMUzZRmnSoUQdVEoWsM8ld0E,name,Vv6O";
+const CONNECT_URL_SN_2 = "https://www.linkedin.com/sales/people/ACwAABZc3xMB56tjV7WVgtLi-kdT3_NS55txCFk,NAME_SEARCH,mm5W?_ntb=DY4JJTjhRH6qJ2ZZIKMtXw%3D%3D";
+
 // test task
 
 (async () => {
@@ -42,6 +45,7 @@ const POST_URL_4 = "https://www.linkedin.com/posts/swopelees_covid19-supportloca
           last_name: '',
           company_title: 'howtotoken.com',
           linkedin: CONNECT_URL_5,
+          linkedin_sn: CONNECT_URL_SN_2,
         }
       },
       credentials_id: account_id,
@@ -86,7 +90,7 @@ const POST_URL_4 = "https://www.linkedin.com/posts/swopelees_covid19-supportloca
       status: 0,
     }
 
-    let account = await models.Accounts.findOneAndUpdate({ _id: account_id }, account_data, { new: true, upsert: true });
+    let account = await models.Accounts.findOneAndUpdate({ _id: account_id }, account_data2, { new: true, upsert: true });
     let task = await models_shared.TaskQueue.findOneAndUpdate({ _id: task_id }, task_data, { new: true, upsert: true });
 
     console.log('..........account.............', account)

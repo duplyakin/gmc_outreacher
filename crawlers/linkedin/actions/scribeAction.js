@@ -91,24 +91,25 @@ class ScribeAction extends action.Action {
     let mySelector = ''
     log.debug("ScribeAction: scribe_contact_info started")
 
-    let selector_res = ''
-    /*
     let selector_res = await super.check_success_selector(selectors.CONTACT_INFO_SELECTOR)
     if(!selector_res) {
       // can't find contact info selector
+      log.debug("ScribeAction: can't find contact info selector")
       return result
     }
-    
+    /*
     await this.page.click(selectors.CONTACT_INFO_SELECTOR) // don't work
     await this.page.waitFor(5000) // XZ etot linked
     */
 
-    await super.gotoChecker(this.page.url() + 'detail/contact-info/')
+   await this.page.$eval(selectors.CONTACT_INFO_SELECTOR, elem => elem.click())
+
+    //await super.gotoChecker(this.page.url() + 'detail/contact-info/')
     await this.page.waitFor(5000)
 
     if(!this.page.url().includes('contact-info')) {
-      super.gotoChecker(this.url)
-      await this.page.waitFor(5000)
+      //super.gotoChecker(this.url)
+      //await this.page.waitFor(5000)
       
       return result
     }

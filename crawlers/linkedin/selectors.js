@@ -76,6 +76,24 @@ module.exports.CONTACT_INFO_IM_SELECTOR = 'section.pv-contact-info__contact-type
 module.exports.CONTACT_INFO_BIRTHDAY_SELECTOR = 'section.pv-contact-info__contact-type.ci-birthday > div > span';
 module.exports.CONTACT_INFO_CONNECTED_DATE_SELECTOR = 'section.pv-contact-info__contact-type.ci-connected > div > span';
 
+// scribe SN
+module.exports.SN_JOB_LINK_SELECTOR = '.profile-topcard__current-positions a';
+module.exports.SN_JOB_SITE_SELECTOR = '.inverse-link-on-a-light-background';
+module.exports.SN_LOCATION_SELECTOR = '.profile-topcard__location-data';
+module.exports.SN_EDUCATION_SELECTOR = '.profile-education__school-name';
+module.exports.SN_JOB_SELECTOR = '.profile-topcard__current-positions .profile-topcard__summary-position-title';
+module.exports.SN_COMPANY_NAME_SELECTOR = '.profile-topcard__current-positions span a';
+// scribe contact info SN
+module.exports.SN_CONTACT_INFO_SELECTOR = '.profile-topcard__contact-info-show-all';
+module.exports.SN_CONTACT_INFO_CLOSE_SELECTOR = '.artdeco-modal__dismiss';
+module.exports.SN_CONTACT_INFO_PHONE_SELECTOR = '.contact-info-form__phone-readonly-text a';
+module.exports.SN_CONTACT_INFO_ADDRESS_SELECTOR = '.contact-info-form__address-read a';
+module.exports.SN_CONTACT_INFO_EMAIL_SELECTOR = '.contact-info-form__email-readonly-text a';
+module.exports.SN_CONTACT_INFO_SOCIAL_SELECTOR = '.contact-info-form__social-readonly-text'; // SKYPE, TWITTER, YAHOO, WECHAT, AIM, QQ, HANGOUTS, ICQ
+module.exports.SN_CONTACT_INFO_WEBSITE_SELECTOR = '.contact-info-form__website-readonly-text';
+//module.exports.CONTACT_INFO_BIRTHDAY_SELECTOR = 'section.pv-contact-info__contact-type.ci-birthday > div > span';
+//module.exports.CONTACT_INFO_CONNECTED_DATE_SELECTOR = 'section.pv-contact-info__contact-type.ci-connected > div > span';
+
 // connect check
 module.exports.SEARCH_CONNECTS_SELECTOR = '#mn-connections-search-input';
 module.exports.CONNECTOR_SELECTOR = 'span.mn-connection-card__name';

@@ -80,7 +80,7 @@ class Post_engagement_action extends action.Action {
 
                 // remove author
                 if(res && !item.linkedin.includes(utils.get_pathname_url(general_info.post_author_link))) {
-                    unique_linkedin[linkedin] = true
+                    unique_linkedin[linkedin] = item.tags[0]
                     return true
                 } else {
                     not_unique_linkedin[linkedin] = true
@@ -211,10 +211,16 @@ class Post_engagement_action extends action.Action {
                 return [...results]
             }, evaluate_data)
 
-
             // close modal
-            await this.page.click(selectors.POST_LIKERS_MODAL_CLOSE_SELECTOR)
-            await this.page.waitFor(2000)
+            if (await this.page.$(selectors.POST_LIKERS_MODAL_CLOSE_SELECTOR) != null) {
+                await this.page.click(selectors.POST_LIKERS_MODAL_CLOSE_SELECTOR)
+                await this.page.waitFor(2000)
+            } else {
+                log.debug("Post_engagement_action: Can't close modal (close btn selector not found).")
+                await super.gotoChecker(this.url)
+                await utils.close_msg_box(this.page)
+            }
+
         } else {
             // a little number of likes
             log.debug("Post_engagement_action: _get_likers started")
@@ -238,9 +244,7 @@ class Post_engagement_action extends action.Action {
                         result.post_url = evaluate_data.general_info.post_url
                         result.post_author_name = evaluate_data.general_info.post_author_name
 
-                        if (linkedin != null) {
-                            result.linkedin = linkedin.href
-                        }
+                        result.linkedin = linkedin.href
 
                         results.add(result)
                     }
