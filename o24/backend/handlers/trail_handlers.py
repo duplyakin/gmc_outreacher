@@ -13,6 +13,7 @@ FAILED_HANDLERS = {
 CARRYOUT_HANDLERS = {
     LINKEDIN_SEARCH_ACTION: carryout_handlers.linkedin_search_action,
     LINKEDIN_PARSE_PROFILE_ACTION: carryout_handlers.linkedin_parse_profile_action,
+    LINKEDIN_POST_PARSING_ACTION: carryout_handlers.linkedin_post_parsing_action,
     EMAIL_CHECK_BOUNCED_ACTION: carryout_handlers.email_check_bounced_action,
     CARRYOUT_DEFAULT_HANDLER: carryout_handlers.default_handler
 }

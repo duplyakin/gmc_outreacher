@@ -37,6 +37,11 @@ LINKEDIN_LIMITS = [
 
     },
     {
+        'label' : 'Post parse',
+        'prop' : LINKEDIN_POST_PARSING_ACTION,
+        'explanation' : 'Maximum number of posts parsing, that you can parse per 24 hour period.'
+    },
+    {
         'label' : 'Profiles parse',
         'prop' : LINKEDIN_PARSE_PROFILE_ACTION,
         'explanation' : 'Maximum number of profile parsed per 24 hour period.'

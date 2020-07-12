@@ -84,6 +84,7 @@ LINKEDIN_ENRICHMENT_CAMPAIGN_TYPE = 2
 GENERAL_FUNNEL_TYPE = 0 
 LINKEDIN_PARSING_FUNNEL_TYPE = 1
 LINKEDIN_ENRICHMENT_FUNNEL_TYPE = 2
+LINKEDIN_POST_PARSING_FUNNEL_TYPE = 3
 
 
 
@@ -99,6 +100,7 @@ LINKEDIN_CONNECT_ACTION = 'linkedin-connect'
 LINKEDIN_SEND_MESSAGE_ACTION = 'linkedin-send-message'
 LINKEDIN_CHECK_ACCEPT_ACTION = 'linkedin-check-accept'
 LINKEDIN_CHECK_REPLY_ACTION = 'linkedin-check-reply'
+LINKEDIN_POST_PARSING_ACTION = 'linkedin-post-parsing'
 
 EMAIL_SEND_MESSAGE_ACTION = 'email-send-message'
 EMAIL_CHECK_REPLY_ACTION = 'email-check-reply' #potential BUG: what if we will add this action to SPECIAL_ACTIONS ?
@@ -126,7 +128,7 @@ SPECIAL_ACTIONS = [EMAIL_CHECK_REPLY_ACTION,
 
 DEFAULT_SEARCH_DELAY = 605
 DEFAULT_PROFILE_ENRICH_DELAY = 705
-
+DEFAULT_POST_PARSING_HOURS_DELAY = 12 #delay between post parsing actions
 
 NON_3RD_PARTY_ACTION_KEYS = [EMAIL_SEND_MESSAGE_ACTION,
                                 EMAIL_CHECK_REPLY_ACTION,
@@ -224,6 +226,7 @@ LINKEDIN_LIMITS_DAILY = {
                 'limits' : {
                         'account_maximum' : 240,
                         LINKEDIN_SEARCH_ACTION: 100,
+                        LINKEDIN_POST_PARSING_ACTION: 100,
                         LINKEDIN_PARSE_PROFILE_ACTION: 120,
                         LINKEDIN_VISIT_PROFILE_ACTION: 500,
                         LINKEDIN_CONNECT_ACTION: 100,
@@ -232,6 +235,7 @@ LINKEDIN_LIMITS_DAILY = {
                 'warmup' : {
                         'account_maximum' : 80,
                         LINKEDIN_SEARCH_ACTION: 10,
+                        LINKEDIN_POST_PARSING_ACTION: 10,
                         LINKEDIN_PARSE_PROFILE_ACTION: 20,
                         LINKEDIN_VISIT_PROFILE_ACTION: 100,
                         LINKEDIN_CONNECT_ACTION: 20,
@@ -246,6 +250,7 @@ LINKEDIN_LIMITS_DAILY = {
                 'limits' : {
                         'account_maximum' : 250,
                         LINKEDIN_SEARCH_ACTION: 200,
+                        LINKEDIN_POST_PARSING_ACTION: 200,
                         LINKEDIN_PARSE_PROFILE_ACTION: 300,
                         LINKEDIN_VISIT_PROFILE_ACTION: 500,
                         LINKEDIN_CONNECT_ACTION: 300,
@@ -254,6 +259,7 @@ LINKEDIN_LIMITS_DAILY = {
                 'warmup' : {
                         'account_maximum' : 100,
                         LINKEDIN_SEARCH_ACTION: 20,
+                        LINKEDIN_POST_PARSING_ACTION: 20,
                         LINKEDIN_PARSE_PROFILE_ACTION: 40,
                         LINKEDIN_VISIT_PROFILE_ACTION: 150,
                         LINKEDIN_CONNECT_ACTION: 30,

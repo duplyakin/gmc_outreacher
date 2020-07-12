@@ -80,6 +80,13 @@ class Funnel(db.Document):
             return funnel.id
 
     @classmethod
+    def get_linkedin_post_parsing_funnel_id(cls):
+        funnel = cls.objects(funnel_type=LINKEDIN_POST_PARSING_FUNNEL_TYPE).first()
+        if funnel:
+            return funnel.id
+
+
+    @classmethod
     def async_funnels(cls, funnel_types=[0,1,2], owner=None):
         results = cls.objects(root=True, funnel_type__in=funnel_types).\
                 only('id', 'title', 'funnel_type', 'template_key','templates_required', 'root')

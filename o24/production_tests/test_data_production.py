@@ -42,6 +42,12 @@ ACTIONS = [
         'action_type' : 0,
         'data' : {},
         'medium' : 'linkedin',
+        'key' : LINKEDIN_POST_PARSING_ACTION
+    },
+    {
+        'action_type' : 0,
+        'data' : {},
+        'medium' : 'linkedin',
         'key' : LINKEDIN_VISIT_PROFILE_ACTION
     },
     {
@@ -140,6 +146,22 @@ FUNNELS = [
             'key' : FINISHED_ACTION
         }
     },
+    {
+        'root' : {
+            'key' : LINKEDIN_POST_PARSING_ACTION,
+            'funnel_type' : LINKEDIN_POST_PARSING_FUNNEL_TYPE,
+            'title' : 'Linkedin Post Parsing Funnel',
+            'templates_required' : {'dummy' : 1},
+            'root' : True,
+            'if_true' : FINISHED_ACTION,
+            'if_false' : FINISHED_ACTION,
+        },
+        FINISHED_ACTION : {
+            'key' : FINISHED_ACTION
+        }
+    },
+
+
     #NEVER SHOWED ON FRONTEND
     {
         'root' : {
