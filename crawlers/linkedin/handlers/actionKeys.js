@@ -8,5 +8,8 @@ module.exports = {
         'linkedin-parse-profile',
         'linkedin-check-reply',
         'linkedin-visit-profile',
+        'linkedin-search-sn',
+        'linkedin-parse-profile-sn',
+        'linkedin-post-parsing',
     ]
 }

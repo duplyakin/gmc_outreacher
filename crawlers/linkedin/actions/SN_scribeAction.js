@@ -1,5 +1,6 @@
 const selectors = require("../selectors");
 const action = require('./action.js');
+const utils = require("./utils");
 
 const MyExceptions = require('../../exceptions/exceptions.js');
 var log = require('loglevel').getLogger("o24_logger");
@@ -31,8 +32,8 @@ class SN_ScribeAction extends action.Action {
 
     await super.autoScroll(this.page)
 
-    // country
-    selector_res = await super.check_success_selector(selectors.SN_LOCATION_SELECTOR)
+    // location
+    selector_res = await utils.check_success_selector(selectors.SN_LOCATION_SELECTOR, this.page)
     if(selector_res) {
       selector = selectors.SN_LOCATION_SELECTOR
       result.location = await this.page.evaluate((selector) => {
@@ -41,7 +42,7 @@ class SN_ScribeAction extends action.Action {
     }
 
     // education
-    selector_res = await super.check_success_selector(selectors.SN_EDUCATION_SELECTOR)
+    selector_res = await utils.check_success_selector(selectors.SN_EDUCATION_SELECTOR, this.page)
     if(selector_res) {
       selector = selectors.SN_EDUCATION_SELECTOR
       result.education = await this.page.evaluate((selector) => {
@@ -49,37 +50,85 @@ class SN_ScribeAction extends action.Action {
       }, selector)
     }
 
-    // company informatiom
-    // company name
-    selector_res = await super.check_success_selector(selectors.SN_COMPANY_NAME_SELECTOR)
-    if(selector_res) {
-      selector = selectors.SN_COMPANY_NAME_SELECTOR
-      result.company_name = await this.page.evaluate((selector) => {
-        return document.querySelector(selector).innerText
-      }, selector)
+    // basic linkedin url
+    let linkedin = await this.page.evaluate(() => {
+      let elems = document.querySelectorAll('code')
+      for(let el of elems) {
+        try {
+          let res = JSON.parse(el.innerText)
+          if(res.hasOwnProperty('flagshipProfileUrl')) {
+            return res.flagshipProfileUrl
+          }
+        } catch(err) {}
+      }
+    })
+
+    if(linkedin != null) {
+      if(utils.get_search_url(linkedin) != '') {
+        result.linkedin = linkedin.split(utils.get_search_url(linkedin))[0]
+      } else {
+        result.linkedin = linkedin
+      }
     }
 
+    // company informatiom
     // job title
-    selector_res = await super.check_success_selector(selectors.SN_JOB_SELECTOR)
+    selector_res = await utils.check_success_selector(selectors.SN_JOB_SELECTOR, this.page)
     if(selector_res) {
       selector = selectors.SN_JOB_SELECTOR
       result.job_title = await this.page.evaluate((selector) => {
         return document.querySelector(selector).innerText
       }, selector)
-    }
+    }   
 
     // company linkedin page
-    selector_res = await super.check_success_selector(selectors.SN_JOB_LINK_SELECTOR)
-    if(selector_res && result.company_url == null) {
+    selector_res = await utils.check_success_selector(selectors.SN_JOB_LINK_SELECTOR, this.page)
+    /*
+    if(!selector_res) {
+      // feature of SN - sometimes don't load company link and name
+      await super.gotoChecker(this.url)
+      await this.page.waitFor(5000)
+      selector_res = await utils.check_success_selector(selectors.SN_JOB_LINK_SELECTOR, this.page)
+    }
+
+    if(!selector_res) {
+      // feature of SN - sometimes don't load company link and name
+      await super.gotoChecker(this.url)
+      await this.page.waitFor(5000)
+      selector_res = await utils.check_success_selector(selectors.SN_JOB_LINK_SELECTOR, this.page)
+    }
+
+    if(!selector_res) {
+      // feature of SN - sometimes don't load company link and name
+      await super.gotoChecker(this.url)
+      await this.page.waitFor(5000)
+      selector_res = await utils.check_success_selector(selectors.SN_JOB_LINK_SELECTOR, this.page)
+    }
+    */
+
+    if(selector_res) {
       selector = selectors.SN_JOB_LINK_SELECTOR
       result.company_linkedin_page = await this.page.evaluate((selector) => {
         return document.querySelector(selector).href
       }, selector)
 
+      log.debug("SN_ScribeAction: company_linkedin_page:", result.company_linkedin_page)
+
+      // company name
+      selector_res = await utils.check_success_selector(selectors.SN_COMPANY_NAME_SELECTOR, this.page)
+      if(selector_res) {
+        selector = selectors.SN_COMPANY_NAME_SELECTOR
+        result.company_name = await this.page.evaluate((selector) => {
+          return document.querySelector(selector).innerText
+        }, selector)
+  
+        log.debug("SN_ScribeAction: company_name:", result.company_name)
+      }
+
       await super.gotoChecker(result.company_linkedin_page)
 
-      // company website on About page
-      selector_res = await super.check_success_selector(selectors.SN_JOB_SITE_SELECTOR)
+      // company website on company SN linkedin page
+      selector_res = await utils.check_success_selector(selectors.SN_JOB_SITE_SELECTOR, this.page)
       if(selector_res) {
         selector = selectors.SN_JOB_SITE_SELECTOR
         result.company_url = await this.page.evaluate((selector) => {
@@ -88,6 +137,7 @@ class SN_ScribeAction extends action.Action {
       }
     }
 
+    log.debug("SN_ScribeAction: result:", result)
     return result
   }
 
@@ -97,7 +147,7 @@ class SN_ScribeAction extends action.Action {
     let mySelector = ''
     log.debug("SN_ScribeAction: scribe_contact_info started")
 
-    let selector_res = await super.check_success_selector(selectors.SN_CONTACT_INFO_SELECTOR)
+    let selector_res = await utils.check_success_selector(selectors.SN_CONTACT_INFO_SELECTOR, this.page)
     if(!selector_res) {
       // can't find contact info selector
       log.debug("SN_ScribeAction: can't find contact info selector")
@@ -109,7 +159,7 @@ class SN_ScribeAction extends action.Action {
     await this.page.waitFor(2000)
 
     // phone
-    selector_res = await super.check_success_selector(selectors.SN_CONTACT_INFO_PHONE_SELECTOR)
+    selector_res = await utils.check_success_selector(selectors.SN_CONTACT_INFO_PHONE_SELECTOR, this.page)
     if(selector_res) {
       mySelector = selectors.SN_CONTACT_INFO_PHONE_SELECTOR
 
@@ -121,7 +171,7 @@ class SN_ScribeAction extends action.Action {
     }
 
     // address
-    selector_res = await super.check_success_selector(selectors.SN_CONTACT_INFO_ADDRESS_SELECTOR)
+    selector_res = await utils.check_success_selector(selectors.SN_CONTACT_INFO_ADDRESS_SELECTOR, this.page)
     if(selector_res) {
       mySelector = selectors.SN_CONTACT_INFO_ADDRESS_SELECTOR
 
@@ -133,19 +183,26 @@ class SN_ScribeAction extends action.Action {
     }
 
     // email
-    selector_res = await super.check_success_selector(selectors.SN_CONTACT_INFO_EMAIL_SELECTOR)
+    selector_res = await utils.check_success_selector(selectors.SN_CONTACT_INFO_EMAIL_SELECTOR, this.page)
     if(selector_res) {
       mySelector = selectors.SN_CONTACT_INFO_EMAIL_SELECTOR
 
-      result.email = await this.page.evaluate((mySelector) => {
-        return document.querySelector(mySelector).innerText
+      result.emails = await this.page.evaluate((mySelector) => {
+        let emails = []
+        let elements = document.querySelectorAll(mySelector)
+        for(let elem of elements) {
+          emails.push(elem.innerText)
+        }
+
+        return emails
+
       }, mySelector)
 
-      log.debug("SN_ScribeAction: email added")
+      log.debug("SN_ScribeAction: emails added")
     }
 
     // twitter
-    selector_res = await super.check_success_selector(selectors.SN_CONTACT_INFO_SOCIAL_SELECTOR)
+    selector_res = await utils.check_success_selector(selectors.SN_CONTACT_INFO_SOCIAL_SELECTOR, this.page)
     if(selector_res) {
       mySelector = selectors.SN_CONTACT_INFO_SOCIAL_SELECTOR
 
@@ -225,57 +282,35 @@ class SN_ScribeAction extends action.Action {
     }
 
     // website
-    selector_res = await super.check_success_selector(selectors.SN_CONTACT_INFO_WEBSITE_SELECTOR)
+    selector_res = await utils.check_success_selector(selectors.SN_CONTACT_INFO_WEBSITE_SELECTOR, this.page)
     if(selector_res) {
       mySelector = selectors.SN_CONTACT_INFO_WEBSITE_SELECTOR
 
       let websites = await this.page.evaluate((mySelector) => {
-        let result = {
-          websites: []
-        }
+        let websites = []
         let elements = document.querySelectorAll(mySelector)
 
         if(elements != null && elements.length > 0) {
 
           for(let elem of elements) {
             if(elem.querySelector('span') != null && elem.querySelector('a') != null) {
-              if(elem.querySelector('span').innerText.toLowerCase().includes('company')) {
-                result.company_url = elem.querySelector('a').href
-              }else if (elem.querySelector('span').innerText.toLowerCase().includes('blog')) {
-                result.websites.push({ blog: elem.querySelector('a').href })
-              } else if (elem.querySelector('span').innerText.toLowerCase().includes('personal')) {
-                result.websites.push({ personal: elem.querySelector('a').href })
-              } else if (elem.querySelector('span').innerText.toLowerCase().includes('rssfeed')) {
-                result.websites.push({ rssfeed: elem.querySelector('a').href })
-              } else if (elem.querySelector('span').innerText.toLowerCase().includes('portfolio')) {
-                result.websites.push({ portfolio: elem.querySelector('a').href })
-              } else {
-                result.websites.push({ other: elem.querySelector('a').href })
-              }
+              websites.push( elem.querySelector('a').href )
             }
           }
         }
 
-        return result
+        return websites
       }, mySelector)
 
       if(websites != null) {
-        if(websites.company_url != null) {
-          result.company_url = websites.company_url
-          log.debug("SN_ScribeAction: company_url added")
-        }
-        if(websites.websites != null) {
-          result.websites = websites.websites
-          log.debug("SN_ScribeAction: websites added")
-        }
+        result.websites = websites
+        log.debug("SN_ScribeAction: websites added")
       }
-
-      log.debug("SN_ScribeAction: website added")
     }
 
 
     // close contact info popup
-    selector_res = await super.check_success_selector(selectors.SN_CONTACT_INFO_CLOSE_SELECTOR)
+    selector_res = await utils.check_success_selector(selectors.SN_CONTACT_INFO_CLOSE_SELECTOR, this.page)
     if(selector_res) {
       await this.page.click(selectors.SN_CONTACT_INFO_CLOSE_SELECTOR)
     } else {
@@ -284,7 +319,7 @@ class SN_ScribeAction extends action.Action {
 
     await this.page.waitFor(5000)
 
-    log.debug("SN_ScribeAction: contact info scribed:", result)
+    //log.debug("SN_ScribeAction: contact info scribed:", result)
     return result
   }
 }

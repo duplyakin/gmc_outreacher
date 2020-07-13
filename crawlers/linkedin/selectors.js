@@ -65,6 +65,8 @@ module.exports.JOB_SITE_SELECTOR = 'span.link-without-visited-state';
 module.exports.COUNTRY_SELECTOR = '.t-16.t-black.t-normal.inline-block';
 module.exports.EDUCATION_SELECTOR = '.pv-entity__school-name';
 module.exports.JOB_SELECTOR = '.t-16.t-black.t-bold';
+module.exports.LINK_TO_SN_SELECTOR = 'a.message-anywhere-button';
+module.exports.COMPANY_NAME_SELECTOR = '.pv-entity__secondary-title';
 // scribe contact info
 module.exports.CONTACT_INFO_SELECTOR = '.inline-block .ember-view';
 module.exports.CONTACT_INFO_CLOSE_SELECTOR = 'li-icon > svg';
@@ -75,6 +77,7 @@ module.exports.CONTACT_INFO_TWITTER_SELECTOR = 'section.pv-contact-info__contact
 module.exports.CONTACT_INFO_IM_SELECTOR = 'section.pv-contact-info__contact-type.ci-ims > ul > li > span.pv-contact-info__contact-item.t-14.t-black.t-normal'; // like Skype etc
 module.exports.CONTACT_INFO_BIRTHDAY_SELECTOR = 'section.pv-contact-info__contact-type.ci-birthday > div > span';
 module.exports.CONTACT_INFO_CONNECTED_DATE_SELECTOR = 'section.pv-contact-info__contact-type.ci-connected > div > span';
+module.exports.CONTACT_INFO_WEBSITE_SELECTOR = 'div > section.pv-contact-info__contact-type.ci-websites a';
 
 // scribe SN
 module.exports.SN_JOB_LINK_SELECTOR = '.profile-topcard__current-positions a';

@@ -125,7 +125,7 @@ const resolve_captcha = async(page, response) => {
             log.error("..... Captcha submit BTN selector not found in resolve_captcha. ..... ");
             return -2;
         }
-        await page.click(selectors.SUBMIT_CAPTCHA_BTN_SELECTOR);
+        //await page.click(selectors.SUBMIT_CAPTCHA_BTN_SELECTOR);
         await page.waitFor(10000);
 
         if (await page.$(selectors.CAPTCHA_SELECTOR) != null) {

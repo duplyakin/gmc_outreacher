@@ -44,8 +44,8 @@ const CONNECT_URL_SN_2 = "https://www.linkedin.com/sales/people/ACwAABZc3xMB56tj
           first_name: 'Olga',
           last_name: '',
           company_title: 'howtotoken.com',
-          linkedin: CONNECT_URL_5,
-          linkedin_sn: CONNECT_URL_SN_2,
+          linkedin: CONNECT_URL_1,
+          linkedin_sn: CONNECT_URL_SN_1,
         }
       },
       credentials_id: account_id,
