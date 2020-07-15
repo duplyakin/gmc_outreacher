@@ -344,19 +344,21 @@ const get_context = async(browser, context, page) => {
       throw new Error("Can't get_context. Page is not defined.");
     }
 
-    await page.waitFor(10000); // wait 10 sec for lading and screenshot the page
-    let screenshot_str = await page.screenshot();
+    await page.waitFor(10000) // wait 10 sec for lading and screenshot the page
+    const screenshot_str = await page.screenshot()
+    const content = await page.content()
 
     let context_obj = {
       endpoint: browser.wsEndpoint(),
       context_id: context._id,
+      content: content,
       page_url: page.url(),
       screenshot: screenshot_str,
     }
     
-    log.debug('get_context - context_obj created.');
-    //log.debug('get_context - context_obj = ', context_obj);
-    return context_obj;
+    log.debug('get_context - context_obj created.')
+    //log.debug('get_context - context_obj = ', context_obj)
+    return context_obj
   }
 
 
