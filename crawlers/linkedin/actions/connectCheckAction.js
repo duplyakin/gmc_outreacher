@@ -26,14 +26,7 @@ class ConnectCheckAction extends action.Action {
 
     let selector = selectors.CONNECT_DEGREE_SELECTOR
     let connect = await this.page.evaluate((selector) => {
-
-      let a = document.querySelector(selector)
-
-      if (a != null) {
-        return a.innerText
-      } else {
-        return null
-      }
+      return document.querySelector(selector) == null ? null : document.querySelector(selector).innerText
     }, selector)
 
     if (connect == null || connect == '') {
