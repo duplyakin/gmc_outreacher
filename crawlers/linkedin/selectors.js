@@ -66,6 +66,7 @@ module.exports.COUNTRY_SELECTOR = '.t-16.t-black.t-normal.inline-block';
 module.exports.EDUCATION_SELECTOR = '.pv-entity__school-name';
 module.exports.JOB_SELECTOR = '.t-16.t-black.t-bold';
 module.exports.LINK_TO_SN_SELECTOR = 'a.message-anywhere-button';
+module.exports.BTN_TO_SN_SELECTOR = '.pv-s-profile-actions--view-profile-in-sales-navigator';
 module.exports.COMPANY_NAME_SELECTOR = '.pv-entity__secondary-title';
 // scribe contact info
 module.exports.CONTACT_INFO_SELECTOR = '.inline-block .ember-view';
@@ -86,6 +87,7 @@ module.exports.SN_LOCATION_SELECTOR = '.profile-topcard__location-data';
 module.exports.SN_EDUCATION_SELECTOR = '.profile-education__school-name';
 module.exports.SN_JOB_SELECTOR = '.profile-topcard__current-positions .profile-topcard__summary-position-title';
 module.exports.SN_COMPANY_NAME_SELECTOR = '.profile-topcard__current-positions span a';
+module.exports.SN_COMPANY_NAME_SELECTOR_2 = '.profile-topcard__current-positions .profile-topcard__summary-position .align-self-center span';
 // scribe contact info SN
 module.exports.SN_CONTACT_INFO_SELECTOR = '.profile-topcard__contact-info-show-all';
 module.exports.SN_CONTACT_INFO_CLOSE_SELECTOR = '.artdeco-modal__dismiss';

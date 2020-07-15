@@ -18,7 +18,7 @@ async function get_cookies(credentials_id) {
     throw new Error("get_cookies: Account not found with credentials_id:", credentials_id)
   }
 
-  let is_expired = check_expired(account) // true if we have to update cookies
+  const is_expired = check_expired(account) // true if we have to update cookies
 
   if (account.cookies == null || !Array.isArray(account.cookies) || account.cookies.length <= 0 || is_expired) {
     let loginAction = new modules.loginAction.LoginAction(credentials_id)
@@ -206,8 +206,8 @@ async function sn_searchWorker(task_id) {
     } else {
       result_data = {
         if_true: false,
-        code: MyExceptions.SearchWorkerError().code,
-        raw: MyExceptions.SearchWorkerError("sn_searchWorker error: " + err).error
+        code: MyExceptions.SN_SearchWorkerError().code,
+        raw: MyExceptions.SN_SearchWorkerError("sn_searchWorker error: " + err).error
       };
     }
 
@@ -553,8 +553,8 @@ async function sn_scribeWorker(task_id) {
     } else {
       result_data = {
         if_true: false,
-        code: MyExceptions.ScribeWorkerError().code,
-        raw: MyExceptions.ScribeWorkerError("sn_scribeWorker error: " + err).error
+        code: MyExceptions.SN_ScribeWorkerError().code,
+        raw: MyExceptions.SN_ScribeWorkerError("sn_scribeWorker error: " + err).error
       };
     }
     status = status_codes.FAILED;
@@ -874,8 +874,8 @@ async function post_engagement_worker(task_id) {
     } else {
       result_data = {
         if_true: false,
-        code: MyExceptions.SearchWorkerError().code,
-        raw: MyExceptions.SearchWorkerError("post_engagement_worker error: " + err).error
+        code: MyExceptions.PostEngagementWorkerError().code,
+        raw: MyExceptions.PostEngagementWorkerError("post_engagement_worker error: " + err).error
       };
     }
 

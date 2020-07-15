@@ -200,6 +200,19 @@ async function gotoChecker(context, page, credentials_id, url) {
 }
 
 
+// get new page after click link
+async function clickAndWaitForTarget (clickSelector, page, browser) {
+    const pageTarget = page.target(); //save this to know that this was the opener
+    await page.click(clickSelector); //click on a link
+    const newTarget = await browser.waitForTarget(target => target.opener() === pageTarget); //check that you opened this page, rather than just checking the url
+    const newPage = await newTarget.page(); //get the page object
+    // await newPage.once("load",()=>{}); //this doesn't work; wait till page is loaded
+    await newPage.waitForSelector("body"); //wait for page to be loaded
+  
+    return newPage;
+  }
+
+
 async function autoScroll(page) {
     await page.evaluate(async () => {
       await new Promise((resolve, reject) => {
@@ -246,6 +259,7 @@ async function autoScroll_modal(page, element_class) {
 
 
 module.exports = {
+    clickAndWaitForTarget: clickAndWaitForTarget,
     autoScroll: autoScroll,
     autoScroll_modal: autoScroll_modal,
     gotoChecker: gotoChecker,

@@ -2,6 +2,7 @@ const puppeteer = require("puppeteer");
 const LoginAction = require('./loginAction.js');
 const links = require("../links");
 const selectors = require("../selectors");
+const models = require("../../models/models.js");
 
 var log = require('loglevel').getLogger("o24_logger");
 
@@ -16,8 +17,8 @@ class Action {
 
 
   async startBrowser() {
-    this.browser = await puppeteer.launch({ headless: false }) // test mode
-    //this.browser = await puppeteer.launch()
+    //this.browser = await puppeteer.launch({ headless: false }) // test mode
+    this.browser = await puppeteer.launch()
     this.context = await this.browser.createIncognitoBrowserContext()
     this.page = await this.context.newPage()
     
@@ -172,14 +173,13 @@ async check_success_selector(selector, page = this.page) {
       await page.goto(url, {
         waitUntil: 'load',
         //waitUntil: 'domcontentloaded',
-        timeout: 30000 // it may load too long! critical here
+        timeout: 60000 // it may load too long! critical here
       })
 
-      await page.waitFor(15000) // puppeteer wait loading..
+      await page.waitFor(10000) // puppeteer wait loading...
 
-      let current_url = page.url()
-
-      let short_url = this.get_pathname(url)
+      const current_url = page.url()
+      const short_url = this.get_pathname(url)
 
       if (!current_url.includes(short_url)) {
         // Sales Navigator access
@@ -194,7 +194,10 @@ async check_success_selector(selector, page = this.page) {
 
           let result = await loginAction.login()
           if (result) {
-            await page.goto(url)
+            await page.goto(url, {
+              waitUntil: 'load',
+              timeout: 60000 // it may load too long! critical here
+            })      
           }
 
         // Unexpectable page
@@ -209,14 +212,39 @@ async check_success_selector(selector, page = this.page) {
       log.error('gotoChecker - error: ', err.stack)
 
       if(this.check_block(page.url())) {
-        throw MyExceptions.ContextError("Block happend.");
+        throw MyExceptions.ContextError("Block happend.")
       }
 
       if(err.code != null && err.code == error_codes.SN_ACCESS_ERROR) {
         throw MyExceptions.SN_access_error("gotoChecker - Sales Navigator unreachable")
       }
 
-      throw new Error('gotoChecker error: ', err);
+      if(err.toString().includes('ERR_TOO_MANY_REDIRECTS')) {
+        /*// TODO
+        log.error('--------------------------------------')
+        let account = await models.Accounts.findOne({ _id: this.credentials_id }, function (err_db, res) {
+          if (err_db) throw MyExceptions.MongoDBError('MongoDB find account err: ' + err_db)
+        })
+      
+        if (account == null) {
+          throw new Error("gotoChecker: Account not found with credentials_id:", this.credentials_id)
+        }
+
+        if(account.login != null && account.password != null) {
+          let loginAction = new LoginAction.LoginAction(this.credentials_id)
+          await loginAction.setContext(this.context)
+  
+          let result = await loginAction.login()
+          if (result) {
+            await page.goto(url)
+          }
+        } else {
+          throw MyExceptions.TooManyRedirectsError("Relogin required.")
+        }*/
+        throw MyExceptions.TooManyRedirectsError("Relogin required.")
+      }
+
+      throw new Error('gotoChecker error: ', err)
     }
   }
 

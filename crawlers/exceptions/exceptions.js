@@ -36,6 +36,11 @@ const NetworkError = (message) => ({
   code: ERROR_CODES.NETWORK_ERROR
 });
 
+const TooManyRedirectsError = (message) => ({
+  error: new Error(message),
+  code: ERROR_CODES.TOO_MANY_REDIRECTS_ERROR
+});
+
 //------Custom error that required user action to continue task-------
 const ContextError = (message) => ({
   error: new Error(message),
@@ -80,6 +85,19 @@ const SearchWorkerError = (message) => ({
 const VisitProfileWorkerError = (message) => ({
   error: new Error(message),
   code: ERROR_CODES.VISIT_PROFILE_WORKER_ERROR
+});
+const PostEngagementWorkerError = (message) => ({
+  error: new Error(message),
+  code: ERROR_CODES.POST_ENGAGEMENT_WORKER_ERROR
+});
+
+const SN_ScribeWorkerError = (message) => ({
+  error: new Error(message),
+  code: ERROR_CODES.SN_SCRIBE_WORKER_ERROR
+});
+const SN_SearchWorkerError = (message) => ({
+  error: new Error(message),
+  code: ERROR_CODES.SN_SEARCH_WORKER_ERROR
 });
 
 //------Actions-------
@@ -139,6 +157,7 @@ module.exports = {
   MongoDBError: MongoDBError,
   BanError: BanError,
   NetworkError: NetworkError,
+  TooManyRedirectsError: TooManyRedirectsError,
 
   SN_access_error: SN_access_error,
   
@@ -152,6 +171,10 @@ module.exports = {
   ScribeWorkerError: ScribeWorkerError,
   SearchWorkerError: SearchWorkerError,
   VisitProfileWorkerError: VisitProfileWorkerError,
+  PostEngagementWorkerError: PostEngagementWorkerError,
+
+  SN_ScribeWorkerError: SN_ScribeWorkerError,
+  SN_SearchWorkerError: SN_SearchWorkerError,
 
   LoginActionError: LoginActionError,
   LoginError: LoginError,

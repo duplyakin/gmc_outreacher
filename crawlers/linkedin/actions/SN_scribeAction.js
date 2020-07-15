@@ -16,19 +16,10 @@ class SN_ScribeAction extends action.Action {
     await super.gotoChecker(this.url)
 
     let result = {}
-    let selector = ''
-    let selector_res = false
+    let selector
+    let selector_res
 
     result = await this.scribe_contact_info()
-
-    // check current url here
-    let current_url = this.page.url()
-    if(!current_url.includes(super.get_pathname(this.url)) || current_url.includes('contact-info')) {
-      log.debug("ScribeAction: current_url was:", current_url)
-      await super.gotoChecker(this.url)
-      await this.page.waitFor(5000)
-      log.debug("ScribeAction: current_url now:", this.page.url())
-    }
 
     await super.autoScroll(this.page)
 
@@ -39,6 +30,8 @@ class SN_ScribeAction extends action.Action {
       result.location = await this.page.evaluate((selector) => {
         return document.querySelector(selector).innerText
       }, selector)
+
+      log.debug("SN_ScribeAction: location added")
     }
 
     // education
@@ -48,6 +41,8 @@ class SN_ScribeAction extends action.Action {
       result.education = await this.page.evaluate((selector) => {
         return document.querySelector(selector).innerText
       }, selector)
+
+      log.debug("SN_ScribeAction: education added")
     }
 
     // basic linkedin url
@@ -63,12 +58,14 @@ class SN_ScribeAction extends action.Action {
       }
     })
 
-    if(linkedin != null) {
+    if(linkedin) {
       if(utils.get_search_url(linkedin) != '') {
         result.linkedin = linkedin.split(utils.get_search_url(linkedin))[0]
       } else {
         result.linkedin = linkedin
       }
+
+      log.debug("SN_ScribeAction: basic linkedin url added")
     }
 
     // company informatiom
@@ -79,7 +76,28 @@ class SN_ScribeAction extends action.Action {
       result.job_title = await this.page.evaluate((selector) => {
         return document.querySelector(selector).innerText
       }, selector)
-    }   
+
+      log.debug("SN_ScribeAction: job title added")
+    }
+
+    // company name
+    selector_res = await utils.check_success_selector(selectors.SN_COMPANY_NAME_SELECTOR, this.page)
+    if(selector_res) {
+      selector = selectors.SN_COMPANY_NAME_SELECTOR
+      result.company_name = await this.page.evaluate((selector) => {
+        return document.querySelector(selector).innerText
+      }, selector)
+
+      log.debug("SN_ScribeAction: company_name:", result.company_name)
+      
+    } else if (await utils.check_success_selector(selectors.SN_COMPANY_NAME_SELECTOR_2, this.page)) {
+      selector = selectors.SN_COMPANY_NAME_SELECTOR_2
+      result.company_name = await this.page.evaluate((selector) => {
+        return document.querySelectorAll(selector)[1].innerText
+      }, selector)
+
+      log.debug("SN_ScribeAction: company_name:", result.company_name)
+    }
 
     // company linkedin page
     selector_res = await utils.check_success_selector(selectors.SN_JOB_LINK_SELECTOR, this.page)
@@ -113,17 +131,6 @@ class SN_ScribeAction extends action.Action {
       }, selector)
 
       log.debug("SN_ScribeAction: company_linkedin_page:", result.company_linkedin_page)
-
-      // company name
-      selector_res = await utils.check_success_selector(selectors.SN_COMPANY_NAME_SELECTOR, this.page)
-      if(selector_res) {
-        selector = selectors.SN_COMPANY_NAME_SELECTOR
-        result.company_name = await this.page.evaluate((selector) => {
-          return document.querySelector(selector).innerText
-        }, selector)
-  
-        log.debug("SN_ScribeAction: company_name:", result.company_name)
-      }
 
       await super.gotoChecker(result.company_linkedin_page)
 

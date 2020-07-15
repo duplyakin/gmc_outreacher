@@ -13,11 +13,11 @@ class ScribeAction extends action.Action {
   }
 
   async scribe() {
-    await super.gotoChecker(this.url)
+    //await super.gotoChecker(this.url)
 
     let result = {}
-    let selector = ''
-    let selector_res = false
+    let selector
+    let selector_res
 
     result = await this.scribe_contact_info()
 
@@ -39,46 +39,9 @@ class ScribeAction extends action.Action {
       result.location = await this.page.evaluate((selector) => {
         return document.querySelector(selector).innerText
       }, selector)
+
+      log.debug("ScribeAction: location added")
     }
-
-    // SN link
-    selector_res = await utils.check_success_selector(selectors.LINK_TO_SN_SELECTOR, this.page)
-    if(selector_res) {
-      selector = selectors.LINK_TO_SN_SELECTOR
-      let linkedin_sn = await this.page.evaluate((selector) => {
-        return document.querySelector(selector).href
-      }, selector)
-
-      if(linkedin_sn.includes('sales')) {
-        if(utils.get_search_url(linkedin_sn) != '') {
-          result.linkedin_sn = linkedin_sn.split(utils.get_search_url(linkedin_sn))[0]
-        } else {
-          result.linkedin_sn = linkedin_sn
-        }
-      } else {
-        log.debug("ScribeAction: wrong linkedin_sn format:", linkedin_sn)
-      }
-    }
-    /*
-    let linkedin_sn = await this.page.evaluate(() => {
-      let elems = document.querySelectorAll('code')
-      for(let el of elems) {
-        try {
-          let res = JSON.parse(el.innerText)
-          if(res.hasOwnProperty('flagshipProfileUrl')) {
-            return res.flagshipProfileUrl
-          }
-        } catch(err) {}
-      }
-    })
-
-    if(linkedin_sn != null) {
-      if(utils.get_search_url(linkedin_sn) != '') {
-        result.linkedin_sn = linkedin_sn.split(utils.get_search_url(linkedin_sn))[0]
-      } else {
-        result.linkedin_sn = linkedin_sn
-      }
-    }*/
 
     // education
     selector_res = await utils.check_success_selector(selectors.EDUCATION_SELECTOR, this.page)
@@ -87,7 +50,13 @@ class ScribeAction extends action.Action {
       result.education = await this.page.evaluate((selector) => {
         return document.querySelector(selector).innerText
       }, selector)
+
+      log.debug("ScribeAction: education added")
     }
+
+    // Sales Navigator link 
+    result.linkedin_sn = await this._get_linkedin_sn(this.page) || null
+    log.debug("ScribeAction: Sales Navigator link added:", result.linkedin_sn)
 
     // company informatiom
     let mySelectors = {
@@ -103,12 +72,16 @@ class ScribeAction extends action.Action {
         return document.querySelector(mySelectors.selector1).href
       }, mySelectors)
 
+      log.debug("ScribeAction: company linkedin page added")
+
       // job title
       selector_res = await utils.check_success_selector(selectors.JOB_SELECTOR, this.page)
       if(selector_res) {
         result.job_title = await this.page.evaluate((mySelectors) => {
           return document.querySelector(mySelectors.selector1).querySelector(mySelectors.selector2).innerText
         }, mySelectors)
+
+        log.debug("ScribeAction: job title added")
       }
 
       // company name
@@ -117,9 +90,12 @@ class ScribeAction extends action.Action {
         result.company_name = await this.page.evaluate((mySelectors) => {
           return document.querySelector(mySelectors.selector1).querySelector(mySelectors.selector3).innerText
         }, mySelectors)
+
+        log.debug("ScribeAction: company name added")
       }
 
-      await super.gotoChecker(result.company_linkedin_page + 'about/')
+      const is_last_slash = (result.company_linkedin_page.slice(-1).includes('/') ? 'about/' : '/about/')
+      await super.gotoChecker(result.company_linkedin_page + is_last_slash)
 
       // company website on About page
       selector_res = await utils.check_success_selector(selectors.JOB_SITE_SELECTOR, this.page)
@@ -128,6 +104,8 @@ class ScribeAction extends action.Action {
         result.company_url = await this.page.evaluate((selector) => {
           return document.querySelector(selector).innerText
         }, selector)
+
+        log.debug("ScribeAction: company website added")
       }
     }
 
@@ -141,7 +119,8 @@ class ScribeAction extends action.Action {
     let mySelector = ''
     log.debug("ScribeAction: scribe_contact_info started")
 
-    await super.gotoChecker(this.page.url() + 'detail/contact-info/')
+    const is_last_slash = (this.url.slice(-1).includes('/') ? 'detail/contact-info/' : '/detail/contact-info/')
+    await super.gotoChecker(this.url + is_last_slash)
     await this.page.waitFor(5000)
 
     if(!this.page.url().includes('contact-info')) {  
@@ -277,7 +256,90 @@ class ScribeAction extends action.Action {
     //log.debug("ScribeAction: contact info scribed:", result)
     return result
   }
+
+
+  async _get_linkedin_sn() {
+    // Sales Navigator link #1
+    log.debug("ScribeAction: Sales Navigator link #1 started")
+    let linkedin_sn = await this.page.evaluate(() => {
+      let elems = document.querySelectorAll('code')
+      for(let el of elems) {
+        try {
+          let res = JSON.parse(el.innerText)
+          if(res.hasOwnProperty('flagshipProfileUrl')) {
+            return res.flagshipProfileUrl
+          }
+        } catch(err) {}
+      }
+    })
+
+    log.debug("ScribeAction: Sales Navigator link #1 linkedin_sn:", linkedin_sn)
+
+    if (linkedin_sn != null && linkedin_sn.includes('sales/people')) {
+      if(utils.get_search_url(linkedin_sn) != '') {
+        return linkedin_sn.split(utils.get_search_url(linkedin_sn))[0]
+      } else {
+        return linkedin_sn
+      }
+
+    } else if (await utils.check_success_selector(selectors.LINK_TO_SN_SELECTOR, this.page)) {
+      // Sales Navigator link #2
+      log.debug("ScribeAction: Sales Navigator link #2 started")
+      let selector = selectors.LINK_TO_SN_SELECTOR
+      let linkedin_sn = await this.page.evaluate((selector) => {
+        return document.querySelector(selector).href
+      }, selector)
+
+      log.debug("ScribeAction: Sales Navigator link #2 linkedin_sn:", linkedin_sn)
+
+      if(linkedin_sn != null && linkedin_sn.includes('sales/people')) {
+        if(utils.get_search_url(linkedin_sn) != '') {
+          return linkedin_sn.split(utils.get_search_url(linkedin_sn))[0]
+        } else {
+          return linkedin_sn
+        }
+      } else {
+        // Sales Navigator link #3/1
+        log.debug("ScribeAction: Sales Navigator link #3/1 started")
+        let new_page = await utils.clickAndWaitForTarget(selectors.BTN_TO_SN_SELECTOR, this.page, this.context)
+        await new_page.waitFor(25000)
+
+        linkedin_sn = new_page.url()
+        log.debug("ScribeAction: Sales Navigator link #3/1 linkedin_sn:", linkedin_sn)
+
+        if(linkedin_sn != null && linkedin_sn.includes('sales/people')) {
+          if(utils.get_search_url(linkedin_sn) != '') {
+            return linkedin_sn.split(utils.get_search_url(linkedin_sn))[0]
+          } else {
+            return linkedin_sn
+          }
+        }
+        await new_page.close()
+      }
+
+    } else if (await utils.check_success_selector(selectors.BTN_TO_SN_SELECTOR, this.page)) {
+      // Sales Navigator link #3/2
+      log.debug("ScribeAction: Sales Navigator link #3/2 started")
+      let new_page = await utils.clickAndWaitForTarget(selectors.BTN_TO_SN_SELECTOR, this.page, this.context)
+      await new_page.waitFor(25000)
+
+      linkedin_sn = new_page.url()
+      log.debug("ScribeAction: Sales Navigator link #3/2 linkedin_sn:", linkedin_sn)
+
+      if(linkedin_sn != null && linkedin_sn.includes('sales/people')) {
+        if(utils.get_search_url(linkedin_sn) != '') {
+          return linkedin_sn.split(utils.get_search_url(linkedin_sn))[0]
+        } else {
+          return linkedin_sn
+        }
+      }
+      await new_page.close()
+    }
+
+    return null
+  }
 }
+
 
 module.exports = {
   ScribeAction: ScribeAction

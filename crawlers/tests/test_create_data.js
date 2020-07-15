@@ -17,6 +17,7 @@ const POST_URL_4 = "https://www.linkedin.com/posts/swopelees_covid19-supportloca
 
 const CONNECT_URL_SN_1 = "https://www.linkedin.com/sales/people/ACoAAAaQ6eYBBjpCMUzZRmnSoUQdVEoWsM8ld0E,name,Vv6O";
 const CONNECT_URL_SN_2 = "https://www.linkedin.com/sales/people/ACwAABZc3xMB56tjV7WVgtLi-kdT3_NS55txCFk,NAME_SEARCH,mm5W?_ntb=DY4JJTjhRH6qJ2ZZIKMtXw%3D%3D";
+const CONNECT_URL_SN_3 = "https://www.linkedin.com/sales/people/ACwAAAELuGkB3LJNWaqKJDuldS1kxVj1esMrLTo,OUT_OF_NETWORK,XJjv?_ntb=wByWqCcSSJOOu%2BxUHSUWOg%3D%3D";
 
 // test task
 
@@ -44,8 +45,8 @@ const CONNECT_URL_SN_2 = "https://www.linkedin.com/sales/people/ACwAABZc3xMB56tj
           first_name: 'Olga',
           last_name: '',
           company_title: 'howtotoken.com',
-          linkedin: CONNECT_URL_1,
-          linkedin_sn: CONNECT_URL_SN_1,
+          linkedin: CONNECT_URL_5,
+          linkedin_sn: CONNECT_URL_SN_3,
         }
       },
       credentials_id: account_id,
@@ -76,7 +77,8 @@ const CONNECT_URL_SN_2 = "https://www.linkedin.com/sales/people/ACwAABZc3xMB56tj
       password: "A123456a",
       cookies: [{
         name: "li_at",
-        value: "AQEDATErT40E2B8bAAABcyjdk58AAAFzTOoXn00Aqy0XYDO9vuw2Jt58tq9_GwPUYRJCYchRMNi113pjfVGkyc9EmhRCe24TQikhMAR6wN9J0cUHduPjF1ux2lqw-U-45MHxt4UHft7E8kJXW-jV0y7v",
+        //value: "AQEDATErT40E2B8bAAABcyjdk58AAAFzTOoXn00Aqy0XYDO9vuw2Jt58tq9_GwPUYRJCYchRMNi113pjfVGkyc9EmhRCe24TQikhMAR6wN9J0cUHduPjF1ux2lqw-U-45MHxt4UHft7E8kJXW-jV0y7v",
+        value: "AQEDATErT40A9GkCAAABc065QMgAAAFzcsXEyFYAWXRHW67coPBIGPkU5GEtbm-m9KsxWgluTR6BKfvqMkgbqf_Ji7_Njwvgz0kxUXZr6cmpg2o_j3otjjJaOdjACekecjOQgB93AcJoyMOJ05_CEJb2",
         domain: '.linkedin.com',
         path: "/",
         expires: Date.now() / 1000 + 10000000, // + ~ 4 months // https://www.epochconverter.com/
