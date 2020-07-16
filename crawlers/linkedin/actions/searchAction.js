@@ -65,7 +65,7 @@ class SearchAction extends action.Action {
 
           for(let item of items) {
             // don't add: noName LinkedIn members and 1st degree connections
-            if (item.querySelector(mySelectors.selector2) != null && !item.querySelector(mySelectors.selector3).innerText.includes('LinkedIn') && (item.querySelector(mySelectors.selector4) == null || !item.querySelector(mySelectors.selector4).innerText.includes('1st'))) {
+            if (item.querySelector(mySelectors.selector2) != null && !item.querySelector(mySelectors.selector3).innerText.toLowerCase().includes('linkedin') && (item.querySelector(mySelectors.selector4) == null || !item.querySelector(mySelectors.selector4).innerText.includes('1'))) {
               let full_name = item.querySelector(mySelectors.selector3)
               let full_job = document.querySelector(mySelectors.selector5)
               

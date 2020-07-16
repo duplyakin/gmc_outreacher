@@ -50,7 +50,7 @@ async function check_success_page(required_url, page) {
 
     let current_url = page.url()
 
-    if (current_url.includes(get_pathname(required_url))) {
+    if (current_url.includes(get_pathname_url(required_url))) {
         return true
     }
 
@@ -169,7 +169,7 @@ async function gotoChecker(context, page, credentials_id, url) {
 
         let current_url = page.url()
 
-        let short_url = get_pathname(url)
+        let short_url = get_pathname_url(url)
 
         if (!current_url.includes(short_url)) {
             if (current_url.includes('login') || current_url.includes('signup') || current_url.includes("authwall")) {

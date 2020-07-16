@@ -9,7 +9,7 @@ const CONNECT_URL_2 = "https://www.linkedin.com/in/vlad-duplyakin-923475116/";
 const CONNECT_URL_3 = "https://www.linkedin.com/in/alexander-savinkin-3ba99614/";
 const CONNECT_URL_4 = "https://www.linkedin.com/in/bersheva/";
 const CONNECT_URL_5 = "https://www.linkedin.com/in/alexyerokhin/";
-const CONNECT_URL_6 = "https://www.linkedin.com/in/mattbertramlive/";
+const CONNECT_URL_6 = "https://www.linkedin.com/in/yana-k%C3%B6hler-44490693/";
 
 const POST_URL_1 = "https://www.linkedin.com/posts/dr-marc-o-riain-74b7a911_covid-activity-6681268515862822913-CZrF/";
 const POST_URL_2 = "https://www.linkedin.com/posts/modern-healthcare_appeals-court-rules-bankrupt-hospitals-not-activity-6681289160814325761-Kt_5/";
@@ -36,17 +36,17 @@ const CONNECT_URL_SN_3 = "https://www.linkedin.com/sales/people/ACwAAAELuGkB3LJN
       input_data: {
         campaign_data: {
           post_url: POST_URL_3,
-          search_url: SEARCH_URL_2,
+          search_url: SEARCH_URL_1,
           interval_pages: 4,
         },
         template_data: {
-          message: 'Hi {first_name}, nice to meet you =)',
+          message: 'Hi {first_name}, nice to meet you',
         },
         prospect_data: {
-          first_name: 'human',
+          first_name: '=)',
           last_name: '',
           company_title: 'howtotoken.com',
-          linkedin: CONNECT_URL_1,
+          linkedin: CONNECT_URL_6,
           linkedin_sn: CONNECT_URL_SN_3,
         }
       },

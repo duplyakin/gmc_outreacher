@@ -39,9 +39,11 @@ module.exports.CONNECT_SELECTOR = '.pv-s-profile-actions.pv-s-profile-actions--c
 module.exports.ADD_MSG_BTN_SELECTOR = '.mr1.artdeco-button.artdeco-button--muted';
 module.exports.MSG_SELECTOR = '#custom-message';
 module.exports.SEND_INVITE_TEXT_BTN_SELECTOR = '.ml1.artdeco-button.artdeco-button--3.artdeco-button--primary.ember-view';
+module.exports.MORE_BTN_SELECTOR = '.pv-s-profile-actions__overflow-toggle';
+module.exports.SEND_BTN_DISABLED_SELECTOR = '.artdeco-modal__actionbar .artdeco-button--disabled';
 
 // follow
-module.exports.MORE_BTN_SELECTOR = '.ml2.pv-s-profile-actions__overflow-toggle';
+//module.exports.MORE_BTN_SELECTOR = '.ml2.pv-s-profile-actions__overflow-toggle';
 module.exports.FOLLOW_SELECTOR = '.pv-s-profile-actions.pv-s-profile-actions--follow';
 
 // phone form

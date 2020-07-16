@@ -11,14 +11,14 @@ const error_codes = require('../../exceptions/error_codes.js');
 
 class Action {
   constructor(cookies, credentials_id) {
-    this.cookies = cookies;
-    this.credentials_id = credentials_id;
+    this.cookies = cookies
+    this.credentials_id = credentials_id
   }
 
 
   async startBrowser() {
-    //this.browser = await puppeteer.launch({ headless: false }) // test mode
-    this.browser = await puppeteer.launch()
+    this.browser = await puppeteer.launch({ headless: false }) // test mode
+    //this.browser = await puppeteer.launch()
     this.context = await this.browser.createIncognitoBrowserContext()
     this.page = await this.context.newPage()
     
