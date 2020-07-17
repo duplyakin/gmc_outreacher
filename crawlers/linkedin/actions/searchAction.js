@@ -1,5 +1,6 @@
 const selectors = require("../selectors");
 const action = require('./action.js');
+const utils = require("./utils.js");
 
 const MyExceptions = require('../../exceptions/exceptions.js');
 var log = require('loglevel').getLogger("o24_logger");
@@ -44,7 +45,7 @@ class SearchAction extends action.Action {
       };
 
       while (currentPage <= this.interval_pages) {
-        await super.autoScroll(this.page);
+        await utils.autoScroll(this.page)
 
         // wait selector here
         //await super.check_success_selector(selectors.SEARCH_ELEMENT_SELECTOR, this.page);
@@ -121,7 +122,8 @@ class SearchAction extends action.Action {
           break
         }
 
-        await this.page.click(selectors.NEXT_PAGE_SELECTOR);
+        await this.page.click(selectors.NEXT_PAGE_SELECTOR)
+        await utils.update_cookie(this.page, this.credentials_id)
         await this.page.waitFor(2000) // critical here!?
         // here we have to check BAN page
         result_data.data.link = this.page.url() // we have to send NEXT page link in task

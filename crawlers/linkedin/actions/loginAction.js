@@ -2,6 +2,7 @@ const selectors = require("../selectors");
 const links = require("../links");
 const models = require("../../models/models.js");
 const puppeteer = require("puppeteer");
+const utils = require("./utils");
 
 const MyExceptions = require('../../exceptions/exceptions.js');
 var log = require('loglevel').getLogger("o24_logger");
@@ -17,7 +18,7 @@ class LoginAction {
         this.context = await this.browser.createIncognitoBrowserContext()
         this.page = await this.context.newPage()
 
-        //this.set_cookie(...this.cookies) // we don't set cookie in loginAction!
+        // we don't set cookie in loginAction!
     }
 
     async closeBrowser() {
@@ -30,50 +31,12 @@ class LoginAction {
         this.page = await this.context.newPage()
     }
 
-    async set_cookie(cookies) {
-        if (cookies != null) {
-            //log.debug('cooooookiieeeess: ', cookies)
-            await this.page.setCookie(...cookies)
-            return true
-        }
-        return false
-    }
-
     _get_domain() {
         let current_url = this.page.url()
 
         // Exctract domain here in format: “www.linkedin.com”
 
         return (new URL(current_url)).hostname
-    }
-
-    async _get_current_cookie() {
-        // Get Session Cookies
-        let newCookies = await this.page.cookies();
-        if (!newCookies) {
-            throw new Error("Can't get cookie.");
-        }
-
-        return newCookies;
-    }
-
-    async _update_cookie() {
-        let new_cookies = await this._get_current_cookie();
-
-        let new_expires = 0;
-        for(let item of new_cookies) {
-            if (item.name === 'li_at') {
-                new_expires = item.expires;
-            }
-        }
-
-        let account = await models.Accounts.findOneAndUpdate({ _id: this.credentials_id }, { expires: new_expires, cookies: new_cookies }, { upsert: false }, function (err, res) {
-            if (err) throw MyExceptions.MongoDBError('MongoDB find Account err: ' + err); 
-        });
-
-        if(account == null) {
-            throw MyExceptions.LoginActionError("Account with credentials_id: " + this.credentials_id + " not exists.");
-        }
     }
 
     async get_account() {
@@ -120,30 +83,6 @@ class LoginAction {
         }
     }
 
-/*
-    async login_with_li_at() {
-        let domain_var = this._get_domain();
-        if(domain_var == null || domain_var == '') {
-            log.debug('Never happend: domain_var is broken.')
-            return;
-        }
-        let cookies_data = [{
-            name : "li_at",
-            value : this.li_at,
-            domain : '.' + domain_var,
-            path : "/",
-            expires : Date.now() / 1000 + 10000000, // + ~ 4 months // https://www.epochconverter.com/
-            size : (new TextEncoder().encode(this.li_at)).length,
-            httpOnly : true,
-            secure : true,
-            session : false,
-            sameSite : "None"
-            }];
-
-        await this.set_cookie(cookies_data);
-    }
-*/
-
     async is_logged() {
         /*
         await this.page.waitFor(2000)
@@ -160,7 +99,7 @@ class LoginAction {
             // login success
             log.debug("LoginAction: Login success.")
             return true
-        } else if (this.check_block(current_url)) {
+        } else if (utils.check_block(current_url)) {
             // BAN here
             log.debug("LoginAction: Not logged - BAN here. current url: ", current_url)
             throw MyExceptions.ContextError("Can't goto url: " + current_url)
@@ -176,24 +115,10 @@ class LoginAction {
         // check - if we logged
         let logged = await this.is_logged()
         if (logged) {
-            await this._update_cookie()
+            await utils.update_cookie(this.page, this.credentials_id)
             await this.page.close()
             return logged
         }
-
-        /*
-        // if not - try to login with li_at
-        if (this.li_at) {
-            await this.login_with_li_at();
-            logged = await this.is_logged();
-
-            if (logged) {
-                await this._update_cookie();
-                await this.page.close();
-                return logged;
-            }
-        }
-        */
 
         // if not - try to login with login/password
         await this.login_with_email()
@@ -203,7 +128,7 @@ class LoginAction {
             throw MyExceptions.LoginActionError("Can't login")
         }
 
-        await this._update_cookie()
+        await utils.update_cookie(this.page, this.credentials_id)
         await this.page.close()
 
         return logged
@@ -222,20 +147,6 @@ class LoginAction {
 
         return false;
     }
-
-    check_block(url) {
-        if(!url) {
-          throw new Error('LoginAction: Empty url in check_block.')
-        }
-    
-        if(url.includes(links.BAN_LINK) || url.includes(links.CHALLENGE_LINK)) {
-          // not target page here
-          return true;
-        } else {
-          // all ok
-          return false;
-        }
-      }
 }
 
 module.exports = {

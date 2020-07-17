@@ -260,7 +260,6 @@ class ScribeAction extends action.Action {
 
   async _get_linkedin_sn() {
     // Sales Navigator link #1
-    log.debug("ScribeAction: Sales Navigator link #1 started")
     let linkedin_sn = await this.page.evaluate(() => {
       let elems = document.querySelectorAll('code')
       for(let el of elems) {
@@ -284,7 +283,6 @@ class ScribeAction extends action.Action {
 
     } else if (await utils.check_success_selector(selectors.LINK_TO_SN_SELECTOR, this.page)) {
       // Sales Navigator link #2
-      log.debug("ScribeAction: Sales Navigator link #2 started")
       let selector = selectors.LINK_TO_SN_SELECTOR
       let linkedin_sn = await this.page.evaluate((selector) => {
         return document.querySelector(selector).href
@@ -300,7 +298,6 @@ class ScribeAction extends action.Action {
         }
       } else {
         // Sales Navigator link #3/1
-        log.debug("ScribeAction: Sales Navigator link #3/1 started")
         let new_page = await utils.clickAndWaitForTarget(selectors.BTN_TO_SN_SELECTOR, this.page, this.context)
         await new_page.waitFor(25000)
 
@@ -319,7 +316,6 @@ class ScribeAction extends action.Action {
 
     } else if (await utils.check_success_selector(selectors.BTN_TO_SN_SELECTOR, this.page)) {
       // Sales Navigator link #3/2
-      log.debug("ScribeAction: Sales Navigator link #3/2 started")
       let new_page = await utils.clickAndWaitForTarget(selectors.BTN_TO_SN_SELECTOR, this.page, this.context)
       await new_page.waitFor(25000)
 

@@ -131,6 +131,7 @@ class SN_SearchAction extends action.Action {
         //await super.check_success_selector(selectors.NEXT_PAGE_SELECTOR, this.page, result_data);
 
         await this.page.click(selectors.SN_NEXT_PAGE_SELECTOR)
+        await utils.update_cookie(this.page, this.credentials_id)
         await this.page.waitFor(2000)
 
         // check current page

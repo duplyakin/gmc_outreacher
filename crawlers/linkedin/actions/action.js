@@ -8,6 +8,7 @@ var log = require('loglevel').getLogger("o24_logger");
 
 const MyExceptions = require('../../exceptions/exceptions.js');
 const error_codes = require('../../exceptions/error_codes.js');
+const utils = require("./utils.js");
 
 class Action {
   constructor(cookies, credentials_id) {
@@ -17,8 +18,8 @@ class Action {
 
 
   async startBrowser() {
-    this.browser = await puppeteer.launch({ headless: false }) // test mode
-    //this.browser = await puppeteer.launch()
+    //this.browser = await puppeteer.launch({ headless: false }) // test mode
+    this.browser = await puppeteer.launch()
     this.context = await this.browser.createIncognitoBrowserContext()
     this.page = await this.context.newPage()
     
@@ -34,6 +35,8 @@ class Action {
 
 
   async closeBrowser() {
+    await utils.update_cookie(this.page, this.credentials_id)
+
     await this.browser.close()
     this.browser.disconnect()
 
@@ -170,16 +173,22 @@ async check_success_selector(selector, page = this.page) {
       throw new Error('Empty url.')
     }
     try {
+      let current_url = page.url()
+      const short_url = this.get_pathname(url)
+
+      // save cookie if it was not new page
+      if(current_url && !current_url.includes('about:blank')) {
+        await utils.update_cookie(this.page, this.credentials_id)
+      }
+
       await page.goto(url, {
         waitUntil: 'load',
         //waitUntil: 'domcontentloaded',
-        timeout: 60000 // it may load too long! critical here
+        timeout: 180000 // it may load too long! critical here
       })
 
       await page.waitFor(10000) // puppeteer wait loading...
-
-      const current_url = page.url()
-      const short_url = this.get_pathname(url)
+      current_url = page.url()
 
       if (!current_url.includes(short_url)) {
         // Sales Navigator access
@@ -196,7 +205,7 @@ async check_success_selector(selector, page = this.page) {
           if (result) {
             await page.goto(url, {
               waitUntil: 'load',
-              timeout: 60000 // it may load too long! critical here
+              timeout: 180000 // it may load too long! critical here
             })      
           }
 
