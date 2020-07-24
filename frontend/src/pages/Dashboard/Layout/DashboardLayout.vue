@@ -11,6 +11,8 @@
         <sidebar-item :link="{name: 'Campaigns', icon: 'nc-icon nc-bullet-list-67', path: '/campaigns'}"></sidebar-item>
         <sidebar-item :link="{name: 'Leads', icon: 'nc-icon nc-layers-3', path: '/prospects'}"></sidebar-item>
         <sidebar-item :link="{name: 'Accounts', icon: 'nc-icon nc-single-02', path: '/accounts'}"></sidebar-item>
+        <sidebar-item :link="{name: 'Videos', icon: 'nc-icon nc-single-02', path: '/videos'}"></sidebar-item>
+
         
         <sidebar-item :link="{name: 'Settings', icon: 'nc-icon nc-notes'}">
           <sidebar-item :link="{name: 'Profile', icon: 'nc-icon nc-circle-09', path: '/profile'}"></sidebar-item>

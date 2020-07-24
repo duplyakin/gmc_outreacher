@@ -6,6 +6,13 @@ const NotFound = () => import('src/pages/GeneralViews/NotFoundPage.vue')
 const Login = () => import('src/pages/Dashboard/Auth/login.vue')
 const Register = () => import('src/pages/Dashboard/Auth/register.vue')
 
+//Videos
+const Videos = () => import('src/pages/Dashboard/Videos/trim_video.vue')
+const PersVideos = () => import('src/pages/Dashboard/Videos/personalize_video.vue')
+const PersGif = () => import('src/pages/Dashboard/Videos/personalize_gif.vue')
+const PersLp = () => import('src/pages/Dashboard/Videos/personalize_lp.vue')
+const PersPreview = () => import('src/pages/Dashboard/Videos/preview.vue')
+
 //CUSTOM components created by me
 const Profile = () => import('src/pages/Dashboard/Profile/profile.vue')
 //const Profile = () => import('src/pages/Dashboard/Profile/1.vue') // test file
@@ -126,6 +133,31 @@ const routes = [
         path: 'help',
         name: 'Help',
         component: Help
+      },
+      {
+        path: 'videos',
+        name: 'Videos',
+        component: Videos
+      },
+      {
+        path: 'personalize_video',
+        name: 'PersonalizeVideos',
+        component: PersVideos
+      },
+      {
+        path: 'personalize_gif',
+        name: 'PersonalizeGif',
+        component: PersGif
+      },
+      {
+        path: 'personalize_preview',
+        name: 'PersonalizePreview',
+        component: PersPreview
+      },
+      {
+        path: 'personalize_lp',
+        name: 'PersonalizeLp',
+        component: PersLp
       },
 
       {

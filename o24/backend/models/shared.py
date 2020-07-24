@@ -224,6 +224,7 @@ class TaskQueue(db.Document):
     current_node = db.ReferenceField(Funnel, reverse_delete_rule=1)
     action_key = db.StringField()
 
+    proceed = db.IntField(default=0)
     status = db.IntField(default=NEW)
     ack = db.IntField(default=0)
     celery_ack = db.IntField(default=0)
@@ -426,6 +427,8 @@ class TaskQueue(db.Document):
 
     def update_status(self, status):
         self.status = status
+        if status == IN_PROGRESS:
+            self.proceed = self.proceed + 1
         self._commit()
     
     def set_result(self, result_data):

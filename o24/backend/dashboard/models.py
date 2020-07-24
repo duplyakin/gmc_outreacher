@@ -932,6 +932,7 @@ class Campaign(db.Document):
     templates = db.DictField()
 
     data = db.DictField()
+    cache = db.DictField()
 
     last_action = db.DateTimeField(default=pytz.utc.localize(datetime.utcnow()))
     next_action = db.DateTimeField(default=pytz.utc.localize(datetime.utcnow()))

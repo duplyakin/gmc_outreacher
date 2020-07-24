@@ -194,7 +194,8 @@ def linkedin_parse_profile_action(task):
     scheduler_models.ActionLog.log(task, step='carryout_handler', description="linkedin_parse_profile_action")
     return
 
-def _save_post_data(task, campaign)
+def _save_post_data(task, campaign):
+    pass
 
 def linkedin_post_parsing_action(task):
     #Special type of action
