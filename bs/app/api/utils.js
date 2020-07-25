@@ -469,6 +469,17 @@ const page_connect = async (context, page_url) => {
 }
 
 
+const _get_current_cookie = async (page) => {
+    // Get Session Cookies
+    let newCookies = await page.cookies()
+    if (!newCookies) {
+        throw new Error("Can't get cookie.") //todo: don't throw error here (?)
+    }
+
+    return newCookies
+}
+
+
 const input_data = async (account, input) => {
     if (!input){
         log.debug("..... Empty input in input_data. ..... ");
@@ -803,17 +814,6 @@ const input_cookie = async (account, li_at) => {
             browser.disconnect();
         }
     }
-}
-
-
-const _get_current_cookie = async (page) => {
-    // Get Session Cookies
-    let newCookies = await page.cookies()
-    if (!newCookies) {
-        throw new Error("Can't get cookie.") //todo: don't throw error here (?)
-    }
-
-    return newCookies
 }
 
 

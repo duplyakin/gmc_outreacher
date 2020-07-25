@@ -1,14 +1,14 @@
 const DashboardLayout = () => import('src/pages/Dashboard/Layout/DashboardLayout.vue')
 //import DashboardLayout from 'src/pages/Dashboard/Layout/DashboardLayout.vue'
+
 // GeneralViews
 const NotFound = () => import('src/pages/GeneralViews/NotFoundPage.vue')
 
 const Login = () => import('src/pages/Dashboard/Auth/login.vue')
 const Register = () => import('src/pages/Dashboard/Auth/register.vue')
 
-//CUSTOM components created by me
-const Profile = () => import('src/pages/Dashboard/Profile/profile.vue')
 //const Profile = () => import('src/pages/Dashboard/Profile/1.vue') // test file
+const Profile = () => import('src/pages/Dashboard/Profile/profile.vue')
 const Blacklist = () => import('src/pages/Dashboard/Blacklist/blacklist.vue')
 const Subscription = () => import('src/pages/Dashboard/Subscription/subscription.vue')
 
@@ -16,17 +16,30 @@ const Dashboard = () => import('src/pages/Dashboard/Overview/Dashboard.vue')
 const Help = () => import('src/pages/Dashboard/Overview/help.vue')
 
 const Prospects = () => import('src/pages/Dashboard/Prospects/prospects.vue')
+const ProspectLists = () => import('src/pages/Dashboard/ProspectLists/lists.vue')
 
+// ---Campaigns---
 const CampaignsList = () => import('src/pages/Dashboard/CampaignsList/campaigns.vue')
+
+const CampaignFormSequence = () => import('src/pages/Dashboard/CampaignsList/campaign_form_sequence.vue')
+const CampaignFormLeads = () => import('src/pages/Dashboard/CampaignsList/campaign_form_leads.vue')
+const CampaignFormSettings = () => import('src/pages/Dashboard/CampaignsList/campaign_form_settings.vue')
+
 const CampaignForm = () => import('src/pages/Dashboard/CampaignsList/campaign_form.vue')
+
 const CampaignEditForm = () => import('src/pages/Dashboard/CampaignsList/campaign_edit_form.vue')
 const CampaignStatistic = () => import('src/pages/Dashboard/CampaignsList/campaign_statistic.vue')
+// --------------
+
+// ---Linkedin---
+const CampaignDataFormSequence = () => import('src/pages/Dashboard/LinkedinActions/campaign_data_form_sequence.vue')
+const CampaignDataFormLeads = () => import('src/pages/Dashboard/LinkedinActions/campaign_data_form_leads.vue')
+const CampaignDataFormSettings = () => import('src/pages/Dashboard/LinkedinActions/campaign_data_form_settings.vue')
 
 const LinkedinEnrichment = () => import('src/pages/Dashboard/LinkedinActions/linkedin_enrichment.vue')
 const LinkedinParsing = () => import('src/pages/Dashboard/LinkedinActions/linkedin_parsing.vue')
 const LinkedinEnrichmentData = () => import('src/pages/Dashboard/LinkedinActions/linkedin_enrichment_data.vue')
-
-const ProspectLists = () => import('src/pages/Dashboard/ProspectLists/lists.vue')
+// --------------
 
 const Statistics = () => import('src/pages/Dashboard/Statistics/statistics.vue')
 const Statistics_detailed = () => import('src/pages/Dashboard/Statistics/statistics_detailed.vue')
@@ -145,6 +158,21 @@ const routes = [
         component: CampaignsList
       },
       {
+        path: 'campaign_form_sequence',
+        name: 'New Campaign',
+        component: CampaignFormSequence
+      },
+      {
+        path: 'campaign_form_leads',
+        name: 'New Campaign',
+        component: CampaignFormLeads
+      },
+      {
+        path: 'campaign_form_settings',
+        name: 'New Campaign',
+        component: CampaignFormSettings
+      },
+      {
         path: 'campaign_form',
         name: 'New Campaign',
         component: CampaignForm
@@ -160,6 +188,21 @@ const routes = [
         component: CampaignStatistic
       },
 
+      {
+        path: 'campaign_data_form_sequence',
+        name: 'New Campaign',
+        component: CampaignDataFormSequence
+      },
+      {
+        path: 'campaign_data_form_leads',
+        name: 'New Campaign',
+        component: CampaignDataFormLeads
+      },
+      {
+        path: 'campaign_data_form_settings',
+        name: 'New Campaign',
+        component: CampaignDataFormSettings
+      },
       {
         path: 'linkedin_enrichment',
         name: 'Leads managment',
