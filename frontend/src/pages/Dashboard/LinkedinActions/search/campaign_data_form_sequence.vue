@@ -13,12 +13,12 @@
     </div>
 
     <div class="mb-5">
-      <el-progress :percentage="60"></el-progress>
+      <el-progress :percentage="60" :format="progress_format"></el-progress>
     </div>
 
     <div class="row justify-content-md-center mb-3">
       <div class="col-8">
-        <label style="color: #262a79; font-size: 20px;">Paste here your LinkedIn URL</label>
+        <label class="o24_text">Paste here your LinkedIn URL</label>
         <el-input
           :disabled="!modified_fields['title']"
           placeholder="You can use basic LinkedIn search URL or LinkedIn Sales Navigator search URL or LinkedIn post URL"
@@ -34,14 +34,7 @@
       <div class="col-2">
       </div>
     </div>
-    <div class="row justify-content-md-center mb-3">
-      <div class="ml-auto">
-        <a href="https://www.linkedin.com/sales/search/people" target="_blank" style="color: #c4c6d5; font-size: 15px; letter-spacing: 1px; padding-bottom: 3px; border-bottom: 1px solid #d2dee0;">Go to LinkedIn Sales Navigator search</a>
-      </div>
-      <div class="col-2">
-      </div>
-    </div>
-
+    
     <div class="row justify-content-md-center mb-3">
       <div class="col-8">
         <label>Number of pages per day</label>
@@ -73,7 +66,6 @@ import {
   Slider,
 } from "element-ui";
 
-import timezones from "../CampaignsList/defaults/timezones";
 import axios from "@/api/axios-auth";
 
 const CAMPAIGNS_API_GET = "/campaigns/get";
@@ -99,11 +91,7 @@ export default {
       action_type: "",
       campaign_id: "",
 
-      linkedin_account_selected: "",
-      timezones_selected: "",
-
       /*All defaults that you store on client*/
-      timezones_selects: timezones,
       modified_fields: {},
 
       /* All lists that we need to select */
@@ -140,22 +128,17 @@ export default {
     };
   },
   methods: {
+    progress_format(percentage) {
+      return '2 / 3';
+    }
   },
   async mounted() {
   }
 };
 </script>
 <style lang="scss">
-.action_text {
+.o24_text {
     color: #262a79;
-    //font-family: NeurialGrotesk-Medium;
     font-size: 20px;
-}
-.new_step {
-    color: #dcdce6;
-    letter-spacing: 1px;
-    //font-family: NeurialGrotesk-Medium;
-    font-size: 26px;
-    line-height: 80px;
 }
 </style>

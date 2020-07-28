@@ -3,7 +3,7 @@
     <div class="form-inline align-items-start">
       <div class="align-self-start">
         <el-button
-          @click="$router.push('/campaign_data_form_sequence')"
+          @click="$router.push('/campaign_data_form_sn_sequence')"
           type="info"
           plain
           icon="el-icon-back"
@@ -19,12 +19,12 @@
     </div>
 
     <div class="mb-5">
-      <el-progress :percentage="90"></el-progress>
+      <el-progress :percentage="90" :format="progress_format"></el-progress>
     </div>
 
-    <div class="row justify-content-md-center mb-3">
+    <div class="row justify-content-md-center mb-5">
       <div class="col-8">
-        <label style="color: #262a79; font-size: 20px;">Name your campaign</label>
+        <label class="o24_text">Name your campaign</label>
         <el-input
           :disabled="!modified_fields['title']"
           placeholder="Сampaign name"
@@ -33,9 +33,9 @@
       </div>
     </div>
 
-    <div class="row justify-content-md-center mb-3">
+    <div class="row justify-content-md-center mb-5">
       <div class="col-8">
-        <label style="color: #262a79; font-size: 20px;">
+        <label class="o24_text">
           Choose LinkedIn account or
           <a href="/accounts" style="color: #409EFF;">add new</a>
         </label>
@@ -61,9 +61,12 @@
     </div>
 
     <div class="container">
-      <div class="row justify-content-md-center mb-5">
-        <div class="col-lg-3">
-          <label style="color: #262a79; font-size: 20px;">Start</label>
+      <div class="row justify-content-md-center mb-3">
+        <label class="o24_text">Shedule</label>
+      </div>
+      <div class="row justify-content-md-center mb-5 ml-1">
+        <div class="col-3">
+          <label class="o24_text">Start</label>
           <el-time-select
             name="From time"
             v-model="campaign_data.from_hour"
@@ -75,8 +78,8 @@
             placeholder="Select time"
           ></el-time-select>
         </div>
-        <div class="col-lg-3">
-          <label style="color: #262a79; font-size: 20px;">End</label>
+        <div class="col-3">
+          <label class="o24_text">End</label>
           <el-time-select
             name="Till time has to be after FROM time"
             v-model="campaign_data.to_hour"
@@ -88,8 +91,8 @@
             placeholder="Select time"
           ></el-time-select>
         </div>
-        <div class="col-lg-3">
-          <label style="color: #262a79; font-size: 20px;">Time Zone</label>
+        <div class="col-3">
+          <label class="o24_text">Time Zone</label>
           <el-select
             class="select-primary"
             name="Time Zone"
@@ -107,62 +110,15 @@
             ></el-option>
           </el-select>
         </div>
-      </div>
+      </div>  
     </div>
 
-    <div class="row justify-content-md-center mb-3">
-      <div class="col-4">
-        <el-switch v-model="campaign_data.sending_days['2']" active-text="Sun"></el-switch>
-      </div>
-    </div>
-    <div class="row justify-content-md-center mb-3">
-      <div class="col-4">
-        <el-switch v-model="campaign_data.sending_days['0']" active-text="Mon"></el-switch>
-      </div>
-    </div>
-    <div class="row justify-content-md-center mb-3">
-      <div class="col-4">
-        <el-switch v-model="campaign_data.sending_days['1']" active-text="Tues"></el-switch>
-      </div>
-    </div>
-    <div class="row justify-content-md-center mb-3">
-      <div class="col-4">
-        <el-switch v-model="campaign_data.sending_days['2']" active-text="Wed"></el-switch>
-      </div>
-    </div>
-    <div class="row justify-content-md-center mb-3">
-      <div class="col-4">
-        <el-switch v-model="campaign_data.sending_days['2']" active-text="Wed"></el-switch>
-      </div>
-    </div>
-    <div class="row justify-content-md-center mb-3">
-      <div class="col-4">
-        <el-switch v-model="campaign_data.sending_days['2']" active-text="Wed"></el-switch>
-      </div>
-    </div>
-    <div class="row justify-content-md-center mb-3">
-      <div class="col-4">
-        <el-switch v-model="campaign_data.sending_days['2']" active-text="Wed"></el-switch>
-      </div>
-    </div>
-
-    <div class="row justify-content-md-center">
-      <div class="col-4">
-        <div class="btn-group">
-          <button
-            type="button"
-            ref="day_0"
-            style="background-color: #409EFF; border-color: #409EFF;"
-            @click="toggleDay('day_0')"
-            v-bind:class="{ 'btn btn-default' : true, 'btn-success': campaign_data.sending_days['0'] }"
-          >Mon</button>
-          <el-button
-            ref="day_0"
-            style="background-color: #409EFF; border-color: #409EFF;"
-            @click="toggleDay('day_0')"
-            v-bind:class="{ 'btn btn-default' : true, 'btn-success': campaign_data.sending_days['0'] }"
-          >Mon</el-button>
-        </div>
+    <div class="row justify-content-md-center mb-5 ml-5">
+      <div class="col-6">
+        <label class="o24_text">Sending days</label>
+        <el-checkbox-group v-model="sending_days">
+          <el-checkbox-button v-for="day in days" :label="day" :key="day">{{day}}</el-checkbox-button>
+        </el-checkbox-group>
       </div>
     </div>
 
@@ -180,10 +136,12 @@ import {
   Input,
   Button,
   Progress,
-  Switch
+  Switch,
+  CheckboxGroup,
+  CheckboxButton,
 } from "element-ui";
 
-import timezones from "../CampaignsList/defaults/timezones";
+import timezones from "../../CampaignsList/defaults/timezones";
 import axios from "@/api/axios-auth";
 
 const CAMPAIGNS_API_GET = "/campaigns/get";
@@ -202,10 +160,15 @@ export default {
     [Option.name]: Option,
     [Table.name]: Table,
     [TableColumn.name]: TableColumn,
-    [TimeSelect.name]: TimeSelect
+    [TimeSelect.name]: TimeSelect,
+    [CheckboxGroup.name]: CheckboxGroup,
+    [CheckboxButton.name]: CheckboxButton,
   },
   data() {
     return {
+      days: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+      sending_days: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'],
+
       action_type: "",
       campaign_id: "",
 
@@ -249,21 +212,17 @@ export default {
       }
     };
   },
-  methods: {},
+  methods: {
+    progress_format(percentage) {
+      return '3 / 3';
+    }
+  },
   async mounted() {}
 };
 </script>
 <style lang="scss">
-.action_text {
-  color: #262a79;
-  //font-family: NeurialGrotesk-Medium;
-  font-size: 20px;
-}
-.new_step {
-  color: #dcdce6;
-  letter-spacing: 1px;
-  //font-family: NeurialGrotesk-Medium;
-  font-size: 26px;
-  line-height: 80px;
+.o24_text {
+    color: #262a79;
+    font-size: 20px;
 }
 </style>

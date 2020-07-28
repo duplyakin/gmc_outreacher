@@ -21,8 +21,11 @@ const ProspectLists = () => import('src/pages/Dashboard/ProspectLists/lists.vue'
 // ---Campaigns---
 const CampaignsList = () => import('src/pages/Dashboard/CampaignsList/campaigns.vue')
 
-const CampaignFormSequence = () => import('src/pages/Dashboard/CampaignsList/campaign_form_sequence.vue')
+const CampaignFormStart = () => import('src/pages/Dashboard/CampaignsList/campaign_form_start.vue')
+
+const CampaignFormType = () => import('src/pages/Dashboard/CampaignsList/campaign_form_type.vue')
 const CampaignFormLeads = () => import('src/pages/Dashboard/CampaignsList/campaign_form_leads.vue')
+const CampaignFormSequence = () => import('src/pages/Dashboard/CampaignsList/campaign_form_sequence.vue')
 const CampaignFormSettings = () => import('src/pages/Dashboard/CampaignsList/campaign_form_settings.vue')
 
 const CampaignForm = () => import('src/pages/Dashboard/CampaignsList/campaign_form.vue')
@@ -32,10 +35,24 @@ const CampaignStatistic = () => import('src/pages/Dashboard/CampaignsList/campai
 // --------------
 
 // ---Linkedin---
-const CampaignDataFormSequence = () => import('src/pages/Dashboard/LinkedinActions/campaign_data_form_sequence.vue')
-const CampaignDataFormLeads = () => import('src/pages/Dashboard/LinkedinActions/campaign_data_form_leads.vue')
-const CampaignDataFormSettings = () => import('src/pages/Dashboard/LinkedinActions/campaign_data_form_settings.vue')
+const CampaignDataFormType = () => import('src/pages/Dashboard/LinkedinActions/campaign_data_form_type.vue')
 
+// search
+const CampaignDataFormLeads = () => import('src/pages/Dashboard/LinkedinActions/search/campaign_data_form_leads.vue')
+const CampaignDataFormSequence = () => import('src/pages/Dashboard/LinkedinActions/search/campaign_data_form_sequence.vue')
+const CampaignDataFormSettings = () => import('src/pages/Dashboard/LinkedinActions/search/campaign_data_form_settings.vue')
+
+// SN search
+const CampaignDataFormSNLeads = () => import('src/pages/Dashboard/LinkedinActions/search_sn/campaign_data_form_leads.vue')
+const CampaignDataFormSNSequence = () => import('src/pages/Dashboard/LinkedinActions/search_sn/campaign_data_form_sequence.vue')
+const CampaignDataFormSNSettings = () => import('src/pages/Dashboard/LinkedinActions/search_sn/campaign_data_form_settings.vue')
+
+// post
+const CampaignDataFormPostLeads = () => import('src/pages/Dashboard/LinkedinActions/post/campaign_data_form_leads.vue')
+const CampaignDataFormPostSequence = () => import('src/pages/Dashboard/LinkedinActions/post/campaign_data_form_sequence.vue')
+const CampaignDataFormPostSettings = () => import('src/pages/Dashboard/LinkedinActions/post/campaign_data_form_settings.vue')
+
+// old
 const LinkedinEnrichment = () => import('src/pages/Dashboard/LinkedinActions/linkedin_enrichment.vue')
 const LinkedinParsing = () => import('src/pages/Dashboard/LinkedinActions/linkedin_parsing.vue')
 const LinkedinEnrichmentData = () => import('src/pages/Dashboard/LinkedinActions/linkedin_enrichment_data.vue')
@@ -153,6 +170,16 @@ const routes = [
       },
 
       {
+        path: 'campaign_form_start',
+        name: 'New Campaign',
+        component: CampaignFormStart
+      },
+      {
+        path: 'campaign_form_type',
+        name: 'New Campaign',
+        component: CampaignFormType
+      },
+      {
         path: 'campaigns',
         name: 'Sequences',
         component: CampaignsList
@@ -189,6 +216,11 @@ const routes = [
       },
 
       {
+        path: 'campaign_data_form_type',
+        name: 'New Campaign',
+        component: CampaignDataFormType
+      },
+      {
         path: 'campaign_data_form_sequence',
         name: 'New Campaign',
         component: CampaignDataFormSequence
@@ -203,6 +235,39 @@ const routes = [
         name: 'New Campaign',
         component: CampaignDataFormSettings
       },
+
+      {
+        path: 'campaign_data_form_sn_sequence',
+        name: 'New Campaign',
+        component: CampaignDataFormSNSequence
+      },
+      {
+        path: 'campaign_data_form_sn_leads',
+        name: 'New Campaign',
+        component: CampaignDataFormSNLeads
+      },
+      {
+        path: 'campaign_data_form_sn_settings',
+        name: 'New Campaign',
+        component: CampaignDataFormSNSettings
+      },
+
+      {
+        path: 'campaign_data_form_post_sequence',
+        name: 'New Campaign',
+        component: CampaignDataFormPostSequence
+      },
+      {
+        path: 'campaign_data_form_post_leads',
+        name: 'New Campaign',
+        component: CampaignDataFormPostLeads
+      },
+      {
+        path: 'campaign_data_form_post_settings',
+        name: 'New Campaign',
+        component: CampaignDataFormPostSettings
+      },
+
       {
         path: 'linkedin_enrichment',
         name: 'Leads managment',

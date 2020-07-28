@@ -2,39 +2,36 @@
   <div>
     <div class="form-inline align-items-start">
       <div class="align-self-start">
-        <el-button @click="$router.push('/campaign_form_type')" type="info" plain icon="el-icon-back" style="font-size: 40px; border: none;"></el-button>
+        <el-button @click="$router.push('/campaign_data_form_post_leads')" type="info" plain icon="el-icon-back" style="font-size: 40px; border: none;"></el-button>
       </div>
       <div class="align-self-center ml-3">
-        <p style="font-size: 26px; line-height: 65px; font-weight: bold; color: #262a79;">Choose leads</p>
+        <p style="font-size: 26px; line-height: 65px; font-weight: bold; color: #262a79;">Add Leads from LinkedIn URL</p>
       </div>
       <div class="align-self-start ml-auto">
-        <el-button @click="$router.push('/campaign_form_sequence')" type="primary" style="font-size: 26px; border: none;">Next</el-button>
+        <el-button @click="$router.push('/campaign_data_form_post_settings')" type="primary" style="font-size: 26px; border: none;">Next</el-button>
       </div>
     </div>
 
     <div class="mb-5">
-      <el-progress :percentage="30" :format="progress_format"></el-progress>
+      <el-progress :percentage="60" :format="progress_format"></el-progress>
+    </div>
+
+    <div class="row justify-content-md-center mb-3">
+      <div class="col-8">
+        <label class="o24_text">Paste here your LinkedIn URL</label> tooltip
+        <el-input
+          :disabled="!modified_fields['title']"
+          placeholder="You can use basic LinkedIn search URL or LinkedIn Sales Navigator search URL or LinkedIn post URL"
+          v-model="campaign_data.title"
+        ></el-input>
+      </div>
     </div>
 
     <div class="row justify-content-md-center">
-      <div class="col-8">
-        <label class="o24_text">Select leads list or <a href="/campaign_data_form_leads" style="color: #409EFF;">create new</a></label>
-        <el-select
-          class="select-default mb-3"
-          style="width: 100%;"
-          placeholder="Select leads list"
-          v-model="campaign_data.list_selected"
-          value-key="title"
-          :disabled="!modified_fields['lists']"
-        >
-          <el-option
-            class="select-default"
-            v-for="(list,index) in list_data.lists"
-            :key="list._id.$oid"
-            :label="list.title"
-            :value="list"
-          ></el-option>
-        </el-select>
+      <div class="ml-auto">
+        <a href="https://www.linkedin.com/" target="_blank" style="color: #c4c6d5; font-size: 15px; letter-spacing: 1px; padding-bottom: 3px; border-bottom: 1px solid #d2dee0;">Go to LinkedIn</a>
+      </div>
+      <div class="col-2">
       </div>
     </div>
 
@@ -44,11 +41,15 @@
 <script>
 import {
   Notification,
+  Table,
+  TimeSelect,
+  TableColumn,
   Select,
   Option,
   Input,
   Button,
   Progress,
+  Slider,
 } from "element-ui";
 
 import axios from "@/api/axios-auth";
@@ -66,6 +67,10 @@ export default {
     [Input.name]: Input,
     [Select.name]: Select,
     [Option.name]: Option,
+    [Table.name]: Table,
+    [TableColumn.name]: TableColumn,
+    [TimeSelect.name]: TimeSelect,
+    [Slider.name]: Slider
   },
   data() {
     return {
@@ -73,28 +78,25 @@ export default {
       campaign_id: "",
 
       /*All defaults that you store on client*/
-      //timezones_selects: timezones,
       modified_fields: {},
 
       /* All lists that we need to select */
       list_data: {
         credentials: [],
         lists: [],
-        funnels: [],
         columns: []
       },
 
       /*Object data*/
       campaign_data: {
-        campaign_type: 0,
-        list_selected: "",
-        title: "",
-        funnel: {},
-        credentials: [],
-        templates: {
-          email: [],
-          linkedin: []
+        list_title: '',
+        data: {
+            search_url: '',
+            total_pages: 100,
+            interval_pages: 20,
         },
+        title: "",
+        credentials: [],
 
         from_hour: "",
         to_hour: "",
@@ -113,7 +115,7 @@ export default {
   },
   methods: {
     progress_format(percentage) {
-      return '1 / 3';
+      return '2 / 3';
     }
   },
   async mounted() {

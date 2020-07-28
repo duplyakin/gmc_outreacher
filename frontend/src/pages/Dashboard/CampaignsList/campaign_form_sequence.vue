@@ -13,25 +13,22 @@
     </div>
 
     <div class="mb-5">
-      <el-progress :percentage="60"></el-progress>
+      <el-progress :percentage="60" :format="progress_format"></el-progress>
     </div>
 
-    <card>
-      <div class="form-inline align-items-start mt-2">
+    <card class="shadow p-3 mb-5 bg-white rounded">
+      <div class="form-inline align-items-start">
         <div class="mr-2">
           <i class="el-icon-message" style="font-size: 28px; color: #262a79;"></i>
         </div>
         <div class="mr-3">
-          <p class="action_text">Send email</p>
+          <p class="o24_text">Send email</p>
         </div>
         <div class="mr-3">
             <el-input-number v-model="interval" controls-position="right" size="mini" @change="handleChange" :min="1" :max="366"></el-input-number>
         </div>
         <div class="mr-auto">
-          <p class="action_text">days from previous step.</p>
-        </div>
-        <div class="ml-auto">
-          <el-button size="small" icon="el-icon-document-copy" style="border: none;"></el-button>
+          <p class="o24_text">days from previous step.</p>
         </div>
         <div class="ml-auto">
           <el-button size="small" icon="el-icon-close" style="border: none;"></el-button>
@@ -41,10 +38,10 @@
       <hr class="my-1">
 
       <div class="row mt-3">        
-        <div class="col-12 mb-4">
+        <div class="col-12 mb-4"> 
+          <label>Subject</label>
           <el-input label="Subject"
               class="o24_input"
-              style="height: 50px;"
               placeholder="Enter Subject"
               name="Subject"
               v-model="subject">
@@ -54,6 +51,7 @@
 
       <div class="row">
         <div class="col-12">
+          <label>Message</label>
           <fg-input>
             <editor
               name="body text"
@@ -69,9 +67,9 @@
     
 
     <div class="row justify-content-md-center">
-      <p class="new_step">Add New Touch:</p>
+      <p class="o24_new_step">Add New Touch:</p>
     </div>
-    <div class="row justify-content-md-center" style="height: 80px;">
+    <div class="row justify-content-md-center mb-5" style="height: 80px;">
       <el-button class="w-25 p-3 mh-100" type="info" style="font-size: 20px;" plain>Email</el-button>
     </div>
 
@@ -143,13 +141,17 @@ export default {
         plugins: [
           "advlist autolink lists link image charmap print preview anchor",
           "searchreplace visualblocks code fullscreen",
-          "insertdatetime media table paste code help wordcount autoresize emoticons"
+          "insertdatetime media table paste code help wordcount autoresize emoticons template"
         ],
         toolbar:
           "undo redo | formatselect | bold italic backcolor | \
            alignleft aligncenter alignright alignjustify | \
            bullist numlist outdent indent | removeformat | help \
-           image | link | autolink | emoticons",
+           image | link | autolink | emoticons | template",
+        templates: [
+          {title: 'first name', description: '', content: '{{first_name}}'},
+          {title: 'last name', description: '', content: '{{last_name}}'},
+        ]
       },
 
 
@@ -231,27 +233,24 @@ export default {
     };
   },
   methods: {
+    progress_format(percentage) {
+      return '2 / 3';
+    }
   },
   async mounted() {
   }
 };
 </script>
 <style lang="scss">
-.action_text {
+.o24_text {
     color: #262a79;
-    //font-family: NeurialGrotesk-Medium;
     font-size: 20px;
 }
-.new_step {
+.o24_new_step {
     color: #dcdce6;
     letter-spacing: 1px;
-    //font-family: NeurialGrotesk-Medium;
     font-size: 26px;
     line-height: 80px;
-}
-.el-input__inner {
-    height: 50px;
-    line-height: 50px;
 }
 
 </style>

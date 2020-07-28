@@ -1,5 +1,10 @@
 <template>
   <div>
+
+    <el-input label="Subject"
+              placeholder="Enter Subject 1111"
+              name="Subject">
+    </el-input>
     <pulse-loader :loading="loading" :color="color"></pulse-loader>
     <el-table v-if="!loading" :data="tableData" style="width: 100%">
       <el-table-column prop="date" label="Date" width="180"></el-table-column>
@@ -16,12 +21,19 @@ import {
   Table,
   TableColumn,
   Select,
-  Option
+  Option, 
+  Input
 } from "element-ui";
 import { PulseLoader } from 'vue-spinner/dist/vue-spinner.min.js'
+
+//import MyComp from '@/components/Inputs/formGroupInput'
+
+//import o24inner from '@/assets/sass/lbd/element/_o24_input.scss'
+
 export default {
   components: {
     PulseLoader,
+    [Input.name]: Input,
     [Loading.name]: Loading,
     [Select.name]: Select,
     [Option.name]: Option,
@@ -54,13 +66,11 @@ export default {
   mounted() {
     setTimeout(() => {
       this.loading = false
-    }, 5000);
+    }, 1000);
   }
 };
 </script>
 
-<style>
-body {
-  margin: 0;
-}
+<style scoped lang="scss">
+@import "~assets/sass/_o24_input";
 </style>

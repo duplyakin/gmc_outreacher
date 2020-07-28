@@ -22,7 +22,7 @@
 }
 
 .form-group {
-  .el-input__inner{
+  .el-input__inner {
     @extend .form-control;
   }
   .el-input-number, .el-select, .el-input__inner {

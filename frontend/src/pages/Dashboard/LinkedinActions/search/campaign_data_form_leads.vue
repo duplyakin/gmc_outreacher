@@ -1,6 +1,9 @@
 <template>
   <div>
     <div class="form-inline align-items-start">
+      <div class="align-self-start">
+        <el-button @click="$router.push('/campaign_data_form_type')" type="info" plain icon="el-icon-back" style="font-size: 40px; border: none;"></el-button>
+      </div>
       <div class="align-self-center ml-3">
         <p style="font-size: 26px; line-height: 65px; font-weight: bold; color: #262a79;">Create leads list</p>
       </div>
@@ -10,12 +13,12 @@
     </div>
 
     <div class="mb-5">
-      <el-progress :percentage="30"></el-progress>
+      <el-progress :percentage="30" :format="progress_format"></el-progress>
     </div>
 
     <div class="row justify-content-md-center">
       <div class="col-8">
-        <label style="color: #262a79; font-size: 20px;">Create new leads list name</label>
+        <label class="o24_text">Create new leads list name</label>
         <el-input
           :disabled="!modified_fields['title']"
           placeholder="New leads list"
@@ -40,7 +43,6 @@ import {
   Progress,
 } from "element-ui";
 
-import timezones from "../CampaignsList/defaults/timezones";
 import axios from "@/api/axios-auth";
 
 const CAMPAIGNS_API_GET = "/campaigns/get";
@@ -56,20 +58,13 @@ export default {
     [Input.name]: Input,
     [Select.name]: Select,
     [Option.name]: Option,
-    [Table.name]: Table,
-    [TableColumn.name]: TableColumn,
-    [TimeSelect.name]: TimeSelect
   },
   data() {
     return {
       action_type: "",
       campaign_id: "",
 
-      linkedin_account_selected: "",
-      timezones_selected: "",
-
       /*All defaults that you store on client*/
-      timezones_selects: timezones,
       modified_fields: {},
 
       /* All lists that we need to select */
@@ -106,22 +101,17 @@ export default {
     };
   },
   methods: {
+    progress_format(percentage) {
+      return '1 / 3';
+    }
   },
   async mounted() {
   }
 };
 </script>
 <style lang="scss">
-.action_text {
+.o24_text {
     color: #262a79;
-    //font-family: NeurialGrotesk-Medium;
     font-size: 20px;
-}
-.new_step {
-    color: #dcdce6;
-    letter-spacing: 1px;
-    //font-family: NeurialGrotesk-Medium;
-    font-size: 26px;
-    line-height: 80px;
 }
 </style>

@@ -2,7 +2,13 @@
   <div>
     <div class="form-inline align-items-start">
       <div class="align-self-start">
-        <el-button @click="$router.push('/campaign_form_sequence')" type="info" plain icon="el-icon-back" style="font-size: 40px; border: none;"></el-button>
+        <el-button
+          @click="$router.push('/campaign_data_form_post_sequence')"
+          type="info"
+          plain
+          icon="el-icon-back"
+          style="font-size: 40px; border: none;"
+        ></el-button>
       </div>
       <div class="align-self-center ml-3">
         <p style="font-size: 26px; line-height: 65px; font-weight: bold; color: #262a79;">Settings</p>
@@ -29,24 +35,28 @@
 
     <div class="row justify-content-md-center mb-5">
       <div class="col-8">
-        <label class="o24_text">Choose Email account or <a href="/accounts" style="color: #409EFF;">add new</a></label>
+        <label class="o24_text">
+          Choose LinkedIn account or
+          <a href="/accounts" style="color: #409EFF;">add new</a>
+        </label>
         <el-select
-            class="select-default mb-3"
-            style="width: 100%;"
-            placeholder="Select email account"
-            v-on:change="onChangeEmailCredentials"
-            v-model="email_account_selected"
-            value-key="data.account"
-            :disabled="!modified_fields['credentials']">
-            <el-option
-              class="select-default"
-              v-for="(account,index) in list_data.credentials"
-              v-if="account.medium == 'email'"
-              :key="account._id.$oid"
-              :label="account.data.account"
-              :value="account"
-            ></el-option>
-          </el-select>
+          class="select-default mb-3"
+          style="width: 100%;"
+          placeholder="Select linkedin account"
+          v-on:change="onChangeEmailCredentials"
+          v-model="email_account_selected"
+          value-key="data.account"
+          :disabled="!modified_fields['credentials']"
+        >
+          <el-option
+            class="select-default"
+            v-for="(account,index) in list_data.credentials"
+            v-if="account.medium == 'linkedin'"
+            :key="account._id.$oid"
+            :label="account.data.account"
+            :value="account"
+          ></el-option>
+        </el-select>
       </div>
     </div>
 
@@ -126,15 +136,13 @@ import {
   Input,
   Button,
   Progress,
+  Switch,
   CheckboxGroup,
   CheckboxButton,
 } from "element-ui";
 
-import Editor from "@tinymce/tinymce-vue";
-import timezones from "./defaults/timezones";
+import timezones from "../../CampaignsList/defaults/timezones";
 import axios from "@/api/axios-auth";
-
-const MessageEdit = () => import("./messageEdit.vue");
 
 const CAMPAIGNS_API_GET = "/campaigns/get";
 const CAMPAIGNS_API_DATA = "/campaigns/data";
@@ -144,7 +152,7 @@ const CAMPAIGNS_API_EDIT = "/campaigns/edit";
 
 export default {
   components: {
-    editor: Editor,
+    [Switch.name]: Switch,
     [Progress.name]: Progress,
     [Button.name]: Button,
     [Input.name]: Input,
@@ -164,7 +172,6 @@ export default {
       action_type: "",
       campaign_id: "",
 
-      email_account_selected: "",
       linkedin_account_selected: "",
       timezones_selected: "",
 
@@ -176,21 +183,19 @@ export default {
       list_data: {
         credentials: [],
         lists: [],
-        funnels: [],
         columns: []
       },
 
       /*Object data*/
       campaign_data: {
-        campaign_type: 0,
-        list_selected: "",
-        title: "",
-        funnel: {},
-        credentials: [],
-        templates: {
-          email: [],
-          linkedin: []
+        list_title: "",
+        data: {
+          search_url: "",
+          total_pages: 100,
+          interval_pages: 20
         },
+        title: "",
+        credentials: [],
 
         from_hour: "",
         to_hour: "",
@@ -209,11 +214,10 @@ export default {
   },
   methods: {
     progress_format(percentage) {
-      return '3 / 3'
+      return '3 / 3';
     }
   },
-  async mounted() {
-  }
+  async mounted() {}
 };
 </script>
 <style lang="scss">
