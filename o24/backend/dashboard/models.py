@@ -212,6 +212,16 @@ class User(db.Document):
     def __repr__(self):
         return '<User %r>' % (self.email)
 
+class FormSession(db.Document):
+    owner = db.ReferenceField(User, reverse_delete_rule=1)
+    form_name = db.StringField()
+
+    data = db.DictField()
+
+    def _commit(self, _reload=False):
+        self.save()
+        if _reload:
+            self.reload()
 
 class BlackList(db.Document):
     owner = db.ReferenceField(User, reverse_delete_rule=1)
@@ -905,6 +915,7 @@ class Campaign(db.Document):
     # 1 - in progress
     # 2 - paused
     # 11 - archived (deleted)
+    # 12 - draft
     status = db.IntField(default=0)
     campaign_type = db.IntField(default=0)
     message = db.StringField(default='')
