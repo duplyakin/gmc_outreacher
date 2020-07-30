@@ -20,7 +20,6 @@
       <div class="col-8">
         <label class="o24_text">Create new leads list name</label>
         <el-input
-          :disabled="!modified_fields['title']"
           placeholder="New leads list"
           v-model="campaign_data.title"
         ></el-input>
@@ -63,9 +62,6 @@ export default {
     return {
       action_type: "",
       campaign_id: "",
-
-      /*All defaults that you store on client*/
-      modified_fields: {},
 
       /* All lists that we need to select */
       list_data: {

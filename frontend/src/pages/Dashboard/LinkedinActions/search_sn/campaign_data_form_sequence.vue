@@ -20,8 +20,7 @@
       <div class="col-8">
         <label class="o24_text">Paste here your LinkedIn URL</label>
         <el-input
-          :disabled="!modified_fields['title']"
-          placeholder="You can use basic LinkedIn search URL or LinkedIn Sales Navigator search URL or LinkedIn post URL"
+          placeholder="LinkedIn Sales Navigator search URL"
           v-model="campaign_data.title"
         ></el-input>
       </div>
@@ -90,10 +89,7 @@ export default {
     return {
       action_type: "",
       campaign_id: "",
-
-      /*All defaults that you store on client*/
-      modified_fields: {},
-
+      
       /* All lists that we need to select */
       list_data: {
         credentials: [],

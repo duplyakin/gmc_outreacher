@@ -18,14 +18,13 @@
 
     <div class="row justify-content-md-center">
       <div class="col-8">
-        <label class="o24_text">Select leads list or <a href="/campaign_data_form_leads" style="color: #409EFF;">create new</a></label>
+        <label class="o24_text">Select leads list or <a href="/campaign_data_form_type" style="color: #409EFF;">create new</a></label>
         <el-select
           class="select-default mb-3"
           style="width: 100%;"
           placeholder="Select leads list"
           v-model="campaign_data.list_selected"
           value-key="title"
-          :disabled="!modified_fields['lists']"
         >
           <el-option
             class="select-default"
@@ -71,10 +70,6 @@ export default {
     return {
       action_type: "",
       campaign_id: "",
-
-      /*All defaults that you store on client*/
-      //timezones_selects: timezones,
-      modified_fields: {},
 
       /* All lists that we need to select */
       list_data: {

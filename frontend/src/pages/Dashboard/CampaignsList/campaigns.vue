@@ -227,7 +227,7 @@ methods: {
         }
     },
     addCampaign() {
-        this.$router.push({path: "campaign_form"});
+        this.$router.push({path: "campaign_form_start"});
     },
     editCampaign(msg_dict, index) {
         var status = -2;

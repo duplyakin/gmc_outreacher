@@ -16,60 +16,62 @@
       <el-progress :percentage="60" :format="progress_format"></el-progress>
     </div>
 
-    <card class="shadow p-3 mb-5 bg-white rounded">
-      <div class="form-inline align-items-start">
-        <div class="mr-2">
-          <i class="el-icon-message" style="font-size: 28px; color: #262a79;"></i>
+    <div v-for="(template, index) in campaign_data.templates.email" :key="index" class="row justify-content-md-center">
+      <card class="shadow p-3 mb-5 bg-white rounded col-10">
+        <div class="form-inline align-items-start">
+          <div class="mr-2">
+            <i class="el-icon-message" style="font-size: 28px; color: #262a79;"></i>
+          </div>
+          <div class="mr-3">
+            <p class="o24_text">Send email</p>
+          </div>
+          <div class="mr-3" v-if="index !== 0">
+              <el-input-number v-model="template.interval" controls-position="right" size="mini" :min="1" :max="366"></el-input-number>
+          </div>
+          <div class="mr-auto" v-if="index !== 0">
+            <p class="o24_text">days from previous step.</p>
+          </div>
+          <div class="ml-auto" v-if="index !== 0">
+            <el-button size="small" icon="el-icon-close" style="border: none;" @click="remove_template(index)"></el-button>
+          </div>
         </div>
-        <div class="mr-3">
-          <p class="o24_text">Send email</p>
-        </div>
-        <div class="mr-3">
-            <el-input-number v-model="interval" controls-position="right" size="mini" @change="handleChange" :min="1" :max="366"></el-input-number>
-        </div>
-        <div class="mr-auto">
-          <p class="o24_text">days from previous step.</p>
-        </div>
-        <div class="ml-auto">
-          <el-button size="small" icon="el-icon-close" style="border: none;"></el-button>
-        </div>
-      </div>
 
-      <hr class="my-1">
+        <hr class="my-1">
 
-      <div class="row mt-3">        
-        <div class="col-12 mb-4"> 
-          <label>Subject</label>
-          <el-input label="Subject"
-              class="o24_input"
-              placeholder="Enter Subject"
-              name="Subject"
-              v-model="subject">
-          </el-input>
+        <div class="row mt-3">        
+          <div class="col-12 mb-4"> 
+            <label>Subject</label>
+            <el-input label="Subject"
+                class="o24_input"
+                placeholder="Enter Subject"
+                name="Subject"
+                v-model="template.subject">
+            </el-input>
+          </div>
         </div>
-      </div>
 
-      <div class="row">
-        <div class="col-12">
-          <label>Message</label>
-          <fg-input>
-            <editor
-              name="body text"
-              output-format="html"
-              v-model="template.body"
-              api-key="o5wuoncsvrewlx7zeflsjb4wo2a252lvnrnlslv30ohh31ex"
-              :init="editorSettings"
-            />
-          </fg-input>
+        <div class="row">
+          <div class="col-12">
+            <label>Message</label>
+            <fg-input>
+              <editor
+                name="body text"
+                output-format="html"
+                v-model="template.body"
+                api-key="o5wuoncsvrewlx7zeflsjb4wo2a252lvnrnlslv30ohh31ex"
+                :init="editorSettings"
+              />
+            </fg-input>
+          </div>
         </div>
-      </div>
-    </card>
+      </card>
+    </div>
     
 
     <div class="row justify-content-md-center">
       <p class="o24_new_step">Add New Touch:</p>
     </div>
-    <div class="row justify-content-md-center mb-5" style="height: 80px;">
+    <div class="row justify-content-md-center mb-5" style="height: 80px;" @click="add_template">
       <el-button class="w-25 p-3 mh-100" type="info" style="font-size: 20px;" plain>Email</el-button>
     </div>
 
@@ -127,10 +129,10 @@ export default {
   },
   data() {
     return {
-      test: false,
-
       interval: 1,
       subject: '',
+
+      touch_count: 0,
 
       template: {
         body: ''
@@ -157,45 +159,6 @@ export default {
 
       action_type: "",
       campaign_id: "",
-
-      email_account_selected: "",
-      linkedin_account_selected: "",
-      timezones_selected: "",
-
-      /*All defaults that you store on client*/
-      timezones_selects: timezones,
-      modified_fields: {},
-
-      email_table_columns: [
-        {
-          prop: "title",
-          label: "Template name",
-          minWidth: 300
-        },
-        {
-          prop: "subject",
-          label: "Subject",
-          minWidth: 300
-        },
-        {
-          prop: "interval",
-          label: "Delay (days)",
-          minWidth: 100
-        }
-      ],
-
-      linkedin_table_columns: [
-        {
-          prop: "title",
-          label: "Template name",
-          minWidth: 300
-        },
-        {
-          prop: "interval",
-          label: "Delay (days)",
-          minWidth: 100
-        }
-      ],
 
       /* All lists that we need to select */
       list_data: {
@@ -229,13 +192,26 @@ export default {
           "5": false,
           "6": false
         }
-      }
+      },
     };
   },
   methods: {
     progress_format(percentage) {
       return '2 / 3';
-    }
+    },
+    add_template() {
+      let new_template = {
+        interval: 1,
+        subject: '',
+        body: ''
+      }
+      this.$set(this.campaign_data.templates.email, this.campaign_data.templates.email.length, new_template)
+    },
+    remove_template(index) {
+      if(index !== 0) {
+        this.campaign_data.templates.email.splice(index, 1)
+      }
+    },
   },
   async mounted() {
   }

@@ -20,7 +20,6 @@
       <div class="col-8">
         <label class="o24_text">Name your campaign</label>
         <el-input
-          :disabled="!modified_fields['title']"
           placeholder="Сampaign name"
           v-model="campaign_data.title"
         ></el-input>
@@ -36,8 +35,7 @@
             placeholder="Select email account"
             v-on:change="onChangeEmailCredentials"
             v-model="email_account_selected"
-            value-key="data.account"
-            :disabled="!modified_fields['credentials']">
+            value-key="data.account">
             <el-option
               class="select-default"
               v-for="(account,index) in list_data.credentials"
@@ -170,7 +168,6 @@ export default {
 
       /*All defaults that you store on client*/
       timezones_selects: timezones,
-      modified_fields: {},
 
       /* All lists that we need to select */
       list_data: {
