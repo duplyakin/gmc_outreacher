@@ -35,12 +35,12 @@ COLUMNS = [
         'field' : 'title',   
     },
     {
-        'label' : 'Pages parsed',
-        'prop' : 'pages_done',
-        'data' : True
+        'label' : 'Leads parsed',
+        'prop' : 'cache',
+        'field' : 'leads_parsed',   
     },
     {
-        'label' : 'Current page',
+        'label' : 'URL',
         'prop' : 'search_url',
         'data' : True
     },

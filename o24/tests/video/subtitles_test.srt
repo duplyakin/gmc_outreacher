@@ -1,0 +1,12 @@
+
+1
+00:00:01,300 --> 00:00:01,900
+Hi Barry!
+
+2
+00:00:02,600 --> 00:00:04,900
+Just came around outreacher24,
+
+3
+00:00:04,900 --> 00:00:06,800
+seems really interesting product.

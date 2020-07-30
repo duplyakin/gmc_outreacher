@@ -30,10 +30,20 @@ COLUMNS = [
         'prop' : 'status'
     },
     {
+        'label' : 'Leads',
+        'prop' : 'cache',
+        'field' : 'leads_total'
+    },
+    {
+        'label' : 'Proceed',
+        'prop' : 'cache',
+        'field' : 'leads_proceed'
+    },
+    {
         'label' : 'Sequence',
         'prop' : 'funnel',
         'field' : 'title',   
-    }
+    },
 ]
 
 modified_fields_on_create = {

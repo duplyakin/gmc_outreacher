@@ -194,6 +194,49 @@ def linkedin_parse_profile_action(task):
     scheduler_models.ActionLog.log(task, step='carryout_handler', description="linkedin_parse_profile_action")
     return
 
+def _save_post_data(task, campaign):
+    pass
+
+def linkedin_post_parsing_action(task):
+    #Special type of action
+    # 1. Need to get prospects and create data from that
+    # 2. Update next_round to 12 hours 
+    # 3. Update input_data
+    # 4. If it's the last one then task.status=FINISHED  other way task.status=NEW
+    if task.status != CARRYOUT:
+        raise Exception("WRONG STATUS: linkedin_post_parsing_action should be called for CARRYOUT status. task.id={0} task.status={1}".format(task.id, task.status))
+
+    result_data = task.get_result_data()
+    if not result_data:
+        raise Exception("linkedin_post_parsing_action ERROR: wrong or empty result_data={0}".format(result_data))
+    
+    campaign = task.get_campaign()
+    if not campaign:
+        task.update_status(status=FAILED)
+        raise Exception("linkedin_post_parsing_action ERROR: There is no campaign for task.id={0}".format(task.id))
+
+    _save_search_data(task, campaign)
+
+    code = int(result_data.get('code', 0))
+    if code < 0:
+        task.update_status(status=FAILED)
+        campaign._safe_pause(message='Parsing error, contact support')
+
+        #log task
+        scheduler_models.ActionLog.log(task, step='carryout_handler', description="linkedin_post_parsing_action code error")
+        return
+
+    task.refresh_input_data()
+
+    now = pytz.utc.localize(datetime.utcnow())
+    task.next_round = now + timedelta(hours=DEFAULT_POST_PARSING_HOURS_DELAY)
+    task.update_status(status=NEW)
+
+    #log task
+    scheduler_models.ActionLog.log(task, step='carryout_handler', description="linkedin_post_parsing_action")
+    return
+
+
 def email_check_bounced_action(task):
     if task.status != CARRYOUT:
         raise Exception("WRONG STATUS: email_check_bounced_action should be called for CARRYOUT status. task.id={0} task.status={1}".format(task.id, task.status))

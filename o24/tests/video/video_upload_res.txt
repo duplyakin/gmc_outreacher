@@ -1,0 +1,45 @@
+{
+    'asset_id': '3b268bda8954d2f1c41a4b5fc038ac96', 
+    'public_id': 'barry_video_for_test', 
+    'version': 1595326631, 
+    'version_id': 'ed09c052242ad2d90d4b43aeae7f33d1', 
+    'signature': '06fc81804cefe5948ebefb73082a5e9675cc25bb', 
+    'width': 576, 
+    'height': 360, 
+    'format': 'mp4', 
+    'resource_type': 'video', 
+    'created_at': '2020-07-21T10:17:11Z', 
+    'tags': [], 
+    'pages': 0, 
+    'bytes': 5304507, 
+    'type': 'upload', 
+    'etag': '7bfa72b27e30603ce059f56f18d2d65b', 
+    'placeholder': False, 
+    'url': 'http://res.cloudinary.com/dfhw5en5v/video/upload/v1595326631/barry_video_for_test.mp4', 
+    'secure_url': 'https://res.cloudinary.com/dfhw5en5v/video/upload/v1595326631/barry_video_for_test.mp4', 
+    'audio': {
+        'codec': 'aac', 
+        'bit_rate': '72010', 
+        'frequency': 44100, 
+        'channels': 1, 
+        'channel_layout': 'mono'
+        }, 
+    'video': {
+        'pix_format': 'yuv420p', 
+        'codec': 'h264', 
+        'level': 30, 
+        'profile': 'Constrained Baseline', 
+        'bit_rate': '212253', 
+        'dar': '8:5'
+        }, 
+    'is_audio': False, 
+    'frame_rate': 30.0, 
+    'bit_rate': 286722, 
+    'duration': 148.003991, 
+    'rotation': 0, 
+    'original_filename': 'barry_video', 
+    'nb_frames': 4438
+}
+
+
+{'asset_id': '3f51f97f2c2c702795157a82221256e5', 'public_id': 'random_guy_test', 'version': 1595329379, 'version_id': '7a681b3159522bf2d0e543d920b8dd1a', 'signature': 'e811ee0acb98ff87101d50339060f6faf2eaf194', 'width': 640, 'height': 360, 'format': 'mp4', 'resource_type': 'video', 'created_at': '2020-07-21T11:02:59Z', 'tags': [], 'pages': 0, 'bytes': 4661003, 'type': 'upload', 'etag': '4d9f55112ec18b95018d58ddc8bbf0dc', 'placeholder': False, 'url': 'http://res.cloudinary.com/dfhw5en5v/video/upload/v1595329379/random_guy_test.mp4', 'secure_url': 'https://res.cloudinary.com/dfhw5en5v/video/upload/v1595329379/random_guy_test.mp4', 'audio': {'codec': 'aac', 'bit_rate': '95999', 'frequency': 44100, 'channels': 2, 'channel_layout': 'stereo'}, 'video': {'pix_format': 'yuv420p', 'codec': 'h264', 'level': 30, 'profile': 'Constrained Baseline', 'bit_rate': '254755', 'dar': '16:9'}, 'is_audio': False, 'frame_rate': 23.976023976023978, 'bit_rate': 353012, 'duration': 105.627574, 'rotation': 0, 'original_filename': 'random_video', 'nb_frames': 2531}
