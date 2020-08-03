@@ -16,7 +16,7 @@
     <p class="text-center" style="font-size: 32px; line-height: 65px; font-weight: bold; color: #262a79;">What type of campaign do you want to create?</p>
 
     <div class="card-deck justify-content-md-center">
-      <a href="/campaign_data_form_leads">
+      <a href="/campaign_data_form_leads" @click="goto_next_step('basic_search')">
         <div class="card mr-3 mb-3" style="width: 18rem;">
           <div class="card-body text-center mx-4 my-4">
             <p class="card-text o24_card_title">LinkedIn search enrichment</p>
@@ -25,7 +25,7 @@
         </div>
       </a>
 
-      <a href="/campaign_data_form_sn_leads">
+      <a href="/campaign_data_form_sn_leads" @click="goto_next_step('sn_search')">
         <div class="card mr-3 mb-3" style="width: 18rem;">
           <div class="card-body text-center mx-4 my-4">
             <p class="card-text o24_card_title">LinkedIn Sales Navigator enrichment</p>
@@ -34,7 +34,7 @@
         </div>
       </a>
 
-      <a href="/campaign_data_form_post_leads">
+      <a href="/campaign_data_form_post_leads" @click="goto_next_step('post')">
         <div class="card mb-3" style="width: 18rem;">
           <div class="card-body text-center mx-4 my-4">
             <p class="card-text o24_card_title">LinkedIn post enrichment</p>
@@ -59,11 +59,7 @@ import {
 
 import axios from "@/api/axios-auth";
 
-const CAMPAIGNS_API_GET = "/campaigns/get";
-const CAMPAIGNS_API_DATA = "/campaigns/data";
-
-const CAMPAIGNS_API_ADD = "/campaigns/create";
-const CAMPAIGNS_API_EDIT = "/campaigns/edit";
+const CAMPAIGNS_API_ADD = "/campaigns/parsing/create";
 
 export default {
   components: {
@@ -75,13 +71,44 @@ export default {
   },
   data() {
     return {
-
+      action_type: 'create',
+      next_step: '/campaign_data_form_leads', // expected default value
     };
   },
   methods: {
     progress_format(percentage) {
-      return '0 / 3';
-    }
+      return '0 / 4'
+    },
+    async goto_next_step(campaign_type) {
+      await this.load_next_step(campaign_type)
+      //this.$router.push({ path: this.next_step, query: { action_type: this.action_type } })
+    },
+    async load_next_step(campaign_type) {
+      let path = CAMPAIGNS_API_ADD
+      let data = new FormData()
+      data.append("action", "create")
+      data.append("campaign_type", campaign_type)
+
+      axios
+        .post(path, data)
+        .then(res => {
+          let r = res.data
+          if (r.hasOwnProperty('error') && r.error !== 0) {
+            let msg = "Error loading data " + r.msg + " Error:" + r.error
+            Notification.error({ title: "Error", message: msg })
+          } else {
+            if (r.hasOwnProperty('next_step')) {
+              this.next_step = r.next_step
+            } else {
+              Notification.error({ title: "Error", message: 'Server error: no next step' })
+            }
+          }
+        })
+        .catch(error => {
+          let msg = "Error loading data. ERROR: " + error
+          Notification.error({ title: "Error", message: msg })
+        })
+    },
   },
   async mounted() {
   }

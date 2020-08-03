@@ -16,8 +16,8 @@
     <p class="text-center" style="font-size: 32px; line-height: 65px; font-weight: bold; color: #262a79;">What type of campaign do you want to create?</p>
 
     <div class="card-deck justify-content-md-center">
-      <a href="/campaign_form_leads">
-        <div class="card mr-3 mb-3" >
+      <a @click="goto_next_step('outreach_email')">
+        <div class="card mr-3 mb-3" style="width: 18rem; height: 11rem;">
           <div class="card-body text-center mx-4 my-4">
             <p class="card-text o24_card_title">Email outreach</p>
             <p class="card-text o24_card_text">Create sequence of emails to contact prospects</p>
@@ -25,8 +25,8 @@
         </div>
       </a>
 
-      <a href="">
-        <div class="card mr-3 mb-3" >
+      <a @click="goto_next_step('outreach_email_linkedin')">
+        <div class="card mr-3 mb-3" style="width: 18rem; height: 11rem;">
           <div class="card-body text-center mx-4 my-4">
             <p class="card-text o24_card_title">Email + LinkedIn outreach</p>
             <p class="card-text o24_card_text" style="color: red;">Comming soom</p>
@@ -35,8 +35,6 @@
       </a>
     </div>
 
-
-    <modals-container />
   </div>
 </template>
 <script>
@@ -51,11 +49,7 @@ import {
 
 import axios from "@/api/axios-auth";
 
-const CAMPAIGNS_API_GET = "/campaigns/get";
-const CAMPAIGNS_API_DATA = "/campaigns/data";
-
 const CAMPAIGNS_API_ADD = "/campaigns/create";
-const CAMPAIGNS_API_EDIT = "/campaigns/edit";
 
 export default {
   components: {
@@ -67,13 +61,44 @@ export default {
   },
   data() {
     return {
-
+      action_type: 'create',
+      next_step: '/campaign_form_leads', // expected default value
     };
   },
   methods: {
     progress_format(percentage) {
-      return '0 / 3';
-    }
+      return '0 / 4'
+    },
+    async goto_next_step(campaign_type) {
+      await this.load_next_step(campaign_type)
+      this.$router.push({ path: this.next_step, query: { action_type: this.action_type } })
+    },
+    async load_next_step(campaign_type) {
+      var path = CAMPAIGNS_API_ADD
+      var data = new FormData()
+      data.append("action", "create")
+      data.append("campaign_type", campaign_type)
+
+      axios
+        .post(path, data)
+        .then(res => {
+          var r = res.data
+          if (r.hasOwnProperty('error') && r.error !== 0) {
+            var msg = "Error loading data " + r.msg + " Error:" + r.error
+            Notification.error({ title: "Error", message: msg })
+          } else {
+            if (r.hasOwnProperty('next_step')) {
+              this.next_step = r.next_step
+            } else {
+              Notification.error({ title: "Error", message: 'Server error: no next step' })
+            }
+          }
+        })
+        .catch(error => {
+          var msg = "Error loading data. ERROR: " + error
+          Notification.error({ title: "Error", message: msg })
+        });
+    },
   },
   async mounted() {
   }

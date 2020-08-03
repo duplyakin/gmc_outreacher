@@ -14,16 +14,16 @@
 
     <div class="card-deck justify-content-md-center">
       <a href="/campaign_data_form_type">
-        <div class="card mr-3 mb-3" >
+        <div class="card mr-3 mb-3" style="width: 18rem; height: 11rem;">
           <div class="card-body text-center mx-4 my-4">
             <p class="card-text o24_card_title">Data enrichment</p>
-            <p class="card-text o24_card_text">Enrich leads from LinkedIn</p>
+            <p class="card-text o24_card_text">Enrich leads (emails, LinkedIn accounts and personal data) from LinkedIn</p>
           </div>
         </div>
       </a>
 
       <a href="/campaign_form_type">
-        <div class="card mr-3 mb-3" >
+        <div class="card mr-3 mb-3" style="width: 18rem; height: 11rem;">
           <div class="card-body text-center mx-4 my-4">
             <p class="card-text o24_card_title">Outreach</p>
             <p class="card-text o24_card_text">Create sequences to contact your leads</p>

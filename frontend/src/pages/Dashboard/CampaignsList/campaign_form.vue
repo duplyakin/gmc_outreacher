@@ -573,7 +573,7 @@ export default {
       }
     },
     deserialize_data(from_data) {
-      console.log(from_data);
+      //console.log(from_data);
       for (var key in from_data) {
         if (this.list_data.hasOwnProperty(key) && from_data[key]) {
           var parsed_data = JSON.parse(from_data[key]);
@@ -667,7 +667,7 @@ export default {
         return false;
       }
 
-      console.log(this.timezones_selected);
+      //console.log(this.timezones_selected);
       if (
         this.campaign_data.from_hour == "" ||
         this.campaign_data.to_hour == "" ||
