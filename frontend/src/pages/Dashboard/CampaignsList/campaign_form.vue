@@ -342,7 +342,7 @@ export default {
       linkedin_account_selected: "",
       timezones_selected: "",
 
-      /*All defaults that you store on client*/
+      /* All defaults that you store on client */
       timezones_selects: timezones,
       modified_fields: {},
 
@@ -385,7 +385,7 @@ export default {
         columns: []
       },
 
-      /*Object data*/
+      /* Object data */
       campaign_data: {
         campaign_type: 0,
         list_selected: "",
@@ -421,9 +421,7 @@ export default {
 
       var index = ref.split("_")[1];
 
-      this.campaign_data.sending_days[index] = !this.campaign_data.sending_days[
-        index
-      ];
+      this.campaign_data.sending_days[index] = !this.campaign_data.sending_days[index];
       return true;
     },
     editLinkedinTemplate(teamplateObj, row_index) {
@@ -575,7 +573,7 @@ export default {
       }
     },
     deserialize_data(from_data) {
-      console.log(from_data);
+      //console.log(from_data);
       for (var key in from_data) {
         if (this.list_data.hasOwnProperty(key) && from_data[key]) {
           var parsed_data = JSON.parse(from_data[key]);
@@ -669,7 +667,7 @@ export default {
         return false;
       }
 
-      console.log(this.timezones_selected);
+      //console.log(this.timezones_selected);
       if (
         this.campaign_data.from_hour == "" ||
         this.campaign_data.to_hour == "" ||

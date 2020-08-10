@@ -28,10 +28,13 @@ async function consumer(data) {
                 await workers.searchWorker(data.task_id);
                 break;
             case 'linkedin-search-sn':
-                await workers.search_SN_worker(data.task_id);
+                await workers.sn_searchWorker(data.task_id);
                 break;
             case 'linkedin-parse-profile':
                 await workers.scribeWorker(data.task_id);
+                break;
+            case 'linkedin-parse-profile-sn':
+                await workers.sn_scribeWorker(data.task_id);
                 break;
             case 'linkedin-check-reply':
                 await workers.messageCheckWorker(data.task_id);

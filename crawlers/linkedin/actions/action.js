@@ -2,16 +2,18 @@ const puppeteer = require("puppeteer");
 const LoginAction = require('./loginAction.js');
 const links = require("../links");
 const selectors = require("../selectors");
+const models = require("../../models/models.js");
 
 var log = require('loglevel').getLogger("o24_logger");
 
 const MyExceptions = require('../../exceptions/exceptions.js');
 const error_codes = require('../../exceptions/error_codes.js');
+const utils = require("./utils.js");
 
 class Action {
   constructor(cookies, credentials_id) {
-    this.cookies = cookies;
-    this.credentials_id = credentials_id;
+    this.cookies = cookies
+    this.credentials_id = credentials_id
   }
 
 
@@ -25,7 +27,7 @@ class Action {
     if(this.cookies != null && Array.isArray(this.cookies) && this.cookies.length > 0) {
       await this.page.setCookie(...this.cookies)
     } else {
-      log.debug("action: Empty or invalid cookies.")
+      log.error("action: Empty or invalid cookies for credentials_id:", this.credentials_id)
     }
 
     return this.browser
@@ -33,6 +35,8 @@ class Action {
 
 
   async closeBrowser() {
+    await utils.update_cookie(this.page, this.credentials_id)
+
     await this.browser.close()
     this.browser.disconnect()
 
@@ -57,7 +61,7 @@ class Action {
 
 async check_success_selector(selector, page = this.page) {
   if(!selector) {
-    throw new Error ('Empty selector.')
+    throw new Error ('check_success_selector: Empty selector.')
   }
 
   try {
@@ -77,7 +81,7 @@ async check_success_selector(selector, page = this.page) {
 
   async check_success_page(required_url, page = this.page) {
     if(!required_url) {
-      throw new Error ('Empty required_url.')
+      throw new Error ('check_success_page: Empty required_url.')
     }
 
     let current_url = page.url()
@@ -169,20 +173,25 @@ async check_success_selector(selector, page = this.page) {
       throw new Error('Empty url.')
     }
     try {
+      let current_url = page.url()
+      const short_url = this.get_pathname(url)
+
+      // save cookie if it was not new page
+      if(current_url && !current_url.includes('about:blank')) {
+        await utils.update_cookie(this.page, this.credentials_id)
+      }
+
       await page.goto(url, {
         waitUntil: 'load',
         //waitUntil: 'domcontentloaded',
-        timeout: 30000 // it may load too long! critical here
+        timeout: 180000 // it may load too long! critical here
       })
 
-      await page.waitFor(15000) // puppeteer wait loading..
-
-      let current_url = page.url()
-
-      let short_url = this.get_pathname(url)
+      await page.waitFor(10000) // puppeteer wait loading...
+      current_url = page.url()
 
       if (!current_url.includes(short_url)) {
-        // Sales Navigator
+        // Sales Navigator access
         if (current_url.includes('guest_login_sales_nav')) {
           log.debug('gotoChecker - Sales Navigator unreachable: ', current_url)
           throw MyExceptions.SN_access_error("gotoChecker - Sales Navigator unreachable: " + current_url)
@@ -194,7 +203,10 @@ async check_success_selector(selector, page = this.page) {
 
           let result = await loginAction.login()
           if (result) {
-            await page.goto(url)
+            await page.goto(url, {
+              waitUntil: 'load',
+              timeout: 180000 // it may load too long! critical here
+            })      
           }
 
         // Unexpectable page
@@ -209,14 +221,39 @@ async check_success_selector(selector, page = this.page) {
       log.error('gotoChecker - error: ', err.stack)
 
       if(this.check_block(page.url())) {
-        throw MyExceptions.ContextError("Block happend.");
+        throw MyExceptions.ContextError("Block happend.")
       }
 
       if(err.code != null && err.code == error_codes.SN_ACCESS_ERROR) {
         throw MyExceptions.SN_access_error("gotoChecker - Sales Navigator unreachable")
       }
 
-      throw new Error('gotoChecker error: ', err);
+      if(err.toString().includes('ERR_TOO_MANY_REDIRECTS')) {
+        /*// TODO
+        log.error('--------------------------------------')
+        let account = await models.Accounts.findOne({ _id: this.credentials_id }, function (err_db, res) {
+          if (err_db) throw MyExceptions.MongoDBError('MongoDB find account err: ' + err_db)
+        })
+      
+        if (account == null) {
+          throw new Error("gotoChecker: Account not found with credentials_id:", this.credentials_id)
+        }
+
+        if(account.login != null && account.password != null) {
+          let loginAction = new LoginAction.LoginAction(this.credentials_id)
+          await loginAction.setContext(this.context)
+  
+          let result = await loginAction.login()
+          if (result) {
+            await page.goto(url)
+          }
+        } else {
+          throw MyExceptions.TooManyRedirectsError("Relogin required.")
+        }*/
+        throw MyExceptions.TooManyRedirectsError("Relogin required.")
+      }
+
+      throw new Error('gotoChecker error: ', err)
     }
   }
 

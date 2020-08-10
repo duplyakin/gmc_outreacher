@@ -125,7 +125,7 @@ const resolve_captcha = async(page, response) => {
             log.error("..... Captcha submit BTN selector not found in resolve_captcha. ..... ");
             return -2;
         }
-        await page.click(selectors.SUBMIT_CAPTCHA_BTN_SELECTOR);
+        //await page.click(selectors.SUBMIT_CAPTCHA_BTN_SELECTOR);
         await page.waitFor(10000);
 
         if (await page.$(selectors.CAPTCHA_SELECTOR) != null) {
@@ -344,19 +344,21 @@ const get_context = async(browser, context, page) => {
       throw new Error("Can't get_context. Page is not defined.");
     }
 
-    await page.waitFor(10000); // wait 10 sec for lading and screenshot the page
-    let screenshot_str = await page.screenshot();
+    await page.waitFor(10000) // wait 10 sec for lading and screenshot the page
+    const screenshot_str = await page.screenshot()
+    const content = await page.content()
 
     let context_obj = {
       endpoint: browser.wsEndpoint(),
       context_id: context._id,
+      content: content,
       page_url: page.url(),
       screenshot: screenshot_str,
     }
     
-    log.debug('get_context - context_obj created.');
-    //log.debug('get_context - context_obj = ', context_obj);
-    return context_obj;
+    log.debug('get_context - context_obj created.')
+    //log.debug('get_context - context_obj = ', context_obj)
+    return context_obj
   }
 
 
@@ -464,6 +466,17 @@ const page_connect = async (context, page_url) => {
     }
 
     return found_page;
+}
+
+
+const _get_current_cookie = async (page) => {
+    // Get Session Cookies
+    let newCookies = await page.cookies()
+    if (!newCookies) {
+        throw new Error("Can't get cookie.") //todo: don't throw error here (?)
+    }
+
+    return newCookies
 }
 
 
@@ -801,17 +814,6 @@ const input_cookie = async (account, li_at) => {
             browser.disconnect();
         }
     }
-}
-
-
-const _get_current_cookie = async (page) => {
-    // Get Session Cookies
-    let newCookies = await page.cookies()
-    if (!newCookies) {
-        throw new Error("Can't get cookie.") //todo: don't throw error here (?)
-    }
-
-    return newCookies
 }
 
 

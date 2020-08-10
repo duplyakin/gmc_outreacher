@@ -106,6 +106,8 @@ import { PulseLoader } from 'vue-spinner/dist/vue-spinner.min.js';
 
 import axios from '@/api/axios-auth';
 
+const CAMPAIGNS_API_EDIT = "/campaigns/edit";
+
 const CAMPAIGNS_API_DATA = '/campaigns/data'
 const CAMPAIGNS_API_LIST = '/campaigns/list';
 
@@ -154,10 +156,7 @@ data() {
 },
 methods: {
     detalization(campaign_id) {
-      this.$router.push({
-        path: "campaign_statistic",
-        query: { campaign_id: campaign_id }
-      });
+      this.$router.push({path: "campaign_statistic", query: { campaign_id: campaign_id }});
     },
     make_action(campaign, index){
         var path = CAMPAIGNS_API_START;
@@ -227,7 +226,7 @@ methods: {
         }
     },
     addCampaign() {
-        this.$router.push({path: "campaign_form"});
+        this.$router.push({path: "campaign_form_start"});
     },
     editCampaign(msg_dict, index) {
         var status = -2;
@@ -239,7 +238,31 @@ methods: {
             return false;
         }
 
-        this.$router.push({ path: "campaign_edit_form", query: { campaign_id: msg_dict._id.$oid } })
+        let path = CAMPAIGNS_API_EDIT
+        let data = new FormData()
+
+        data.append("action", "edit")
+        data.append("campaign_id", msg_dict._id.$oid)
+
+        axios
+            .post(path, data)
+            .then(res => {
+            let r = res.data
+            if (r.hasOwnProperty('error') && r.error !== 0) {
+                let msg = "Error loading data " + r.msg + " Error:" + r.error
+                Notification.error({ title: "Error", message: msg })
+            } else {
+                if (r.hasOwnProperty('next_step') && r.next_step) {
+                    this.$router.push({ path: r.next_step, query: { action_type: 'edit' } })
+                } else {
+                    Notification.error({ title: "Error", message: 'Server error: no next step' })
+                }
+            }
+            })
+            .catch(error => {
+                let msg = "Error loading data. ERROR: " + error
+                Notification.error({ title: "Error", message: msg })
+            })
     },
     next_page(){
         var page = 2;

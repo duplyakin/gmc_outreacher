@@ -15,10 +15,16 @@ module.exports = {
     SCRIBE_WORKER_ERROR: -4060,
     SEARCH_WORKER_ERROR: -4070,
     VISIT_PROFILE_WORKER_ERROR: -4080,
+    POST_ENGAGEMENT_WORKER_ERROR: -4090,
+    GROUP_PARSING_WORKER_ERROR: -4090, //
+
+    SN_SCRIBE_WORKER_ERROR: -4110,
+    SN_SEARCH_WORKER_ERROR: -4120,
 
     CONTEXT_ERROR: -1, // Custom error that required user action to continue task
     NETWORK_ERROR: -2, //something wromg with network
     BAN_ERROR: -3, //Seems we are banned
+    TOO_MANY_REDIRECTS_ERROR: -4, // need to update credentials
     
     LOGIN_ACTION_ERROR: -1010, //On our sid
     LOGIN_ERROR: -1011, //Check credentials

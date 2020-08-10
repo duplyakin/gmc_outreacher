@@ -95,7 +95,7 @@ export default {
       test: false,
       multipleSelection: [],
       list_data: {
-        columns: [{label: "Email | Domain | Linkedin", prop: "source"}, {label: "Type", prop: "type"}, {label: "Added date", prop: "date"}],
+        columns: [{label: "Email | Domain | LinkedIn", prop: "source"}, {label: "Type", prop: "type"}, {label: "Added date", prop: "date"}],
         list: []
       }
     };

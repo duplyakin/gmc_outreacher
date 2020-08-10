@@ -2,10 +2,47 @@ const puppeteer = require("puppeteer");
 const LoginAction = require('./loginAction.js');
 const links = require("../links");
 const selectors = require("../selectors");
+const models = require("../../models/models.js");
 
 var log = require('loglevel').getLogger("o24_logger");
 
 const MyExceptions = require('../../exceptions/exceptions.js');
+
+
+async function get_current_cookie(page) {
+    // Get Session Cookies
+    const newCookies = await page.cookies()
+    if (!newCookies || !Array.isArray(newCookies) || newCookies.length == 0) {
+        log.error("utils: Can't get cookie (or empty).")
+        throw new Error("utils: Can't get cookie (or empty).")
+    }
+
+    //log.debug("utils: cookie:", newCookies)
+    return newCookies
+}
+
+
+async function update_cookie(page, credentials_id) {
+    const new_cookies = await get_current_cookie(page)
+
+    let new_expires = 0
+    for(let item of new_cookies) {
+        if (item.name === 'li_at') {
+            new_expires = item.expires
+            break
+        }
+    }
+
+    const account = await models.Accounts.findOneAndUpdate({ _id: credentials_id }, { expires: new_expires, cookies: new_cookies }, { upsert: false }, function (err, res) {
+        if (err) throw MyExceptions.MongoDBError('MongoDB find Account err: ' + err)
+    })
+
+    if(account == null) {
+        throw new Error("utils: Account with credentials_id: " + credentials_id + " not exists.")
+    }
+
+    log.debug("utils: Cookies updated.")
+}
 
 
 function check_block(url) {
@@ -13,13 +50,7 @@ function check_block(url) {
         throw new Error('Empty url in check_block.')
     }
 
-    if (url.includes(links.BAN_LINK) || url.includes(links.CHALLENGE_LINK)) {
-        // not target page here
-        return true
-    } else {
-        // all ok
-        return false
-    }
+    return ((url.includes(links.BAN_LINK) || url.includes(links.CHALLENGE_LINK)) ? true : false)
 }
 
 
@@ -50,7 +81,7 @@ async function check_success_page(required_url, page) {
 
     let current_url = page.url()
 
-    if (current_url.includes(get_pathname(required_url))) {
+    if (current_url.includes(get_pathname_url(required_url))) {
         return true
     }
 
@@ -169,7 +200,7 @@ async function gotoChecker(context, page, credentials_id, url) {
 
         let current_url = page.url()
 
-        let short_url = get_pathname(url)
+        let short_url = get_pathname_url(url)
 
         if (!current_url.includes(short_url)) {
             if (current_url.includes('login') || current_url.includes('signup') || current_url.includes("authwall")) {
@@ -200,23 +231,37 @@ async function gotoChecker(context, page, credentials_id, url) {
 }
 
 
+// get new page after click link
+async function clickAndWaitForTarget (clickSelector, page, browser) {
+    const pageTarget = page.target(); //save this to know that this was the opener
+    await page.click(clickSelector); //click on a link
+    const newTarget = await browser.waitForTarget(target => target.opener() === pageTarget); //check that you opened this page, rather than just checking the url
+    const newPage = await newTarget.page(); //get the page object
+    // await newPage.once("load",()=>{}); //this doesn't work; wait till page is loaded
+    await newPage.waitForSelector("body"); //wait for page to be loaded
+  
+    return newPage;
+  }
+
+
 async function autoScroll(page) {
     await page.evaluate(async () => {
       await new Promise((resolve, reject) => {
-        var totalHeight = 0;
-        var distance = 100;
+        var totalHeight = 0
+        var distance = 100
+
         var timer = setInterval(() => {
-          var scrollHeight = document.body.scrollHeight;
-          window.scrollBy(0, distance);
-          totalHeight += distance;
+          var scrollHeight = document.body.scrollHeight
+          window.scrollBy(0, distance)
+          totalHeight += distance
 
           if (totalHeight >= scrollHeight) {
-            clearInterval(timer);
-            resolve();
+            clearInterval(timer)
+            resolve()
           }
-        }, 100);
-      });
-    });
+        }, 100)
+      })
+    })
   }
 
 
@@ -246,6 +291,7 @@ async function autoScroll_modal(page, element_class) {
 
 
 module.exports = {
+    clickAndWaitForTarget: clickAndWaitForTarget,
     autoScroll: autoScroll,
     autoScroll_modal: autoScroll_modal,
     gotoChecker: gotoChecker,
@@ -257,4 +303,6 @@ module.exports = {
     check_success_page: check_success_page,
     check_success_selector: check_success_selector,
     check_block: check_block,
+    update_cookie: update_cookie,
+    get_current_cookie: get_current_cookie,
 }

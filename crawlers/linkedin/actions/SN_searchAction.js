@@ -5,7 +5,7 @@ const utils = require('./utils.js');
 const MyExceptions = require('../../exceptions/exceptions.js');
 var log = require('loglevel').getLogger("o24_logger");
 
-class Search_SN_action extends action.Action {
+class SN_SearchAction extends action.Action {
   constructor(cookies, credentials_id, searchUrl, interval_pages) {
     super(cookies, credentials_id);
 
@@ -14,6 +14,10 @@ class Search_SN_action extends action.Action {
   }
 
   async search() {
+    if (!this.searchUrl) {
+      throw new Error('Empty search url.')
+    }
+
     if (!this.searchUrl) {
       throw new Error('Empty search url.')
     }
@@ -73,7 +77,7 @@ class Search_SN_action extends action.Action {
 
           for (let item of items) {
             // don't add: noName LinkedIn members and 1st degree connections
-            if (item.querySelector(mySelectors.selector2) != null && !item.querySelector(mySelectors.selector3).innerText.includes('LinkedIn') && (item.querySelector(mySelectors.selector4) == null || !item.querySelector(mySelectors.selector4).innerText.includes('1st'))) {
+            if (item.querySelector(mySelectors.selector2) != null && !item.querySelector(mySelectors.selector3).innerText.toLowerCase().includes('linkedin') && (item.querySelector(mySelectors.selector4) == null || !item.querySelector(mySelectors.selector4).innerText.includes('1'))) {
               let full_name = item.querySelector(mySelectors.selector3)
               let job_title = item.querySelector(mySelectors.selector5)
               let company_linkedin_page = item.querySelector(mySelectors.selector6)
@@ -127,6 +131,7 @@ class Search_SN_action extends action.Action {
         //await super.check_success_selector(selectors.NEXT_PAGE_SELECTOR, this.page, result_data);
 
         await this.page.click(selectors.SN_NEXT_PAGE_SELECTOR)
+        await utils.update_cookie(this.page, this.credentials_id)
         await this.page.waitFor(2000)
 
         // check current page
@@ -162,5 +167,5 @@ class Search_SN_action extends action.Action {
 }
 
 module.exports = {
-  Search_SN_action: Search_SN_action
+  SN_SearchAction: SN_SearchAction
 }

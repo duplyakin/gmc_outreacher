@@ -1,5 +1,6 @@
 const DashboardLayout = () => import('src/pages/Dashboard/Layout/DashboardLayout.vue')
 //import DashboardLayout from 'src/pages/Dashboard/Layout/DashboardLayout.vue'
+
 // GeneralViews
 const NotFound = () => import('src/pages/GeneralViews/NotFoundPage.vue')
 
@@ -23,17 +24,51 @@ const Dashboard = () => import('src/pages/Dashboard/Overview/Dashboard.vue')
 const Help = () => import('src/pages/Dashboard/Overview/help.vue')
 
 const Prospects = () => import('src/pages/Dashboard/Prospects/prospects.vue')
+const ProspectLists = () => import('src/pages/Dashboard/ProspectLists/lists.vue')
 
+// ---Campaigns---
 const CampaignsList = () => import('src/pages/Dashboard/CampaignsList/campaigns.vue')
+
+const CampaignFormStart = () => import('src/pages/Dashboard/CampaignsList/campaign_form_start.vue')
+
+const CampaignFormType = () => import('src/pages/Dashboard/CampaignsList/campaign_form_type.vue')
+const CampaignFormLeads = () => import('src/pages/Dashboard/CampaignsList/campaign_form_leads.vue')
+const CampaignFormSequence = () => import('src/pages/Dashboard/CampaignsList/campaign_form_sequence.vue')
+const CampaignFormAccounts = () => import('src/pages/Dashboard/CampaignsList/campaign_form_accounts.vue')
+const CampaignFormSettings = () => import('src/pages/Dashboard/CampaignsList/campaign_form_settings.vue')
+
 const CampaignForm = () => import('src/pages/Dashboard/CampaignsList/campaign_form.vue')
+
 const CampaignEditForm = () => import('src/pages/Dashboard/CampaignsList/campaign_edit_form.vue')
 const CampaignStatistic = () => import('src/pages/Dashboard/CampaignsList/campaign_statistic.vue')
+// --------------
 
+// ---Linkedin---
+const CampaignDataFormType = () => import('src/pages/Dashboard/LinkedinActions/campaign_data_form_type.vue')
+
+// search
+const CampaignDataFormLeads = () => import('src/pages/Dashboard/LinkedinActions/search/campaign_data_form_leads.vue')
+const CampaignDataFormSequence = () => import('src/pages/Dashboard/LinkedinActions/search/campaign_data_form_sequence.vue')
+const CampaignDataFormAccounts = () => import('src/pages/Dashboard/LinkedinActions/search/campaign_data_form_accounts.vue')
+const CampaignDataFormSettings = () => import('src/pages/Dashboard/LinkedinActions/search/campaign_data_form_settings.vue')
+
+// SN search
+const CampaignDataFormSNLeads = () => import('src/pages/Dashboard/LinkedinActions/search_sn/campaign_data_form_leads.vue')
+const CampaignDataFormSNSequence = () => import('src/pages/Dashboard/LinkedinActions/search_sn/campaign_data_form_sequence.vue')
+const CampaignDataFormSNAccounts = () => import('src/pages/Dashboard/LinkedinActions/search_sn/campaign_data_form_accounts.vue')
+const CampaignDataFormSNSettings = () => import('src/pages/Dashboard/LinkedinActions/search_sn/campaign_data_form_settings.vue')
+
+// post
+const CampaignDataFormPostLeads = () => import('src/pages/Dashboard/LinkedinActions/post/campaign_data_form_leads.vue')
+const CampaignDataFormPostSequence = () => import('src/pages/Dashboard/LinkedinActions/post/campaign_data_form_sequence.vue')
+const CampaignDataFormPostAccounts = () => import('src/pages/Dashboard/LinkedinActions/post/campaign_data_form_accounts.vue')
+const CampaignDataFormPostSettings = () => import('src/pages/Dashboard/LinkedinActions/post/campaign_data_form_settings.vue')
+
+// old
 const LinkedinEnrichment = () => import('src/pages/Dashboard/LinkedinActions/linkedin_enrichment.vue')
 const LinkedinParsing = () => import('src/pages/Dashboard/LinkedinActions/linkedin_parsing.vue')
 const LinkedinEnrichmentData = () => import('src/pages/Dashboard/LinkedinActions/linkedin_enrichment_data.vue')
-
-const ProspectLists = () => import('src/pages/Dashboard/ProspectLists/lists.vue')
+// --------------
 
 const Statistics = () => import('src/pages/Dashboard/Statistics/statistics.vue')
 const Statistics_detailed = () => import('src/pages/Dashboard/Statistics/statistics_detailed.vue')
@@ -172,9 +207,39 @@ const routes = [
       },
 
       {
+        path: 'campaign_form_start',
+        name: 'New Campaign',
+        component: CampaignFormStart
+      },
+      {
+        path: 'campaign_form_type',
+        name: 'New Campaign',
+        component: CampaignFormType
+      },
+      {
         path: 'campaigns',
         name: 'Sequences',
         component: CampaignsList
+      },
+      {
+        path: 'campaign_form_sequence',
+        name: 'New Campaign',
+        component: CampaignFormSequence
+      },
+      {
+        path: 'campaign_form_accounts',
+        name: 'New Campaign',
+        component: CampaignFormAccounts
+      },
+      {
+        path: 'campaign_form_leads',
+        name: 'New Campaign',
+        component: CampaignFormLeads
+      },
+      {
+        path: 'campaign_form_settings',
+        name: 'New Campaign',
+        component: CampaignFormSettings
       },
       {
         path: 'campaign_form',
@@ -190,6 +255,74 @@ const routes = [
         path: 'campaign_statistic',
         name: 'Campaign Statistic',
         component: CampaignStatistic
+      },
+
+      {
+        path: 'campaign_data_form_type',
+        name: 'New Campaign',
+        component: CampaignDataFormType
+      },
+      {
+        path: 'campaign_data_form_sequence',
+        name: 'New Campaign',
+        component: CampaignDataFormSequence
+      },
+      {
+        path: 'campaign_data_form_accounts',
+        name: 'New Campaign',
+        component: CampaignDataFormAccounts
+      },
+      {
+        path: 'campaign_data_form_leads',
+        name: 'New Campaign',
+        component: CampaignDataFormLeads
+      },
+      {
+        path: 'campaign_data_form_settings',
+        name: 'New Campaign',
+        component: CampaignDataFormSettings
+      },
+
+      {
+        path: 'campaign_data_form_sn_sequence',
+        name: 'New Campaign',
+        component: CampaignDataFormSNSequence
+      },
+      {
+        path: 'campaign_data_form_sn_accounts',
+        name: 'New Campaign',
+        component: CampaignDataFormSNAccounts
+      },
+      {
+        path: 'campaign_data_form_sn_leads',
+        name: 'New Campaign',
+        component: CampaignDataFormSNLeads
+      },
+      {
+        path: 'campaign_data_form_sn_settings',
+        name: 'New Campaign',
+        component: CampaignDataFormSNSettings
+      },
+
+      {
+        path: 'campaign_data_form_post_sequence',
+        name: 'New Campaign',
+        component: CampaignDataFormPostSequence
+      },
+      {
+        path: 'campaign_data_form_post_accounts',
+        name: 'New Campaign',
+        component: CampaignDataFormPostAccounts
+      },
+      {
+        path: 'campaign_data_form_post_leads',
+        name: 'New Campaign',
+        component: CampaignDataFormPostLeads
+      },
+      {
+        path: 'campaign_data_form_post_settings',
+        name: 'New Campaign',
+        component: CampaignDataFormPostSettings
       },
 
       {
