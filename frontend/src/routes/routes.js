@@ -108,7 +108,7 @@ let adminMenu = {
   path: '/admin',
   component: DashboardLayout,
   redirect: '/admin/users_list',
-  meta: { requiresAuth: true, requiresAdmin: true },
+ // meta: { requiresAuth: true, requiresAdmin: true },
   children: [
     {
       path: 'users_list',
@@ -139,7 +139,7 @@ const routes = [
   adminMenu,
   loginAdminPage,
   {
-    meta: { requiresAuth: true, role: 'user' },
+   // meta: { requiresAuth: true, role: 'user' },
     path: '/',
     component: DashboardLayout,
     redirect: '/profile',
@@ -366,7 +366,7 @@ const routes = [
   {
     path: '/admin',
     component: DashboardLayout,
-    meta: { requiresAuth: true, requiresAdmin: true },
+    //meta: { requiresAuth: true, requiresAdmin: true },
     children: [
       {
         path: 'actions',
