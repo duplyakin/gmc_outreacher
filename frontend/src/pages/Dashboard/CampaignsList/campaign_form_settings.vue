@@ -111,7 +111,7 @@ import timezones from "./defaults/timezones";
 
 import utils from "@/utils/campaign_utils";
 
-const CURRENT_PATH = "/campaign_form_leads";
+const CURRENT_PATH = "/campaign_form_settings";
 
 const CAMPAIGNS_API_ADD = "/campaigns/create";
 const CAMPAIGNS_API_EDIT = "/campaigns/edit";

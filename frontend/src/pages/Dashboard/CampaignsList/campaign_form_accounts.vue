@@ -110,7 +110,7 @@ export default {
       return this.onChangeCredentials("email", new_credentials)
     },
     onChangeCredentials(medium, new_credentials) {
-      if (this.campaign_data.credentials.length <= 0) {
+/*       if (this.campaign_data.credentials.length <= 0) {
         this.campaign_data.credentials.push(new_credentials)
         return
       } else {
@@ -121,11 +121,11 @@ export default {
         if (index >= 0) {
           this.campaign_data.credentials.splice(index, 1, new_credentials)
         } else {
-          /* Should never happened */
+          // Should never happened
           this.campaign_data.credentials.push(new_credentials)
         }
         return
-      }
+      } */
     },
 
     async goto_next_step() {

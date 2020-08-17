@@ -7,14 +7,14 @@ const NotFound = () => import('src/pages/GeneralViews/NotFoundPage.vue')
 const Login = () => import('src/pages/Dashboard/Auth/login.vue')
 const Register = () => import('src/pages/Dashboard/Auth/register.vue')
 
-//Videos
+// Videos
 const Videos = () => import('src/pages/Dashboard/Videos/trim_video.vue')
 const PersVideos = () => import('src/pages/Dashboard/Videos/personalize_video.vue')
 const PersGif = () => import('src/pages/Dashboard/Videos/personalize_gif.vue')
 const PersLp = () => import('src/pages/Dashboard/Videos/personalize_lp.vue')
 const PersPreview = () => import('src/pages/Dashboard/Videos/preview.vue')
 
-//CUSTOM components created by me
+// CUSTOM components created by me
 const Profile = () => import('src/pages/Dashboard/Profile/profile.vue')
 //const Profile = () => import('src/pages/Dashboard/Profile/1.vue') // test file
 const Blacklist = () => import('src/pages/Dashboard/Blacklist/blacklist.vue')
