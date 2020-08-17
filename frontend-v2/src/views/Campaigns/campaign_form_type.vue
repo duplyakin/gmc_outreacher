@@ -16,27 +16,31 @@
     <b-container>
       <b-row align-h="center" class="justify-content-md-center">
 
-        <h2>What type of campaign do you want to create?</h2>
+        <b-col cols="6" md="auto">
+          <h2>What type of campaign do you want to create?</h2>
+        </b-col>
 
-        <b-card-group class="mt-3">
-          <a @click="goto_next_step('outreach_email')">
-            <b-card class="mr-3 mb-3">
-              <b-card-body class="text-center mx-4">
-                <b-card-text>Email outreach</b-card-text>
-                <b-card-text>Create sequence of emails to contact prospects</b-card-text>
-              </b-card-body>
-            </b-card>
-          </a>
+        <b-col cols="12" md="auto">
+          <b-card-group class="mt-3">
+            <a @click="goto_next_step('outreach_email')">
+              <b-card class="mr-3 mb-3">
+                <b-card-body class="text-center mx-4">
+                  <b-card-text>Email outreach</b-card-text>
+                  <b-card-text>Create sequence of emails to contact prospects</b-card-text>
+                </b-card-body>
+              </b-card>
+            </a>
 
-          <a @click="goto_next_step('outreach_email_linkedin')">
-            <b-card class="mr-3 mb-3">
-              <b-card-body class="text-center mx-4">
-                <b-card-text>Email + LinkedIn outreach</b-card-text>
-                <b-card-text style="color: red;">Comming soon</b-card-text>
-              </b-card-body>
-            </b-card>
-          </a>
-        </b-card-group>
+            <a @click="goto_next_step('outreach_email_linkedin')">
+              <b-card class="mr-3 mb-3">
+                <b-card-body class="text-center mx-4">
+                  <b-card-text>Email + LinkedIn outreach</b-card-text>
+                  <b-card-text style="color: red;">Comming soon</b-card-text>
+                </b-card-body>
+              </b-card>
+            </a>
+          </b-card-group>
+        </b-col>
 
       </b-row>
     </b-container>
