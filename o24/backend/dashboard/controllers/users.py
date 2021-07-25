@@ -14,6 +14,7 @@ import json
 import traceback
 from o24.backend.utils.decors import auth_required, get_token
 from o24.backend.dashboard.serializers import JSUserData
+from contextlib import redirect_stdout
 
 
 
@@ -23,20 +24,20 @@ def sign_in():
         'code' : -1,
         'msg' : 'Unknown request'
     }
-
+    
     try:
         if request.method == 'POST':
             raw_data = request.form.get('_auth_data', '')
             if not raw_data:
                 raise Exception("Bad _user")
-            
+
             user_data = JSUserData(raw_data)
-            
+
             current_user = User.authenticate(user_data=user_data)
             if not current_user:
                 raise Exception("Authentication error")
 
-            
+
             session['user_id'] = str(current_user.id)
 
             result['code'] = 1
@@ -45,12 +46,12 @@ def sign_in():
             result['role'] = current_user.role
             result['user_id'] = str(current_user.id)
     except Exception as e:
-        print(e)
-        traceback.print_exc()
-
+        f = open('ErrorFile.txt', 'w')
+        traceback.print_exc(file=f)
+        f.close()
         result['code'] = -1
         result['msg'] = str(e)
-
+    
     return jsonify(result)
 
 @bp_dashboard.route('/sign_up', methods=['POST'])

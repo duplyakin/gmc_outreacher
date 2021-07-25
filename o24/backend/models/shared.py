@@ -1,7 +1,7 @@
 from o24.backend import db
 from o24.backend import app
 from o24.globals import *
-
+#from o24.backend.utils.aes_encode import * 
 import o24.backend.dashboard.models as models 
 from mongoengine.queryset.visitor import Q
 from datetime import datetime
@@ -264,7 +264,6 @@ class TaskQueue(db.Document):
         password = data.get('password', '')
         if not password:
             return
-        
         credentials_dict['password'] = decode_password(password)
 
     def _check_black_listed(self, prospect):
